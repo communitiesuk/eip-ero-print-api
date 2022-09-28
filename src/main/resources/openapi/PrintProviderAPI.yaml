@@ -2,120 +2,136 @@ openapi: 3.0.0
 info:
   title: Print ProviderAPI
   version: '1.0'
-  description: API for Print providers to retrieve print requests and to send updates on print request statuses.
+  description: API Specification for sharing Models between EIP and Print suppliers that will be exchanged over SFTP.
   contact:
     name: Krister Bone
     email: krister.bone@valtech.com
 servers:
   - url: 'https://api.printprovider.int.erop.ierds.uk'
-paths:
-  '/printrequests/standard?maxResults={maxResults}':
-    parameters:
-      - schema:
-          type: string
-        name: maxResults
-        in: path
-        required: true
-        description: 'Max results to return between 1 and 1000. Default: 100'
-    get:
-      summary: Printer Service Provider Print Requests API
-      description: Returns print requests queued for Print Provider fullfilment.
-      tags: []
-      responses:
-        '200':
-          $ref: '#/components/responses/PrintRequestsResponse'
-        '':
-          $ref: '#/components/responses/PrintRequestsResponse'
-      operationId: get-print-requests
-  '/printrequests/{requestid}':
-    post:
-      summary: ''
-      operationId: post-print-request-requestid
-      responses:
-        '201':
-          description: Accepted
-      description: Updates the status of the print request.
-      requestBody:
-        $ref: '#/components/requestBodies/PrintRequestUpdate'
-    parameters:
-      - schema:
-          type: string
-        name: requestid
-        in: path
-        description: The print request identifier
-        required: true
-  /printrequests:
-    post:
-      summary: ''
-      operationId: post-print-requests
-      responses:
-        '201':
-          description: Accepted
-      description: Updates the statuses of the print requests.
-      requestBody:
-        $ref: '#/components/requestBodies/PrintRequestUpdate'
-    parameters: []
 components:
   schemas:
     PrintRequest:
       title: PrintRequest
-      x-stoplight:
-        id: dfvt2gi6cy2p9
       type: object
       description: Represents a request to print a single voter certificate.
       properties:
-        requestid:
+        requestId:
           type: string
+          format: uuid
+          description: The request identifier of the print request
+          example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
         issuingAuthority:
           type: string
+          maxLength: 255
+          description: Issuing authority (LA/ERO/VJB)
+          example: Camden Borough Council
         issueDate:
           type: string
           format: date-time
-        requestedDateTime:
+          description: The issue date of the Voter Authority Card
+          example: '2022-06-01'
+        requestDateTime:
           type: string
           format: date-time
+          description: The date time the Voter Authority Certificate was requested
+          example: '2022-06-01T12:23:03.000Z'
         cardVersion:
           type: string
-          description: Discuss
-        cardTitle:
-          type: string
-          maxLength: 10
+          description: Unsure if needed
         cardFirstname:
           type: string
           maxLength: 255
+          description: First name of the Elector
+          example: John
         cardMiddlenames:
           type: string
           maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
         cardSurname:
           type: string
           maxLength: 255
+          description: Surname of the Elector
+          example: Smith
         cardNumber:
           type: string
           maxLength: 20
+          minLength: 20
+          description: Unique identifier of the Voter Authority Certificate
+          example: TBC
+        certificateLanguage:
+          type: string
+          enum:
+            - cy
+            - en
+          default: en
+          description: The Voter Authority Certificate language
         deliveryOption:
           type: string
           enum:
             - standard
+          description: Future proof in case of fast track
         photo:
           type: string
           format: binary
+          description: Base64 encoded png image to be printed on the Voter Authority Certificate
         deliveryAddress:
           $ref: '#/components/schemas/Address'
       required:
-        - requestid
+        - requestId
         - issuingAuthority
         - issueDate
-        - requestedDateTime
+        - requestDateTime
         - cardFirstname
         - cardSurname
         - cardNumber
+        - certificateLanguage
         - deliveryOption
         - photo
         - deliveryAddress
+      x-examples:
+        Sample:
+          requestId: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+          issuingAuthority: Camden Borough Council
+          issueDate: '2022-06-01'
+          requestDateTime: '2022-06-01T12:23:03.000Z'
+          cardVersion: string
+          cardFirstname: John
+          cardMiddlenames: Malcolm
+          cardSurname: Smith
+          cardNumber: TBC
+          certificateLanguage: en
+          deliveryOption: standard
+          photo: base64==
+          deliveryAddress:
+            street: string
+            property: string
+            locality: string
+            town: string
+            area: string
+            postcode: string
+            uprn: string
+    PrintRequestStatusUpdate:
+      title: PrintRequestStatusUpdate
+      type: object
+      description: Represents a status update to a print request.
+      properties:
+        requestId:
+          type: string
+          format: uuid
+          description: The request identifier of the print request
+          example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+        dateTimeUpdated:
+          type: string
+          format: date-time
+          description: The date time the Voter Authority Certificate print request was updated.
+          example: '2022-06-01T14:23:03.000Z'
+      required:
+        - requestId
+        - dateTimeUpdated
     Address:
       title: Address
       type: object
-      description: 'Address may contains UPRN unless address manually entered (5-10%), format matches IER naming to align with OS PLaces.'
       properties:
         street:
           type: string
@@ -141,87 +157,19 @@ components:
       required:
         - street
         - postcode
-  responses:
-    PrintRequestsResponse:
-      description: Results page of print requests for the print supplier to process
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              pageSize:
-                type: number
-                description: Number of results returned.
-              totalQueued:
-                type: number
-                description: 'Number of requests, including the current page size.'
-              printReqeusts:
-                type: array
-                description: List of print requests.
-                items:
-                  $ref: '#/components/schemas/PrintRequest'
-            required:
-              - pageSize
-              - totalQueued
+      x-examples:
+        Minimum data:
+          street: Street 1
+          postcode: PC1 2FB
+        Normal Address:
+          street: East Lodge
+          property: Balruddery
+          locality: Invergowrie
+          town: Dundee
+          area: Angus
+          postcode: DD25LF
+          uprn: '117095813'
+      description: Address format used throughout gov.uk voter services.
+  responses: {}
   securitySchemes: {}
-  requestBodies:
-    PrintRequestUpdate:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              datetime:
-                type: string
-                format: date-time
-              status:
-                type: string
-                enum:
-                  - received
-                  - processing
-                  - dispatched
-                  - failed
-              tracking:
-                type: string
-                maxLength: 2048
-              failurereason:
-                type: string
-                maxLength: 255
-              arr:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    asd:
-                      type: string
-            required:
-              - datetime
-              - status
-      description: ''
-    PrintRequestsUpdate:
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              type: object
-              properties:
-                datetime:
-                  type: string
-                  format: date-time
-                status:
-                  type: string
-                  enum:
-                    - received
-                    - processing
-                    - dispatched
-                    - failed
-                tracking:
-                  type: string
-                  maxLength: 2048
-                failurereason:
-                  type: string
-                  maxLength: 255
-              required:
-                - datetime
-                - status
+  requestBodies: {}
