@@ -1,0 +1,227 @@
+openapi: 3.0.0
+info:
+  title: Print ProviderAPI
+  version: '1.0'
+  description: API for Print providers to retrieve print requests and to send updates on print request statuses.
+  contact:
+    name: Krister Bone
+    email: krister.bone@valtech.com
+servers:
+  - url: 'https://api.printprovider.int.erop.ierds.uk'
+paths:
+  '/printrequests/standard?maxResults={maxResults}':
+    parameters:
+      - schema:
+          type: string
+        name: maxResults
+        in: path
+        required: true
+        description: 'Max results to return between 1 and 1000. Default: 100'
+    get:
+      summary: Printer Service Provider Print Requests API
+      description: Returns print requests queued for Print Provider fullfilment.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/PrintRequestsResponse'
+        '':
+          $ref: '#/components/responses/PrintRequestsResponse'
+      operationId: get-print-requests
+  '/printrequests/{requestid}':
+    post:
+      summary: ''
+      operationId: post-print-request-requestid
+      responses:
+        '201':
+          description: Accepted
+      description: Updates the status of the print request.
+      requestBody:
+        $ref: '#/components/requestBodies/PrintRequestUpdate'
+    parameters:
+      - schema:
+          type: string
+        name: requestid
+        in: path
+        description: The print request identifier
+        required: true
+  /printrequests:
+    post:
+      summary: ''
+      operationId: post-print-requests
+      responses:
+        '201':
+          description: Accepted
+      description: Updates the statuses of the print requests.
+      requestBody:
+        $ref: '#/components/requestBodies/PrintRequestUpdate'
+    parameters: []
+components:
+  schemas:
+    PrintRequest:
+      title: PrintRequest
+      x-stoplight:
+        id: dfvt2gi6cy2p9
+      type: object
+      description: Represents a request to print a single voter certificate.
+      properties:
+        requestid:
+          type: string
+        issuingAuthority:
+          type: string
+        issueDate:
+          type: string
+          format: date-time
+        requestedDateTime:
+          type: string
+          format: date-time
+        cardVersion:
+          type: string
+          description: Discuss
+        cardTitle:
+          type: string
+          maxLength: 10
+        cardFirstname:
+          type: string
+          maxLength: 255
+        cardMiddlenames:
+          type: string
+          maxLength: 255
+        cardSurname:
+          type: string
+          maxLength: 255
+        cardNumber:
+          type: string
+          maxLength: 20
+        deliveryOption:
+          type: string
+          enum:
+            - standard
+        photo:
+          type: string
+          format: binary
+        deliveryAddress:
+          $ref: '#/components/schemas/Address'
+      required:
+        - requestid
+        - issuingAuthority
+        - issueDate
+        - requestedDateTime
+        - cardFirstname
+        - cardSurname
+        - cardNumber
+        - deliveryOption
+        - photo
+        - deliveryAddress
+    Address:
+      title: Address
+      type: object
+      description: 'Address may contains UPRN unless address manually entered (5-10%), format matches IER naming to align with OS PLaces.'
+      properties:
+        street:
+          type: string
+          maxLength: 255
+        property:
+          type: string
+          maxLength: 255
+        locality:
+          type: string
+          maxLength: 255
+        town:
+          type: string
+          maxLength: 255
+        area:
+          type: string
+          maxLength: 255
+        postcode:
+          type: string
+          maxLength: 10
+        uprn:
+          type: string
+          maxLength: 12
+      required:
+        - street
+        - postcode
+  responses:
+    PrintRequestsResponse:
+      description: Results page of print requests for the print supplier to process
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pageSize:
+                type: number
+                description: Number of results returned.
+              totalQueued:
+                type: number
+                description: 'Number of requests, including the current page size.'
+              printReqeusts:
+                type: array
+                description: List of print requests.
+                items:
+                  $ref: '#/components/schemas/PrintRequest'
+            required:
+              - pageSize
+              - totalQueued
+  securitySchemes: {}
+  requestBodies:
+    PrintRequestUpdate:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              datetime:
+                type: string
+                format: date-time
+              status:
+                type: string
+                enum:
+                  - received
+                  - processing
+                  - dispatched
+                  - failed
+              tracking:
+                type: string
+                maxLength: 2048
+              failurereason:
+                type: string
+                maxLength: 255
+              arr:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    asd:
+                      type: string
+            required:
+              - datetime
+              - status
+      description: ''
+    PrintRequestsUpdate:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                datetime:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                  enum:
+                    - received
+                    - processing
+                    - dispatched
+                    - failed
+                tracking:
+                  type: string
+                  maxLength: 2048
+                failurereason:
+                  type: string
+                  maxLength: 255
+              required:
+                - datetime
+                - status
