@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: Print Service API
-  version: '1.0'
+  title: Print Service API (Draft)
+  version: '0.0.1'
   description: API Specification EROP and Voter Card API interactions with Print Service
   contact:
     name: Krister Bone

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: Print ProviderAPI
-  version: '1.0'
+  title: Print ProviderAPI (Draft)
+  version: '0.0.1'
   description: API Specification for sharing Models between EIP and Print suppliers that will be exchanged over SFTP.
   contact:
     name: Krister Bone
