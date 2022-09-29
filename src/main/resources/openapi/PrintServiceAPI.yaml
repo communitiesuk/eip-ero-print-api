@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Print ProviderAPI
+  title: Print Service API
   version: '1.0'
-  description: API Specification for sharing Models between EIP and Print suppliers that will be exchanged over SFTP.
+  description: API Specification EROP and Voter Card API interactions with Print Service
   contact:
     name: Krister Bone
     email: krister.bone@valtech.com
@@ -13,13 +13,40 @@ components:
     PrintRequest:
       title: PrintRequest
       type: object
-      description: Represents a request to print a single voter certificate.
+      description: Represents a request to print a voter certificate. This is the SQS message to be sent to the Print Service from the Voter Card API Service
+      x-examples:
+        Sample:
+          voterApplicationId: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+          applicationReference: V321654978
+          gssCode: E00000001
+          issuingAuthority: Camden Borough Council
+          issueDate: '2022-06-01'
+          requestDateTime: '2022-06-01T12:23:03.000Z'
+          cardVersion: string
+          cardFirstname: John
+          cardMiddlenames: Malcolm
+          cardSurname: Smith
+          certificateLanguage: en
+          photoS3Arn: string
+          deliveryOption: standard
+          deliveryAddress:
+            street: string
+            property: string
+            locality: string
+            town: string
+            area: string
+            postcode: string
+            uprn: string
       properties:
-        requestId:
+        voterApplicationId:
           type: string
           format: uuid
-          description: The request identifier of the print request
+          description: The Voter Authority Certificate identifier
           example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+        applicationReference:
+          type: string
+        gssCode:
+          type: string
         issuingAuthority:
           type: string
           maxLength: 255
@@ -53,12 +80,6 @@ components:
           maxLength: 255
           description: Surname of the Elector
           example: Smith
-        cardNumber:
-          type: string
-          maxLength: 20
-          minLength: 20
-          description: Unique identifier of the Voter Authority Certificate
-          example: TBC
         certificateLanguage:
           type: string
           enum:
@@ -66,82 +87,27 @@ components:
             - en
           default: en
           description: The Voter Authority Certificate language
+        photoS3Arn:
+          type: string
+          description: The S3 Arn of the processed approved image to be sent to the printers
         deliveryOption:
           type: string
           enum:
             - standard
           description: Future proof in case of fast track
-        photo:
-          type: string
-          format: binary
-          description: Base64 encoded png image to be printed on the Voter Authority Certificate
         deliveryAddress:
           $ref: '#/components/schemas/Address'
       required:
-        - requestId
+        - voterApplicationId
         - issuingAuthority
         - issueDate
         - requestDateTime
         - cardFirstname
         - cardSurname
-        - cardNumber
         - certificateLanguage
+        - photoS3Arn
         - deliveryOption
-        - photo
         - deliveryAddress
-      x-examples:
-        Sample:
-          requestId: 14ab70e8-bd3b-400f-bd95-246caf9e4810
-          issuingAuthority: Camden Borough Council
-          issueDate: '2022-06-01'
-          requestDateTime: '2022-06-01T12:23:03.000Z'
-          cardVersion: string
-          cardFirstname: John
-          cardMiddlenames: Malcolm
-          cardSurname: Smith
-          cardNumber: TBC
-          certificateLanguage: en
-          deliveryOption: standard
-          photo: base64==
-          deliveryAddress:
-            street: string
-            property: string
-            locality: string
-            town: string
-            area: string
-            postcode: string
-            uprn: string
-    PrintRequestStatusUpdate:
-      title: PrintRequestStatusUpdate
-      type: object
-      description: Represents a status update to a print request.
-      properties:
-        requestId:
-          type: string
-          format: uuid
-          description: The request identifier of the print request
-          example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
-        dateTimeUpdated:
-          type: string
-          format: date-time
-          description: The date time the Voter Authority Certificate print request was updated.
-          example: '2022-06-01T14:23:03.000Z'
-        status:
-          type: string
-          enum:
-            - received
-            - processing
-            - dispatched
-            - failed
-          description: Status update of print request
-        failureMessage:
-          type: string
-          maxLength: 500
-          description: Failure message
-      required:
-        - requestId
-        - dateTimeUpdated
-        - status
     Address:
       title: Address
       type: object
@@ -186,3 +152,4 @@ components:
   responses: {}
   securitySchemes: {}
   requestBodies: {}
+paths: {}
