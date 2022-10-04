@@ -1,11 +1,20 @@
+id: "http://eip-print/schemas/yaml-schema/v0.1-draft"
 title: PrintProviderSchema
+description: |
+  Print Batch Request, Print Batch and Print Request Response models.
+  PrintRequests -> represents the JSON message sent from EROP to the Print Provider for a batch of print requests.
+  PrintResponses -> represents a response from the Print Provider to EROP, PrintResponses can contain responses to 0..m batches and 0..m print requests.
 type: object
-description: 'Print Batch Request, Print Batch and Print Request Response models.'
+x-internal: false
 properties:
   PrintRequests:
     title: PrintRequests
     type: object
-    description: Represents a colleciton of print requests.
+    description: |
+      Represents a collection of print requests.
+      The request contains the batchId which uniquely idenifies the items contained within the 'batch'
+      The total number of items contained withing the batch.
+      And all of the print requests.
     properties:
       batchId:
         type: string
@@ -26,6 +35,7 @@ properties:
       - printRequests
   PrintRequest:
     type: object
+    description: Represents a single print request
     properties:
       requestId:
         type: string
@@ -125,19 +135,21 @@ properties:
       - eroAddress
   PrintResponses:
     type: object
+    description: 'A response from the print provider to EROP, can contain either batch or print responses, or both.'
     properties:
       BatchResponses:
         type: array
         description: Array of all batch responses.
         items:
-          $ref: '#BatchResponse'        
+          $ref: '#BatchResponse'
       PrintResponses:
         type: array
         description: Array of all print responses.
         items:
-          $ref: '#BPrinthResponse'         
+          $ref: '#BPrinthResponse'
   BatchResponse:
     type: object
+    description: Represents the response from the print provider in response to recieving a batch file from EROP
     properties:
       batchId:
         type: string
@@ -160,6 +172,7 @@ properties:
       - timestamp
   PrintResponse:
     type: object
+    description: 'Represents a print response, status update for a single print request'
     properties:
       requestId:
         type: string
