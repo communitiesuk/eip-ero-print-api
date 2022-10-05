@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  title: Print APIs
+  version: '1.0'
+  description: Print APIs
+  contact:
+    name: Krister Bone
+    email: krister.bone@valtech.com
+#
+# --------------------------------------------------------------------------------
+#
+paths:
+  #
+  # --------------------------------------------------------------------------------
+  # RESTful style endpoints start here
+  # --------------------------------------------------------------------------------
+  #
+
+  #
+  # TEMP - Health Check
+  # --------------------------------------------------------------------------------
+  '/health':
+    get:
+      summary: Temporary health endpoint
+      description: Temporarily exposed endpoint for verifying new app deploys successfully
+      tags:
+        - Print
+      responses:
+        '200':
+          description: Healthy
+        '503':
+          description: Service unavailable
+      operationId: health-check
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/actuator/health'
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+components:
+  securitySchemes:
+    eroUserCognitoUserPoolAuthorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: cognito_user_pools
+      x-amazon-apigateway-authorizer:
+        providerARNs:
+          - '${cognito_ero_user_pool_arn}'
+        type: cognito_user_pools
