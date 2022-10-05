@@ -1,4 +1,4 @@
-id: "http://eip-print/schemas/yaml-schema/v0.1-draft"
+id: 'http://eip-print/schemas/yaml-schema/v0.1-draft'
 title: PrintProviderSchema
 description: |
   Print Batch Request, Print Batch and Print Request Response models.
@@ -104,16 +104,10 @@ properties:
         description: Name to be printed with delivery address
       deliveryAddress:
         $ref: '#Address'
-      eroName:
-        type: string
-      eroPhoneNumber:
-        type: string
-      eroEmailAddress:
-        type: string
-      eroWebsite:
-        type: string
-      eroAddress:
-        $ref: '#Address'
+      eroEnglish:
+        $ref: '#ERO'
+      eroWelsh:
+        $ref: '#ERO'
     required:
       - requestId
       - issuingAuthority
@@ -128,11 +122,7 @@ properties:
       - photo
       - deliveryName
       - deliveryAddress
-      - eroName
-      - eroPhoneNumber
-      - eroEmailAddress
-      - eroWebsite
-      - eroAddress
+      - eroEnglish
   PrintResponses:
     type: object
     description: 'A response from the print provider to EROP, can contain either batch or print responses, or both.'
@@ -244,3 +234,32 @@ properties:
     required:
       - street
       - postcode
+  ERO:
+    type: object
+    description: ERO Details
+    properties:
+      name:
+        type: string
+        maxLength: 255
+        description: ERO name
+      phoneNumber:
+        type: string
+        maxLength: 20
+        description: ERO contact phone number
+      emailAddress:
+        type: string
+        maxLength: 255
+        format: email
+        description: ERO contact email address
+      website:
+        type: string
+        maxLength: 1024
+        description: The ERO website url
+      address:
+        $ref: '#Address'
+    required:
+      - name
+      - phoneNumber
+      - emailAddress
+      - website
+      - address
