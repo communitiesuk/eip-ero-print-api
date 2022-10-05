@@ -1,0 +1,38 @@
+#version: 0.0.1
+title: Address Model
+description: Address format used throughout gov.uk voter services.
+type: object
+x-examples:
+  Minimum data:
+    street: Street 1
+    postcode: PC1 2FB
+  Normal Address:
+    street: East Lodge
+    property: Balruddery
+    locality: Invergowrie
+    town: Dundee
+    area: Angus
+    postcode: DD25LF
+    uprn: '117095813'
+properties:
+  street:
+    type: string
+    maxLength: 255
+  property:
+    type: string
+    maxLength: 255
+  locality:
+    type: string
+    maxLength: 255
+  town:
+    type: string
+    maxLength: 255
+  area:
+    type: string
+    maxLength: 255
+  postcode:
+    type: string
+    maxLength: 10
+required:
+  - street
+  - postcode

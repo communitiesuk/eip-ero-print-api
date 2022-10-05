@@ -1,11 +1,10 @@
-id: 'http://eip-print/schemas/yaml-schema/v0.1-draft'
-title: PrintProviderSchema
+#version: 0.0.1
+title: Print Provider Schema
 description: |
   Print Batch Request, Print Batch and Print Request Response models.
   PrintRequests -> represents the JSON message sent from EROP to the Print Provider for a batch of print requests.
   PrintResponses -> represents a response from the Print Provider to EROP, PrintResponses can contain responses to 0..m batches and 0..m print requests.
 type: object
-x-internal: false
 properties:
   PrintRequests:
     title: PrintRequests
@@ -49,7 +48,7 @@ properties:
         example: Camden Borough Council
       issueDate:
         type: string
-        format: date-time
+        format: date
         description: The issue date of the Voter Authority Card
         example: '2022-06-01'
       requestDateTime:
@@ -103,11 +102,11 @@ properties:
         maxLength: 255
         description: Name to be printed with delivery address
       deliveryAddress:
-        $ref: '#Address'
+        $ref: ./Address.yaml
       eroEnglish:
-        $ref: '#ERO'
+        $ref: ./ERO.yaml
       eroWelsh:
-        $ref: '#ERO'
+        $ref: ./ERO.yaml
     required:
       - requestId
       - issuingAuthority
@@ -196,70 +195,3 @@ properties:
       - timestamp
       - statusStep
       - status
-  Address:
-    title: Address
-    type: object
-    x-examples:
-      Minimum data:
-        street: Street 1
-        postcode: PC1 2FB
-      Normal Address:
-        street: East Lodge
-        property: Balruddery
-        locality: Invergowrie
-        town: Dundee
-        area: Angus
-        postcode: DD25LF
-        uprn: '117095813'
-    description: Address format used throughout gov.uk voter services.
-    properties:
-      street:
-        type: string
-        maxLength: 255
-      property:
-        type: string
-        maxLength: 255
-      locality:
-        type: string
-        maxLength: 255
-      town:
-        type: string
-        maxLength: 255
-      area:
-        type: string
-        maxLength: 255
-      postcode:
-        type: string
-        maxLength: 10
-    required:
-      - street
-      - postcode
-  ERO:
-    type: object
-    description: ERO Details
-    properties:
-      name:
-        type: string
-        maxLength: 255
-        description: ERO name
-      phoneNumber:
-        type: string
-        maxLength: 20
-        description: ERO contact phone number
-      emailAddress:
-        type: string
-        maxLength: 255
-        format: email
-        description: ERO contact email address
-      website:
-        type: string
-        maxLength: 1024
-        description: The ERO website url
-      address:
-        $ref: '#Address'
-    required:
-      - name
-      - phoneNumber
-      - emailAddress
-      - website
-      - address
