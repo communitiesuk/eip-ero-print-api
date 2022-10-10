@@ -1,37 +1,10 @@
-#version: 0.0.1
 title: Print Provider Schema
 description: |
-  Print Batch Request, Print Batch and Print Request Response models.
-  PrintRequests -> represents the JSON message sent from EROP to the Print Provider for a batch of print requests.
+  Print Request, Print Batch and Print Request Response models.
+  PrintRequest -> represents the PSV message sent from EROP to the Print Provider for a batch of print requests.
   PrintResponses -> represents a response from the Print Provider to EROP, PrintResponses can contain responses to 0..m batches and 0..m print requests.
 type: object
 properties:
-  PrintRequests:
-    title: PrintRequests
-    type: object
-    description: |
-      Represents a collection of print requests.
-      The request contains the batchId which uniquely idenifies the items contained within the 'batch'
-      The total number of items contained withing the batch.
-      And all of the print requests.
-    properties:
-      batchId:
-        type: string
-        maxLength: 50
-        description: Batch identifier
-      numberOfRequests:
-        type: number
-        format: double
-        description: Number of print requests contained in the batch
-      printRequests:
-        type: array
-        description: Array of all print requests
-        items:
-          $ref: '#PrintRequest'
-    required:
-      - batchId
-      - numberOfRequests
-      - printRequests
   PrintRequest:
     type: object
     description: Represents a single print request
@@ -50,6 +23,10 @@ properties:
         type: string
         format: date
         description: The issue date of the Voter Authority Card
+        example: '2022-06-01'
+      suggestedExpiryDate:
+        type: string
+        format: date
         example: '2022-06-01'
       requestDateTime:
         type: string
@@ -101,12 +78,94 @@ properties:
         type: string
         maxLength: 255
         description: Name to be printed with delivery address
-      deliveryAddress:
-        $ref: ./Address.yaml
-      eroEnglish:
-        $ref: ./ERO.yaml
-      eroWelsh:
-        $ref: ./ERO.yaml
+      deliveryStreet:
+        type: string
+        maxLength: 255
+      deliverypProperty:
+        type: string
+        maxLength: 255
+      deliveryLocality:
+        type: string
+        maxLength: 255
+      deliveryTown:
+        type: string
+        maxLength: 255
+      deliveryArea:
+        type: string
+        maxLength: 255
+      deliveryPostcode:
+        type: string
+        maxLength: 10
+      eroNameEn:
+        type: string
+        maxLength: 255
+        description: ERO name
+      eroPhoneNumberEn:
+        type: string
+        maxLength: 20
+        description: ERO contact phone number
+      eroEmailAddressEn:
+        type: string
+        maxLength: 255
+        format: email
+        description: ERO contact email address
+      eroWebsiteEn:
+        type: string
+        maxLength: 1024
+        description: The ERO website url
+      eroDeliveryStreetEn:
+        type: string
+        maxLength: 255
+      eroDeliveryPropertyEn:
+        type: string
+        maxLength: 255
+      eroDeliveryLocalityEn:
+        type: string
+        maxLength: 255
+      eroDeliveryTownEn:
+        type: string
+        maxLength: 255
+      eroDeliveryAreaEn:
+        type: string
+        maxLength: 255
+      eroDeliveryPostcodeEn:
+        type: string
+        maxLength: 10
+      eroNameCy:
+        type: string
+        maxLength: 255
+        description: ERO name
+      eroPhoneNumberCy:
+        type: string
+        maxLength: 20
+        description: ERO contact phone number
+      eroEmailAddressCy:
+        type: string
+        maxLength: 255
+        format: email
+        description: ERO contact email address
+      eroWebsiteCy:
+        type: string
+        maxLength: 1024
+        description: The ERO website url
+      eroDeliveryStreetCy:
+        type: string
+        maxLength: 255
+      eroDeliverypPropertyCy:
+        type: string
+        maxLength: 255
+      eroDeliveryLocalityCy:
+        type: string
+        maxLength: 255
+      eroDeliveryTownCy:
+        type: string
+        maxLength: 255
+      erodDeliveryAreaCy:
+        type: string
+        maxLength: 255
+      eroDeliveryPostcodeCy:
+        type: string
+        maxLength: 10
     required:
       - requestId
       - issuingAuthority
@@ -120,8 +179,14 @@ properties:
       - deliveryOption
       - photo
       - deliveryName
-      - deliveryAddress
-      - eroEnglish
+      - deliveryStreet
+      - deliveryPostcode
+      - eroNameEn
+      - eroPhoneNumberEn
+      - eroEmailAddressEn
+      - eroWebsiteEn
+      - eroDeliveryStreetEn
+      - eroDeliveryPostcodeEn
   PrintResponses:
     type: object
     description: 'A response from the print provider to EROP, can contain either batch or print responses, or both.'
@@ -177,7 +242,6 @@ properties:
         type: string
         description: Status update of print request
         enum:
-          - RECEIVED
           - PROCESSED
           - IN-PRODUCTION
           - DISPATCHED
