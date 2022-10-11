@@ -1,0 +1,221 @@
+openapi: 3.0.0
+info:
+  title: Print API SQS Message Types
+  version: '1.0.0'
+  description: |-
+    Print API SQS Message Types
+    
+    Whilst this is an openAPI spec, it does not imply being used to define REST APIs, nor is it intended to.
+    
+    The `paths` elements are being used to document (at a high level) the SQS queues and the request bodies that are expected
+    to be published to them. **There is no intent to generate or implement SQS queues or listener classes from this document.**
+    
+    The `paths` element is only being used in order to maintain the structure of the openApi spec, as `paths` are required 
+    elements.
+#
+# --------------------------------------------------------------------------------
+#
+
+paths:
+  #
+  # --------------------------------------------------------------------------------
+  # SQS Queues start here
+  # --------------------------------------------------------------------------------
+  #
+  '/send-application-to-print':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/SendApplicationToPrintMessage'
+      responses:
+        '204':
+          description: No response content.
+
+components:
+  #
+  # Schema and Enum Definitions
+  # --------------------------------------------------------------------------------
+  schemas:
+
+    SendApplicationToPrintMessage:
+      description: The SQS message for sending an application to print.
+      type: object
+      properties:
+        voterApplicationId:
+          type: string
+          format: uuid
+          description: The Voter Authority Certificate identifier
+          example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+        applicationReference:
+          type: string
+          description: The application reference as known by the citizen. Not guaranteed to be unique.
+        gssCode:
+          type: string
+          minLength: 9
+          maxLength: 9
+          description: GSS Code to ensure permissions can be maintained in Print Service API
+        issuingAuthority:
+          type: string
+          maxLength: 255
+          description: Issuing authority (LA/ERO/VJB)
+          example: Camden Borough Council
+        issueDate:
+          type: string
+          format: date
+          description: The issue date of the Voter Authority Card
+          example: '2022-06-01'
+        requestDateTime:
+          type: string
+          format: date-time
+          description: The date time the Voter Authority Certificate was requested
+          example: '2022-06-01T12:23:03.000Z'
+        cardFirstname:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        cardMiddlenames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        cardSurname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        certificateLanguage:
+          $ref: '#/components/schemas/CertificateLanguage'
+        deliveryOption:
+          $ref: '#/components/schemas/DeliveryOption'
+        photoS3Arn:
+          type: string
+          description: S3 ARN to image to send to printers.
+          maxLength: 1024
+        deliveryName:
+          type: string
+          maxLength: 255
+          description: Name to be printed with delivery address
+        deliveryAddress:
+          $ref: '#/components/schemas/Address'
+        eroEnglish:
+          $ref: '#/components/schemas/ElectoralRegistrationOffice'
+        eroWelsh:
+          $ref: '#/components/schemas/ElectoralRegistrationOffice'
+      required:
+        - voterApplicationId
+        - applicationReference
+        - issuingAuthority
+        - issueDate
+        - requestDateTime
+        - cardFirstname
+        - cardMiddlenames
+        - cardSurname
+        - certificateLanguage
+        - deliveryOption
+        - photoS3Arn
+        - deliveryName
+        - deliveryAddress
+        - eroEnglish
+
+    CertificateLanguage:
+      title: CertificateLanguage
+      description: The Voter Authority Certificate language
+      type: string
+      enum:
+        - cy
+        - en
+      default: en
+
+    DeliveryOption:
+      title: DeliveryOption
+      description: The delivery option for the Voter Authority Certificate
+      type: string
+      enum:
+        - standard
+
+    Address:
+      title: Address
+      description: Address format used throughout gov.uk voter services.
+      type: object
+      x-examples:
+        Minimum data:
+          street: Street 1
+          postcode: PC1 2FB
+        Normal Address:
+          street: East Lodge
+          property: Balruddery
+          locality: Invergowrie
+          town: Dundee
+          area: Angus
+          postcode: DD25LF
+          uprn: '117095813'
+      properties:
+        street:
+          type: string
+          maxLength: 255
+        property:
+          type: string
+          maxLength: 255
+        locality:
+          type: string
+          maxLength: 255
+        town:
+          type: string
+          maxLength: 255
+        area:
+          type: string
+          maxLength: 255
+        postcode:
+          type: string
+          maxLength: 10
+      required:
+        - street
+        - postcode
+
+    ElectoralRegistrationOffice:
+      title: ElectoralRegistrationOffice
+      description: Electoral Registration Office Details
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          description: ERO name
+        phoneNumber:
+          type: string
+          maxLength: 20
+          description: ERO contact phone number
+        emailAddress:
+          type: string
+          maxLength: 255
+          format: email
+          description: ERO contact email address
+        website:
+          type: string
+          maxLength: 1024
+          description: The ERO website url
+        address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - name
+        - phoneNumber
+        - emailAddress
+        - website
+        - address
+
+  #
+  # Response Body Definitions
+  # --------------------------------------------------------------------------------
+  responses: { }
+
+  #
+  # Request Body Definitions
+  # --------------------------------------------------------------------------------
+  requestBodies:
+    SendApplicationToPrintMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SendApplicationToPrintMessage'
