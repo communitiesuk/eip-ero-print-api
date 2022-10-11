@@ -131,6 +131,12 @@ tasks.withType<GenerateTask> {
     )
 }
 
+tasks.create("generate-models-from-openapi-document-print-api-sqs-messaging.yaml", GenerateTask::class) {
+    enabled = true
+    inputSpec.set("$projectDir/src/main/resources/openapi/sqs/print-api-sqs-messaging.yaml")
+    packageName.set("uk.gov.dluhc.printapi.messaging")
+}
+
 // Add the generated code to the source sets
 sourceSets["main"].java {
     this.srcDir("$projectDir/build/generated")
@@ -140,7 +146,6 @@ sourceSets["main"].java {
 tasks.withType<KtLintCheckTask> {
     dependsOn(tasks.withType<GenerateTask>())
 }
-
 tasks.withType<BootBuildImage> {
     environment = mapOf("BP_HEALTH_CHECKER_ENABLED" to "true")
     buildpacks = listOf(
