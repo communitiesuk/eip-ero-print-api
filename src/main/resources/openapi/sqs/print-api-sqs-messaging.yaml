@@ -42,19 +42,19 @@ components:
       description: The SQS message for sending an application to print.
       type: object
       properties:
-        voterApplicationId:
+        sourceReference:
           type: string
-          format: uuid
-          description: The Voter Authority Certificate identifier
-          example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+          description: Reference in the source application that this print request relates to
         applicationReference:
           type: string
           description: The application reference as known by the citizen. Not guaranteed to be unique.
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
         gssCode:
           type: string
           minLength: 9
           maxLength: 9
-          description: GSS Code to ensure permissions can be maintained in Print Service API
+          description: GSS code of the ERO responsible for sending the message
         issuingAuthority:
           type: string
           maxLength: 255
@@ -63,61 +63,61 @@ components:
         issueDate:
           type: string
           format: date
-          description: The issue date of the Voter Authority Card
+          description: The issue date of the Voter Authority Certificate
           example: '2022-06-01'
         requestDateTime:
           type: string
           format: date-time
-          description: The date time the Voter Authority Certificate was requested
+          description: The date time the Voter Authority Certificate print request was requested
           example: '2022-06-01T12:23:03.000Z'
-        cardFirstname:
+        firstName:
           type: string
           maxLength: 255
           description: First name of the Elector
           example: John
-        cardMiddlenames:
+        middleNames:
           type: string
           maxLength: 255
           description: Middle names of the Elector
           example: Malcolm
-        cardSurname:
+        surname:
           type: string
           maxLength: 255
           description: Surname of the Elector
           example: Smith
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
-        deliveryOption:
-          $ref: '#/components/schemas/DeliveryOption'
-        photoS3Arn:
+        photoLocation:
           type: string
-          description: S3 ARN to image to send to printers.
+          description: The location of the Elector's photo. Typically an S3 ARN
           maxLength: 1024
-        deliveryName:
-          type: string
-          maxLength: 255
-          description: Name to be printed with delivery address
-        deliveryAddress:
-          $ref: '#/components/schemas/Address'
+        delivery:
+          $ref: '#/components/schemas/CertificateDelivery'
         eroEnglish:
           $ref: '#/components/schemas/ElectoralRegistrationOffice'
         eroWelsh:
           $ref: '#/components/schemas/ElectoralRegistrationOffice'
       required:
-        - voterApplicationId
+        - sourceReference
+        - sourceType
         - applicationReference
         - issuingAuthority
         - issueDate
         - requestDateTime
-        - cardFirstname
-        - cardMiddlenames
-        - cardSurname
+        - firstName
+        - middleNames
+        - surname
         - certificateLanguage
-        - deliveryOption
-        - photoS3Arn
-        - deliveryName
-        - deliveryAddress
+        - photoLocation
+        - delivery
         - eroEnglish
+
+    SourceType:
+      title: SourceType
+      description: An enumeration of sources for this print request
+      type: string
+      enum:
+        - voter-card
 
     CertificateLanguage:
       title: CertificateLanguage
@@ -127,6 +127,24 @@ components:
         - cy
         - en
       default: en
+
+    CertificateDelivery:
+      title: CertificateDelivery
+      description: Object describing how and where the Voter Authority Certificate should be delivered
+      type: object
+      properties:
+        deliveryOption:
+          $ref: '#/components/schemas/DeliveryOption'
+        addressee:
+          type: string
+          maxLength: 255
+          description: The addressee to be printed in addition to the delivery address
+        address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - deliveryOption
+        - addressee
+        - address
 
     DeliveryOption:
       title: DeliveryOption
@@ -170,6 +188,10 @@ components:
         postcode:
           type: string
           maxLength: 10
+        uprn:
+          type: string
+          description: Unique Property Reference Number consisting of up to 12 digits in length
+          pattern: '^\d{1,12}$'
       required:
         - street
         - postcode
