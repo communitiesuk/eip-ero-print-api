@@ -60,11 +60,6 @@ components:
           maxLength: 255
           description: Issuing authority (LA/ERO/VJB)
           example: Camden Borough Council
-        issueDate:
-          type: string
-          format: date
-          description: The issue date of the Voter Authority Certificate
-          example: '2022-06-01'
         requestDateTime:
           type: string
           format: date-time
@@ -102,7 +97,6 @@ components:
         - sourceType
         - applicationReference
         - issuingAuthority
-        - issueDate
         - requestDateTime
         - firstName
         - middleNames
@@ -133,8 +127,8 @@ components:
       description: Object describing how and where the Voter Authority Certificate should be delivered
       type: object
       properties:
-        deliveryOption:
-          $ref: '#/components/schemas/DeliveryOption'
+        deliveryClass:
+          $ref: '#/components/schemas/DeliveryClass'
         addressee:
           type: string
           maxLength: 255
@@ -146,9 +140,9 @@ components:
         - addressee
         - address
 
-    DeliveryOption:
-      title: DeliveryOption
-      description: The delivery option for the Voter Authority Certificate
+    DeliveryClass:
+      title: DeliveryClass
+      description: The delivery class for the Voter Authority Certificate
       type: string
       enum:
         - standard
