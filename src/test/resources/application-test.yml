@@ -1,0 +1,11 @@
+cloud:
+  aws:
+    region:
+      static: eu-west-2
+    credentials:
+      access-key: test
+      secret-key: test
+    sqs:
+      endpoint: http://replaced-by-localStackContainerSqsSettings-bean
+sqs:
+  send-application-to-print-queue-name: send-application-to-print

@@ -1,5 +1,9 @@
 package uk.gov.dluhc.printapi.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.util.TestPropertyValues
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.testcontainers.containers.GenericContainer
@@ -7,6 +11,7 @@ import org.testcontainers.utility.DockerImageName
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import java.net.URI
 
 /**
  * Configuration class exposing beans for the LocalStack (AWS) environment.
@@ -20,6 +25,7 @@ class LocalStackContainerConfiguration {
         const val DEFAULT_ACCESS_KEY_ID = "test"
         const val DEFAULT_SECRET_KEY = "test"
 
+        val objectMapper = ObjectMapper()
         val localStackContainer: GenericContainer<*> = getInstance()
         private var container: GenericContainer<*>? = null
 
@@ -56,4 +62,59 @@ class LocalStackContainerConfiguration {
                 DEFAULT_SECRET_KEY
             )
         )
+
+    /**
+     * Uses the localstack container to configure the various services.
+     *
+     * @return a [LocalStackContainerSettings] bean encapsulating the various IDs etc of the configured container and services.
+     */
+    @Bean
+    fun localStackContainerSqsSettings(
+        applicationContext: ConfigurableApplicationContext,
+        @Value("\${sqs.send-application-to-print-queue-name}") sendApplicationToPrintQueueName: String
+    ): LocalStackContainerSettings {
+        val queueUrlSendApplicationToPrint = localStackContainer.createSqsQueue(sendApplicationToPrintQueueName)
+        val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
+
+        TestPropertyValues.of(
+            "cloud.aws.sqs.endpoint=$apiUrl"
+        ).applyTo(applicationContext)
+
+        return LocalStackContainerSettings(
+            apiUrl = apiUrl,
+            queueUrlSendApplicationToPrint = queueUrlSendApplicationToPrint,
+        )
+    }
+
+    private fun GenericContainer<*>.createSqsQueue(queueName: String): String {
+        val execInContainer = execInContainer(
+            "awslocal", "sqs", "create-queue", "--queue-name", queueName
+        )
+        return execInContainer.stdout.let {
+            objectMapper.readValue(it, Map::class.java)
+        }.let {
+            it["QueueUrl"] as String
+        }
+    }
+
+    data class LocalStackContainerSettings(
+        val apiUrl: String,
+        val queueUrlSendApplicationToPrint: String
+    ) {
+        val mappedQueueUrlSendApplicationToPrint: String = toMappedUrl(queueUrlSendApplicationToPrint, apiUrl)
+
+        private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {
+            val rawUrl = URI.create(rawUrlString)
+            val apiUrl = URI.create(apiUrlString)
+            return URI(
+                rawUrl.scheme,
+                rawUrl.userInfo,
+                apiUrl.host,
+                apiUrl.port,
+                rawUrl.path,
+                rawUrl.query,
+                rawUrl.fragment
+            ).toASCIIString()
+        }
+    }
 }
