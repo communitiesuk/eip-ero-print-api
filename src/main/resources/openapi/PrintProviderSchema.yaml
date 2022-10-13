@@ -11,10 +11,16 @@ properties:
     properties:
       requestId:
         type: string
-        format: uuid
-        description: The request identifier of the print request
+        description: |-
+          The request identifier of the print request
+          Mongo GUID (needs to be under 25 chars long)
         example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
-      issuingAuthority:
+      issuingAuthorityEn:
+        type: string
+        maxLength: 255
+        description: Issuing authority (LA/ERO/VJB)
+        example: Camden Borough Council
+      issuingAuthorityCy:
         type: string
         maxLength: 255
         description: Issuing authority (LA/ERO/VJB)
@@ -28,15 +34,12 @@ properties:
         type: string
         format: date
         example: '2022-06-01'
+        description: issueDate + 10 years
       requestDateTime:
         type: string
         format: date-time
         description: The date time the Voter Authority Certificate was requested
         example: '2022-06-01T12:23:03.000Z'
-      cardVersion:
-        type: string
-        maxLength: 20
-        description: Version text if supporting mutiple versions.
       cardFirstname:
         type: string
         maxLength: 255
@@ -168,8 +171,10 @@ properties:
         maxLength: 10
     required:
       - requestId
-      - issuingAuthority
+      - issuingAuthorityEn
+      - issuingAuthorityCy
       - issueDate
+      - suggestedExpiryDate
       - requestDateTime
       - cardFirstname
       - cardMiddlenames
@@ -245,6 +250,7 @@ properties:
           - PROCESSED
           - IN-PRODUCTION
           - DISPATCHED
+          - NOT-DELIVERED
       status:
         type: string
         enum:

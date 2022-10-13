@@ -201,3 +201,15 @@ paths:
           $ref: '#/components/responses/PrintRequests'
       operationId: get-print-requests-applicationId
       description: Print Requests for a Voter Authority Certificate application
+  /printrequests:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses: {}
+      operationId: get-printrequests
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: applicationid
+    parameters: []
