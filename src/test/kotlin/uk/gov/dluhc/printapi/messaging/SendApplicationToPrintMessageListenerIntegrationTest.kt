@@ -39,7 +39,6 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
 
         // Then
         await.during(5, SECONDS).until {
-            // TODO - assert failed payload was sent to a DLQ. Currently we don't have a DLQ ...
             assertThat(
                 TestLogAppender.hasLog(
                     "Sending application [${payload.sourceReference}] to print", Level.INFO
