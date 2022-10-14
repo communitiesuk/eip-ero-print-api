@@ -27,7 +27,9 @@ This will build a docker image for the Spring Boot application.
 Either `./gradlew bootRun` or run the class `PrintApiApplication`
 
 ### External Environment Variables
+The following environment variables must be set in order to run the application:
 * `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` - the uri of the cognito ERO user pool JWT issuer.
+* `SQS_SEND_APPLICATION_TO_PRINT_QUEUE_NAME` - the queue name for sending application to print
 
 ### Authentication and authorisation
 Requests are authenticated by the presence of a signed cognito JWT as a bearer token in the HTTP request `authorization` header.  

@@ -64,6 +64,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
+    // AWS messaging
+    implementation("io.awspring.cloud:spring-cloud-starter-aws-messaging")
+
     // AWS v2 dependencies
     implementation("software.amazon.awssdk:dynamodb")
     implementation("software.amazon.awssdk:dynamodb-enhanced")
@@ -81,6 +84,9 @@ dependencies {
 
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.2")
     testImplementation("net.datafaker:datafaker:1.6.0")
+
+    // mongo core datatypes, so that our tests can generate a Mongo ObjectId (which is what IER uses)
+    testImplementation("org.mongodb:bson:4.7.1")
 
     // Libraries to support creating JWTs in tests
     testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
