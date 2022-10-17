@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.0.0'
+  version: '1.1.0'
   description: |-
     Print API SQS Message Types
     
@@ -55,11 +55,6 @@ components:
           minLength: 9
           maxLength: 9
           description: GSS code of the ERO responsible for sending the message
-        issuingAuthority:
-          type: string
-          maxLength: 255
-          description: Issuing authority (LA/ERO/VJB)
-          example: Camden Borough Council
         requestDateTime:
           type: string
           format: date-time
@@ -88,15 +83,10 @@ components:
           maxLength: 1024
         delivery:
           $ref: '#/components/schemas/CertificateDelivery'
-        eroEnglish:
-          $ref: '#/components/schemas/ElectoralRegistrationOffice'
-        eroWelsh:
-          $ref: '#/components/schemas/ElectoralRegistrationOffice'
       required:
         - sourceReference
         - sourceType
         - applicationReference
-        - issuingAuthority
         - requestDateTime
         - firstName
         - middleNames
@@ -104,7 +94,6 @@ components:
         - certificateLanguage
         - photoLocation
         - delivery
-        - eroEnglish
 
     SourceType:
       title: SourceType
@@ -189,37 +178,6 @@ components:
       required:
         - street
         - postcode
-
-    ElectoralRegistrationOffice:
-      title: ElectoralRegistrationOffice
-      description: Electoral Registration Office Details
-      type: object
-      properties:
-        name:
-          type: string
-          maxLength: 255
-          description: ERO name
-        phoneNumber:
-          type: string
-          maxLength: 20
-          description: ERO contact phone number
-        emailAddress:
-          type: string
-          maxLength: 255
-          format: email
-          description: ERO contact email address
-        website:
-          type: string
-          maxLength: 1024
-          description: The ERO website url
-        address:
-          $ref: '#/components/schemas/Address'
-      required:
-        - name
-        - phoneNumber
-        - emailAddress
-        - website
-        - address
 
   #
   # Response Body Definitions
