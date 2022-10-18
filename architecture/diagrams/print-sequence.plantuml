@@ -28,18 +28,20 @@ end loop
 
 loop Cron Batch Process (Every x Mins)
     "Print Service"<-"Print SFTP Server": Retrieve Print Batches - Array[PrintRequest]
+    "Print Service"->"Print Service": Check file
+    "Print Service"->"Print SFTP Server": Send Batch Response Status Updates - Array[BatchResponse] 
     activate "Print Service"
 end loop
 
-loop Print Sevice Processes
+loop Print Service Processes
     "Print Service"->"Print Service": Process Print Requests - Array[PrintRequest]
-    "Print Service"->"Print Service": Zip/Format Batch Status Updates - Array[PrintRequestStatusUpdate]
-    "Print Service"->"Print SFTP Server": Send Print Requests Status Updates - Array[PrintRequestStatusUpdate]
+    "Print Service"->"Print Service": Zip/Format Batch Status Updates - Array[PrintResponse]
+    "Print Service"->"Print SFTP Server": Send Print Requests Status Updates - Array[PrintResponse]
     deactivate "Print Service"
 end loop
 
 loop Cron Batch Process (Every x Mins)
-    "EROP Print Service"<-"Print SFTP Server": Retrieve Print Status Updates - Array[PrintRequestStatusUpdate]
+    "EROP Print Service"<-"Print SFTP Server": Retrieve Batch and Print Status Updates - Array[BatchResponse and PrintResponse]
     activate "EROP Print Service"
     "EROP Print Service"->"EROP Print Service Database": Update Print Request Statuses
     deactivate "EROP Print Service"

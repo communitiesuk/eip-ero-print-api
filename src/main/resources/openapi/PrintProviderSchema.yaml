@@ -55,6 +55,12 @@ properties:
         maxLength: 255
         description: Surname of the Elector
         example: Smith
+      cardVersion:
+        type: string
+        maxLength: 20
+        minLength: 20
+        example: TBC
+        description: Supplier version of certificate
       cardNumber:
         type: string
         maxLength: 20
@@ -68,6 +74,14 @@ properties:
           - en
         default: en
         description: The Voter Authority Certificate language
+      certificateFormat:
+        type: string
+        default: standard
+        description: The Voter Authority Certificate format
+        enum:
+          - standard
+          - braille
+          - largeprint
       deliveryOption:
         type: string
         enum:
@@ -177,10 +191,11 @@ properties:
       - suggestedExpiryDate
       - requestDateTime
       - cardFirstname
-      - cardMiddlenames
       - cardSurname
+      - cardVersion
       - cardNumber
       - certificateLanguage
+      - certificateFormat
       - deliveryOption
       - photo
       - deliveryName
@@ -218,6 +233,7 @@ properties:
         enum:
           - SUCCESS
           - FAILED
+        description: 'SUCCESS Status '
       timestamp:
         type: string
         format: date-time
