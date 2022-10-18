@@ -1,0 +1,30 @@
+#version: 0.0.1
+title: ERO Model
+description: ERO Details
+type: object
+properties:
+  name:
+    type: string
+    maxLength: 255
+    description: ERO name
+  phoneNumber:
+    type: string
+    maxLength: 20
+    description: ERO contact phone number
+  emailAddress:
+    type: string
+    maxLength: 255
+    format: email
+    description: ERO contact email address
+  website:
+    type: string
+    maxLength: 1024
+    description: The ERO website url
+  address:
+    $ref: '#Address'
+required:
+  - name
+  - phoneNumber
+  - emailAddress
+  - website
+  - address

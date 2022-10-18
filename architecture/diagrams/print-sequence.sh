@@ -1,0 +1,1 @@
+java -jar plantuml-1.2022.1.jar print-sequence.plantuml

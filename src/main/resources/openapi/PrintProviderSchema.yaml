@@ -1,0 +1,285 @@
+#version: 0.0.3
+title: Print Provider Schema
+description: |
+  Print Request, Print Batch and Print Request Response models.
+  PrintRequest -> represents the PSV message sent from EROP to the Print Provider for a batch of print requests.
+  PrintResponses -> represents a response from the Print Provider to EROP, PrintResponses can contain responses to 0..m batches and 0..m print requests.
+type: object
+properties:
+  PrintRequest:
+    type: object
+    description: Represents a single print request
+    properties:
+      requestId:
+        type: string
+        description: |-
+          The request identifier of the print request
+          Mongo GUID (needs to be under 25 chars long)
+        example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+      issuingAuthorityEn:
+        type: string
+        maxLength: 255
+        description: Issuing authority (LA/ERO/VJB)
+        example: Camden Borough Council
+      issuingAuthorityCy:
+        type: string
+        maxLength: 255
+        description: Issuing authority (LA/ERO/VJB)
+        example: Camden Borough Council
+      issueDate:
+        type: string
+        format: date
+        description: The issue date of the Voter Authority Card
+        example: '2022-06-01'
+      suggestedExpiryDate:
+        type: string
+        format: date
+        example: '2022-06-01'
+        description: issueDate + 10 years
+      requestDateTime:
+        type: string
+        format: date-time
+        description: The date time the Voter Authority Certificate was requested
+        example: '2022-06-01T12:23:03.000Z'
+      cardFirstname:
+        type: string
+        maxLength: 255
+        description: First name of the Elector
+        example: John
+      cardMiddlenames:
+        type: string
+        maxLength: 255
+        description: Middle names of the Elector
+        example: Malcolm
+      cardSurname:
+        type: string
+        maxLength: 255
+        description: Surname of the Elector
+        example: Smith
+      cardVersion:
+        type: string
+        maxLength: 20
+        minLength: 20
+        example: TBC
+        description: Supplier version of certificate
+      cardNumber:
+        type: string
+        maxLength: 20
+        minLength: 20
+        description: Unique identifier of the Voter Authority Certificate
+        example: TBC
+      certificateLanguage:
+        type: string
+        enum:
+          - cy
+          - en
+        default: en
+        description: The Voter Authority Certificate language
+      certificateFormat:
+        type: string
+        default: standard
+        description: The Voter Authority Certificate format
+        enum:
+          - standard
+          - braille
+          - largeprint
+      deliveryOption:
+        type: string
+        enum:
+          - standard
+        description: Future proof in case of fast track
+      photo:
+        type: string
+        format: binary
+        description: Path to image in zip file
+      deliveryName:
+        type: string
+        maxLength: 255
+        description: Name to be printed with delivery address
+      deliveryStreet:
+        type: string
+        maxLength: 255
+      deliverypProperty:
+        type: string
+        maxLength: 255
+      deliveryLocality:
+        type: string
+        maxLength: 255
+      deliveryTown:
+        type: string
+        maxLength: 255
+      deliveryArea:
+        type: string
+        maxLength: 255
+      deliveryPostcode:
+        type: string
+        maxLength: 10
+      eroNameEn:
+        type: string
+        maxLength: 255
+        description: ERO name
+      eroPhoneNumberEn:
+        type: string
+        maxLength: 20
+        description: ERO contact phone number
+      eroEmailAddressEn:
+        type: string
+        maxLength: 255
+        format: email
+        description: ERO contact email address
+      eroWebsiteEn:
+        type: string
+        maxLength: 1024
+        description: The ERO website url
+      eroDeliveryStreetEn:
+        type: string
+        maxLength: 255
+      eroDeliveryPropertyEn:
+        type: string
+        maxLength: 255
+      eroDeliveryLocalityEn:
+        type: string
+        maxLength: 255
+      eroDeliveryTownEn:
+        type: string
+        maxLength: 255
+      eroDeliveryAreaEn:
+        type: string
+        maxLength: 255
+      eroDeliveryPostcodeEn:
+        type: string
+        maxLength: 10
+      eroNameCy:
+        type: string
+        maxLength: 255
+        description: ERO name
+      eroPhoneNumberCy:
+        type: string
+        maxLength: 20
+        description: ERO contact phone number
+      eroEmailAddressCy:
+        type: string
+        maxLength: 255
+        format: email
+        description: ERO contact email address
+      eroWebsiteCy:
+        type: string
+        maxLength: 1024
+        description: The ERO website url
+      eroDeliveryStreetCy:
+        type: string
+        maxLength: 255
+      eroDeliverypPropertyCy:
+        type: string
+        maxLength: 255
+      eroDeliveryLocalityCy:
+        type: string
+        maxLength: 255
+      eroDeliveryTownCy:
+        type: string
+        maxLength: 255
+      erodDeliveryAreaCy:
+        type: string
+        maxLength: 255
+      eroDeliveryPostcodeCy:
+        type: string
+        maxLength: 10
+    required:
+      - requestId
+      - issuingAuthorityEn
+      - issuingAuthorityCy
+      - issueDate
+      - suggestedExpiryDate
+      - requestDateTime
+      - cardFirstname
+      - cardSurname
+      - cardVersion
+      - cardNumber
+      - certificateLanguage
+      - certificateFormat
+      - deliveryOption
+      - photo
+      - deliveryName
+      - deliveryStreet
+      - deliveryPostcode
+      - eroNameEn
+      - eroPhoneNumberEn
+      - eroEmailAddressEn
+      - eroWebsiteEn
+      - eroDeliveryStreetEn
+      - eroDeliveryPostcodeEn
+  PrintResponses:
+    type: object
+    description: 'A response from the print provider to EROP, can contain either batch or print responses, or both.'
+    properties:
+      BatchResponses:
+        type: array
+        description: Array of all batch responses.
+        items:
+          $ref: '#BatchResponse'
+      PrintResponses:
+        type: array
+        description: Array of all print responses.
+        items:
+          $ref: '#BPrinthResponse'
+  BatchResponse:
+    type: object
+    description: Represents the response from the print provider in response to recieving a batch file from EROP
+    properties:
+      batchId:
+        type: string
+        example: 1000-2000
+      status:
+        type: string
+        enum:
+          - SUCCESS
+          - FAILED
+        description: Indicates success or failure recieving the batch
+      timestamp:
+        type: string
+        format: date-time
+      message:
+        type: string
+        maxLength: 255
+        description: Error description
+    required:
+      - batchId
+      - status
+      - timestamp
+  PrintResponse:
+    type: object
+    description: 'Represents a print response, status update for a single print request'
+    properties:
+      requestId:
+        type: string
+        format: uuid
+        description: The request identifier of the print request
+        example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+      timestamp:
+        type: string
+        format: date-time
+        description: The date time the Voter Authority Certificate print request was updated to this status.
+        example: '2022-06-01T14:23:03.000Z'
+      statusStep:
+        type: string
+        description: The current print step this update relates to
+        enum:
+          - PROCESSED
+          - IN-PRODUCTION
+          - DISPATCHED
+          - NOT-DELIVERED
+      status:
+        type: string
+        enum:
+          - SUCCESS
+          - FAILED
+        description: Indicates if the step change was sucessful or not.
+      message:
+        type: string
+        maxLength: 255
+        description: Failure message
+    required:
+      - requestId
+      - timestamp
+      - statusStep
+      - status

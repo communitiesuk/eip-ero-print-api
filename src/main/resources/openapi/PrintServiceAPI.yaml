@@ -1,0 +1,215 @@
+openapi: 3.0.0
+info:
+  title: Print Service API (Draft)
+  version: 0.0.1
+  description: API Specification EROP and Voter Card API interactions with Print Service
+  contact:
+    name: Krister Bone
+    email: krister.bone@valtech.com
+servers:
+  - url: 'https://api.printservice.int.erop.ierds.uk'
+components:
+  schemas:
+    PrintRequest:
+      title: PrintRequest
+      type: object
+      description: |-
+        Represents a request to print a voter certificate.
+
+        This currently returns all data.
+      x-examples:
+        Sample:
+          requestId: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+          batchId: 1234-456
+          voterApplicationId: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+          applicationReference: V321654978
+          gssCode: E00000001
+          issuingAuthority: Camden Borough Council
+          issueDate: '2022-06-01'
+          requestDateTime: '2022-06-01T12:23:03.000Z'
+          cardVersion: string
+          cardFirstname: John
+          cardMiddlenames: Malcolm
+          cardSurname: Smith
+          certificateLanguage: en
+          photoS3Arn: string
+          deliveryOption: standard
+          deliveryAddress:
+            street: string
+            property: string
+            locality: string
+            town: string
+            area: string
+            postcode: string
+            uprn: string
+      properties:
+        reqeustId:
+          type: string
+          format: uuid
+          description: The Voter Authority Certificate identifier
+          example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+        batchId:
+          type: string
+          description: The Batch Id sent to the Printers
+        voterApplicationId:
+          type: string
+          format: uuid
+          description: The Voter Authority Certificate identifier
+          example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+        applicationReference:
+          type: string
+          minLength: 9
+          maxLength: 9
+        gssCode:
+          type: string
+          minLength: 9
+          maxLength: 9
+        issuingAuthority:
+          type: string
+          maxLength: 255
+          description: Issuing authority (LA/ERO/VJB)
+          example: Camden Borough Council
+        issueDate:
+          type: string
+          format: date
+          description: The issue date of the Voter Authority Card
+          example: '2022-06-01'
+        requestDateTime:
+          type: string
+          format: date-time
+          description: The date time the Voter Authority Certificate was requested
+          example: '2022-06-01T12:23:03.000Z'
+        cardVersion:
+          type: string
+          description: Unsure if needed
+        cardFirstname:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        cardMiddlenames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        cardSurname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        certificateLanguage:
+          type: string
+          enum:
+            - cy
+            - en
+          default: en
+          description: The Voter Authority Certificate language
+        photoS3Arn:
+          type: string
+          description: The S3 Arn of the processed approved image to be sent to the printers
+        deliveryOption:
+          type: string
+          enum:
+            - standard
+          description: Future proof in case of fast track
+        deliveryName:
+          type: string
+          maxLength: 255
+          description: Name to be printed with delivery address
+        deliveryAddress:
+          $ref: '#Address'
+        eroEnglish:
+          $ref: ./ERO.yaml
+        eroWelsh:
+          $ref: ./ERO.yaml
+        printStatusHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrintStatus'
+      required:
+        - voterApplicationId
+        - applicationReference
+        - issuingAuthority
+        - issueDate
+        - requestDateTime
+        - cardFirstname
+        - cardMiddlenames
+        - cardSurname
+        - certificateLanguage
+        - photoS3Arn
+        - deliveryOption
+        - deliveryName
+        - deliveryAddress
+        - eroEnglish
+    PrintStatus:
+      title: PrintStatus
+      x-stoplight:
+        id: h3x3w7f5qzmoc
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The date time the Voter Authority Certificate print request was updated to this status.
+          example: '2022-06-01T14:23:03.000Z'
+        statusStep:
+          type: string
+          description: Status update of print request
+          enum:
+            - RECEIVED
+            - PROCESSED
+            - IN-PRODUCTION
+            - DISPATCHED
+        status:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILED
+        message:
+          type: string
+          maxLength: 255
+          description: Failure message
+      required:
+        - requestId
+        - timestamp
+        - statusStep
+        - status
+  responses:
+    PrintRequests:
+      description: Array of print requests
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PrintRequest'
+  securitySchemes: {}
+  requestBodies: {}
+paths:
+  '/printrequests/{applicationId}':
+    parameters:
+      - schema:
+          type: string
+        name: applicationId
+        in: path
+        required: true
+    get:
+      summary: Returns all Print Requests for a Voter Authority Certificate application
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/PrintRequests'
+      operationId: get-print-requests-applicationId
+      description: Print Requests for a Voter Authority Certificate application
+  /printrequests:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses: {}
+      operationId: get-printrequests
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: applicationid
+    parameters: []
