@@ -19,7 +19,7 @@ fun buildSendApplicationToPrintMessage(
     sourceType: SourceType = SourceType.VOTER_MINUS_CARD,
     requestDateTime: OffsetDateTime = Instant.now().atOffset(UTC),
     firstName: String = faker.name().firstName(),
-    middleNames: String = faker.name().firstName(),
+    middleNames: String? = faker.name().firstName(),
     surname: String = faker.name().lastName(),
     certificateLanguage: CertificateLanguage = CertificateLanguage.EN,
     delivery: CertificateDelivery = buildCertificateDelivery(),
