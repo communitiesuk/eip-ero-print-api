@@ -1,3 +1,4 @@
+#version: 0.0.3
 title: Print Provider Schema
 description: |
   Print Request, Print Batch and Print Request Response models.
@@ -233,7 +234,7 @@ properties:
         enum:
           - SUCCESS
           - FAILED
-        description: 'SUCCESS Status '
+        description: Indicates success or failure recieving the batch
       timestamp:
         type: string
         format: date-time
@@ -261,7 +262,7 @@ properties:
         example: '2022-06-01T14:23:03.000Z'
       statusStep:
         type: string
-        description: Status update of print request
+        description: The current print step this update relates to
         enum:
           - PROCESSED
           - IN-PRODUCTION
@@ -272,6 +273,7 @@ properties:
         enum:
           - SUCCESS
           - FAILED
+        description: Indicates if the step change was sucessful or not.
       message:
         type: string
         maxLength: 255
