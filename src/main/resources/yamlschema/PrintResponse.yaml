@@ -1,0 +1,38 @@
+#version: 0.0.3
+title: PrintResponse
+type: object
+description: 'Represents a print response, status update for a single print request'
+properties:
+  requestId:
+    type: string
+    format: uuid
+    description: The request identifier of the print request
+    example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+  timestamp:
+    type: string
+    format: date-time
+    description: The date time the Voter Authority Certificate print request was updated to this status.
+    example: '2022-06-01T14:23:03.000Z'
+  statusStep:
+    type: string
+    description: The current print step this update relates to
+    enum:
+      - PROCESSED
+      - IN-PRODUCTION
+      - DISPATCHED
+      - NOT-DELIVERED
+  status:
+    type: string
+    enum:
+      - SUCCESS
+      - FAILED
+    description: Indicates if the step change was sucessful or not.
+  message:
+    type: string
+    maxLength: 255
+    description: Failure message
+required:
+  - requestId
+  - timestamp
+  - statusStep
+  - status

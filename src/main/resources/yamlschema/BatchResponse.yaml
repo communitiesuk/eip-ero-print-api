@@ -1,0 +1,25 @@
+#version: 0.0.3
+title: BatchResponse
+type: object
+description: Represents the response from the print provider in response to recieving a batch file from EROP
+properties:
+  batchId:
+    type: string
+    example: 1000-2000
+  status:
+    type: string
+    enum:
+      - SUCCESS
+      - FAILED
+    description: Indicates success or failure recieving the batch
+  timestamp:
+    type: string
+    format: date-time
+  message:
+    type: string
+    maxLength: 255
+    description: Error description
+required:
+  - batchId
+  - status
+  - timestamp

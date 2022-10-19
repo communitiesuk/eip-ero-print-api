@@ -1,0 +1,15 @@
+#version: 0.0.3
+title: PrintResponses
+type: object
+description: 'A response from the print provider to EROP, can contain either batch or print responses, or both.'
+properties:
+  BatchResponses:
+    type: array
+    description: Array of all batch responses.
+    items:
+      $ref: './BatchResponse.yaml'
+  PrintResponses:
+    type: array
+    description: Array of all print responses.
+    items:
+      $ref: './PrintResponse.yaml'
