@@ -16,6 +16,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint-idea") version "10.3.0"
     id("org.openapi.generator") version "6.0.1"
     id("org.owasp.dependencycheck") version "7.1.2"
+    id("org.jsonschema2dataclass") version "4.5.0"
 }
 
 group = "uk.gov.dluhc"
@@ -143,6 +144,24 @@ tasks.create("generate-models-from-openapi-document-print-api-sqs-messaging.yaml
     packageName.set("uk.gov.dluhc.printapi.messaging")
 }
 
+// Codegen the Print Provider schemas from yamlschema into java pojos
+jsonSchema2Pojo {
+    targetPackage.set("uk.gov.dluhc.printapi.printprovider.models")
+    source.setFrom("$projectDir/src/main/resources/yamlschema")
+    sourceType.set("yamlschema")
+    useTitleAsClassname.set(true)
+    includeConstructors.set(true)
+    constructorsRequiredPropertiesOnly.set(true)
+    includeCopyConstructor.set(true)
+    includeAdditionalProperties.set(false)
+    serializable.set(true)
+    generateBuilders.set(true)
+    useInnerClassBuilders.set(true)
+    includeJsr303Annotations.set(true)
+    includeGeneratedAnnotation.set(false)
+    includeToString.set(false)
+}
+
 // Add the generated code to the source sets
 sourceSets["main"].java {
     this.srcDir("$projectDir/build/generated")
@@ -152,6 +171,21 @@ sourceSets["main"].java {
 tasks.withType<KtLintCheckTask> {
     dependsOn(tasks.withType<GenerateTask>())
 }
+/* Linting is also dependent on Js2pGenerationTask but the dependency cannot be declared in the above manner because
+   `Js2pGenerationTask` is an internal class (so we cannot import and reference it), its abstract, and it's implementation
+   `Js2pGenerationTask_Decorated` appears to be dynamically generated. Over and above the task class being dynamically
+   generated, the task instantiation is handled by the plugin class `Js2pPlugin`.
+   We need to hook into the task addition lifecycle and define the dependency at that point.
+ */
+tasks.whenTaskAdded {
+    if (this.javaClass.name == "org.jsonschema2dataclass.js2p.Js2pGenerationTask_Decorated") {
+        val jsonschema2dataclassTask = this
+        tasks.withType<KtLintCheckTask> {
+            dependsOn(jsonschema2dataclassTask)
+        }
+    }
+}
+
 tasks.withType<BootBuildImage> {
     environment = mapOf("BP_HEALTH_CHECKER_ENABLED" to "true")
     buildpacks = listOf(
