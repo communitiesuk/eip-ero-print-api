@@ -3,10 +3,10 @@ package uk.gov.dluhc.printapi.testsupport.testdata
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomStringUtils.randomNumeric
 import org.bson.types.ObjectId
-import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 
-fun getRandomEro() = "${faker.address().city().lowercase().replaceSpacesWith("-")}-city-council"
+fun aValidEroName(): String = faker.address().city()
+fun aValidLocalAuthorityName(): String = faker.address().city()
 
 fun getRandomGssCode() = "E${randomNumeric(8)}"
 

@@ -61,6 +61,10 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    // webclient
+    implementation("org.springframework:spring-webflux")
+    implementation("io.projectreactor.netty:reactor-netty-http")
+
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -145,6 +149,12 @@ tasks.create("generate-models-from-openapi-document-print-api-sqs-messaging.yaml
     enabled = true
     inputSpec.set("$projectDir/src/main/resources/openapi/sqs/print-api-sqs-messaging.yaml")
     packageName.set("uk.gov.dluhc.printapi.messaging")
+}
+
+tasks.create("generate-models-from-openapi-document-EROManagementAPIs.yaml", GenerateTask::class) {
+    enabled = true
+    inputSpec.set("$projectDir/src/main/resources/openapi/external/EROManagementAPIs.yaml")
+    packageName.set("uk.gov.dluhc.eromanagementapi")
 }
 
 // Codegen the Print Provider schemas from yamlschema into java pojos

@@ -9,3 +9,7 @@ cloud:
       endpoint: http://replaced-by-localStackContainerSqsSettings-bean
 sqs:
   send-application-to-print-queue-name: send-application-to-print
+
+api:
+  ero-management:
+    url: http://will-be-replaced-by-wireMockServer-bean
