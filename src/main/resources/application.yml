@@ -7,3 +7,11 @@ api:
 
 dynamodb:
   print-details-table-name: ${DYNAMODB_PRINT_DETAILS_TABLE_NAME}
+  scheduler-lock-table-name: ${DYNAMODB_SCHEDULER_LOCKS_TABLE_NAME}
+
+jobs:
+  print-requests:
+    name: "BatchPrintRequests"
+    cron: ${JOBS_PRINT_REQUEST_CRON}
+#    lock-at-most-for: ${JOBS_PRINT_REQUEST_LOCK_AT_MOST_FOR}
+#    lock-at-least-for: ${JOBS_PRINT_REQUEST_LOCK_AT_LEAST_FOR}

@@ -33,6 +33,8 @@ The following environment variables must be set in order to run the application:
 * `API_ERO_MANAGEMENT_URL` - the base URL of the ERO Management REST API service.
 * `DYNAMODB_ENDPOINT` - the localstack endpoint
 * `DYNAMODB_PRINT_DETAILS_TABLE_NAME` - table name to persist print details
+* `DYNAMODB_SCHEDULER_LOCKS_TABLE_NAME` - table name to persist scheduler locks
+* `JOBS_PRINT_REQUEST_CRON` - cron expression for print request job
 
 ### Authentication and authorisation
 Requests are authenticated by the presence of a signed cognito JWT as a bearer token in the HTTP request `authorization` header.  

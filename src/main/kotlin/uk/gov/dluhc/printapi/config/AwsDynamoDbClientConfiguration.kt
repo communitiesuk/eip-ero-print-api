@@ -34,5 +34,6 @@ class AwsDynamoDbClientConfiguration {
 @ConstructorBinding
 data class DynamoDbConfiguration(
     val printDetailsTableName: String,
+    val schedulerLockTableName: String,
     val endpoint: URI?
 )
