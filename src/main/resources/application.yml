@@ -4,3 +4,6 @@ sqs:
 api:
   ero-management:
     url: ${API_ERO_MANAGEMENT_URL}
+
+dynamodb:
+  print-details-table-name: ${DYNAMODB_PRINT_DETAILS_TABLE_NAME}

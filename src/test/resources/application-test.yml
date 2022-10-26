@@ -13,3 +13,6 @@ sqs:
 api:
   ero-management:
     url: http://will-be-replaced-by-wireMockServer-bean
+
+dynamodb:
+  print-details-table-name: print-details
