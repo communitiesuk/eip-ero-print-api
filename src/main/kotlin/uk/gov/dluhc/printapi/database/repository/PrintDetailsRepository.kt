@@ -29,14 +29,6 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
         }
     }
 
-    //
-    // fun getBySourceReference(sourceReference: String, gssCode: String): List<Notification> {
-    //     val queryConditional = QueryConditional.keyEqualTo(key(sourceReference, gssCode))
-    //     val index = table.index(SOURCE_REFERENCE_INDEX_NAME)
-    //     val query = QueryEnhancedRequest.builder().queryConditional(queryConditional).build()
-    //     return index.query(query).flatMap { it.items() }
-    // }
-    //
     private fun key(partitionValue: String): Key =
         Key.builder().partitionValue(partitionValue).build()
 }
