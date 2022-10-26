@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.dynamodb.model.ProjectionType
 import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.REQUEST_ID_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.SOURCE_TYPE_GSS_CODE_INDEX_NAME
+import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
 import java.net.InetAddress
 import java.net.URI
 
@@ -149,47 +150,54 @@ class LocalStackContainerConfiguration {
 
     private fun createPrintDetailsTable(dynamoDbClient: DynamoDbClient, tableName: String) {
         if (dynamoDbClient.listTables().tableNames().contains(tableName)) {
-            return
+            dynamoDbClient.deleteTable { it.tableName(tableName) }
         }
 
         val attributeDefinitions: MutableList<AttributeDefinition> = mutableListOf(
             attributeDefinition("id"),
             attributeDefinition("requestId"),
             attributeDefinition("sourceType"),
-            attributeDefinition("gssCode")
+            attributeDefinition("gssCode"),
+            attributeDefinition("status"),
+            attributeDefinition("batchId")
         )
 
         val keySchema: MutableList<KeySchemaElement> = mutableListOf(partitionKey("id"))
 
-        val requestIdIndexKeySchema: MutableList<KeySchemaElement> =
-            mutableListOf(partitionKey("requestId"))
-
-        val requestIdIndexSchema = GlobalSecondaryIndex.builder()
-            .indexName(REQUEST_ID_INDEX_NAME)
-            .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(0L).writeCapacityUnits(0L).build())
-            .keySchema(requestIdIndexKeySchema)
-            .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
-            .build()
-
-        val sourceTypeGssCodeIndexKeySchema: MutableList<KeySchemaElement> =
-            mutableListOf(partitionKey("sourceType"), sortKey("gssCode"))
-
-        val sourceTypeGssCodeIndexSchema = GlobalSecondaryIndex.builder()
-            .indexName(SOURCE_TYPE_GSS_CODE_INDEX_NAME)
-            .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(0L).writeCapacityUnits(0L).build())
-            .keySchema(sourceTypeGssCodeIndexKeySchema)
-            .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
-            .build()
+        val requestIdIndexSchema = globalSecondaryIndex(REQUEST_ID_INDEX_NAME, "requestId")
+        val sourceTypeGssCodeIndexSchema =
+            globalSecondaryIndex(SOURCE_TYPE_GSS_CODE_INDEX_NAME, "sourceType", "gssCode")
+        val statusBatchIdIndexSchema = globalSecondaryIndex(STATUS_BATCH_ID_INDEX_NAME, "status", "batchId")
 
         val request: CreateTableRequest = CreateTableRequest.builder()
             .tableName(tableName)
             .keySchema(keySchema)
-            .globalSecondaryIndexes(requestIdIndexSchema, sourceTypeGssCodeIndexSchema)
+            .globalSecondaryIndexes(requestIdIndexSchema, sourceTypeGssCodeIndexSchema, statusBatchIdIndexSchema)
             .attributeDefinitions(attributeDefinitions)
             .billingMode(BillingMode.PAY_PER_REQUEST)
             .build()
 
         dynamoDbClient.createTable(request)
+    }
+
+    private fun globalSecondaryIndex(
+        indexName: String,
+        partitionKey: String,
+        sortKey: String? = null
+    ): GlobalSecondaryIndex {
+        val indexKeySchema: MutableList<KeySchemaElement> =
+            mutableListOf(partitionKey(partitionKey))
+
+        if (sortKey != null) {
+            indexKeySchema.add(sortKey(sortKey))
+        }
+
+        return GlobalSecondaryIndex.builder()
+            .indexName(indexName)
+            .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(0L).writeCapacityUnits(0L).build())
+            .keySchema(indexKeySchema)
+            .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
+            .build()
     }
 
     private fun attributeDefinition(name: String): AttributeDefinition =
@@ -201,7 +209,7 @@ class LocalStackContainerConfiguration {
     private fun sortKey(name: String): KeySchemaElement =
         KeySchemaElement.builder().attributeName(name).keyType(KeyType.RANGE).build()
 
-    private fun GenericContainer<*>.getEndpointOverride(): URI? {
+    private fun GenericContainer<*>.getEndpointOverride(): URI {
         val ipAddress = InetAddress.getByName(host).hostAddress
         val mappedPort = getMappedPort(DEFAULT_PORT)
         return URI("http://$ipAddress:$mappedPort")

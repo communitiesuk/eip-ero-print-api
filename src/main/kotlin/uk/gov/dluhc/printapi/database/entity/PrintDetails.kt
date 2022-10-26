@@ -4,7 +4,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -24,11 +23,13 @@ data class PrintDetails(
     var certificateLanguage: CertificateLanguage? = null,
     var photoLocation: String? = null,
     var delivery: CertificateDelivery? = null,
-    @get:DynamoDbSortKey @get:DynamoDbSecondarySortKey(indexNames = [SOURCE_TYPE_GSS_CODE_INDEX_NAME]) var gssCode: String? = null,
+    @get:DynamoDbSecondarySortKey(indexNames = [SOURCE_TYPE_GSS_CODE_INDEX_NAME]) var gssCode: String? = null,
     var issuingAuthority: String? = null,
     var issueDate: LocalDate = LocalDate.now(),
     var eroEnglish: ElectoralRegistrationOffice? = null,
-    var eroWelsh: ElectoralRegistrationOffice? = null
+    var eroWelsh: ElectoralRegistrationOffice? = null,
+    @get:DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+    @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])var batchId: UUID? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -48,5 +49,6 @@ data class PrintDetails(
     companion object {
         const val REQUEST_ID_INDEX_NAME = "RequestIdIndex"
         const val SOURCE_TYPE_GSS_CODE_INDEX_NAME = "SourceTypeGssCodeIndex"
+        const val STATUS_BATCH_ID_INDEX_NAME = "StatusBatchIdIndex"
     }
 }

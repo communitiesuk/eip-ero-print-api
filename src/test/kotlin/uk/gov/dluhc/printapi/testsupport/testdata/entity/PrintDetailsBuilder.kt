@@ -5,6 +5,7 @@ import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
@@ -36,6 +37,8 @@ fun buildPrintDetails(
     eroWelsh: ElectoralRegistrationOffice? = null,
     photoLocation: String = "arn:aws:s3:::source-document-storage/$gssCode/$sourceReference/${UUID.randomUUID()}/" +
         faker.file().fileName("", null, "jpg", ""),
+    status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+    batchId: UUID? = UUID.randomUUID()
 ) = PrintDetails(
     id = id,
     requestId = requestId,
@@ -54,5 +57,7 @@ fun buildPrintDetails(
     issuingAuthority = issuingAuthority,
     issueDate = issueDate,
     eroEnglish = eroEnglish,
-    eroWelsh = eroWelsh
+    eroWelsh = eroWelsh,
+    batchId = batchId,
+    status = status,
 )
