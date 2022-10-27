@@ -12,6 +12,6 @@ dynamodb:
 jobs:
   print-requests:
     name: "BatchPrintRequests"
-    cron: ${JOBS_PRINT_REQUEST_CRON}
+    cron: ${JOB_PRINT_REQUESTS_CRON}
 #    lock-at-most-for: ${JOBS_PRINT_REQUEST_LOCK_AT_MOST_FOR}
 #    lock-at-least-for: ${JOBS_PRINT_REQUEST_LOCK_AT_LEAST_FOR}

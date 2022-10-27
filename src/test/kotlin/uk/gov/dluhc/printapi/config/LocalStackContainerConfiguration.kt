@@ -217,7 +217,7 @@ class LocalStackContainerConfiguration {
         return URI("http://$ipAddress:$mappedPort")
     }
 
-    protected fun createSchedulerLockTable(dynamoDbClient: DynamoDbClient, tableName: String) {
+    private fun createSchedulerLockTable(dynamoDbClient: DynamoDbClient, tableName: String) {
         if (dynamoDbClient.listTables().tableNames().contains(tableName)) {
             return
         }
