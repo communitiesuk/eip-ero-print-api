@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
+import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
 
@@ -8,11 +9,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class IdFactory {
+    fun requestId(): String = ObjectId().toString()
 
-    fun requestId(): String =
-        ObjectId().toString()
-
-    fun certificateReference(): String {
-        TODO("To be implemented in EIP1-2131")
-    }
+    fun vacNumber(): String = randomAlphanumeric(20)
 }

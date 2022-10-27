@@ -9,7 +9,9 @@ import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
-import uk.gov.dluhc.printapi.testsupport.testdata.getAMongoDbId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import java.time.Instant
 import java.time.LocalDate
@@ -19,10 +21,10 @@ import java.util.UUID
 
 fun buildPrintDetails(
     id: UUID = UUID.randomUUID(),
-    requestId: String = getAMongoDbId(),
-    sourceReference: String = getAMongoDbId(),
+    requestId: String = aValidRequestId(),
+    sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
-    vacNumber: String = getAMongoDbId(),
+    vacNumber: String = aValidVacNumber(),
     sourceType: SourceType = SourceType.VOTER_CARD,
     requestDateTime: OffsetDateTime = Instant.now().atOffset(UTC),
     firstName: String = faker.name().firstName(),
