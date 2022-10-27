@@ -1,8 +1,6 @@
 package uk.gov.dluhc.printapi.mapper
 
-import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -18,8 +16,10 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
+import uk.gov.dluhc.printapi.service.IdFactory
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
-import uk.gov.dluhc.printapi.testsupport.testdata.getAMongoDbId
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.LocalDate
 import java.util.UUID
@@ -36,6 +36,9 @@ class PrintDetailsMapperTest {
     @Mock
     private lateinit var sourceTypeMapper: SourceTypeMapper
 
+    @Mock
+    private lateinit var idFactory: IdFactory
+
     @ParameterizedTest
     @CsvSource(value = ["EN, EN", "CY, CY"])
     fun `should map send application to print message to print details`(
@@ -46,16 +49,20 @@ class PrintDetailsMapperTest {
         val ero = buildEroManagementApiEroDto()
         val localAuthority = ero.localAuthorities[0]
         val message = buildSendApplicationToPrintMessage(certificateLanguage = certificateLanguageModel)
+        val requestId = aValidRequestId()
+        val vacNumber = aValidVacNumber()
         given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
+        given(idFactory.requestId()).willReturn(requestId)
+        given(idFactory.vacNumber()).willReturn(vacNumber)
 
         val expected = with(message) {
             PrintDetails(
                 id = UUID.randomUUID(),
-                requestId = getAMongoDbId(),
+                requestId = requestId,
                 sourceReference = sourceReference,
                 applicationReference = applicationReference,
                 sourceType = SourceTypeEntity.VOTER_CARD,
-                vacNumber = randomAlphanumeric(20),
+                vacNumber = vacNumber,
                 requestDateTime = requestDateTime,
                 firstName = firstName,
                 middleNames = middleNames,
@@ -107,29 +114,10 @@ class PrintDetailsMapperTest {
         val actual = mapper.toPrintDetails(message, ero, localAuthority.name)
 
         // Then
-        assertThat(actual).usingRecursiveComparison().ignoringFields("id", "requestId", "vacNumber").isEqualTo(expected)
+        assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
         assertThat(actual.id).isNotNull
-        assertThat(actual.requestId).isNotNull.containsPattern(Regex("^[a-f\\d]{24}$").toPattern())
-        assertThat(actual.vacNumber).isNotNull.containsPattern(Regex("^[A-Za-z\\d]{20}$").toPattern())
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
-    }
-
-    @Test
-    fun `should map id requestId and vacNumber to random values`() {
-        // Given
-        val ero = buildEroManagementApiEroDto()
-        val localAuthority = ero.localAuthorities[0]
-        val message = buildSendApplicationToPrintMessage()
-        given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
-        val results = mutableListOf<PrintDetails>()
-
-        // When
-
-        repeat(100) { results.add(mapper.toPrintDetails(message, ero, localAuthority.name)) }
-
-        // Then
-        assertThat(results).extracting("id").doesNotHaveDuplicates()
-        assertThat(results).extracting("requestId").doesNotHaveDuplicates()
-        assertThat(results).extracting("vacNumber").doesNotHaveDuplicates()
+        verify(idFactory).requestId()
+        verify(idFactory).vacNumber()
     }
 }

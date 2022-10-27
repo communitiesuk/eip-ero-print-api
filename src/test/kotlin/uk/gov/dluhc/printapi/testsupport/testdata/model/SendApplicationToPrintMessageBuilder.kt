@@ -6,7 +6,7 @@ import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.messaging.models.SourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
-import uk.gov.dluhc.printapi.testsupport.testdata.getAMongoDbId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -14,7 +14,7 @@ import java.time.ZoneOffset.UTC
 import java.util.UUID
 
 fun buildSendApplicationToPrintMessage(
-    sourceReference: String = getAMongoDbId(),
+    sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     sourceType: SourceType = SourceType.VOTER_MINUS_CARD,
     requestDateTime: OffsetDateTime = Instant.now().atOffset(UTC),
