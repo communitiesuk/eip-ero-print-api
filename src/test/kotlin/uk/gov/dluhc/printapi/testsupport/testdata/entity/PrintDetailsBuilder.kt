@@ -38,7 +38,7 @@ fun buildPrintDetails(
     photoLocation: String = "arn:aws:s3:::source-document-storage/$gssCode/$sourceReference/${UUID.randomUUID()}/" +
         faker.file().fileName("", null, "jpg", ""),
     status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-    batchId: UUID? = UUID.randomUUID()
+    batchId: String? = UUID.randomUUID().toString()
 ) = PrintDetails(
     id = id,
     requestId = requestId,
@@ -61,3 +61,5 @@ fun buildPrintDetails(
     batchId = batchId,
     status = status,
 )
+
+fun aPrintDetailsList() = listOf(buildPrintDetails())
