@@ -40,13 +40,12 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
     }
 
     @Nested
-    inner class GetAllByStatusAndBatchId{
+    inner class GetAllByStatusAndBatchId {
         @Test
         fun `should get print details matching the status and batchID`() {
             // Given
             val details = buildPrintDetails()
             printDetailsRepository.save(details)
-
 
             // When
             val results = printDetailsRepository.getAllByStatusAndBatchId(details.status, details.batchId!!)
@@ -58,10 +57,9 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
         @Test
         fun `should find no matching print details given different status`() {
             // Given
-            val differentStatus = Status.SENT_TO_PRINTER
+            val differentStatus = Status.SENT_TO_PRINT_PROVIDER
             val details = buildPrintDetails(status = Status.PENDING_ASSIGNMENT_TO_BATCH)
             printDetailsRepository.save(details)
-
 
             // When
             val results = printDetailsRepository.getAllByStatusAndBatchId(differentStatus, details.batchId!!)
