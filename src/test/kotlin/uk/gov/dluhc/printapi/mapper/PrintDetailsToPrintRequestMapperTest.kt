@@ -14,7 +14,6 @@ import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.DeliveryOption
 import uk.gov.dluhc.printapi.testsupport.testdata.aBatchId
-import uk.gov.dluhc.printapi.testsupport.testdata.aRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
@@ -22,7 +21,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.testsupport.testdata.getAMongoDbId
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoLocation
