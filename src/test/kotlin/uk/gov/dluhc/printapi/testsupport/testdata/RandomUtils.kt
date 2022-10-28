@@ -23,4 +23,6 @@ fun aValidVacNumber(): String = randomAlphanumeric(20)
 
 fun aValidSourceReference(): String = getAMongoDbId()
 
+fun aRequestId() = getAMongoDbId()
+
 fun aValidApplicationReference(): String = "V${RandomStringUtils.randomAlphabetic(9).uppercase()}"

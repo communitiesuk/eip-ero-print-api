@@ -13,12 +13,18 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.DeliveryOption
+import uk.gov.dluhc.printapi.testsupport.testdata.aBatchId
+import uk.gov.dluhc.printapi.testsupport.testdata.aRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.getAMongoDbId
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoLocation
 import java.time.Instant
 import java.time.LocalDate
@@ -46,10 +52,10 @@ class PrintDetailsToPrintRequestMapperTest {
     fun `should map ERO response to dto with optional Welsh ERO translation`(eroWelsh: ElectoralRegistrationOffice?) {
         // Given
         val id = UUID.fromString("7787ba5b-e79e-40c2-bcc4-6118393628bc")
-        val requestId: String = getAMongoDbId()
-        val sourceReference: String = getAMongoDbId()
+        val requestId: String = aValidRequestId()
+        val sourceReference: String = aValidSourceReference()
         val applicationReference: String = aValidApplicationReference()
-        val vacNumber: String = getAMongoDbId()
+        val vacNumber: String = aValidVacNumber()
         val vacVersion = "1"
         val sourceType: SourceType = SourceType.VOTER_CARD
         val requestDateTime: OffsetDateTime = Instant.ofEpochMilli(0).atOffset(UTC)
@@ -63,9 +69,9 @@ class PrintDetailsToPrintRequestMapperTest {
         val issuingAuthority: String = aValidLocalAuthorityName()
         val issueDate = LocalDate.of(2022, 10, 21)
         val eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(name = issuingAuthority)
-        val photoLocation = "arn:aws:s3:::dev-vca-api-vca-target-bucket/E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
+        val photoLocation = aPhotoArn()
         val status = Status.PENDING_ASSIGNMENT_TO_BATCH
-        val batchId = "8b2215c7-4e1e-4f0e-873b-a2eea04eac84"
+        val batchId = aBatchId()
         val details = PrintDetails(
             id = id,
             requestId = requestId,
