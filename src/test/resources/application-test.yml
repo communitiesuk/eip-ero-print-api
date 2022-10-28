@@ -19,6 +19,4 @@ dynamodb:
   scheduler-lock-table-name: scheduler-locks
 
 jobs:
-    print-requests:
-        name: BatchPrintRequests
-        cron: 0 0 */1 * * *
+  enabled: false
