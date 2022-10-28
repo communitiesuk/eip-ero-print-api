@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @Component
-class FilenameFactory(val clock: Clock) {
+class FilenameFactory(private val clock: Clock) {
 
     fun createZipFilename(batchId: String, count: Int): String = createFilename(batchId, count, "zip")
 
