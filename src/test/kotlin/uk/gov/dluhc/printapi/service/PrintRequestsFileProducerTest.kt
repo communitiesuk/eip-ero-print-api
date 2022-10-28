@@ -90,7 +90,7 @@ internal class PrintRequestsFileProducerTest {
                 suggestedExpiryDate = "2032-06-01",
                 requestDateTime = Date(Instant.parse("2022-06-01T12:23:03.000Z").toEpochMilli()),
                 cardFirstname = "Otelia",
-                cardMiddlenames = "Shamika",
+                cardMiddlenames = null,
                 cardSurname = "Ziemann",
                 cardVersion = "1",
                 cardNumber = "3987",
@@ -110,21 +110,21 @@ internal class PrintRequestsFileProducerTest {
                 eroEmailAddressEn = "contact@Lake-Deedra.gov.uk",
                 eroWebsiteEn = "https://Lake-Deedra.gov.uk",
                 eroDeliveryStreetEn = "Fidela Road",
-                eroDeliveryPropertyEn = "44181",
-                eroDeliveryLocalityEn = "David Orchard",
-                eroDeliveryTownEn = "East Roberto",
-                eroDeliveryAreaEn = "Nebraska",
+                eroDeliveryPropertyEn = null,
+                eroDeliveryLocalityEn = null,
+                eroDeliveryTownEn = null,
+                eroDeliveryAreaEn = null,
                 eroDeliveryPostcodeEn = "SS8Y 5RY",
-                eroNameCy = "North Brittport",
-                eroPhoneNumberCy = "07902 544470",
-                eroEmailAddressCy = "contact@North-Brittport.gov.uk",
-                eroWebsiteCy = "https://North-Brittport.gov.uk",
-                eroDeliveryStreetCy = "Alexander Harbor",
-                eroDeliverypPropertyCy = "3587",
-                eroDeliveryLocalityCy = "Maggio Ways",
-                eroDeliveryTownCy = "South Addieburgh",
-                erodDeliveryAreaCy = "Oregon",
-                eroDeliveryPostcodeCy = "WE7B 7FJ"
+                eroNameCy = null,
+                eroPhoneNumberCy = null,
+                eroEmailAddressCy = null,
+                eroWebsiteCy = null,
+                eroDeliveryStreetCy = null,
+                eroDeliverypPropertyCy = null,
+                eroDeliveryLocalityCy = null,
+                eroDeliveryTownCy = null,
+                erodDeliveryAreaCy = null,
+                eroDeliveryPostcodeCy = null
             )
         )
 
@@ -136,7 +136,7 @@ internal class PrintRequestsFileProducerTest {
         assertThat(fileContents).isEqualTo(
             """
   requestId|issuingAuthorityEn|issuingAuthorityCy|issueDate|suggestedExpiryDate|requestDateTime|cardFirstname|cardMiddlenames|cardSurname|cardVersion|cardNumber|certificateLanguage|certificateFormat|deliveryOption|photo|deliveryName|deliveryStreet|deliverypProperty|deliveryLocality|deliveryTown|deliveryArea|deliveryPostcode|eroNameEn|eroPhoneNumberEn|eroEmailAddressEn|eroWebsiteEn|eroDeliveryStreetEn|eroDeliveryPropertyEn|eroDeliveryLocalityEn|eroDeliveryTownEn|eroDeliveryAreaEn|eroDeliveryPostcodeEn|eroNameCy|eroPhoneNumberCy|eroEmailAddressCy|eroWebsiteCy|eroDeliveryStreetCy|eroDeliverypPropertyCy|eroDeliveryLocalityCy|eroDeliveryTownCy|erodDeliveryAreaCy|eroDeliveryPostcodeCy
-  627ab400-5ae2-4cc5-9e91-5c050e43e4c1|Lake Deedra|Bradtketon|2022-06-01|2032-06-01|2022-06-01T12:23:03.000Z|Otelia|Shamika|Ziemann|1|3987|en|standard|standard|8a53a30ac9bae2ebb9b1239b.png|Len Hessel DDS|Shon Flat|||||WR9 8JN|Lake Deedra|07323 256949|contact@Lake-Deedra.gov.uk|https://Lake-Deedra.gov.uk|Fidela Road|44181|David Orchard|East Roberto|Nebraska|SS8Y 5RY|North Brittport|07902 544470|contact@North-Brittport.gov.uk|https://North-Brittport.gov.uk|Alexander Harbor|3587|Maggio Ways|South Addieburgh|Oregon|WE7B 7FJ
+  627ab400-5ae2-4cc5-9e91-5c050e43e4c1|Lake Deedra|Bradtketon|2022-06-01|2032-06-01|2022-06-01T12:23:03.000Z|Otelia||Ziemann|1|3987|en|standard|standard|8a53a30ac9bae2ebb9b1239b.png|Len Hessel DDS|Shon Flat|||||WR9 8JN|Lake Deedra|07323 256949|contact@Lake-Deedra.gov.uk|https://Lake-Deedra.gov.uk|Fidela Road|||||SS8Y 5RY||||||||||
   
             """.trimIndent()
         )

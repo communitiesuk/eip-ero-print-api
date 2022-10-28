@@ -80,10 +80,10 @@ class PrintRequestsFileProducer {
     private fun toStringArray(printRequest: PrintRequest): Array<String> =
         with(printRequest) {
             arrayOf(
-                requestId.toString(),
+                requestId,
                 issuingAuthorityEn,
                 issuingAuthorityCy,
-                issueDate.toString(),
+                issueDate,
                 suggestedExpiryDate,
                 requestDateTime.toInstant().atOffset(ZoneOffset.UTC).format(DATE_TIMESTAMP_FORMATTER),
                 cardFirstname,
@@ -101,7 +101,7 @@ class PrintRequestsFileProducer {
                 deliveryLocality ?: "",
                 deliveryTown ?: "",
                 deliveryArea ?: "",
-                deliveryPostcode ?: "",
+                deliveryPostcode,
                 eroNameEn,
                 eroPhoneNumberEn,
                 eroEmailAddressEn,
@@ -111,7 +111,7 @@ class PrintRequestsFileProducer {
                 eroDeliveryLocalityEn ?: "",
                 eroDeliveryTownEn ?: "",
                 eroDeliveryAreaEn ?: "",
-                eroDeliveryPostcodeEn ?: "",
+                eroDeliveryPostcodeEn,
                 eroNameCy ?: "",
                 eroPhoneNumberCy ?: "",
                 eroEmailAddressCy ?: "",
