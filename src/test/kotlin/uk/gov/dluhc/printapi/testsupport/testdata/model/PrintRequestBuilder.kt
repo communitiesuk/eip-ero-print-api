@@ -3,15 +3,15 @@ package uk.gov.dluhc.printapi.testsupport.testdata.model
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.testsupport.testdata.getAMongoDbId
 import java.time.Instant
 import java.util.Date
 
 fun buildPrintRequest(
     eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(),
     eroWelsh: ElectoralRegistrationOffice? = buildElectoralRegistrationOffice(),
-    requestId: String = getAMongoDbId(),
+    requestId: String = aValidRequestId(),
     issuingAuthorityEn: String = eroEnglish.name!!,
     issuingAuthorityCy: String = eroWelsh?.name!!,
     issueDate: String = "12/07/2023",
