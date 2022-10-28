@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.messaging
 
-import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
@@ -12,7 +11,6 @@ import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
@@ -87,7 +85,6 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             val response = dynamoDbClient.scan(
                 ScanRequest.builder().tableName(dynamoDbConfiguration.printDetailsTableName).build()
             )
-            assertThat(response.hasItems()).isTrue
             assertThat(response.items().count()).isEqualTo(1)
             val id = UUID.fromString(response.items()[0]["id"]!!.s())
             val saved = printDetailsRepository.get(id)
@@ -108,11 +105,10 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
 
         // Then
         await.during(5, SECONDS).until {
-            assertThat(
-                TestLogAppender.hasLog(
-                    "Print message with source reference [${payload.sourceReference}] received", Level.INFO
-                )
-            ).isFalse
+            val response = dynamoDbClient.scan(
+                ScanRequest.builder().tableName(dynamoDbConfiguration.printDetailsTableName).build()
+            )
+            assertThat(response.items()).isEmpty()
             true
         }
     }
