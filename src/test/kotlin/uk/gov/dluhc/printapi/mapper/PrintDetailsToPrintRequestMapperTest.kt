@@ -13,7 +13,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.DeliveryOption
-import uk.gov.dluhc.printapi.testsupport.testdata.aBatchId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
@@ -69,7 +69,7 @@ class PrintDetailsToPrintRequestMapperTest {
         val eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(name = issuingAuthority)
         val photoLocation = aPhotoArn()
         val status = Status.PENDING_ASSIGNMENT_TO_BATCH
-        val batchId = aBatchId()
+        val batchId = aValidBatchId()
         val details = PrintDetails(
             id = id,
             requestId = requestId,
