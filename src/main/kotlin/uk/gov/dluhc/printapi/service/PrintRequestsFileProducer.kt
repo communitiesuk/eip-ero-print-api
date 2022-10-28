@@ -9,7 +9,6 @@ import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Optional
 
 @Component
 class PrintRequestsFileProducer {
@@ -88,7 +87,7 @@ class PrintRequestsFileProducer {
                 suggestedExpiryDate,
                 requestDateTime.toInstant().atOffset(ZoneOffset.UTC).format(DATE_TIMESTAMP_FORMATTER),
                 cardFirstname,
-                Optional.ofNullable(cardMiddlenames).orElse(""),
+                cardMiddlenames ?: "",
                 cardSurname,
                 cardVersion,
                 cardNumber,
@@ -98,31 +97,31 @@ class PrintRequestsFileProducer {
                 photo,
                 deliveryName,
                 deliveryStreet,
-                Optional.ofNullable(deliverypProperty).orElse(""),
-                Optional.ofNullable(deliveryLocality).orElse(""),
-                Optional.ofNullable(deliveryTown).orElse(""),
-                Optional.ofNullable(deliveryArea).orElse(""),
-                Optional.ofNullable(deliveryPostcode).orElse(""),
+                deliverypProperty ?: "",
+                deliveryLocality ?: "",
+                deliveryTown ?: "",
+                deliveryArea ?: "",
+                deliveryPostcode ?: "",
                 eroNameEn,
                 eroPhoneNumberEn,
                 eroEmailAddressEn,
                 eroWebsiteEn,
                 eroDeliveryStreetEn,
-                Optional.ofNullable(eroDeliveryPropertyEn).orElse(""),
-                Optional.ofNullable(eroDeliveryLocalityEn).orElse(""),
-                Optional.ofNullable(eroDeliveryTownEn).orElse(""),
-                Optional.ofNullable(eroDeliveryAreaEn).orElse(""),
-                Optional.ofNullable(eroDeliveryPostcodeEn).orElse(""),
-                Optional.ofNullable(eroNameCy).orElse(""),
-                Optional.ofNullable(eroPhoneNumberCy).orElse(""),
-                Optional.ofNullable(eroEmailAddressCy).orElse(""),
-                Optional.ofNullable(eroWebsiteCy).orElse(""),
-                Optional.ofNullable(eroDeliveryStreetCy).orElse(""),
-                Optional.ofNullable(eroDeliverypPropertyCy).orElse(""),
-                Optional.ofNullable(eroDeliveryLocalityCy).orElse(""),
-                Optional.ofNullable(eroDeliveryTownCy).orElse(""),
-                Optional.ofNullable(erodDeliveryAreaCy).orElse(""),
-                Optional.ofNullable(eroDeliveryPostcodeCy).orElse("")
+                eroDeliveryPropertyEn ?: "",
+                eroDeliveryLocalityEn ?: "",
+                eroDeliveryTownEn ?: "",
+                eroDeliveryAreaEn ?: "",
+                eroDeliveryPostcodeEn ?: "",
+                eroNameCy ?: "",
+                eroPhoneNumberCy ?: "",
+                eroEmailAddressCy ?: "",
+                eroWebsiteCy ?: "",
+                eroDeliveryStreetCy ?: "",
+                eroDeliverypPropertyCy ?: "",
+                eroDeliveryLocalityCy ?: "",
+                eroDeliveryTownCy ?: "",
+                erodDeliveryAreaCy ?: "",
+                eroDeliveryPostcodeCy ?: "",
             )
         }
 
