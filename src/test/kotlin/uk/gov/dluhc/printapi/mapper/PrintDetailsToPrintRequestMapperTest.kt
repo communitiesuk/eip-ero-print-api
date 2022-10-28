@@ -23,7 +23,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificateDeliver
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
-import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoLocation
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -94,7 +94,7 @@ class PrintDetailsToPrintRequestMapperTest {
             batchId = batchId,
             status = status,
         )
-        val photoZipPath: String = aPhotoLocation().zipPath
+        val photoZipPath: String = aPhotoZipPath()
 
         val expected = PrintRequest()
         expected.requestId = requestId
