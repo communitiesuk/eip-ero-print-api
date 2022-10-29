@@ -25,6 +25,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.photoLocationBuilder
 import java.io.ByteArrayInputStream
+import java.io.IOException
 import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -76,6 +77,7 @@ internal class ZipOutputStreamProducerRunnableTest {
             argThat<GetObjectRequest> { request -> request.bucket().equals(s3Bucket) && request.key().equals(s3Path) },
             any<ResponseTransformer<GetObjectResponse, ZipOutputStream>>()
         )
+        assertPipeClosed(zipOutputStream)
         val generatedZip = ZipInputStream(sftpInputStream)
         val psvFile = generatedZip.nextEntry
         assertThat(psvFile).isNotNull
@@ -87,6 +89,13 @@ internal class ZipOutputStreamProducerRunnableTest {
         assertThat(photoFile!!.name).isEqualTo(zipPath)
         val photoFileContents = String(generatedZip.readBytes())
         assertThat(photoFileContents).isEqualTo(s3ResourceContents)
+    }
+
+    private fun assertPipeClosed(zipOutputStream: PipedOutputStream) {
+        val error = catchException { zipOutputStream.write(1) }
+        assertThat(error)
+            .isInstanceOf(IOException::class.java)
+            .hasMessage("Pipe closed")
     }
 
     @Test
@@ -105,6 +114,7 @@ internal class ZipOutputStreamProducerRunnableTest {
         verify(printRequestsFileProducer).writeFileToStream(any<ZipOutputStream>(), eq(fileDetails.printRequests))
         verifyNoInteractions(s3Client)
         assertThat(error).isNotNull
+        assertPipeClosed(zipOutputStream)
     }
 
     private fun createRunnable(
