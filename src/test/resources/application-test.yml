@@ -16,3 +16,7 @@ api:
 
 dynamodb:
   print-details-table-name: print-details
+  scheduler-lock-table-name: scheduler-locks
+
+jobs:
+  enabled: false
