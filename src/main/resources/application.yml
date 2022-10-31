@@ -17,3 +17,8 @@ jobs:
 #    lock-at-most-for: ${JOBS_PRINT_REQUEST_LOCK_AT_MOST_FOR}
 #    lock-at-least-for: ${JOBS_PRINT_REQUEST_LOCK_AT_LEAST_FOR}
     batchSize: ${JOB_PRINT_REQUESTS_BATCH_SIZE}
+
+thread-pool:
+  zip:
+    core-size: 5
+    max-size: 5

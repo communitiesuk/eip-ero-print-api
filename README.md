@@ -35,6 +35,9 @@ The following environment variables must be set in order to run the application:
 * `DYNAMODB_PRINT_DETAILS_TABLE_NAME` - table name to persist print details
 * `DYNAMODB_SCHEDULER_LOCKS_TABLE_NAME` - table name to persist scheduler locks
 * `JOB_PRINT_REQUESTS_CRON` - cron expression for print request job
+* `THREAD_POOL_ZIP_CORE_SIZE` - number of core threads for the Zip producer thread pool 
+* `THREAD_POOL_ZIP_MAX_SIZE` - maximum number of threads for the Zip producer thread pool
+
 
 ### Authentication and authorisation
 Requests are authenticated by the presence of a signed cognito JWT as a bearer token in the HTTP request `authorization` header.  

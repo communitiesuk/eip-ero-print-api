@@ -16,20 +16,23 @@ data class PrintDetails(
     var applicationReference: String? = null,
     @get:DynamoDbSecondaryPartitionKey(indexNames = [SOURCE_TYPE_GSS_CODE_INDEX_NAME]) var sourceType: SourceType? = null,
     var vacNumber: String? = null,
+    var vacVersion: String? = "1",
     var requestDateTime: OffsetDateTime? = null,
     var firstName: String? = null,
     var middleNames: String? = null,
     var surname: String? = null,
     var certificateLanguage: CertificateLanguage? = null,
+    var certificateFormat: CertificateFormat? = CertificateFormat.STANDARD,
     var photoLocation: String? = null,
     var delivery: CertificateDelivery? = null,
     @get:DynamoDbSecondarySortKey(indexNames = [SOURCE_TYPE_GSS_CODE_INDEX_NAME]) var gssCode: String? = null,
     var issuingAuthority: String? = null,
     var issueDate: LocalDate = LocalDate.now(),
+    var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
     var eroEnglish: ElectoralRegistrationOffice? = null,
     var eroWelsh: ElectoralRegistrationOffice? = null,
     @get:DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-    @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])var batchId: UUID? = null
+    @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])var batchId: String? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
