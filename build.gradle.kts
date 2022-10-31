@@ -60,6 +60,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("com.opencsv:opencsv:5.7.0") {
+        exclude("commons-collections", "commons-collections")
+        exclude("org.apache.commons", "commons-text")
+    }
+    implementation("org.springframework.integration:spring-integration-sftp")
 
     // webclient
     implementation("org.springframework:spring-webflux")
@@ -75,6 +80,7 @@ dependencies {
     // AWS v2 dependencies
     implementation("software.amazon.awssdk:dynamodb")
     implementation("software.amazon.awssdk:dynamodb-enhanced")
+    implementation("software.amazon.awssdk:s3")
 
     // mongo core datatypes, so that we can generate a Mongo ObjectId (a 12 byte/24 char hex string ID)
     implementation("org.mongodb:bson:4.7.1")

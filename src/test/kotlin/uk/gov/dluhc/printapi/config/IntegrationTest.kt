@@ -57,6 +57,11 @@ internal abstract class IntegrationTest {
         clearTable(dynamoDbConfiguration.printDetailsTableName)
     }
 
+    @BeforeEach
+    fun resetWireMock() {
+        wireMockService.resetAllStubsAndMappings()
+    }
+
     companion object {
         val localStackContainer = LocalStackContainerConfiguration.getInstance()
     }
