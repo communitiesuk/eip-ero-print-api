@@ -13,7 +13,7 @@ jobs:
   enabled: true
   print-requests:
     name: "BatchPrintRequests"
-    cron: "${JOB_PRINT_REQUESTS_CRON:0 0 */1 * * *}" # every hour by default
+    cron: "0 0 */1 * * *" # every hour by default
 #    lock-at-most-for: ${JOBS_PRINT_REQUEST_LOCK_AT_MOST_FOR}
 #    lock-at-least-for: ${JOBS_PRINT_REQUEST_LOCK_AT_LEAST_FOR}
     batchSize: ${JOB_PRINT_REQUESTS_BATCH_SIZE}
