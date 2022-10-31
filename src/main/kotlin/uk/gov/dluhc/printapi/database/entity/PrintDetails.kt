@@ -53,5 +53,6 @@ data class PrintDetails(
         const val REQUEST_ID_INDEX_NAME = "RequestIdIndex"
         const val SOURCE_TYPE_GSS_CODE_INDEX_NAME = "SourceTypeGssCodeIndex"
         const val STATUS_BATCH_ID_INDEX_NAME = "StatusBatchIdIndex"
+        const val STATUS_INDEX_NAME = "StatusIndex"
     }
 }
