@@ -6,6 +6,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest
 import uk.gov.dluhc.printapi.config.DynamoDbConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
@@ -38,6 +39,12 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
         val index = table.index(STATUS_BATCH_ID_INDEX_NAME)
         val query = QueryEnhancedRequest.builder().queryConditional(queryConditional).build()
         return index.query(query).flatMap { it.items() }
+    }
+
+    fun updateItems(printList: List<PrintDetails>) {
+        printList.forEach { item ->
+            table.updateItem(UpdateItemEnhancedRequest.builder(PrintDetails::class.java).item(item).build())
+        }
     }
 
     private fun key(partitionValue: String, sortValue: String): Key =

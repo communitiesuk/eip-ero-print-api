@@ -14,6 +14,9 @@ api:
   ero-management:
     url: http://will-be-replaced-by-wireMockServer-bean
 
+sftp:
+  print-request-upload-directory: upload
+
 dynamodb:
   print-details-table-name: print-details
   scheduler-lock-table-name: scheduler-locks

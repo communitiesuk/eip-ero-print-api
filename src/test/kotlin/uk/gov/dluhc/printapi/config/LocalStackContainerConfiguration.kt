@@ -23,6 +23,7 @@ import software.amazon.awssdk.services.dynamodb.model.KeyType
 import software.amazon.awssdk.services.dynamodb.model.Projection
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType
 import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput
+import software.amazon.awssdk.services.s3.S3Client
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.REQUEST_ID_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.SOURCE_TYPE_GSS_CODE_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
@@ -78,6 +79,19 @@ class LocalStackContainerConfiguration {
                 DEFAULT_SECRET_KEY
             )
         )
+
+    @Primary
+    @Bean
+    fun createS3BucketSettings(
+        awsCredentialsProvider: AwsCredentialsProvider?
+    ): S3Client = S3Client.builder()
+        .endpointOverride(localStackContainer.getEndpointOverride())
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(DEFAULT_ACCESS_KEY_ID, DEFAULT_SECRET_KEY)
+            )
+        )
+        .build()
 
     /**
      * Uses the localstack container to configure the various services.
