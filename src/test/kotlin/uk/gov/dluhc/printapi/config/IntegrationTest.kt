@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory
@@ -98,12 +99,13 @@ internal abstract class IntegrationTest {
     class IntegrationTestConfiguration {
         @Bean
         @Primary
-        fun testSftpSessionFactory(): SessionFactory<ChannelSftp.LsEntry> {
+        fun testSftpSessionFactory(properties: SftpProperties): SessionFactory<ChannelSftp.LsEntry> {
             val factory = DefaultSftpSessionFactory(true)
-            factory.setHost(SftpContainerConfiguration.HOST)
+            factory.setHost(properties.host)
             factory.setPort(sftpContainer.getMappedPort(SftpContainerConfiguration.DEFAULT_SFTP_PORT))
-            factory.setUser(SftpContainerConfiguration.USER)
-            factory.setPassword(SftpContainerConfiguration.PASSWORD)
+            factory.setUser(properties.user)
+            factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
+            factory.setPrivateKeyPassphrase(properties.privateKeyPassphrase)
             factory.setAllowUnknownKeys(true)
             return CachingSessionFactory(factory)
         }

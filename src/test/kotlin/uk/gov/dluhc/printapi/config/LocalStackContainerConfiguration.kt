@@ -24,6 +24,8 @@ import software.amazon.awssdk.services.dynamodb.model.Projection
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType
 import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest
+import software.amazon.awssdk.services.s3.model.S3Exception
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.REQUEST_ID_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.SOURCE_TYPE_GSS_CODE_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
@@ -41,6 +43,7 @@ class LocalStackContainerConfiguration {
         const val DEFAULT_PORT = 4566
         const val DEFAULT_ACCESS_KEY_ID = "test"
         const val DEFAULT_SECRET_KEY = "test"
+        const val S3_BUCKET_CONTAINING_PHOTOS = "localstack-vca-api-vca-target-bucket"
 
         val objectMapper = ObjectMapper()
         val localStackContainer: GenericContainer<*> = getInstance()
@@ -84,14 +87,28 @@ class LocalStackContainerConfiguration {
     @Bean
     fun createS3BucketSettings(
         awsCredentialsProvider: AwsCredentialsProvider?
-    ): S3Client = S3Client.builder()
-        .endpointOverride(localStackContainer.getEndpointOverride())
-        .credentialsProvider(
-            StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(DEFAULT_ACCESS_KEY_ID, DEFAULT_SECRET_KEY)
+    ): S3Client {
+        val s3Client = S3Client.builder()
+            .endpointOverride(localStackContainer.getEndpointOverride())
+            .credentialsProvider(
+                StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(DEFAULT_ACCESS_KEY_ID, DEFAULT_SECRET_KEY)
+                )
             )
-        )
-        .build()
+            .build()
+
+        createS3BucketsRequiredForTesting(s3Client)
+
+        return s3Client
+    }
+
+    private fun createS3BucketsRequiredForTesting(s3Client: S3Client) {
+        try {
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(S3_BUCKET_CONTAINING_PHOTOS).build())
+        } catch (ex: S3Exception) {
+            // ignore
+        }
+    }
 
     /**
      * Uses the localstack container to configure the various services.

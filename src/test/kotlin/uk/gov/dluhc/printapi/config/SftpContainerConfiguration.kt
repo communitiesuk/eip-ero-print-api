@@ -1,18 +1,22 @@
 package uk.gov.dluhc.printapi.config
 
 import org.springframework.context.annotation.Configuration
+import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.images.builder.ImageFromDockerfile
+import java.net.URL
 
 @Configuration
 class SftpContainerConfiguration {
 
     companion object {
         const val DEFAULT_SFTP_PORT = 22
-        const val HOST = "localhost"
         const val USER = "user"
-        const val PASSWORD = "password"
-        const val REMOTE_PATH = "upload" // must match sftp.remote-directory
+        private const val PUBLIC_KEY_FILENAME = "ssh/printer_rsa.pub"
+        const val REMOTE_PATH = "EROP/Dev/OutBound" // must match sftp.print-request-upload-directory
+        val DIRECTORIES = listOf("EROP/Dev/InBound", REMOTE_PATH)
+        const val USER_ID = 1001
+        const val GROUP_ID = 100
 
         private var container: GenericContainer<*>? = null
 
@@ -22,6 +26,7 @@ class SftpContainerConfiguration {
          */
         fun getInstance(): GenericContainer<*> {
             if (container == null) {
+                val publicKeyResourceUrl: URL = getPublicKeyResourceUrl()
                 container = GenericContainer(
                     ImageFromDockerfile()
                         .withDockerfileFromBuilder { builder ->
@@ -32,8 +37,9 @@ class SftpContainerConfiguration {
                         }
                 )
                     .withReuse(true) // NOTE: ImageFromDockerfile does not currently support this feature
+                    .withFileSystemBind(publicKeyResourceUrl.file, "/home/$USER/.ssh/keys/id_rsa.pub", BindMode.READ_ONLY)
                     .withExposedPorts(DEFAULT_SFTP_PORT)
-                    .withCommand("$USER:$PASSWORD:1001:::$REMOTE_PATH")
+                    .withCommand("$USER::$USER_ID:$GROUP_ID:${DIRECTORIES.joinToString(",")}")
                     .apply {
                         start()
                     }
@@ -41,5 +47,7 @@ class SftpContainerConfiguration {
 
             return container!!
         }
+
+        private fun getPublicKeyResourceUrl(): URL = ClassLoader.getSystemResource(PUBLIC_KEY_FILENAME)
     }
 }

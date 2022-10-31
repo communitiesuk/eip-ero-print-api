@@ -9,6 +9,7 @@ import org.springframework.integration.file.remote.InputStreamCallback
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.REMOTE_PATH
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.service.ProcessPrintBatchService
@@ -33,8 +34,9 @@ internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
         val batchId = aValidBatchId()
         val requestId = aValidRequestId()
         val s3ResourceContents = "S3 Object Contents"
-        val s3Bucket = "localstack-vca-api-vca-target-bucket"
-        val s3Path = "E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
+        val s3Bucket = S3_BUCKET_CONTAINING_PHOTOS
+        val s3Path =
+            "E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
 
         // add resource to S3
         val s3Resource = s3ResourceContents.encodeToByteArray()

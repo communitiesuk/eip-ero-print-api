@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.Resource
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.expression.common.LiteralExpression
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
@@ -29,12 +29,11 @@ class SftpConfiguration {
     @Bean
     fun sftpSessionFactory(properties: SftpProperties): SessionFactory<ChannelSftp.LsEntry> {
         val factory = DefaultSftpSessionFactory(true)
-        factory.setHost(properties.host) // printer-a1-sftp-credentials.primarySftpServer
-        factory.setPort(properties.port) // default port
-        factory.setUser(properties.user) // printer-a1-sftp-credentials.sftpUsername
-        factory.setPrivateKey(properties.privateKey) // printer-a1-sftp-credentials-private-ssh-key
-        factory.setPrivateKeyPassphrase(properties.privateKeyPassphrase) // Nothing configured?
-        factory.setPassword(properties.password) // printer-a1-sftp-credentials.sftpPassword
+        factory.setHost(properties.host)
+        factory.setPort(properties.port)
+        factory.setUser(properties.user)
+        factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
+        factory.setPrivateKeyPassphrase(properties.privateKeyPassphrase)
         factory.setAllowUnknownKeys(true)
         return CachingSessionFactory(factory)
     }
@@ -46,8 +45,7 @@ data class SftpProperties(
     val host: String,
     val port: Int = 22,
     val user: String,
-    val privateKey: Resource,
+    val privateKey: String,
     val privateKeyPassphrase: String,
-    val password: String,
     val printRequestUploadDirectory: String
 )
