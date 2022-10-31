@@ -8,9 +8,9 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
 import uk.gov.dluhc.printapi.config.DynamoDbConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_INDEX_NAME
+import uk.gov.dluhc.printapi.database.entity.Status
 import java.util.UUID
 
 @Repository
