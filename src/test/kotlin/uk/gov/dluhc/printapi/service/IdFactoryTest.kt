@@ -46,7 +46,7 @@ internal class IdFactoryTest {
 
             // Then
             assertThat(vacNumbers).doesNotHaveDuplicates()
-                .allSatisfy { assertThat(it).containsPattern(Regex("^[A-Za-z\\d]{20}$").pattern) }
+                .allSatisfy { assertThat(it).containsPattern(Regex("^[0-9AC-HJ-NP-RT-Z]{20}$").pattern) }
         }
     }
 }

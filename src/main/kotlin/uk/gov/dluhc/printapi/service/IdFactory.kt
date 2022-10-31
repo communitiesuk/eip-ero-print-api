@@ -1,8 +1,8 @@
 package uk.gov.dluhc.printapi.service
 
-import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
+import uk.gov.dluhc.printapi.domain.CertificateNumber
 
 /**
  * Simple factory bean for creating different types of IDs and reference numbers.
@@ -11,5 +11,5 @@ import org.springframework.stereotype.Component
 class IdFactory {
     fun requestId(): String = ObjectId().toString()
 
-    fun vacNumber(): String = randomAlphanumeric(20)
+    fun vacNumber(): String = CertificateNumber().toString()
 }
