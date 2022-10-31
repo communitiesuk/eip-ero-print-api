@@ -10,8 +10,8 @@ class ThreadPoolConfiguration {
 
     @Bean
     fun zipStreamProducerTaskExecutor(
-        @Value("\${thread-pool.zip.core-size:5}") coreSize: Int,
-        @Value("\${thread-pool.zip.max-size:5}") maxSize: Int,
+        @Value("\${thread-pool.zip.core-size}") coreSize: Int,
+        @Value("\${thread-pool.zip.max-size}") maxSize: Int,
     ): ThreadPoolTaskExecutor {
         val pool = ThreadPoolTaskExecutor()
         pool.corePoolSize = coreSize

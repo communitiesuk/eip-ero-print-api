@@ -7,3 +7,9 @@ api:
 
 dynamodb:
   print-details-table-name: ${DYNAMODB_PRINT_DETAILS_TABLE_NAME}
+
+
+thread-pool:
+  zip:
+    core-size: 5
+    max-size: 5
