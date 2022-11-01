@@ -1,52 +1,58 @@
 package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.BDDMockito.given
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateNumber
 
+@ExtendWith(MockitoExtension::class)
 internal class IdFactoryTest {
 
-    private val idFactory = IdFactory()
+    @Mock
+    private lateinit var certificateNumberGenerator: CertificateNumberGenerator
 
-    @Nested
-    inner class RequestId {
-        @Test
-        fun `should generate requestId`() {
-            // Given
+    @InjectMocks
+    private lateinit var idFactory: IdFactory
 
-            // When
-            val requestId = idFactory.requestId()
+    @Test
+    fun `should generate requestId`() {
+        // Given
 
-            // Then
-            assertThat(requestId).hasSize(24)
-        }
+        // When
+        val requestId = idFactory.requestId()
 
-        @Test
-        fun `should generate unique requestId with each call`() {
-            // Given
-            val requestIds = mutableSetOf<String>() // store request IDs in a set to ensure unique entries
-
-            // When
-            repeat(10) { requestIds.add(idFactory.requestId()) }
-
-            // Then
-            assertThat(requestIds).hasSize(10) // 10 elements in the set mean that there were no duplicates
-        }
+        // Then
+        assertThat(requestId).hasSize(24)
     }
 
-    @Nested
-    inner class VacNumber {
-        @Test
-        fun `should generate unique vacNumber`() {
-            // Given
-            val vacNumbers = mutableListOf<String>()
+    @Test
+    fun `should generate unique requestId with each call`() {
+        // Given
+        val requestIds = mutableListOf<String>()
 
-            // When
-            repeat(100) { vacNumbers.add(idFactory.vacNumber()) }
-
-            // Then
-            assertThat(vacNumbers).doesNotHaveDuplicates()
-                .allSatisfy { assertThat(it).containsPattern(Regex("^[A-Za-z\\d]{20}$").pattern) }
+        // When
+        repeat(100) {
+            requestIds.add(idFactory.requestId())
         }
+
+        // Then
+        assertThat(requestIds).doesNotHaveDuplicates()
+    }
+
+    @Test
+    fun `should generate vacNumber`() {
+        // Given
+        val expectedCertificateNumber = aValidCertificateNumber()
+        given(certificateNumberGenerator.generateCertificateNumber()).willReturn(expectedCertificateNumber)
+
+        // When
+        val certificateNumber = idFactory.vacNumber()
+
+        // Then
+        assertThat(certificateNumber).isEqualTo(expectedCertificateNumber)
     }
 }
