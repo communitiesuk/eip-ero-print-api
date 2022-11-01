@@ -13,8 +13,8 @@ class SftpContainerConfiguration {
         const val DEFAULT_SFTP_PORT = 22
         const val USER = "user"
         private const val PUBLIC_KEY_FILENAME = "ssh/printer_rsa.pub"
-        const val REMOTE_PATH = "EROP/Dev/OutBound" // must match sftp.print-request-upload-directory
-        val DIRECTORIES = listOf("EROP/Dev/InBound", REMOTE_PATH)
+        const val PRINT_REQUEST_UPLOAD_PATH = "EROP/Dev/InBound" // must match sftp.print-request-upload-directory
+        val DIRECTORIES = listOf(PRINT_REQUEST_UPLOAD_PATH, "EROP/Dev/OutBound")
         const val USER_ID = 1001
         const val GROUP_ID = 100
 
@@ -32,7 +32,7 @@ class SftpContainerConfiguration {
                         .withDockerfileFromBuilder { builder ->
                             builder
                                 .from("atmoz/sftp:latest")
-                                .run("mkdir -p /home/$USER/$REMOTE_PATH; chmod -R 007 /home/$USER")
+                                .run("mkdir -p /home/$USER/$PRINT_REQUEST_UPLOAD_PATH; chmod -R 007 /home/$USER")
                                 .build()
                         }
                 )

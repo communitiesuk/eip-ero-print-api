@@ -10,7 +10,7 @@ import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
-import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.REMOTE_PATH
+import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.service.ProcessPrintBatchService
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
@@ -80,7 +80,7 @@ internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
         assertThat(filename).matches("$batchId-\\d{17}-1.zip")
         val expectedPhotoPathInZip = "$batchId-$requestId.png"
         sftpTemplate.get(
-            "$REMOTE_PATH/$filename",
+            "$PRINT_REQUEST_UPLOAD_PATH/$filename",
             (
                 InputStreamCallback { stream ->
                     run {
@@ -102,5 +102,5 @@ internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
     }
 
     private fun filterListForName(batchId: String) =
-        sftpTemplate.list(REMOTE_PATH).filter { lsEntry -> lsEntry.filename.contains(batchId) }
+        sftpTemplate.list(PRINT_REQUEST_UPLOAD_PATH).filter { lsEntry -> lsEntry.filename.contains(batchId) }
 }

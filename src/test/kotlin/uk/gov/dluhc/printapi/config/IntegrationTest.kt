@@ -23,7 +23,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import software.amazon.awssdk.services.s3.S3Client
-import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.REMOTE_PATH
+import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
@@ -78,11 +78,11 @@ internal abstract class IntegrationTest {
 
     @BeforeEach
     fun clearSftpUploadDirectory() {
-        sftpTemplate.list(REMOTE_PATH)
+        sftpTemplate.list(PRINT_REQUEST_UPLOAD_PATH)
             .map(LsEntry::getFilename)
             .filterNot { path -> path.equals(".") }
             .filterNot { path -> path.equals("..") }
-            .forEach { path -> sftpTemplate.remove("$REMOTE_PATH/$path") }
+            .forEach { path -> sftpTemplate.remove("$PRINT_REQUEST_UPLOAD_PATH/$path") }
     }
 
     @BeforeEach
@@ -105,7 +105,6 @@ internal abstract class IntegrationTest {
             factory.setPort(sftpContainer.getMappedPort(SftpContainerConfiguration.DEFAULT_SFTP_PORT))
             factory.setUser(properties.user)
             factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
-            factory.setPrivateKeyPassphrase(properties.privateKeyPassphrase)
             factory.setAllowUnknownKeys(true)
             return CachingSessionFactory(factory)
         }

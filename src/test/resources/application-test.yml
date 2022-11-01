@@ -46,8 +46,7 @@ sftp:
     u3QTpGj9UrZmhExoFzW2IzTaidiqZ/Vh6ffLJ80FGKdiPDOt9HK62e2Ft1IxWlLm
     47oGutsp1o6qL7xtHcr62QA=
     -----END PRIVATE KEY-----
-  private-key-passphrase: ""
-  print-request-upload-directory: EROP/Dev/OutBound
+  print-request-upload-directory: EROP/Dev/InBound
 
 dynamodb:
   print-details-table-name: print-details

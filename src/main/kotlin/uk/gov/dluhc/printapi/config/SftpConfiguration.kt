@@ -33,7 +33,6 @@ class SftpConfiguration {
         factory.setPort(properties.port)
         factory.setUser(properties.user)
         factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
-        factory.setPrivateKeyPassphrase(properties.privateKeyPassphrase)
         factory.setAllowUnknownKeys(true)
         return CachingSessionFactory(factory)
     }
@@ -46,6 +45,5 @@ data class SftpProperties(
     val port: Int = 22,
     val user: String,
     val privateKey: String,
-    val privateKeyPassphrase: String,
     val printRequestUploadDirectory: String
 )

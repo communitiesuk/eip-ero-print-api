@@ -40,7 +40,6 @@ The following environment variables must be set in order to run the application:
 * `SFTP_HOST` - Hostname of the SFTP server to send print requests
 * `SFTP_USER` - Username to use when connecting to the SFTP server 
 * `SFTP_PRIVATE_KEY` - SSH private key to use when securely connecting to the SFTP server
-* `SFTP_KEY_PASSPHRASE` - Passphrase to use with the SSH private key
 * `SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY` - Directory on the remote host to write print request files
 
 

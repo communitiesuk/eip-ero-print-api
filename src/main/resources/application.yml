@@ -10,7 +10,6 @@ sftp:
   user: ${SFTP_USER}
   password: ${SFTP_PASSWORD}
   private-key: ${SFTP_PRIVATE_KEY}
-  private-key-passphrase: ${SFTP_KEY_PASSPHRASE}
   print-request-upload-directory: ${SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY}
 
 dynamodb:
