@@ -47,7 +47,7 @@ class SftpConfiguration {
         factory.setUser(properties.user)
         factory.setPassword(properties.password)
         factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
-        factory.setAllowUnknownKeys(true)
+        factory.setAllowUnknownKeys(true) // TODO insecure?
         return CachingSessionFactory(factory)
     }
 }

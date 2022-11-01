@@ -31,6 +31,7 @@ The following environment variables must be set in order to run the application:
 * `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` - the uri of the cognito ERO user pool JWT issuer.
 * `SQS_SEND_APPLICATION_TO_PRINT_QUEUE_NAME` - the queue name for sending application to print
 * `SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME` - the queue name for processing print request batches
+* `SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME` - the queue name for processing print response.
 * `API_ERO_MANAGEMENT_URL` - the base URL of the ERO Management REST API service.
 * `DYNAMODB_ENDPOINT` - the localstack endpoint
 * `DYNAMODB_PRINT_DETAILS_TABLE_NAME` - table name to persist print details
@@ -49,3 +50,17 @@ EG: `Authorization: Bearer xxxxxyyyyyyzzzzz.....`
 Requests are authorised by their membership of groups and roles carried on the JWT token.  
 The UI application is expected to handle the authentication with cognito and pass the JWT token in the `authorization` header.
 
+## Connecting to the local Print Provider SFTP server
+When running integration tests, an SFTP server will be started.
+The port that it will be listening on will be written to the logs as shown below:
+```text
+17:09:50.314 [Test worker] INFO  uk.gov.dluhc.printapi.config.SftpContainerConfiguration - sftp mapped port: 58272
+```
+To connect to the SFTP server so that you can inspect the state of the server while the integration test is suspended
+at a break point during debugging, you can `cd` to the directory containing the user's private key (printer_rsa) 
+and then run the sftp command as shown below.
+```shell
+cd src/test/resources/ssh
+export PORT=<find port number from logs>
+sftp -v -P $PORT -oStrictHostKeyChecking=no -oKexAlgorithms=+diffie-hellman-group1-sha1 -o "IdentityFile=./printer_rsa" -o User=user localhost
+```

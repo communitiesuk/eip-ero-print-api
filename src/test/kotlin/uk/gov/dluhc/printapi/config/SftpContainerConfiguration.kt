@@ -1,9 +1,13 @@
 package uk.gov.dluhc.printapi.config
 
+import mu.KotlinLogging
+import org.apache.commons.lang3.time.StopWatch
 import org.springframework.context.annotation.Configuration
 import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.images.builder.ImageFromDockerfile
+
+private val logger = KotlinLogging.logger {}
 
 @Configuration
 class SftpContainerConfiguration {
@@ -27,13 +31,13 @@ class SftpContainerConfiguration {
          */
         fun getInstance(): GenericContainer<*> {
             if (container == null) {
-                val makeHomeDirRunCommand = "mkdir -p /home/$USER/$PRINT_REQUEST_UPLOAD_PATH; chmod -R 007 /home/$USER"
+                val sw = StopWatch.createStarted()
+
                 container = GenericContainer(
                     ImageFromDockerfile()
                         .withDockerfileFromBuilder { builder ->
                             builder
                                 .from("atmoz/sftp:latest")
-                                .run(makeHomeDirRunCommand)
                                 .build()
                         }
                 )
@@ -43,7 +47,10 @@ class SftpContainerConfiguration {
                     .withCommand("$USER::$USER_ID:$GROUP_ID:${DIRECTORIES.joinToString(",")}")
                     .apply {
                         start()
+                        logger.info { "sftp mapped port: ${getMappedPort(22)}" }
                     }
+                sw.stop()
+                logger.info { "sftp container started in: $sw" }
             }
 
             return container!!

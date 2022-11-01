@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jcraft.jsch.ChannelSftp
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
@@ -15,6 +16,7 @@ private val logger = KotlinLogging.logger {}
 class SftpService(
     @Qualifier("sftpInboundTemplate") private val sftpInboundTemplate: SftpRemoteFileTemplate,
     @Qualifier("sftpOutboundTemplate") private val sftpOutboundTemplate: SftpRemoteFileTemplate,
+    val objectMapper: ObjectMapper,
 ) {
     companion object {
         private const val PROCESSING_SUFFIX = ".processing"
@@ -51,4 +53,19 @@ class SftpService(
         sftpOutboundTemplate.rename("$fileDirectoryPath/$originalFileName", "$fileDirectoryPath/$newFileName")
         return newFileName
     }
+
+    /**
+     * Fetches the file from the path on the remote server and
+     * unmarshalls the content to an object of type `responseObjectType`
+     * @param filePathToProcess the path to the file on the remote server
+     * @param responseObjectType the type of the object to marshall the json content of the file to
+     */
+    fun <T> fetchAndUnmarshallFile(filePathToProcess: String, responseObjectType: Class<T>): T {
+        var responseObject: T? = null
+        sftpOutboundTemplate.get(filePathToProcess) { responseObject = objectMapper.readValue(it, responseObjectType) }
+        return responseObject!!
+    }
+
+    fun removeFileFromOutBoundDirectory(filePathToProcess: String) =
+        sftpOutboundTemplate.remove(filePathToProcess)
 }

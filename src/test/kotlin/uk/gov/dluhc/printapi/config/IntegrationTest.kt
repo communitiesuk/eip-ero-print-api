@@ -1,8 +1,11 @@
 package uk.gov.dluhc.printapi.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jcraft.jsch.ChannelSftp
 import com.jcraft.jsch.ChannelSftp.LsEntry
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate
+import mu.KotlinLogging
+import org.apache.commons.io.IOUtils
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -13,10 +16,12 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.integration.file.FileHeaders
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
+import org.springframework.integration.support.MessageBuilder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -28,8 +33,16 @@ import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_R
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
+import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintBatchStatusUpdateMessage
+import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
+import uk.gov.dluhc.printapi.service.PrintResponseFileService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
+import java.io.InputStream
+import java.nio.charset.Charset
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Base class used to bring up the entire Spring ApplicationContext
@@ -74,11 +87,24 @@ internal abstract class IntegrationTest {
     @Autowired
     protected lateinit var s3Client: S3Client
 
+    @Autowired
+    protected lateinit var printResponseFileService: PrintResponseFileService
+
+    @Autowired
+    // todo change class name of message and variable, to ProcessPrintResponseFileMessage?
+    protected lateinit var processPrintBatchStatusUpdateQueue: MessageQueue<ProcessPrintBatchStatusUpdateMessage>
+
+    @Autowired
+    protected lateinit var objectMapper: ObjectMapper
+
     @Value("\${sqs.send-application-to-print-queue-name}")
     protected lateinit var sendApplicationToPrintQueueName: String
 
     @Value("\${sqs.process-print-request-batch-queue-name}")
     protected lateinit var processPrintRequestBatchQueueName: String
+
+    @Value("\${sqs.process-print-response-file-queue-name}")
+    protected lateinit var processPrintResponseFileQueueName: String
 
     @BeforeEach
     fun clearLogAppender() {
@@ -125,6 +151,29 @@ internal abstract class IntegrationTest {
             factory.setAllowUnknownKeys(true)
             return CachingSessionFactory(factory)
         }
+    }
+
+    protected fun writeFileToRemoteOutBoundDirectory(filename: String, inputStream: InputStream): String? {
+        val remoteFilenamePath = sftpOutboundTemplate.send(
+            MessageBuilder
+                .withPayload(inputStream)
+                .setHeader(FileHeaders.FILENAME, filename)
+                .build()
+        )
+        logger.info { "remote file written to: $remoteFilenamePath" }
+        return remoteFilenamePath
+    }
+
+    protected fun fileFoundInOutboundDirectory(filenameToProcess: String) =
+        sftpOutboundTemplate.list(PRINT_RESPONSE_DOWNLOAD_PATH)
+            .any { lsEntry -> lsEntry.filename.contains(filenameToProcess) }
+
+    protected fun writePrintResponsesFileToSftpOutboundDirectory(filenameToProcess: String, printResponses: PrintResponses) {
+        val printResponsesAsString = objectMapper.writeValueAsString(printResponses)
+        writeFileToRemoteOutBoundDirectory(
+            filenameToProcess,
+            IOUtils.toInputStream(printResponsesAsString, Charset.defaultCharset())
+        )
     }
 
     protected fun clearTable(tableName: String, partitionKey: String = "id", sortKey: String? = null) {

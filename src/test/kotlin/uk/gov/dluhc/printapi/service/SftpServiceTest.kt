@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jcraft.jsch.ChannelSftp.LsEntry
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -31,11 +32,14 @@ internal class SftpServiceTest {
     @Mock
     private lateinit var sftpOutboundTemplate: SftpRemoteFileTemplate
 
+    @Mock
+    private lateinit var objectMapper: ObjectMapper
+
     private lateinit var sftpService: SftpService
 
     @BeforeEach
     fun setUp() {
-        sftpService = SftpService(sftpInboundTemplate, sftpOutboundTemplate)
+        sftpService = SftpService(sftpInboundTemplate, sftpOutboundTemplate, objectMapper)
     }
 
     @Test
