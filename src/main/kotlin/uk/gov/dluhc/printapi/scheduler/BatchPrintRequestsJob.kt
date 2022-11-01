@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.jobs
+package uk.gov.dluhc.printapi.scheduler
 
 import mu.KotlinLogging
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock

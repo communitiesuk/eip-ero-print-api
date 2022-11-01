@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
+import org.joda.time.DateTime
 import java.util.UUID
 
 fun aValidBatchId() = UUID.randomUUID().toString().replace("-", "")
@@ -11,3 +12,5 @@ fun aValidZipFilename() = "05372cf5339447b39f98b248c2217b9f-20221018112232123-10
 fun aValidSftpPath() = "/home/valtech/dev/${aValidZipFilename()}"
 
 fun aValidInputStream() = "Some input stream".byteInputStream()
+
+fun aValidPrintResponseFileName() = "status-" + DateTime.now().toString("yyyyMMddHHmmssSSS") + ".json"

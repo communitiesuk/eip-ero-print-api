@@ -81,7 +81,7 @@ internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
         val filename = sftpDirectoryList[0].filename
         assertThat(filename).matches("$batchId-\\d{17}-1.zip")
         val expectedPhotoPathInZip = "$batchId-$requestId.png"
-        sftpTemplate.get(
+        sftpInboundTemplate.get(
             "$PRINT_REQUEST_UPLOAD_PATH/$filename",
             (
                 InputStreamCallback { stream ->
@@ -104,5 +104,5 @@ internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
     }
 
     private fun filterListForName(batchId: String) =
-        sftpTemplate.list(PRINT_REQUEST_UPLOAD_PATH).filter { lsEntry -> lsEntry.filename.contains(batchId) }
+        sftpInboundTemplate.list(PRINT_REQUEST_UPLOAD_PATH).filter { lsEntry -> lsEntry.filename.contains(batchId) }
 }
