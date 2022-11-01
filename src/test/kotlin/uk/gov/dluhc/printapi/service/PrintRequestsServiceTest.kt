@@ -32,14 +32,14 @@ class PrintRequestsServiceTest {
         val numOfRequests = 12
         val items = (1..numOfRequests).map { buildPrintDetails() }
 
-        given(printDetailsRepository.filterItemsBy(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
-        given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId())
+        given(printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
+        given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId(), aValidBatchId())
 
         // When
         printRequestsService.processPrintRequests(batchSize)
 
         // Then
-        verify(printDetailsRepository).filterItemsBy(Status.PENDING_ASSIGNMENT_TO_BATCH)
+        verify(printDetailsRepository).getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
         verify(printDetailsRepository, times(12)).save(any())
     }
 
@@ -49,8 +49,8 @@ class PrintRequestsServiceTest {
         val batchSize = 10
         val numOfRequests = 23
         val items = (1..numOfRequests).map { buildPrintDetails() }
-        given(printDetailsRepository.filterItemsBy(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
-        given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId())
+        given(printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
+        given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId(), aValidBatchId())
 
         // When
         val batches = printRequestsService.batchPrintRequests(batchSize)

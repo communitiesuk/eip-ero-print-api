@@ -15,7 +15,7 @@ class PrintRequestsService(private val printDetailsRepository: PrintDetailsRepos
     }
 
     fun batchPrintRequests(batchSize: Int): Map<String, List<PrintDetails>> {
-        val printDetailsPendingAssignment = printDetailsRepository.filterItemsBy(Status.PENDING_ASSIGNMENT_TO_BATCH)
+        val printDetailsPendingAssignment = printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
         return printDetailsPendingAssignment.chunked(batchSize).associateBy { idFactory.batchId() }
     }
 }
