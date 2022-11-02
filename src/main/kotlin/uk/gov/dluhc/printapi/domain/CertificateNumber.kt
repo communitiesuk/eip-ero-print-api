@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.domain
 
 import java.security.SecureRandom
+import java.time.Clock
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -68,7 +69,7 @@ class CertificateNumber {
     }
 
     constructor() : this(
-        timestamp = dateToTimestampSeconds(Instant.now()),
+        timestamp = dateToTimestampSeconds(Instant.now(Clock.systemUTC())),
         randomValue1 = RANDOM_VALUE1,
         randomValue2 = RANDOM_VALUE2,
         counter = NEXT_COUNTER.getAndIncrement(),
