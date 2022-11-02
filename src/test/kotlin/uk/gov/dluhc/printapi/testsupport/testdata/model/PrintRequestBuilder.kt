@@ -13,12 +13,12 @@ fun buildPrintRequest(
     eroWelsh: ElectoralRegistrationOffice? = buildElectoralRegistrationOffice(),
     requestId: String = aValidRequestId(),
     issuingAuthorityEn: String = eroEnglish.name!!,
-    issuingAuthorityCy: String = eroWelsh?.name!!,
+    issuingAuthorityCy: String? = eroWelsh?.name!!,
     issueDate: String = "12/07/2023",
     suggestedExpiryDate: String = "28/02/2033",
     requestDateTime: Date = Date.from(Instant.now()),
     cardFirstname: String = faker.name().firstName(),
-    cardMiddlenames: String? = faker.name().firstName(),
+    cardMiddleNames: String? = faker.name().firstName(),
     cardSurname: String = faker.name().lastName(),
     cardVersion: String = "1",
     cardNumber: String = "3987",
@@ -48,10 +48,10 @@ fun buildPrintRequest(
     eroEmailAddressCy: String? = eroWelsh?.emailAddress,
     eroWebsiteCy: String? = eroWelsh?.website,
     eroDeliveryStreetCy: String? = eroWelsh?.address?.street,
-    eroDeliverypPropertyCy: String? = eroWelsh?.address?.property,
+    eroDeliveryPropertyCy: String? = eroWelsh?.address?.property,
     eroDeliveryLocalityCy: String? = eroWelsh?.address?.locality,
     eroDeliveryTownCy: String? = eroWelsh?.address?.town,
-    erodDeliveryAreaCy: String? = eroWelsh?.address?.area,
+    eroDeliveryAreaCy: String? = eroWelsh?.address?.area,
     eroDeliveryPostcodeCy: String? = eroWelsh?.address?.postcode,
 ): PrintRequest {
     val request = PrintRequest()
@@ -61,7 +61,7 @@ fun buildPrintRequest(
     request.suggestedExpiryDate = suggestedExpiryDate
     request.requestDateTime = Date.from(requestDateTime.toInstant())
     request.cardFirstname = cardFirstname
-    request.cardMiddlenames = cardMiddlenames
+    request.cardMiddleNames = cardMiddleNames
     request.cardSurname = cardSurname
     request.cardVersion = cardVersion
     request.cardNumber = cardNumber
@@ -71,7 +71,7 @@ fun buildPrintRequest(
     request.photo = photo
     request.deliveryName = deliveryName
     request.deliveryStreet = deliveryStreet
-    request.deliverypProperty = deliveryProperty
+    request.deliveryProperty = deliveryProperty
     request.deliveryLocality = deliveryLocality
     request.deliveryTown = deliveryTown
     request.deliveryArea = deliveryArea
@@ -92,10 +92,10 @@ fun buildPrintRequest(
     request.eroEmailAddressCy = eroEmailAddressCy
     request.eroWebsiteCy = eroWebsiteCy
     request.eroDeliveryStreetCy = eroDeliveryStreetCy
-    request.eroDeliverypPropertyCy = eroDeliverypPropertyCy
+    request.eroDeliveryPropertyCy = eroDeliveryPropertyCy
     request.eroDeliveryLocalityCy = eroDeliveryLocalityCy
     request.eroDeliveryTownCy = eroDeliveryTownCy
-    request.erodDeliveryAreaCy = erodDeliveryAreaCy
+    request.eroDeliveryAreaCy = eroDeliveryAreaCy
     request.eroDeliveryPostcodeCy = eroDeliveryPostcodeCy
     return request
 }
