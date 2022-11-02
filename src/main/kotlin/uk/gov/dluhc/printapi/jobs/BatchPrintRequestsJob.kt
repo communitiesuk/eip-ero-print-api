@@ -12,7 +12,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class BatchPrintRequestsJob(
     private val printRequestsService: PrintRequestsService,
-    @Value("\${jobs.batch-print-requests.batchSize}")
+    @Value("\${jobs.batch-print-requests.batch-size}")
     private val batchSize: Int
 ) {
 
