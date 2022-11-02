@@ -37,16 +37,24 @@ class PrintRequestsServiceTest {
         val numOfRequests = 12
         val items = (1..numOfRequests).map { buildPrintDetails() }
 
+        val batchId1 = aValidBatchId()
+        val batchId2 = aValidBatchId()
+        val batchId3 = aValidBatchId()
+
         given(printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
-        given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId(), aValidBatchId())
+        given(idFactory.batchId()).willReturn(batchId1, batchId2, batchId3)
 
         // When
         printRequestsService.processPrintRequests(batchSize)
 
         // Then
         verify(printDetailsRepository).getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
+        verify(idFactory, times(3)).batchId()
         verify(printDetailsRepository, times(12)).save(any())
         verify(processPrintRequestQueue, times(3)).submit(any())
+        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batchId1))
+        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batchId2))
+        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batchId3))
     }
 
     @Test
@@ -56,12 +64,16 @@ class PrintRequestsServiceTest {
         val numOfRequests = 23
         val items = (1..numOfRequests).map { buildPrintDetails() }
         given(printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
-        given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId(), aValidBatchId())
+        given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId())
 
         // When
         val batches = printRequestsService.batchPrintRequests(batchSize)
 
         // Then
         assert(batches.size == 3)
+        batches.map { (id, items) ->
+            assert(items.all { it.status == Status.PENDING_ASSIGNMENT_TO_BATCH })
+            assert(items.all { it.batchId == id })
+        }
     }
 }
