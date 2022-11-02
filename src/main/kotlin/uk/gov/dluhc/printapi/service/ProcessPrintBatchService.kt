@@ -3,7 +3,7 @@ package uk.gov.dluhc.printapi.service
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 
 /**
@@ -33,10 +33,10 @@ class ProcessPrintBatchService(
      * Step B: Stream contents to SFTP
      * Step C: Rename the file stored on SFTP server
      *
-     * Step 4: Update Dynamo batch records with new status and name of zip sent to printer
+     * Step 4: Update Dynamo batch records with new status
      */
     fun processBatch(batchId: String) {
-        val printList = printDetailsRepository.getAllByStatusAndBatchId(PENDING_ASSIGNMENT_TO_BATCH, batchId)
+        val printList = printDetailsRepository.getAllByStatusAndBatchId(ASSIGNED_TO_BATCH, batchId)
         val fileContents = printFileDetailsFactory.createFileDetails(batchId, printList)
         val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(fileContents)
         val sftpFilename = filenameFactory.createZipFilename(batchId, printList.size)

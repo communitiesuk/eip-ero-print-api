@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import java.io.InputStream
 
 @Service
-class SftpService(val sftpTemplate: SftpRemoteFileTemplate) {
+class SftpService(private val sftpTemplate: SftpRemoteFileTemplate) {
 
     fun sendFile(inputStream: InputStream, filename: String): String =
         sftpTemplate.send(

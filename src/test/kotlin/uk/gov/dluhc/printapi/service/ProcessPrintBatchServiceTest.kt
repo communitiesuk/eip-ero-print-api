@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidInputStream
@@ -56,7 +56,7 @@ internal class ProcessPrintBatchServiceTest {
         processPrintBatchService.processBatch(batchId)
 
         // Then
-        verify(printDetailsRepository).getAllByStatusAndBatchId(PENDING_ASSIGNMENT_TO_BATCH, batchId)
+        verify(printDetailsRepository).getAllByStatusAndBatchId(ASSIGNED_TO_BATCH, batchId)
         verify(printFileDetailsFactory).createFileDetails(batchId, printList)
         verify(sftpZipInputStreamProvider).createSftpInputStream(fileDetails)
         verify(filenameFactory).createZipFilename(batchId, printList.size)

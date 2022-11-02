@@ -12,6 +12,7 @@ import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.service.ProcessPrintBatchService
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
@@ -52,6 +53,7 @@ internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
         val details = buildPrintDetails(
             id = printDetailsId,
             batchId = batchId,
+            status = ASSIGNED_TO_BATCH,
             requestId = requestId,
             eroWelsh = buildElectoralRegistrationOffice(),
             photoLocation = "arn:aws:s3:::$s3Bucket/$s3Path"

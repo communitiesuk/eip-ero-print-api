@@ -16,7 +16,8 @@ class FilenameFactory(private val clock: Clock) {
 
     private fun createFilename(batchId: String, count: Int, ext: String): String {
         val timestamp = LocalDateTime.now(clock).toInstant(ZoneOffset.UTC)
-        return "$batchId-${TIMESTAMP_FORMATTER.withZone(ZoneId.of("UTC")).format(timestamp)}-$count.$ext"
+        val formattedTimestamp = TIMESTAMP_FORMATTER.withZone(ZoneId.of("UTC")).format(timestamp)
+        return "$batchId-$formattedTimestamp-$count.$ext"
     }
 
     companion object {
