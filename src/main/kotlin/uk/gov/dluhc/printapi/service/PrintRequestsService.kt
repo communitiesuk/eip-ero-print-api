@@ -33,9 +33,9 @@ class PrintRequestsService(
 
     fun batchPrintRequests(batchSize: Int): Map<String, List<PrintDetails>> {
         val printDetailsPendingAssignment = printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
-        return printDetailsPendingAssignment.chunked(batchSize).map { batch ->
+        return printDetailsPendingAssignment.chunked(batchSize).associate { batch ->
             val batchId = idFactory.batchId()
             batchId to batch.map { it.copy(batchId = batchId) }
-        }.toMap()
+        }
     }
 }
