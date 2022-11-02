@@ -6,6 +6,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest
 import uk.gov.dluhc.printapi.config.DynamoDbConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
@@ -45,7 +46,13 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
         return table.scan().flatMap { it.items() }.filter { it.status == Status.PENDING_ASSIGNMENT_TO_BATCH }
     }
 
-    private fun key(partitionValue: String, sortValue: String?): Key =
+    fun updateItems(printList: List<PrintDetails>) {
+        printList.forEach { item ->
+            table.updateItem(UpdateItemEnhancedRequest.builder(PrintDetails::class.java).item(item).build())
+        }
+    }
+
+    private fun key(partitionValue: String, sortValue: String): Key =
         Key.builder().partitionValue(partitionValue).sortValue(sortValue).build()
     private fun key(partitionValue: String): Key =
         Key.builder().partitionValue(partitionValue).build()

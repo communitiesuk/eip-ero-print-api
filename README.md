@@ -37,6 +37,10 @@ The following environment variables must be set in order to run the application:
 * `DYNAMODB_SCHEDULER_LOCKS_TABLE_NAME` - table name to persist scheduler locks
 * `THREAD_POOL_ZIP_CORE_SIZE` - number of core threads for the Zip producer thread pool 
 * `THREAD_POOL_ZIP_MAX_SIZE` - maximum number of threads for the Zip producer thread pool
+* `SFTP_HOST` - Hostname of the SFTP server to send print requests
+* `SFTP_USER` - Username to use when connecting to the SFTP server 
+* `SFTP_PRIVATE_KEY` - SSH private key to use when securely connecting to the SFTP server
+* `SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY` - Directory on the remote host to write print request files
 
 
 ### Authentication and authorisation

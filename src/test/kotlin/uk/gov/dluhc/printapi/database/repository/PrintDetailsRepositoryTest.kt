@@ -98,4 +98,21 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
             assertThat(results).hasSize(3)
         }
     }
+
+    @Test
+    fun `should update item as it exists in the repository`() {
+        // Given
+        val initialStatus = Status.PENDING_ASSIGNMENT_TO_BATCH
+        val details = buildPrintDetails(status = initialStatus)
+        printDetailsRepository.save(details)
+        val updatedStatus = Status.SENT_TO_PRINT_PROVIDER
+        details.status = updatedStatus
+
+        // When
+        printDetailsRepository.updateItems(listOf(details))
+
+        // Then
+        val updatedDetails = printDetailsRepository.get(details.id!!)
+        assertThat(updatedDetails.status).isEqualTo(updatedStatus)
+    }
 }

@@ -27,7 +27,7 @@ internal class FilenameFactoryTest {
         val filename = filenameFactory.createZipFilename(batchId, count)
 
         // Then
-        assertThat(filename).isEqualTo("05372cf5339447b39f98b248c2217b9f-2022-10-18T11:22:32.123Z-10.zip")
+        assertThat(filename).isEqualTo("05372cf5339447b39f98b248c2217b9f-20221018112232123-10.zip")
     }
 
     @Test
@@ -40,6 +40,6 @@ internal class FilenameFactoryTest {
         val filename = filenameFactory.createPrintRequestsFilename(batchId, count)
 
         // Then
-        assertThat(filename).isEqualTo("49825273c8e64dd885886b74883b8bb3-2022-10-18T11:22:32.123Z-19.psv")
+        assertThat(filename).isEqualTo("49825273c8e64dd885886b74883b8bb3-20221018112232123-19.psv")
     }
 }
