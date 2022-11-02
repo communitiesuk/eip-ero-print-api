@@ -15,5 +15,4 @@ class IdFactory {
     fun vacNumber(): String = CertificateNumber.create()
 
     fun batchId(): String = UUID.randomUUID().toString().replace("-", "")
-
 }
