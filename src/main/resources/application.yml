@@ -19,9 +19,10 @@ dynamodb:
 
 jobs:
   enabled: true
-  print-requests:
+  batch-print-requests:
     name: "BatchPrintRequests"
     cron: "0 0 */1 * * *" # every hour by default
+    lock-at-most-for: "PT10M"
     batchSize: ${JOB_PRINT_REQUESTS_BATCH_SIZE}
 
 thread-pool:

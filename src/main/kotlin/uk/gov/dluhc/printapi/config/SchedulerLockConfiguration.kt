@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.config
 
 import net.javacrumbs.shedlock.core.LockProvider
 import net.javacrumbs.shedlock.provider.dynamodb2.DynamoDBLockProvider
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -11,7 +12,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 @Configuration
 @EnableScheduling
 @ConditionalOnProperty("jobs.enabled", havingValue = "true")
-// @EnableSchedulerLock(defaultLockAtMostFor = "PT5M")
+@EnableSchedulerLock(defaultLockAtMostFor = "\${jobs.batch-print-requests.lock-at-most-for}")
 class SchedulerLockConfiguration(
     private val dynamoDbClient: DynamoDbClient,
     private val dynamoDbConfiguration: DynamoDbConfiguration
