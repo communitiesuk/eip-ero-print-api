@@ -5,6 +5,13 @@ api:
   ero-management:
     url: ${API_ERO_MANAGEMENT_URL}
 
+sftp:
+  host: ${SFTP_HOST}
+  user: ${SFTP_USER}
+  password: ${SFTP_PASSWORD}
+  private-key: ${SFTP_PRIVATE_KEY}
+  print-request-upload-directory: ${SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY}
+
 dynamodb:
   print-details-table-name: ${DYNAMODB_PRINT_DETAILS_TABLE_NAME}
   scheduler-lock-table-name: ${DYNAMODB_SCHEDULER_LOCKS_TABLE_NAME}

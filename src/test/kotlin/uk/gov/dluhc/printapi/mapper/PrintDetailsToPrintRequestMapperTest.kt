@@ -103,7 +103,7 @@ class PrintDetailsToPrintRequestMapperTest {
         expected.suggestedExpiryDate = "2032-10-21"
         expected.requestDateTime = Date.from(requestDateTime.toInstant())
         expected.cardFirstname = firstName
-        expected.cardMiddlenames = middleNames
+        expected.cardMiddleNames = middleNames
         expected.cardSurname = surname
         expected.cardVersion = vacVersion
         expected.cardNumber = vacNumber
@@ -113,7 +113,7 @@ class PrintDetailsToPrintRequestMapperTest {
         expected.photo = photoZipPath
         expected.deliveryName = delivery.addressee
         expected.deliveryStreet = delivery.address?.street
-        expected.deliverypProperty = delivery.address?.property
+        expected.deliveryProperty = delivery.address?.property
         expected.deliveryLocality = delivery.address?.locality
         expected.deliveryTown = delivery.address?.town
         expected.deliveryArea = delivery.address?.area
@@ -135,10 +135,10 @@ class PrintDetailsToPrintRequestMapperTest {
         expected.eroEmailAddressCy = eroWelsh?.emailAddress
         expected.eroWebsiteCy = eroWelsh?.website
         expected.eroDeliveryStreetCy = eroWelsh?.address?.street
-        expected.eroDeliverypPropertyCy = eroWelsh?.address?.property
+        expected.eroDeliveryPropertyCy = eroWelsh?.address?.property
         expected.eroDeliveryLocalityCy = eroWelsh?.address?.locality
         expected.eroDeliveryTownCy = eroWelsh?.address?.town
-        expected.erodDeliveryAreaCy = eroWelsh?.address?.area
+        expected.eroDeliveryAreaCy = eroWelsh?.address?.area
         expected.eroDeliveryPostcodeCy = eroWelsh?.address?.postcode
 
         // When

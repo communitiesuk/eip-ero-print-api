@@ -1,17 +1,29 @@
 package uk.gov.dluhc.printapi.config
 
+import com.jcraft.jsch.ChannelSftp
+import com.jcraft.jsch.ChannelSftp.LsEntry
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.integration.file.remote.session.CachingSessionFactory
+import org.springframework.integration.file.remote.session.SessionFactory
+import org.springframework.integration.sftp.session.DefaultSftpSessionFactory
+import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
+import software.amazon.awssdk.services.s3.S3Client
+import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
@@ -21,6 +33,7 @@ import uk.gov.dluhc.printapi.testsupport.WiremockService
  */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = [IntegrationTest.IntegrationTestConfiguration::class],
 )
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient(timeout = "PT5M")
@@ -44,6 +57,12 @@ internal abstract class IntegrationTest {
     @Autowired
     protected lateinit var printDetailsRepository: PrintDetailsRepository
 
+    @Autowired
+    protected lateinit var sftpTemplate: SftpRemoteFileTemplate
+
+    @Autowired
+    protected lateinit var s3Client: S3Client
+
     @Value("\${sqs.send-application-to-print-queue-name}")
     protected lateinit var sendApplicationToPrintQueueName: String
 
@@ -58,12 +77,37 @@ internal abstract class IntegrationTest {
     }
 
     @BeforeEach
+    fun clearSftpUploadDirectory() {
+        sftpTemplate.list(PRINT_REQUEST_UPLOAD_PATH)
+            .map(LsEntry::getFilename)
+            .filterNot { path -> path.equals(".") }
+            .filterNot { path -> path.equals("..") }
+            .forEach { path -> sftpTemplate.remove("$PRINT_REQUEST_UPLOAD_PATH/$path") }
+    }
+
+    @BeforeEach
     fun resetWireMock() {
         wireMockService.resetAllStubsAndMappings()
     }
 
     companion object {
         val localStackContainer = LocalStackContainerConfiguration.getInstance()
+        val sftpContainer = SftpContainerConfiguration.getInstance()
+    }
+
+    @TestConfiguration
+    class IntegrationTestConfiguration {
+        @Bean
+        @Primary
+        fun testSftpSessionFactory(properties: SftpProperties): SessionFactory<ChannelSftp.LsEntry> {
+            val factory = DefaultSftpSessionFactory(true)
+            factory.setHost(properties.host)
+            factory.setPort(sftpContainer.getMappedPort(SftpContainerConfiguration.DEFAULT_SFTP_PORT))
+            factory.setUser(properties.user)
+            factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
+            factory.setAllowUnknownKeys(true)
+            return CachingSessionFactory(factory)
+        }
     }
 
     protected fun clearTable(tableName: String, partitionKey: String = "id", sortKey: String? = null) {

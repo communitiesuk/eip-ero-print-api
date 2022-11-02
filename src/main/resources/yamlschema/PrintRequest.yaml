@@ -39,7 +39,7 @@ properties:
     maxLength: 255
     description: First name of the Elector
     example: John
-  cardMiddlenames:
+  cardMiddleNames:
     type: string
     maxLength: 255
     description: Middle names of the Elector
@@ -92,7 +92,7 @@ properties:
   deliveryStreet:
     type: string
     maxLength: 255
-  deliverypProperty:
+  deliveryProperty:
     type: string
     maxLength: 255
   deliveryLocality:
@@ -162,7 +162,7 @@ properties:
   eroDeliveryStreetCy:
     type: string
     maxLength: 255
-  eroDeliverypPropertyCy:
+  eroDeliveryPropertyCy:
     type: string
     maxLength: 255
   eroDeliveryLocalityCy:
@@ -171,7 +171,7 @@ properties:
   eroDeliveryTownCy:
     type: string
     maxLength: 255
-  erodDeliveryAreaCy:
+  eroDeliveryAreaCy:
     type: string
     maxLength: 255
   eroDeliveryPostcodeCy:
@@ -180,7 +180,6 @@ properties:
 required:
   - requestId
   - issuingAuthorityEn
-  - issuingAuthorityCy
   - issueDate
   - suggestedExpiryDate
   - requestDateTime
