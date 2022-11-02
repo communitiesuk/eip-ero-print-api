@@ -11,5 +11,5 @@ import uk.gov.dluhc.printapi.domain.CertificateNumber
 class IdFactory {
     fun requestId(): String = ObjectId().toString()
 
-    fun vacNumber(): String = CertificateNumber().toString()
+    fun vacNumber(): String = CertificateNumber.create()
 }

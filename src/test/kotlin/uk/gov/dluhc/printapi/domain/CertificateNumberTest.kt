@@ -9,14 +9,14 @@ internal class CertificateNumberTest {
     @Test
     fun `should create unique Certificate Number`() {
         // Given
-        val certificateNumbers = mutableListOf<CertificateNumber>()
+        val certificateNumbers = mutableListOf<String>()
 
         // When
-        repeat(100) { certificateNumbers.add(CertificateNumber()) }
+        repeat(100) { certificateNumbers.add(CertificateNumber.create()) }
 
         // Then
         assertThat(certificateNumbers).doesNotHaveDuplicates()
-            .allSatisfy { assertThat(it.toString()).containsPattern(Regex("^[0-9AC-HJ-NP-RT-Z]{20}$").pattern) }
+            .allSatisfy { assertThat(it).containsPattern(Regex("^[0-9AC-HJ-NP-RT-Z]{20}$").pattern) }
     }
 
     @Test

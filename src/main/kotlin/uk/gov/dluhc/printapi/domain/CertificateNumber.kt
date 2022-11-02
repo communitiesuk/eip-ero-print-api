@@ -28,9 +28,11 @@ import java.util.concurrent.atomic.AtomicInteger
  *  `increment` is an [AtomicInteger] and is a static member seeded from a random number. The use of `getAndIncrement()` means
  *  this is a thread safe way of generating an incremental counter.
  *
- * An instance of [CertificateNumber] is a 12 byte identifier which serializes via it's `toString()` method into a 20
- * character string using the character set `0123456789ACDEFGHJKLMNPQRTUVWXYZ` (specifically B, I, O and S are excluded
- * as they can be misread as numbers)
+ * An instance of [CertificateNumber] is a 12 byte identifier which serializes as a 20 character string using the character
+ * set `0123456789ACDEFGHJKLMNPQRTUVWXYZ` (specifically B, I, O and S are excluded as they can be misread as numbers)
+ *
+ * Class constructors are convenience constructors for the purpose of tests. The public API and preferred method of
+ * creating a new Certificate Number is to use the static factory method [CertificateNumber.create]
  */
 class CertificateNumber {
 
@@ -57,6 +59,12 @@ class CertificateNumber {
 
         private fun dateToTimestampSeconds(date: Instant): Int =
             date.epochSecond.toInt()
+
+        /**
+         * Creates a new 20 character string Certificate Number.
+         */
+        fun create(): String =
+            CertificateNumber().toString()
     }
 
     constructor() : this(
@@ -88,10 +96,7 @@ class CertificateNumber {
         this.counter = counter
     }
 
-    /**
-     * Convenience constructor used by tests to create CertificateNumber with known internal values.
-     */
-    internal constructor(timestamp: Int, randomValue1: Int, randomValue2: Short, counter: Int) {
+    constructor(timestamp: Int, randomValue1: Int, randomValue2: Short, counter: Int) {
         validateValues(randomValue1, counter)
         this.timestamp = timestamp
         this.randomValue1 = randomValue1
