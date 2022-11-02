@@ -11,12 +11,14 @@ private val logger = KotlinLogging.logger {}
 
 @Component
 class BatchPrintRequestsJob(
-    private val printRequestsService: PrintRequestsService
+    private val printRequestsService: PrintRequestsService,
+    @Value("\${jobs.batch-print-requests.batchSize}")
+    private val batchSize: Int
 ) {
 
     @Scheduled(cron = "\${jobs.batch-print-requests.cron}")
     @SchedulerLock(name = "\${jobs.batch-print-requests.name}")
-    fun run(@Value("\${jobs.batch-print-requests.batchSize}") batchSize: Int) {
+    fun run() {
         printRequestsService.processPrintRequests(batchSize)
     }
 }
