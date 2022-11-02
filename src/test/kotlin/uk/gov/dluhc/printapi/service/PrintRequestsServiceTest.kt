@@ -11,6 +11,8 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
+import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 
@@ -25,8 +27,11 @@ class PrintRequestsServiceTest {
     @Mock
     private lateinit var printDetailsRepository: PrintDetailsRepository
 
+    @Mock
+    private lateinit var processPrintRequestQueue: MessageQueue<ProcessPrintRequestBatchMessage>
+
     @Test
-    fun `should batch print requests and save`() {
+    fun `should batch print requests, save and submit to queue`() {
         // Given
         val batchSize = 5
         val numOfRequests = 12
@@ -41,6 +46,7 @@ class PrintRequestsServiceTest {
         // Then
         verify(printDetailsRepository).getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
         verify(printDetailsRepository, times(12)).save(any())
+        verify(processPrintRequestQueue, times(3)).submit(any())
     }
 
     @Test

@@ -87,9 +87,11 @@ class LocalStackContainerConfiguration {
     @Bean
     fun localStackContainerSqsSettings(
         applicationContext: ConfigurableApplicationContext,
-        @Value("\${sqs.send-application-to-print-queue-name}") sendApplicationToPrintQueueName: String
+        @Value("\${sqs.send-application-to-print-queue-name}") sendApplicationToPrintQueueName: String,
+        @Value("\${sqs.process-print-request-batch-queue-name}") processPrintRequestBatchQueueName: String
     ): LocalStackContainerSettings {
         val queueUrlSendApplicationToPrint = localStackContainer.createSqsQueue(sendApplicationToPrintQueueName)
+        val queueUrlProcessPrintBatchRequest = localStackContainer.createSqsQueue(processPrintRequestBatchQueueName)
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
 
         TestPropertyValues.of(
@@ -99,6 +101,7 @@ class LocalStackContainerConfiguration {
         return LocalStackContainerSettings(
             apiUrl = apiUrl,
             queueUrlSendApplicationToPrint = queueUrlSendApplicationToPrint,
+            queueUrlProcessPrintBatchRequest = queueUrlProcessPrintBatchRequest
         )
     }
 
@@ -115,9 +118,11 @@ class LocalStackContainerConfiguration {
 
     data class LocalStackContainerSettings(
         val apiUrl: String,
-        val queueUrlSendApplicationToPrint: String
+        val queueUrlSendApplicationToPrint: String,
+        val queueUrlProcessPrintBatchRequest: String
     ) {
         val mappedQueueUrlSendApplicationToPrint: String = toMappedUrl(queueUrlSendApplicationToPrint, apiUrl)
+        val mappedQueueUrlProcessPrintBatchRequest: String = toMappedUrl(queueUrlProcessPrintBatchRequest, apiUrl)
 
         private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {
             val rawUrl = URI.create(rawUrlString)

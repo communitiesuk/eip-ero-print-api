@@ -31,6 +31,15 @@ paths:
       responses:
         '204':
           description: No response content.
+  '/process-print-request-batch':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/ProcessPrintRequestBatchMessage'
+      responses:
+        '204':
+          description: No response content.
 
 components:
   #
@@ -178,6 +187,16 @@ components:
         - street
         - postcode
 
+    ProcessPrintRequestBatchMessage:
+      description: The SQS message for processing a batch of print requests
+      type: object
+      properties:
+        batchId:
+          type: string
+          description: The batch ID
+      required:
+        - batchId
+
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
@@ -192,3 +211,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SendApplicationToPrintMessage'
+    ProcessPrintRequestBatchMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProcessPrintRequestBatchMessage'
