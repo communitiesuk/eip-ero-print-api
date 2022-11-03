@@ -23,7 +23,7 @@ jobs:
     name: "BatchPrintRequests"
     cron: "0 0 */1 * * *" # every hour by default
     lock-at-most-for: "PT10M"
-    batch-size: ${JOB_PRINT_REQUESTS_BATCH_SIZE}
+    batch-size: 100
 
 thread-pool:
   zip:

@@ -57,4 +57,4 @@ dynamodb:
 jobs:
   enabled: false
   batch-print-requests:
-    batch-size: 10
+    batch-size: 100
