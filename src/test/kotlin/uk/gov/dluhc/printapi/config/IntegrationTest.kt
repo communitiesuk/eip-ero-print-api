@@ -5,6 +5,7 @@ import com.jcraft.jsch.ChannelSftp.LsEntry
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
@@ -24,7 +25,9 @@ import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import software.amazon.awssdk.services.s3.S3Client
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
+import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
+import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
 
@@ -58,7 +61,15 @@ internal abstract class IntegrationTest {
     protected lateinit var printDetailsRepository: PrintDetailsRepository
 
     @Autowired
-    protected lateinit var sftpTemplate: SftpRemoteFileTemplate
+    @Qualifier("sftpInboundTemplate")
+    protected lateinit var sftpInboundTemplate: SftpRemoteFileTemplate
+
+    @Autowired
+    @Qualifier("sftpOutboundTemplate")
+    protected lateinit var sftpOutboundTemplate: SftpRemoteFileTemplate
+
+    @Autowired
+    protected lateinit var processPrintResponsesBatchJob: ProcessPrintResponsesBatchJob
 
     @Autowired
     protected lateinit var s3Client: S3Client
@@ -81,11 +92,14 @@ internal abstract class IntegrationTest {
 
     @BeforeEach
     fun clearSftpUploadDirectory() {
-        sftpTemplate.list(PRINT_REQUEST_UPLOAD_PATH)
-            .map(LsEntry::getFilename)
-            .filterNot { path -> path.equals(".") }
-            .filterNot { path -> path.equals("..") }
-            .forEach { path -> sftpTemplate.remove("$PRINT_REQUEST_UPLOAD_PATH/$path") }
+        getSftpInboundDirectoryFileNames()
+            .forEach { path -> sftpInboundTemplate.remove("$PRINT_REQUEST_UPLOAD_PATH/$path") }
+    }
+
+    @BeforeEach
+    fun clearSftpDownloadDirectory() {
+        getSftpOutboundDirectoryFileNames()
+            .forEach { path -> sftpOutboundTemplate.remove("$PRINT_RESPONSE_DOWNLOAD_PATH/$path") }
     }
 
     @BeforeEach
@@ -131,5 +145,22 @@ internal abstract class IntegrationTest {
 
             dynamoDbClient.deleteItem(deleteRequest)
         }
+    }
+
+    protected fun getSftpOutboundDirectoryFileNames() =
+        getSftpDirectoryFileNames(sftpOutboundTemplate, PRINT_RESPONSE_DOWNLOAD_PATH)
+
+    private fun getSftpInboundDirectoryFileNames() =
+        getSftpDirectoryFileNames(sftpInboundTemplate, PRINT_REQUEST_UPLOAD_PATH)
+
+    private fun getSftpDirectoryFileNames(
+        sftpTemplate: SftpRemoteFileTemplate,
+        directory: String
+    ): List<String> {
+        return sftpTemplate.list(directory)
+            .map(LsEntry::getFilename)
+            .filterNot { path -> path.equals(".") }
+            .filterNot { path -> path.equals("..") }
+            .toList()
     }
 }

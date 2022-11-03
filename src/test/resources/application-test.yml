@@ -49,6 +49,7 @@ sftp:
     47oGutsp1o6qL7xtHcr62QA=
     -----END PRIVATE KEY-----
   print-request-upload-directory: EROP/Dev/InBound
+  print-response-download-directory: EROP/Dev/OutBound
 
 dynamodb:
   print-details-table-name: print-details

@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.config
 
 import com.jcraft.jsch.ChannelSftp
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
@@ -16,13 +17,25 @@ import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 class SftpConfiguration {
 
     @Bean
-    fun sftpRemoteFileTemplate(
+    @Qualifier("sftpInboundTemplate")
+    fun sftpInboundTemplate(
         sessionFactory: SessionFactory<ChannelSftp.LsEntry>,
         properties: SftpProperties
     ): SftpRemoteFileTemplate {
         val template = SftpRemoteFileTemplate(sessionFactory)
         template.setRemoteDirectoryExpression(LiteralExpression(properties.printRequestUploadDirectory))
         template.temporaryFileSuffix = ".tmp"
+        return template
+    }
+
+    @Bean
+    @Qualifier("sftpOutboundTemplate")
+    fun sftpOutboundTemplate(
+        sessionFactory: SessionFactory<ChannelSftp.LsEntry>,
+        properties: SftpProperties
+    ): SftpRemoteFileTemplate {
+        val template = SftpRemoteFileTemplate(sessionFactory)
+        template.setRemoteDirectoryExpression(LiteralExpression(properties.printResponseDownloadDirectory))
         return template
     }
 
@@ -47,5 +60,6 @@ data class SftpProperties(
     val user: String,
     val password: String,
     val privateKey: String,
-    val printRequestUploadDirectory: String
+    val printRequestUploadDirectory: String,
+    val printResponseDownloadDirectory: String
 )
