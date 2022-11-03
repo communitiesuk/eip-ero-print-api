@@ -5,6 +5,7 @@ import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
@@ -44,7 +45,9 @@ fun buildPrintDetails(
     eroWelsh: ElectoralRegistrationOffice? = null,
     photoLocation: String = "arn:aws:s3:::source-document-storage/$gssCode/$sourceReference/${UUID.randomUUID()}/" +
         faker.file().fileName("", null, "jpg", ""),
-    status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+    printRequestStatuses: MutableList<PrintRequestStatus> = mutableListOf(
+        PrintRequestStatus(Status.PENDING_ASSIGNMENT_TO_BATCH, OffsetDateTime.now(UTC))
+    ),
     batchId: String? = aValidBatchId(),
 ) = PrintDetails(
     id = id,
@@ -69,7 +72,17 @@ fun buildPrintDetails(
     eroEnglish = eroEnglish,
     eroWelsh = eroWelsh,
     batchId = batchId,
-    status = status,
+    printRequestStatuses = printRequestStatuses,
+)
+
+fun aValidPrintDetailsWithSingleStatus(
+    status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+    batchId: String? = aValidBatchId(),
+) = buildPrintDetails(
+    batchId = batchId,
+    printRequestStatuses = mutableListOf(
+        PrintRequestStatus(status, OffsetDateTime.now(UTC))
+    )
 )
 
 fun aPrintDetailsList() = listOf(buildPrintDetails())

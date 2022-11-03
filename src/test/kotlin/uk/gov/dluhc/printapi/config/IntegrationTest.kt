@@ -30,6 +30,7 @@ import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
+import java.time.Clock
 
 /**
  * Base class used to bring up the entire Spring ApplicationContext
@@ -73,6 +74,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var s3Client: S3Client
+
+    @Autowired
+    protected lateinit var clock: Clock
 
     @Value("\${sqs.send-application-to-print-queue-name}")
     protected lateinit var sendApplicationToPrintQueueName: String

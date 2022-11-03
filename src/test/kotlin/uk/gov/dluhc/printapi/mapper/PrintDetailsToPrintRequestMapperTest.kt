@@ -9,6 +9,7 @@ import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
@@ -68,7 +69,9 @@ class PrintDetailsToPrintRequestMapperTest {
         val issueDate = LocalDate.of(2022, 10, 21)
         val eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(name = issuingAuthority)
         val photoLocation = aPhotoArn()
-        val status = Status.PENDING_ASSIGNMENT_TO_BATCH
+        val printRequestStatuses = mutableListOf(
+            PrintRequestStatus(Status.PENDING_ASSIGNMENT_TO_BATCH, OffsetDateTime.now(UTC))
+        )
         val batchId = aValidBatchId()
         val details = PrintDetails(
             id = id,
@@ -92,7 +95,7 @@ class PrintDetailsToPrintRequestMapperTest {
             eroEnglish = eroEnglish,
             eroWelsh = eroWelsh,
             batchId = batchId,
-            status = status,
+            printRequestStatuses = printRequestStatuses,
         )
         val photoZipPath: String = aPhotoZipPath()
 

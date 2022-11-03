@@ -6,6 +6,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecon
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 @DynamoDbBean
@@ -32,9 +33,22 @@ data class PrintDetails(
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
     var eroEnglish: ElectoralRegistrationOffice? = null,
     var eroWelsh: ElectoralRegistrationOffice? = null,
-    @get:DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-    @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])var batchId: String? = null
+    var printRequestStatuses: MutableList<PrintRequestStatus>? = null,
+    @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var batchId: String? = null
 ) {
+
+    var status: Status? = null
+        @DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])
+        get() = printRequestStatuses?.sortedBy { it.dateTime }?.last()?.status
+
+    fun addStatus(status: Status, dateTime: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC), message: String? = null): PrintDetails {
+        if (printRequestStatuses == null) {
+            printRequestStatuses = mutableListOf()
+        }
+        printRequestStatuses!!.add(PrintRequestStatus(status, dateTime, message))
+        return this
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

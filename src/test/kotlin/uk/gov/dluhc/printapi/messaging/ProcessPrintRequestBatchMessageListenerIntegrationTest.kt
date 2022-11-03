@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
@@ -19,6 +20,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintRequestBatchMessage
 import java.io.ByteArrayInputStream
+import java.time.OffsetDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
@@ -51,7 +53,9 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         val details = buildPrintDetails(
             id = printDetailsId,
             batchId = batchId,
-            status = ASSIGNED_TO_BATCH,
+            printRequestStatuses = mutableListOf(
+                PrintRequestStatus(ASSIGNED_TO_BATCH, OffsetDateTime.now(clock))
+            ),
             requestId = requestId,
             eroWelsh = buildElectoralRegistrationOffice(),
             photoLocation = "arn:aws:s3:::$s3Bucket/$s3Path"

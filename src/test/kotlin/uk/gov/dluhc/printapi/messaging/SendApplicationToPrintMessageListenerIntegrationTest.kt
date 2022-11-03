@@ -10,12 +10,15 @@ import uk.gov.dluhc.printapi.database.entity.CertificateDelivery
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 
@@ -74,7 +77,12 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                         address = null
                     )
                 },
-                eroWelsh = null
+                eroWelsh = null,
+                printRequestStatuses = mutableListOf(
+                    PrintRequestStatus(
+                        Status.PENDING_ASSIGNMENT_TO_BATCH, dateTime = OffsetDateTime.now()
+                    )
+                )
             )
         }
 
@@ -90,8 +98,10 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             assertThat(response.items().count()).isEqualTo(1)
             val id = UUID.fromString(response.items()[0]["id"]!!.s())
             val saved = printDetailsRepository.get(id)
-            assertThat(saved).usingRecursiveComparison().ignoringFields("id", "requestId", "vacNumber")
+            assertThat(saved).usingRecursiveComparison()
+                .ignoringFields("id", "requestId", "vacNumber", "printRequestStatuses.dateTime")
                 .isEqualTo(expected)
+            assertThat(saved.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
             assertThat(saved.requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
             assertThat(saved.vacNumber).containsPattern(Regex("^[A-Za-z\\d]{20}$").pattern)
         }
