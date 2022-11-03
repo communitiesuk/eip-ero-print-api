@@ -13,8 +13,8 @@ import org.springframework.messaging.handler.annotation.support.HeadersMethodArg
 import org.springframework.messaging.handler.annotation.support.PayloadMethodArgumentResolver
 import org.springframework.validation.Validator
 import uk.gov.dluhc.printapi.messaging.MessageQueue
-import uk.gov.dluhc.printapi.messaging.models.ProcessPrintBatchStatusUpdateMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 
 @Configuration
 class MessagingConfiguration {
@@ -31,7 +31,7 @@ class MessagingConfiguration {
 
     @Bean
     fun processPrintResponseFileQueue(queueMessagingTemplate: QueueMessagingTemplate) =
-        MessageQueue<ProcessPrintBatchStatusUpdateMessage>(processPrintResponseFileQueueName, queueMessagingTemplate)
+        MessageQueue<ProcessPrintResponseFileMessage>(processPrintResponseFileQueueName, queueMessagingTemplate)
 
     @Bean
     fun queueMessageHandlerFactory(

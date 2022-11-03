@@ -1,1 +1,19 @@
-Hello World 2
+{
+  "BatchResponses": [
+    {
+      "batchId": "1194720399",
+      "status": "SUCCESS",
+      "timestamp": "2022-11-03T17:51:51.777+00:00",
+      "message": "This is a Batch response. Hooray!"
+    }
+  ],
+  "PrintResponses": [
+    {
+      "requestId": "c27003dc-5e41-4a74-9032-3af706acaa02",
+      "timestamp": "2022-11-03T17:51:51.779+00:00",
+      "statusStep": "IN-PRODUCTION",
+      "status": "SUCCESS",
+      "message": "This is a print response. Hooray!"
+    }
+  ]
+}

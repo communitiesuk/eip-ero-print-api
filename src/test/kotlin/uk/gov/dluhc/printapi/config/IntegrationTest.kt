@@ -34,7 +34,7 @@ import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_R
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
-import uk.gov.dluhc.printapi.messaging.models.ProcessPrintBatchStatusUpdateMessage
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.service.PrintResponseFileService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
@@ -91,8 +91,7 @@ internal abstract class IntegrationTest {
     protected lateinit var printResponseFileService: PrintResponseFileService
 
     @Autowired
-    // todo change class name of message and variable, to ProcessPrintResponseFileMessage?
-    protected lateinit var processPrintBatchStatusUpdateQueue: MessageQueue<ProcessPrintBatchStatusUpdateMessage>
+    protected lateinit var processPrintResponseFileMessageQueue: MessageQueue<ProcessPrintResponseFileMessage>
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
@@ -165,8 +164,8 @@ internal abstract class IntegrationTest {
     }
 
     protected fun fileFoundInOutboundDirectory(filenameToProcess: String) =
-        sftpOutboundTemplate.list(PRINT_RESPONSE_DOWNLOAD_PATH)
-            .any { lsEntry -> lsEntry.filename.contains(filenameToProcess) }
+        getSftpOutboundDirectoryFileNames()
+            .any { fileName -> fileName.contains(filenameToProcess) }
 
     protected fun writePrintResponsesFileToSftpOutboundDirectory(filenameToProcess: String, printResponses: PrintResponses) {
         val printResponsesAsString = objectMapper.writeValueAsString(printResponses)

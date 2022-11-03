@@ -7,7 +7,7 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
-import uk.gov.dluhc.printapi.messaging.models.ProcessPrintBatchStatusUpdateMessage
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
 import java.util.concurrent.TimeUnit
 
@@ -23,13 +23,13 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
 
         writePrintResponsesFileToSftpOutboundDirectory(filenameToProcess, expectedPrintResponses)
 
-        val message = ProcessPrintBatchStatusUpdateMessage(
-            fileDirectory = PRINT_RESPONSE_DOWNLOAD_PATH,
+        val message = ProcessPrintResponseFileMessage(
+            directory = PRINT_RESPONSE_DOWNLOAD_PATH,
             fileName = filenameToProcess,
         )
 
         // When
-        processPrintBatchStatusUpdateQueue.submit(message)
+        processPrintResponseFileMessageQueue.submit(message)
 
         // Then
         val stopWatch = StopWatch.createStarted()
