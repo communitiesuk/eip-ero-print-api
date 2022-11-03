@@ -2,9 +2,9 @@ package uk.gov.dluhc.printapi.messaging
 
 import com.jcraft.jsch.ChannelSftp
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.integration.file.remote.InputStreamCallback
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
@@ -13,23 +13,21 @@ import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
-import uk.gov.dluhc.printapi.service.ProcessPrintBatchService
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintRequestBatchMessage
 import java.io.ByteArrayInputStream
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
 
-// TODO - This should be test for the Listener that processes a SQS message
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
-    @Autowired
-    private lateinit var printBatchService: ProcessPrintBatchService
+internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : IntegrationTest() {
 
     @Test
-    fun `should process batch`() {
+    fun `should process print request batch message`() {
         // Given
         val printDetailsId = UUID.randomUUID()
         val batchId = aValidBatchId()
@@ -61,15 +59,20 @@ internal class ProcessPrintBatchIntegrationTest : IntegrationTest() {
         printDetailsRepository.save(details)
         assertThat(filterListForName(batchId)).isEmpty()
 
+        // add message to queue for processing
+        val payload = buildProcessPrintRequestBatchMessage(batchId = batchId)
+
         // When
-        printBatchService.processBatch(batchId)
+        sqsMessagingTemplate.convertAndSend(processPrintRequestBatchQueueName, payload)
 
         // Then
-        val sftpDirectoryList = filterListForName(batchId)
-        assertThat(sftpDirectoryList).hasSize(1)
-        verifySftpZipFile(sftpDirectoryList, batchId, requestId, s3ResourceContents)
-        val processedPrintDetails = printDetailsRepository.get(printDetailsId)
-        assertThat(processedPrintDetails.status).isEqualTo(Status.SENT_TO_PRINT_PROVIDER)
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            val sftpDirectoryList = filterListForName(batchId)
+            assertThat(sftpDirectoryList).hasSize(1)
+            verifySftpZipFile(sftpDirectoryList, batchId, requestId, s3ResourceContents)
+            val processedPrintDetails = printDetailsRepository.get(printDetailsId)
+            assertThat(processedPrintDetails.status).isEqualTo(Status.SENT_TO_PRINT_PROVIDER)
+        }
     }
 
     private fun verifySftpZipFile(
