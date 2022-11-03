@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 @Configuration
 @EnableScheduling
 @ConditionalOnProperty("jobs.enabled", havingValue = "true")
-@EnableSchedulerLock(defaultLockAtMostFor = "\${jobs.batch-print-requests.lock-at-most-for}")
+@EnableSchedulerLock(defaultLockAtMostFor = "\${jobs.lock-at-most-for}")
 class SchedulerLockConfiguration(
     private val dynamoDbClient: DynamoDbClient,
     private val dynamoDbConfiguration: DynamoDbConfiguration

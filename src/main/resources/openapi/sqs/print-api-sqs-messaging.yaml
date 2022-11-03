@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.2.0'
+  version: '1.4.0'
   description: |-
     Print API SQS Message Types
     
