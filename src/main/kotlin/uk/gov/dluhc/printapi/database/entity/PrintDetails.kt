@@ -18,6 +18,7 @@ data class PrintDetails(
     var vacNumber: String? = null,
     var vacVersion: String? = "1",
     var requestDateTime: OffsetDateTime? = null,
+    var applicationReceivedDateTime: OffsetDateTime? = null,
     var firstName: String? = null,
     var middleNames: String? = null,
     var surname: String? = null,

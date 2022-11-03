@@ -6,5 +6,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean
 data class CertificateDelivery(
     var addressee: String? = null,
     var address: Address? = null,
-    var deliveryClass: DeliveryClass? = null
+    var deliveryClass: DeliveryClass? = null,
+    var deliveryMethod: DeliveryMethod? = null
 )
