@@ -85,9 +85,9 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
         @Test
         fun `should find eligible print requests`() {
             // Given
-            printDetailsRepository.save(buildPrintDetails(batchId = null))
-            printDetailsRepository.save(buildPrintDetails(batchId = null))
-            printDetailsRepository.save(buildPrintDetails(batchId = null))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
             printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.ASSIGNED_TO_BATCH))
             printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.SENT_TO_PRINT_PROVIDER))
 
