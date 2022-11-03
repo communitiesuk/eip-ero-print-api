@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -70,7 +71,7 @@ class PrintRequestsServiceTest {
         val batches = printRequestsService.batchPrintRequests(batchSize)
 
         // Then
-        assert(batches.size == 3)
+        assertThat(batches).hasSize(3)
         batches.map { (id, items) ->
             assert(items.all { it.status == Status.PENDING_ASSIGNMENT_TO_BATCH })
             assert(items.all { it.batchId == id })
