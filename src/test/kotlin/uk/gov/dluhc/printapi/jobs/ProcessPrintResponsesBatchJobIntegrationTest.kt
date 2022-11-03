@@ -1,16 +1,12 @@
-package uk.gov.dluhc.printapi.scheduler
+package uk.gov.dluhc.printapi.jobs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.integration.support.MessageBuilder
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import java.io.File
 
-internal class ProcessPrintResponsesSchedulerIntegrationTest : IntegrationTest() {
-
-    @Autowired
-    private lateinit var processPrintResponsesScheduler: ProcessPrintResponsesScheduler
+internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() {
 
     companion object {
         const val LOCAL_SFTP_TEST_DIRECTORY = "src/test/resources/sftp/local/OutBound"
@@ -35,7 +31,7 @@ internal class ProcessPrintResponsesSchedulerIntegrationTest : IntegrationTest()
         }
 
         // When
-        processPrintResponsesScheduler.pollAndProcessPrintResponses()
+        processPrintResponsesBatchJob.pollAndProcessPrintResponses()
 
         // Then
         val filesMarkedForProcessingOnSftpServer = getSftpOutboundDirectoryFileNames()

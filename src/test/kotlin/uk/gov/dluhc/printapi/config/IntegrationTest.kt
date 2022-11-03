@@ -27,6 +27,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
+import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
 
@@ -66,6 +67,9 @@ internal abstract class IntegrationTest {
     @Autowired
     @Qualifier("sftpOutboundTemplate")
     protected lateinit var sftpOutboundTemplate: SftpRemoteFileTemplate
+
+    @Autowired
+    protected lateinit var processPrintResponsesBatchJob: ProcessPrintResponsesBatchJob
 
     @Autowired
     protected lateinit var s3Client: S3Client

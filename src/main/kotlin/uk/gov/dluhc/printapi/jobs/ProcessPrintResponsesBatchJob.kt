@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.scheduler
+package uk.gov.dluhc.printapi.jobs
 
 import mu.KotlinLogging
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 private val logger = KotlinLogging.logger {}
 
 @Component
-class ProcessPrintResponsesScheduler(
+class ProcessPrintResponsesBatchJob(
     private val sftpService: SftpService,
     private val sftpProperties: SftpProperties,
 ) {
