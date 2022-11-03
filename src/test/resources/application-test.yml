@@ -9,6 +9,8 @@ cloud:
       endpoint: http://replaced-by-localStackContainerSqsSettings-bean
 sqs:
   send-application-to-print-queue-name: send-application-to-print
+  process-print-request-batch-queue-name: process-print-request-batch
+
 
 api:
   ero-management:
@@ -54,3 +56,5 @@ dynamodb:
 
 jobs:
   enabled: false
+  batch-print-requests:
+    batch-size: 100

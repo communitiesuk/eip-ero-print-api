@@ -1,5 +1,6 @@
 sqs:
   send-application-to-print-queue-name: ${SQS_SEND_APPLICATION_TO_PRINT_QUEUE_NAME}
+  process-print-request-batch-queue-name: ${SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME}
 
 api:
   ero-management:
@@ -18,12 +19,11 @@ dynamodb:
 
 jobs:
   enabled: true
-  print-requests:
+  lock-at-most-for: "PT10M"
+  batch-print-requests:
     name: "BatchPrintRequests"
-    cron: "${JOB_PRINT_REQUESTS_CRON:0 0 */1 * * *}" # every hour by default
-#    lock-at-most-for: ${JOBS_PRINT_REQUEST_LOCK_AT_MOST_FOR}
-#    lock-at-least-for: ${JOBS_PRINT_REQUEST_LOCK_AT_LEAST_FOR}
-    batchSize: ${JOB_PRINT_REQUESTS_BATCH_SIZE}
+    cron: "0 0 */1 * * *" # every hour by default
+    batch-size: 100
 
 thread-pool:
   zip:

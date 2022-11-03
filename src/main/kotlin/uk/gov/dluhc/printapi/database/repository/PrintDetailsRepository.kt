@@ -41,6 +41,11 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
         return index.query(query).flatMap { it.items() }
     }
 
+    fun getAllByStatus(status: Status): List<PrintDetails> {
+        // TODO: This is temporary as dynamodb has given me enough headaches for now
+        return table.scan().flatMap { it.items() }.filter { it.status == Status.PENDING_ASSIGNMENT_TO_BATCH }
+    }
+
     fun updateItems(printList: List<PrintDetails>) {
         printList.forEach { item ->
             table.updateItem(UpdateItemEnhancedRequest.builder(PrintDetails::class.java).item(item).build())

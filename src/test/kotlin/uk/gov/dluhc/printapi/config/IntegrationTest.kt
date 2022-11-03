@@ -66,6 +66,9 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.send-application-to-print-queue-name}")
     protected lateinit var sendApplicationToPrintQueueName: String
 
+    @Value("\${sqs.process-print-request-batch-queue-name}")
+    protected lateinit var processPrintRequestBatchQueueName: String
+
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
