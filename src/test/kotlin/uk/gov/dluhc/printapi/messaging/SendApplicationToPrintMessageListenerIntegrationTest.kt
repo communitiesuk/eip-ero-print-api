@@ -38,6 +38,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 sourceType = SourceType.VOTER_CARD,
                 vacNumber = aValidVacNumber(),
                 requestDateTime = requestDateTime,
+                applicationReceivedDateTime = applicationReceivedDateTime,
                 firstName = firstName,
                 middleNames = middleNames,
                 surname = surname,
@@ -57,7 +58,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                                 uprn = uprn
                             )
                         },
-                        deliveryClass = uk.gov.dluhc.printapi.database.entity.DeliveryClass.STANDARD
+                        deliveryClass = uk.gov.dluhc.printapi.database.entity.DeliveryClass.STANDARD,
+                        deliveryMethod = uk.gov.dluhc.printapi.database.entity.DeliveryMethod.DELIVERY,
                     )
                 },
                 gssCode = gssCode,

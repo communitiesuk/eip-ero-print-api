@@ -13,6 +13,7 @@ import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.CertificateDelivery
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
+import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
@@ -64,6 +65,7 @@ class PrintDetailsMapperTest {
                 sourceType = SourceTypeEntity.VOTER_CARD,
                 vacNumber = vacNumber,
                 requestDateTime = requestDateTime,
+                applicationReceivedDateTime = applicationReceivedDateTime,
                 firstName = firstName,
                 middleNames = middleNames,
                 surname = surname,
@@ -83,7 +85,8 @@ class PrintDetailsMapperTest {
                                 uprn = uprn
                             )
                         },
-                        deliveryClass = DeliveryClass.STANDARD
+                        deliveryClass = DeliveryClass.STANDARD,
+                        deliveryMethod = DeliveryMethod.DELIVERY
                     )
                 },
                 gssCode = gssCode,
