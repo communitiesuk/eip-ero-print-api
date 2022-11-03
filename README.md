@@ -41,7 +41,7 @@ The following environment variables must be set in order to run the application:
 * `SFTP_USER` - Username to use when connecting to the SFTP server 
 * `SFTP_PRIVATE_KEY` - SSH private key to use when securely connecting to the SFTP server
 * `SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY` - Directory on the remote host to write print request files
-
+* `SFTP_PRINT_RESPONSE_DOWNLOAD_DIRECTORY` - Directory on the remote host to read print response files
 
 ### Authentication and authorisation
 Requests are authenticated by the presence of a signed cognito JWT as a bearer token in the HTTP request `authorization` header.  
