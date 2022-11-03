@@ -42,8 +42,9 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
     }
 
     fun getAllByStatus(status: Status): List<PrintDetails> {
-        // TODO: This is temporary as dynamodb has given me enough headaches for now
-        return table.scan().flatMap { it.items() }.filter { it.status == Status.PENDING_ASSIGNMENT_TO_BATCH }
+        val index = table.index(STATUS_BATCH_ID_INDEX_NAME)
+        val queryConditional = QueryConditional.keyEqualTo(key(status.toString()))
+        return index.query(queryConditional).flatMap { it.items() }.toList()
     }
 
     fun updateItems(printList: List<PrintDetails>) {

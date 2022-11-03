@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import java.util.UUID
 
@@ -83,13 +84,14 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
         }
 
         @Test
-        fun `should find eligible print requests`() {
+        fun `should get all print details by status`() {
             // Given
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.ASSIGNED_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.SENT_TO_PRINT_PROVIDER))
+            val preAssignedBatchId = "NOT_YET_ASSIGNED"
+            printDetailsRepository.save(buildPrintDetails(batchId = preAssignedBatchId, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = preAssignedBatchId, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = preAssignedBatchId, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = aValidBatchId(), status = Status.ASSIGNED_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = aValidBatchId(), status = Status.SENT_TO_PRINT_PROVIDER))
 
             // When
             val results = printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
