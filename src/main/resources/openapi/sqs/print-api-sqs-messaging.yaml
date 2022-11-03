@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.4.0'
+  version: '1.5.0'
   description: |-
     Print API SQS Message Types
     
@@ -40,7 +40,15 @@ paths:
       responses:
         '204':
           description: No response content.
-
+  '/process-print-response-file':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/ProcessPrintResponseFileMessage'
+      responses:
+        '204':
+          description: No response content.
 components:
   #
   # Schema and Enum Definitions
@@ -214,6 +222,19 @@ components:
       required:
         - batchId
 
+    ProcessPrintResponseFileMessage:
+      description: The SQS message for processing a print response file
+      type: object
+      properties:
+        directory:
+          type: string
+          description: The directory where file to be processed is present
+        fileName:
+          type: string
+          description: The file name to be processed
+      required:
+        - directory
+        - fileName
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
@@ -233,3 +254,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ProcessPrintRequestBatchMessage'
+    ProcessPrintResponseFileMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProcessPrintResponseFileMessage'

@@ -5,7 +5,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.config.SftpProperties
-import uk.gov.dluhc.printapi.messaging.models.ProcessPrintBatchStatusUpdateMessage
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.service.SftpService
 import java.time.LocalDateTime
 
@@ -30,7 +30,7 @@ class ProcessPrintResponsesBatchJob(
                     originalFileName = unprocessedFile.filename
                 ).also {
                     // TODO EIP1-2261 will send a SQS message to print-api queue
-                    val messagePayload = ProcessPrintBatchStatusUpdateMessage(outboundFolderPath, it)
+                    val messagePayload = ProcessPrintResponseFileMessage(outboundFolderPath, it)
                     logger.info { "Sending SQS message with payload $messagePayload" }
                 }
             }
