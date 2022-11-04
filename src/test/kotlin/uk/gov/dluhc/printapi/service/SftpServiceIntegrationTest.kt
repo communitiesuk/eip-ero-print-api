@@ -16,7 +16,7 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
     inner class FetchRemotePrintResponseFile {
 
         @Test
-        fun `should fetch remote file and return as a string`() {
+        fun `should fetch content of the remote file and return as a string`() {
             // Given
             val filenameToProcess = "status-20220928235441999.json"
             val printResponses = buildPrintResponses()

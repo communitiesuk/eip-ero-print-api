@@ -27,7 +27,7 @@ class ProcessPrintResponseFileMessageListener(
             val filePath = "$directory/$fileName"
             logger.info { "Begin processing PrintResponse file [$filePath]" }
             val printResponsesString = sftpService.fetchFile(filePath)
-            val printResponses = objectMapper.convertValue(printResponsesString, PrintResponses::class.java)
+            val printResponses = objectMapper.readValue(printResponsesString, PrintResponses::class.java)
             processPrintResponses(printResponses)
             sftpService.removeFileFromOutBoundDirectory(filePath)
             logger.info { "Completed processing PrintResponse file [$filePath]" }

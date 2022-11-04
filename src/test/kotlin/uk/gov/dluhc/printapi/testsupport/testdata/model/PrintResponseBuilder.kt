@@ -4,9 +4,11 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
-import java.util.Date
-import java.util.UUID
-import kotlin.random.Random
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 fun buildPrintResponses(
     batchResponses: List<BatchResponse> = listOf(buildBatchResponse()),
@@ -17,10 +19,10 @@ fun buildPrintResponses(
         .withPrintResponses(printResponses)
 
 fun buildBatchResponse(
-    batchId: String = Random.nextInt().toString(),
+    batchId: String = aValidBatchId(),
     message: String = DataFaker.faker.famousLastWords().lastWords(),
     status: BatchResponse.Status = BatchResponse.Status.SUCCESS,
-    timestamp: Date = Date(),
+    timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
 ) = BatchResponse()
     .withBatchId(batchId)
     .withMessage(message)
@@ -28,11 +30,11 @@ fun buildBatchResponse(
     .withTimestamp(timestamp)
 
 fun buildPrintResponse(
-    requestId: UUID = UUID.randomUUID(),
+    requestId: String = aValidRequestId(),
     message: String = DataFaker.faker.famousLastWords().lastWords(),
     statusStep: PrintResponse.StatusStep = PrintResponse.StatusStep.IN_PRODUCTION,
     status: PrintResponse.Status = PrintResponse.Status.SUCCESS,
-    timestamp: Date = Date(),
+    timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
 ) = PrintResponse()
     .withMessage(message)
     .withRequestId(requestId)
