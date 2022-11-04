@@ -152,29 +152,6 @@ internal abstract class IntegrationTest {
         }
     }
 
-    protected fun writeFileToRemoteOutBoundDirectory(filename: String, inputStream: InputStream): String? {
-        val remoteFilenamePath = sftpOutboundTemplate.send(
-            MessageBuilder
-                .withPayload(inputStream)
-                .setHeader(FileHeaders.FILENAME, filename)
-                .build()
-        )
-        logger.info { "remote file written to: $remoteFilenamePath" }
-        return remoteFilenamePath
-    }
-
-    protected fun fileFoundInOutboundDirectory(filenameToProcess: String) =
-        getSftpOutboundDirectoryFileNames()
-            .any { fileName -> fileName.contains(filenameToProcess) }
-
-    protected fun writePrintResponsesFileToSftpOutboundDirectory(filenameToProcess: String, printResponses: PrintResponses) {
-        val printResponsesAsString = objectMapper.writeValueAsString(printResponses)
-        writeFileToRemoteOutBoundDirectory(
-            filenameToProcess,
-            IOUtils.toInputStream(printResponsesAsString, Charset.defaultCharset())
-        )
-    }
-
     protected fun clearTable(tableName: String, partitionKey: String = "id", sortKey: String? = null) {
         val response = dynamoDbClient.scan(ScanRequest.builder().tableName(tableName).build())
         response.items().forEach {
@@ -197,6 +174,29 @@ internal abstract class IntegrationTest {
 
     protected fun getSftpOutboundDirectoryFileNames() =
         getSftpDirectoryFileNames(sftpOutboundTemplate, PRINT_RESPONSE_DOWNLOAD_PATH)
+
+    protected fun fileFoundInOutboundDirectory(filenameToProcess: String) =
+        getSftpOutboundDirectoryFileNames()
+            .any { fileName -> fileName.contains(filenameToProcess) }
+
+    protected fun writeFileToRemoteOutBoundDirectory(filename: String, inputStream: InputStream): String? {
+        val remoteFilenamePath = sftpOutboundTemplate.send(
+            MessageBuilder
+                .withPayload(inputStream)
+                .setHeader(FileHeaders.FILENAME, filename)
+                .build()
+        )
+        logger.info { "remote file written to: $remoteFilenamePath" }
+        return remoteFilenamePath
+    }
+
+    protected fun writePrintResponsesToSftpOutboundDirectory(filenameToProcess: String, printResponses: PrintResponses) {
+        val printResponsesAsString = objectMapper.writeValueAsString(printResponses)
+        writeFileToRemoteOutBoundDirectory(
+            filenameToProcess,
+            IOUtils.toInputStream(printResponsesAsString, Charset.defaultCharset())
+        )
+    }
 
     private fun getSftpInboundDirectoryFileNames() =
         getSftpDirectoryFileNames(sftpInboundTemplate, PRINT_REQUEST_UPLOAD_PATH)

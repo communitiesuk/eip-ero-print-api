@@ -31,7 +31,7 @@ The following environment variables must be set in order to run the application:
 * `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` - the uri of the cognito ERO user pool JWT issuer.
 * `SQS_SEND_APPLICATION_TO_PRINT_QUEUE_NAME` - the queue name for sending application to print
 * `SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME` - the queue name for processing print request batches
-* `SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME` - the queue name for processing print response file.
+* `SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME` - the queue name for processing print response files
 * `API_ERO_MANAGEMENT_URL` - the base URL of the ERO Management REST API service.
 * `DYNAMODB_ENDPOINT` - the localstack endpoint
 * `DYNAMODB_PRINT_DETAILS_TABLE_NAME` - table name to persist print details

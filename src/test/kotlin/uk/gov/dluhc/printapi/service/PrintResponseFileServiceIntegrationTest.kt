@@ -43,7 +43,7 @@ internal class PrintResponseFileServiceIntegrationTest : IntegrationTest() {
                 printResponses = (0 until noOfPrintElements).map { buildPrintResponse() },
             )
 
-            writePrintResponsesFileToSftpOutboundDirectory(filenameToProcess, expectedPrintResponses)
+            writePrintResponsesToSftpOutboundDirectory(filenameToProcess, expectedPrintResponses)
             val filePathToProcess = FilenameFactory.createFileNamePath(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
 
             // When
@@ -105,7 +105,7 @@ internal class PrintResponseFileServiceIntegrationTest : IntegrationTest() {
             val filenameToProcess = "status-20220928235441999.json"
             val expectedPrintResponses = buildPrintResponses()
 
-            writePrintResponsesFileToSftpOutboundDirectory(filenameToProcess, expectedPrintResponses)
+            writePrintResponsesToSftpOutboundDirectory(filenameToProcess, expectedPrintResponses)
             val filePathToProcess = "$PRINT_RESPONSE_DOWNLOAD_PATH/$filenameToProcess"
 
             // When

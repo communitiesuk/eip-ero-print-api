@@ -21,7 +21,7 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
         val filenameToProcess = "status-20220928235441999.json"
         val expectedPrintResponses = buildPrintResponses()
 
-        writePrintResponsesFileToSftpOutboundDirectory(filenameToProcess, expectedPrintResponses)
+        writePrintResponsesToSftpOutboundDirectory(filenameToProcess, expectedPrintResponses)
 
         val message = ProcessPrintResponseFileMessage(
             directory = PRINT_RESPONSE_DOWNLOAD_PATH,
