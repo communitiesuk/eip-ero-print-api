@@ -9,15 +9,15 @@ import org.springframework.integration.file.FileHeaders
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.integration.support.MessageBuilder
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.service.FilenameFactory.Companion.createFileNamePath
 import java.io.InputStream
 
 private val logger = KotlinLogging.logger {}
-
 @Service
 class SftpService(
     @Qualifier("sftpInboundTemplate") private val sftpInboundTemplate: SftpRemoteFileTemplate,
     @Qualifier("sftpOutboundTemplate") private val sftpOutboundTemplate: SftpRemoteFileTemplate,
-    val objectMapper: ObjectMapper,
+    val objectMapper: ObjectMapper
 ) {
     companion object {
         private const val PROCESSING_SUFFIX = ".processing"
@@ -45,13 +45,16 @@ class SftpService(
     /**
      * Renames the file by suffixing ".processing" to its original name. Returns the newly renamed file name
      * Note: The "/" is appended between fileDirectoryPath and fileName before it's renamed
-     * @param fileDirectoryPath the location of the status file to be renamed
+     * @param directory the location of the status file to be renamed
      * @param originalFileName the name of the file e.g. fileName.json
      */
-    fun markFileForProcessing(fileDirectoryPath: String, originalFileName: String): String {
+    fun markFileForProcessing(directory: String, originalFileName: String): String {
         val newFileName = "$originalFileName$PROCESSING_SUFFIX"
-        logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$fileDirectoryPath]" }
-        sftpOutboundTemplate.rename("$fileDirectoryPath/$originalFileName", "$fileDirectoryPath/$newFileName")
+        logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$directory]" }
+        sftpOutboundTemplate.rename(
+            createFileNamePath(directory, originalFileName),
+            createFileNamePath(directory, newFileName)
+        )
         return newFileName
     }
 

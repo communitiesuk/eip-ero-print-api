@@ -1,10 +1,16 @@
 package uk.gov.dluhc.printapi.jobs
 
+import mu.KotlinLogging
+import org.apache.commons.lang3.time.StopWatch
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.integration.support.MessageBuilder
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import java.io.File
+import java.util.concurrent.TimeUnit
+
+private val logger = KotlinLogging.logger { }
 
 internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() {
 
@@ -17,12 +23,10 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
         // Given
         val fileName1 = "status-20221101171156056.json"
         val fileName2 = "status-20221101171156057.json"
-
+        val originalFileList = listOf(fileName1, fileName2)
         val expectedFileList = listOf("$fileName1.processing", "$fileName2.processing")
-        val expectedFileCount = 2
-        val originalFileNames = listOf(fileName1, fileName2)
 
-        originalFileNames.forEach { fileName ->
+        originalFileList.forEach { fileName ->
             sftpOutboundTemplate.send(
                 MessageBuilder
                     .withPayload(File("$LOCAL_SFTP_TEST_DIRECTORY/$fileName"))
@@ -30,16 +34,20 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
             )
         }
 
+        val printResponseFileCountOnSftpServerBeforeProcessing = hasFilesPresentInOutboundDirectory(originalFileList)
+
         // When
         processPrintResponsesBatchJob.pollAndProcessPrintResponses()
 
         // Then
-        val filesMarkedForProcessingOnSftpServer = getSftpOutboundDirectoryFileNames()
-        assertThat(filesMarkedForProcessingOnSftpServer.size).isEqualTo(expectedFileCount)
-        assertThat(filesMarkedForProcessingOnSftpServer)
-            .hasSize(expectedFileCount)
-            .doesNotContainAnyElementsOf(originalFileNames)
-            .containsExactlyInAnyOrderElementsOf(expectedFileList)
-        // TODO EIP1-2261 will assert that SQS message is sent to print-api queue
+        assertThat(printResponseFileCountOnSftpServerBeforeProcessing).isTrue
+
+        val stopWatch = StopWatch.createStarted()
+        await.atMost(3, TimeUnit.SECONDS).untilAsserted {
+            assertThat(hasFilesPresentInOutboundDirectory(expectedFileList)).isFalse
+            assertThat(getSftpOutboundDirectoryFileNames()).isEmpty()
+            stopWatch.stop()
+            logger.info("completed assertions in $stopWatch")
+        }
     }
 }
