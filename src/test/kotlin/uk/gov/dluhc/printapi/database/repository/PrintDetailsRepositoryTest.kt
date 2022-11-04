@@ -9,7 +9,6 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.aValidPrintDetailsWithSingleStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -95,11 +94,11 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
         @Test
         fun `should find eligible print requests`() {
             // Given
-            printDetailsRepository.save(aValidPrintDetailsWithSingleStatus(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(aValidPrintDetailsWithSingleStatus(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(aValidPrintDetailsWithSingleStatus(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(aValidPrintDetailsWithSingleStatus(batchId = null, status = ASSIGNED_TO_BATCH))
-            printDetailsRepository.save(aValidPrintDetailsWithSingleStatus(batchId = null, status = SENT_TO_PRINT_PROVIDER))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = ASSIGNED_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = SENT_TO_PRINT_PROVIDER))
 
             // When
             val results = printDetailsRepository.getAllByStatus(PENDING_ASSIGNMENT_TO_BATCH)
@@ -113,7 +112,7 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
     fun `should update item as it exists in the repository`() {
         // Given
         val initialStatus = PENDING_ASSIGNMENT_TO_BATCH
-        val details = aValidPrintDetailsWithSingleStatus(status = initialStatus)
+        val details = buildPrintDetails(status = initialStatus)
         printDetailsRepository.save(details)
         val updatedStatus = SENT_TO_PRINT_PROVIDER
         details.addStatus(updatedStatus)

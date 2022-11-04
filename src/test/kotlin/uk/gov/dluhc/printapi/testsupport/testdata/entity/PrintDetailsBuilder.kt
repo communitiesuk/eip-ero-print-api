@@ -75,7 +75,7 @@ fun buildPrintDetails(
     printRequestStatuses = printRequestStatuses,
 )
 
-fun aValidPrintDetailsWithSingleStatus(
+fun buildPrintDetails(
     status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
     batchId: String? = aValidBatchId(),
 ) = buildPrintDetails(
