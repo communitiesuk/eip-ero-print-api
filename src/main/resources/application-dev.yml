@@ -1,0 +1,4 @@
+jobs:
+  process-print-responses:
+    name: "ProcessPrintResponses"
+    cron: "0 */5 * ? * *" # every 5 minutes by default
