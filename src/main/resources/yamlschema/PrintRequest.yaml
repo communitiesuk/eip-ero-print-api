@@ -76,6 +76,7 @@ properties:
       - standard
       - braille
       - largeprint
+      - audio
   deliveryOption:
     type: string
     enum:
