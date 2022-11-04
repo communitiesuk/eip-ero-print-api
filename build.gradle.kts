@@ -181,6 +181,10 @@ jsonSchema2Pojo {
     includeJsr303Annotations.set(true)
     includeGeneratedAnnotation.set(false)
     includeToString.set(false)
+    dateTimeType.set("java.time.OffsetDateTime")
+    dateType.set("java.time.LocalDate")
+    formatDateTimes.set(true)
+    formatDates.set(true)
 }
 
 // Add the generated code to the source sets

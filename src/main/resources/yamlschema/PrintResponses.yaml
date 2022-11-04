@@ -1,4 +1,4 @@
-#version: 0.0.3
+#version: 0.0.4
 title: PrintResponses
 type: object
 description: 'A response from the print provider to EROP, can contain either batch or print responses, or both.'
