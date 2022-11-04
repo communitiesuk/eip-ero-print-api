@@ -1,13 +1,14 @@
-#version: 0.0.3
+#version: 0.0.4
 title: PrintResponse
 type: object
 description: 'Represents a print response, status update for a single print request'
 properties:
   requestId:
     type: string
-    format: uuid
-    description: The request identifier of the print request
-    example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+    description: |-
+      The unique identifier of the print request
+      A 24 character hex string
+    example: 14ab70e8bd3b400fbd95246c
   timestamp:
     type: string
     format: date-time
@@ -26,11 +27,11 @@ properties:
     enum:
       - SUCCESS
       - FAILED
-    description: Indicates if the step change was sucessful or not.
+    description: Indicates if the step change was successful or not.
   message:
     type: string
     maxLength: 255
-    description: Failure message
+    description: Error description. Only populated if `status` is `FAILED`
 required:
   - requestId
   - timestamp

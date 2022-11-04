@@ -99,9 +99,9 @@ class PrintDetailsToPrintRequestMapperTest {
         val expected = PrintRequest()
         expected.requestId = requestId
         expected.issuingAuthorityEn = eroEnglish.name
-        expected.issueDate = "2022-10-21"
-        expected.suggestedExpiryDate = "2032-10-21"
-        expected.requestDateTime = Date.from(requestDateTime.toInstant())
+        expected.issueDate = LocalDate.parse("2022-10-21")
+        expected.suggestedExpiryDate = LocalDate.parse("2032-10-21")
+        expected.requestDateTime = requestDateTime
         expected.cardFirstname = firstName
         expected.cardMiddleNames = middleNames
         expected.cardSurname = surname

@@ -7,7 +7,6 @@ import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @Component
@@ -83,9 +82,9 @@ class PrintRequestsFileProducer {
                 requestId,
                 issuingAuthorityEn,
                 issuingAuthorityCy ?: "",
-                issueDate,
-                suggestedExpiryDate,
-                requestDateTime.toInstant().atOffset(ZoneOffset.UTC).format(DATE_TIMESTAMP_FORMATTER),
+                issueDate.format(DATE_FORMATTER),
+                suggestedExpiryDate.format(DATE_FORMATTER),
+                requestDateTime.format(DATE_TIMESTAMP_FORMATTER),
                 cardFirstname,
                 cardMiddleNames ?: "",
                 cardSurname,
@@ -126,6 +125,7 @@ class PrintRequestsFileProducer {
         }
 
     companion object {
+        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         private val DATE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     }
 }

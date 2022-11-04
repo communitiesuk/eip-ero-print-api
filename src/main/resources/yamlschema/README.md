@@ -1,5 +1,5 @@
 # Print Provider Schema
-# v0.0.3
+# v0.0.4
 This folder contains the Print Provider schema files.
 
 The schema is defined in `yamlschema`. Each type is defined in its own file.
