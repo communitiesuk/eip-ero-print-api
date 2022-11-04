@@ -86,12 +86,11 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
         @Test
         fun `should get all print details by status`() {
             // Given
-            val preAssignedBatchId = "NOT_YET_ASSIGNED"
-            printDetailsRepository.save(buildPrintDetails(batchId = preAssignedBatchId, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = preAssignedBatchId, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = preAssignedBatchId, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = aValidBatchId(), status = Status.ASSIGNED_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = aValidBatchId(), status = Status.SENT_TO_PRINT_PROVIDER))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.ASSIGNED_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.SENT_TO_PRINT_PROVIDER))
 
             // When
             val results = printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)

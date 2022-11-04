@@ -2,11 +2,14 @@ package uk.gov.dluhc.printapi.database.repository
 
 import org.springframework.stereotype.Repository
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
+import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import uk.gov.dluhc.printapi.config.DynamoDbConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
@@ -42,9 +45,13 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
     }
 
     fun getAllByStatus(status: Status): List<PrintDetails> {
-        val index = table.index(STATUS_BATCH_ID_INDEX_NAME)
-        val queryConditional = QueryConditional.keyEqualTo(key(status.toString()))
-        return index.query(queryConditional).flatMap { it.items() }.toList()
+        val expression = Expression.builder()
+            .expression("#print_status = :status")
+            .expressionNames(mapOf(Pair("#print_status","status")))
+            .expressionValues(mapOf(
+                Pair(":status", AttributeValue.builder().s(Status.PENDING_ASSIGNMENT_TO_BATCH.toString()).build())))
+            .build()
+        return table.scan(ScanEnhancedRequest.builder().filterExpression(expression).build()).items().toList()
     }
 
     fun updateItems(printList: List<PrintDetails>) {
