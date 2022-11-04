@@ -35,11 +35,9 @@ import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
-import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
-import uk.gov.dluhc.printapi.service.PrintResponseFileService
+import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
-import java.io.InputStream
 import java.nio.charset.Charset
 
 private val logger = KotlinLogging.logger {}
@@ -74,6 +72,9 @@ internal abstract class IntegrationTest {
     protected lateinit var printDetailsRepository: PrintDetailsRepository
 
     @Autowired
+    protected lateinit var sftpService: SftpService
+
+    @Autowired
     @Qualifier("sftpInboundTemplate")
     protected lateinit var sftpInboundTemplate: SftpRemoteFileTemplate
 
@@ -86,9 +87,6 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var s3Client: S3Client
-
-    @Autowired
-    protected lateinit var printResponseFileService: PrintResponseFileService
 
     @Autowired
     protected lateinit var processPrintResponseFileMessageQueue: MessageQueue<ProcessPrintResponseFileMessage>
@@ -179,23 +177,15 @@ internal abstract class IntegrationTest {
         getSftpOutboundDirectoryFileNames()
             .any { fileName -> fileName.contains(filenameToProcess) }
 
-    protected fun writeFileToRemoteOutBoundDirectory(filename: String, inputStream: InputStream): String? {
+    protected fun writeContentToRemoteOutBoundDirectory(filename: String, fileContent: String): String? {
         val remoteFilenamePath = sftpOutboundTemplate.send(
             MessageBuilder
-                .withPayload(inputStream)
+                .withPayload(IOUtils.toInputStream(fileContent, Charset.defaultCharset()))
                 .setHeader(FileHeaders.FILENAME, filename)
                 .build()
         )
         logger.info { "remote file written to: $remoteFilenamePath" }
         return remoteFilenamePath
-    }
-
-    protected fun writePrintResponsesToSftpOutboundDirectory(filenameToProcess: String, printResponses: PrintResponses) {
-        val printResponsesAsString = objectMapper.writeValueAsString(printResponses)
-        writeFileToRemoteOutBoundDirectory(
-            filenameToProcess,
-            IOUtils.toInputStream(printResponsesAsString, Charset.defaultCharset())
-        )
     }
 
     private fun getSftpInboundDirectoryFileNames() =

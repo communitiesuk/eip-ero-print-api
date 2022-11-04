@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jcraft.jsch.ChannelSftp
+import com.nimbusds.jose.util.IOUtils
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.integration.file.FileHeaders
@@ -55,15 +56,14 @@ class SftpService(
     }
 
     /**
-     * Fetches the file from the path on the remote server and
-     * unmarshalls the content to an object of type `responseObjectType`
+     * Fetches the file from the path on the remote server
      * @param filePathToProcess the path to the file on the remote server
-     * @param responseObjectType the type of the object to marshall the json content of the file to
+     * @return the contents of the remote file
      */
-    fun <T> fetchAndUnmarshallFile(filePathToProcess: String, responseObjectType: Class<T>): T {
-        var responseObject: T? = null
-        sftpOutboundTemplate.get(filePathToProcess) { responseObject = objectMapper.readValue(it, responseObjectType) }
-        return responseObject!!
+    fun fetchFile(filePathToProcess: String): String {
+        var responseString: String? = null
+        sftpOutboundTemplate.get(filePathToProcess) { responseString = IOUtils.readInputStreamToString(it) }
+        return responseString!!
     }
 
     fun removeFileFromOutBoundDirectory(filePathToProcess: String) =
