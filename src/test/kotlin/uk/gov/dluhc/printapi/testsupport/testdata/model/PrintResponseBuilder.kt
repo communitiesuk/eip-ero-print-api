@@ -16,7 +16,7 @@ fun buildPrintResponses(
         .withBatchResponses(batchResponses)
         .withPrintResponses(printResponses)
 
-private fun buildBatchResponse(
+fun buildBatchResponse(
     batchId: String = Random.nextInt().toString(),
     message: String = DataFaker.faker.famousLastWords().lastWords(),
     status: BatchResponse.Status = BatchResponse.Status.SUCCESS,
@@ -27,7 +27,7 @@ private fun buildBatchResponse(
     .withStatus(status)
     .withTimestamp(timestamp)
 
-private fun buildPrintResponse(
+fun buildPrintResponse(
     requestId: UUID = UUID.randomUUID(),
     message: String = DataFaker.faker.famousLastWords().lastWords(),
     statusStep: PrintResponse.StatusStep = PrintResponse.StatusStep.IN_PRODUCTION,

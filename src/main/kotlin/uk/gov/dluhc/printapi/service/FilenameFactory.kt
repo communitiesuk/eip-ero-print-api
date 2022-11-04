@@ -22,5 +22,7 @@ class FilenameFactory(private val clock: Clock) {
 
     companion object {
         private var TIMESTAMP_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
+
+        fun createFileNamePath(fileDirectory: String, fileName: String) = "$fileDirectory/$fileName"
     }
 }
