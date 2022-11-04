@@ -115,5 +115,23 @@ internal class PrintResponseFileServiceIntegrationTest : IntegrationTest() {
             assertThat(actualRemovedResponses).isTrue
             assertThat(fileFoundInOutboundDirectory(filenameToProcess)).isFalse
         }
+
+        @Test
+        fun `should throw exception given missing remote file`() {
+            // Given
+            val filenameToProcess = "missing-file.json"
+            val filePathToProcess = FilenameFactory.createFileNamePath(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
+
+            // When
+            val ex =
+                Assertions.catchThrowableOfType(
+                    { printResponseFileService.removeRemoteFile(filePathToProcess) },
+                    MessagingException::class.java
+                )
+
+            // Then
+            assertThat(ex).hasMessageContaining("Failed to execute on session; nested exception is java.io.IOException: Failed to remove file")
+            assertThat(ex).hasCauseInstanceOf(IOException::class.java)
+        }
     }
 }
