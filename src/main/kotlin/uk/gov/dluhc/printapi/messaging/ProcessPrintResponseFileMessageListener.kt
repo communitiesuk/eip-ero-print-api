@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
-import uk.gov.dluhc.printapi.service.SftpService
+import uk.gov.dluhc.printapi.service.PrintResponseFileService
 import javax.validation.Valid
 
 private val logger = KotlinLogging.logger { }
@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger { }
  */
 @Component
 class ProcessPrintResponseFileMessageListener(
-    private val sftpService: SftpService,
+    private val printResponseFileService: PrintResponseFileService,
 ) : MessageListener<ProcessPrintResponseFileMessage> {
 
     @SqsListener("\${sqs.process-print-response-file-queue-name}")
@@ -23,15 +23,8 @@ class ProcessPrintResponseFileMessageListener(
         with(payload) {
             val filePath = "$directory/$fileName"
             logger.info { "Begin processing PrintResponse file [$filePath]" }
-            val printResponsesString = sftpService.fetchFileFromOutBoundDirectory(payload.directory, payload.fileName)
-            processPrintResponses(printResponsesString)
-            sftpService.removeFileFromOutBoundDirectory(payload.directory, payload.fileName)
+            printResponseFileService.processPrintResponseFile(payload.directory, payload.fileName)
             logger.info { "Completed processing PrintResponse file [$filePath]" }
         }
-    }
-
-    private fun processPrintResponses(printResponses: String) {
-        logger.info { "processing $printResponses" }
-        // TODO in EIP1-2262
     }
 }
