@@ -37,7 +37,7 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
         fun `should throw exception given missing remote file`() {
             // Given
             val filenameToProcess = "missing-file.json"
-            val filePathToProcess = FilenameFactory.createFileNamePath(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
+            val filePathToProcess = "$PRINT_RESPONSE_DOWNLOAD_PATH/$filenameToProcess"
 
             // When
             val ex =
@@ -77,7 +77,7 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
         fun `should throw exception given missing remote file`() {
             // Given
             val filenameToProcess = "missing-file.json"
-            val filePathToProcess = FilenameFactory.createFileNamePath(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
+            val filePathToProcess = "$PRINT_RESPONSE_DOWNLOAD_PATH/$filenameToProcess"
 
             // When
             val ex =
