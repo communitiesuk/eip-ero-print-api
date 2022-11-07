@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.jcraft.jsch.ChannelSftp.LsEntry
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -32,16 +31,13 @@ internal class SftpServiceTest {
     @Mock
     private lateinit var sftpOutboundTemplate: SftpRemoteFileTemplate
 
-    @Mock
-    private lateinit var objectMapper: ObjectMapper
-
     // @InjectMocks doesn't seem to be able to handle injecting 2 params of the same type
     // so initialising in setUp method below
     private lateinit var sftpService: SftpService
 
     @BeforeEach
     fun setUp() {
-        sftpService = SftpService(sftpInboundTemplate, sftpOutboundTemplate, objectMapper)
+        sftpService = SftpService(sftpInboundTemplate, sftpOutboundTemplate)
     }
 
     @Test

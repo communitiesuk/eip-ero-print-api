@@ -23,10 +23,9 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
             val expectedResponseString = objectMapper.writeValueAsString(printResponses)
 
             writeContentToRemoteOutBoundDirectory(filenameToProcess, expectedResponseString)
-            val filePathToProcess = "$PRINT_RESPONSE_DOWNLOAD_PATH/$filenameToProcess"
 
             // When
-            val actualPrintResponsesString = sftpService.fetchFile(filePathToProcess)
+            val actualPrintResponsesString = sftpService.fetchFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
 
             // Then
             assertThat(actualPrintResponsesString).isEqualTo(expectedResponseString)
@@ -37,12 +36,11 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
         fun `should throw exception given missing remote file`() {
             // Given
             val filenameToProcess = "missing-file.json"
-            val filePathToProcess = "$PRINT_RESPONSE_DOWNLOAD_PATH/$filenameToProcess"
 
             // When
             val ex =
                 Assertions.catchThrowableOfType(
-                    { sftpService.fetchFile(filePathToProcess) },
+                    { sftpService.fetchFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess) },
                     MessagingException::class.java
                 )
 
@@ -63,10 +61,8 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
 
             writeContentToRemoteOutBoundDirectory(filenameToProcess, expectedResponseString)
 
-            val filePathToProcess = "$PRINT_RESPONSE_DOWNLOAD_PATH/$filenameToProcess"
-
             // When
-            val actualRemovedResponses = sftpService.removeFileFromOutBoundDirectory(filePathToProcess)
+            val actualRemovedResponses = sftpService.removeFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
 
             // Then
             assertThat(actualRemovedResponses).isTrue
@@ -77,12 +73,11 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
         fun `should throw exception given missing remote file`() {
             // Given
             val filenameToProcess = "missing-file.json"
-            val filePathToProcess = "$PRINT_RESPONSE_DOWNLOAD_PATH/$filenameToProcess"
 
             // When
             val ex =
                 Assertions.catchThrowableOfType(
-                    { sftpService.removeFileFromOutBoundDirectory(filePathToProcess) },
+                    { sftpService.removeFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess) },
                     MessagingException::class.java
                 )
 

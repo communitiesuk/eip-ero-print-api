@@ -1,15 +1,15 @@
 package uk.gov.dluhc.printapi.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.jcraft.jsch.ChannelSftp
-import com.nimbusds.jose.util.IOUtils
 import mu.KotlinLogging
+import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.integration.file.FileHeaders
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.integration.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 private val logger = KotlinLogging.logger {}
 
@@ -17,7 +17,6 @@ private val logger = KotlinLogging.logger {}
 class SftpService(
     @Qualifier("sftpInboundTemplate") private val sftpInboundTemplate: SftpRemoteFileTemplate,
     @Qualifier("sftpOutboundTemplate") private val sftpOutboundTemplate: SftpRemoteFileTemplate,
-    val objectMapper: ObjectMapper,
 ) {
     companion object {
         private const val PROCESSING_SUFFIX = ".processing"
@@ -57,15 +56,16 @@ class SftpService(
 
     /**
      * Fetches the file from the path on the remote server
-     * @param filePathToProcess the path to the file on the remote server
+     * @param directory the path to the file on the remote server
+     * @param fileName the path to the file on the remote server
      * @return the contents of the remote file
      */
-    fun fetchFile(filePathToProcess: String): String {
+    fun fetchFileFromOutBoundDirectory(directory: String, fileName: String): String {
         var responseString: String? = null
-        sftpOutboundTemplate.get(filePathToProcess) { responseString = IOUtils.readInputStreamToString(it) }
+        sftpOutboundTemplate.get("$directory/$fileName") { responseString = IOUtils.toString(it, StandardCharsets.UTF_8) }
         return responseString!!
     }
 
-    fun removeFileFromOutBoundDirectory(filePathToProcess: String) =
-        sftpOutboundTemplate.remove(filePathToProcess)
+    fun removeFileFromOutBoundDirectory(directory: String, fileName: String) =
+        sftpOutboundTemplate.remove("$directory/$fileName")
 }
