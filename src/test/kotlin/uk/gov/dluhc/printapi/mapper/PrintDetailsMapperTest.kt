@@ -130,7 +130,11 @@ class PrintDetailsMapperTest {
                     )
                 },
                 printRequestStatuses = mutableListOf(
-                    PrintRequestStatus(Status.PENDING_ASSIGNMENT_TO_BATCH, dateTime = FIXED_TIME.atOffset(ZoneOffset.UTC))
+                    PrintRequestStatus(
+                        Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        dateCreated = FIXED_TIME.atOffset(ZoneOffset.UTC),
+                        eventDateTime = FIXED_TIME.atOffset(ZoneOffset.UTC)
+                    )
                 )
             )
         }

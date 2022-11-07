@@ -39,12 +39,12 @@ data class PrintDetails(
 
     var status: Status?
         @DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])
-        get() = printRequestStatuses?.sortedBy { it.dateTime }?.last()?.status
+        get() = printRequestStatuses?.sortedBy { it.eventDateTime }?.last()?.status
         @Deprecated(
             """
             Programmatically setting the status property is not supported and will have no effect.
             The status property and its setter are provided so that dynamodb persists a status attribute, where the value
-            is the last element from the printRequestStatuses list (element with the most recent datetime).
+            is the last element from the printRequestStatuses list (element with the most recent eventDateTime).
             To set the status add a new PrintRequestStatus to the printRequestStatuses list.
             """
         )
@@ -52,13 +52,14 @@ data class PrintDetails(
 
     fun addStatus(
         status: Status,
-        dateTime: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+        dateCreated: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+        eventDateTime: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
         message: String? = null
     ): PrintDetails {
         if (printRequestStatuses == null) {
             printRequestStatuses = mutableListOf()
         }
-        printRequestStatuses!!.add(PrintRequestStatus(status, dateTime, message))
+        printRequestStatuses!!.add(PrintRequestStatus(status, dateCreated, eventDateTime, message))
         return this
     }
 

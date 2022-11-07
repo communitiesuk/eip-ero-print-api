@@ -44,11 +44,14 @@ abstract class PrintDetailsMapper {
         return message.certificateLanguage == CertificateLanguage.CY
     }
 
-    protected fun initialStatus(): List<PrintRequestStatus> =
-        listOf(
+    protected fun initialStatus(): List<PrintRequestStatus> {
+        val now = OffsetDateTime.now(clock)
+        return listOf(
             PrintRequestStatus(
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-                dateTime = OffsetDateTime.now(clock)
+                dateCreated = now,
+                eventDateTime = now
             )
         )
+    }
 }

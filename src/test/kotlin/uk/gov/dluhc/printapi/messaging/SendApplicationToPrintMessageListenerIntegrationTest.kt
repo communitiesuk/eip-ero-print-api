@@ -80,7 +80,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 eroWelsh = null,
                 printRequestStatuses = mutableListOf(
                     PrintRequestStatus(
-                        Status.PENDING_ASSIGNMENT_TO_BATCH, dateTime = OffsetDateTime.now()
+                        Status.PENDING_ASSIGNMENT_TO_BATCH, dateCreated = OffsetDateTime.now(), eventDateTime = OffsetDateTime.now()
                     )
                 )
             )
@@ -99,7 +99,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             val id = UUID.fromString(response.items()[0]["id"]!!.s())
             val saved = printDetailsRepository.get(id)
             assertThat(saved).usingRecursiveComparison()
-                .ignoringFields("id", "requestId", "vacNumber", "printRequestStatuses.dateTime")
+                .ignoringFields("id", "requestId", "vacNumber", "printRequestStatuses.dateCreated", "printRequestStatuses.eventDateTime")
                 .isEqualTo(expected)
             assertThat(saved.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
             assertThat(saved.requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
