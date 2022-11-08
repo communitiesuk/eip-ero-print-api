@@ -18,7 +18,7 @@ fun buildPrintResponses(
         .withBatchResponses(batchResponses)
         .withPrintResponses(printResponses)
 
-private fun buildBatchResponse(
+fun buildBatchResponse(
     batchId: String = aValidBatchId(),
     message: String = faker.harryPotter().spell(),
     status: BatchResponse.Status = BatchResponse.Status.SUCCESS,
@@ -29,7 +29,7 @@ private fun buildBatchResponse(
     .withStatus(status)
     .withTimestamp(timestamp)
 
-private fun buildPrintResponse(
+fun buildPrintResponse(
     requestId: String = aValidRequestId(),
     message: String = faker.harryPotter().spell(),
     statusStep: PrintResponse.StatusStep = PrintResponse.StatusStep.IN_PRODUCTION,
