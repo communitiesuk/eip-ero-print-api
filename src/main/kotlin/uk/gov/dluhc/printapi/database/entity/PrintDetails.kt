@@ -32,6 +32,7 @@ data class PrintDetails(
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
     var eroEnglish: ElectoralRegistrationOffice? = null,
     var eroWelsh: ElectoralRegistrationOffice? = null,
+    var userId: String? = null,
     @get:DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
     @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])var batchId: String? = null
 ) {

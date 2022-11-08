@@ -108,7 +108,8 @@ class PrintDetailsMapperTest {
                 issuingAuthority = localAuthority.name,
                 issueDate = LocalDate.now(),
                 eroEnglish = electoralRegistrationOffice,
-                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else electoralRegistrationOffice
+                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else electoralRegistrationOffice,
+                userId = userId
             )
         }
         // When
