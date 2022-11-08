@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.integration.annotation.IntegrationComponentScan
 import org.springframework.integration.config.EnableIntegration
 
@@ -13,6 +14,7 @@ import org.springframework.integration.config.EnableIntegration
 @IntegrationComponentScan
 @EnableIntegration
 @ConfigurationPropertiesScan
+@EnableJpaAuditing
 class PrintApiApplication
 
 fun main(args: Array<String>) {

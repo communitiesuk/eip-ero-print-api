@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0001-EIP1-2386-certificate-table
+      author: neil.massey@valtech.com
+      context: ddl
+      changes:
+        - createTable:
+            tableName: certificate
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: certificate_pkey
+              - column:
+                  name: certificate_number
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gss_code
+                  type: varchar(80)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_created
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: bigint
+                  constraints:
+                    nullable: false

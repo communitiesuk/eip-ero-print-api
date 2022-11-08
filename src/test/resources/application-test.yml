@@ -7,6 +7,21 @@ cloud:
       secret-key: test
     sqs:
       endpoint: http://replaced-by-localStackContainerSqsSettings-bean
+
+spring:
+  datasource:
+    username: root
+    password: password
+  liquibase:
+    contexts: ddl
+
+  jpa:
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        format_sql : false
+        show_sql : false
+
 sqs:
   send-application-to-print-queue-name: send-application-to-print
   process-print-request-batch-queue-name: process-print-request-batch
