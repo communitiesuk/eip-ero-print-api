@@ -44,13 +44,16 @@ class SftpService(
     /**
      * Renames the file by suffixing ".processing" to its original name. Returns the newly renamed file name
      * Note: The "/" is appended between fileDirectoryPath and fileName before it's renamed
-     * @param fileDirectoryPath the location of the status file to be renamed
+     * @param directory the location of the status file to be renamed
      * @param originalFileName the name of the file e.g. fileName.json
      */
-    fun markFileForProcessing(fileDirectoryPath: String, originalFileName: String): String {
+    fun markFileForProcessing(directory: String, originalFileName: String): String {
         val newFileName = "$originalFileName$PROCESSING_SUFFIX"
-        logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$fileDirectoryPath]" }
-        sftpOutboundTemplate.rename("$fileDirectoryPath/$originalFileName", "$fileDirectoryPath/$newFileName")
+        logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$directory]" }
+        sftpOutboundTemplate.rename(
+            createFileNamePath(directory, originalFileName),
+            createFileNamePath(directory, newFileName)
+        )
         return newFileName
     }
 
@@ -62,10 +65,14 @@ class SftpService(
      */
     fun fetchFileFromOutBoundDirectory(directory: String, fileName: String): String {
         var responseString: String? = null
-        sftpOutboundTemplate.get("$directory/$fileName") { responseString = IOUtils.toString(it, StandardCharsets.UTF_8) }
+        sftpOutboundTemplate.get(createFileNamePath(directory, fileName)) { responseString = IOUtils.toString(it, StandardCharsets.UTF_8) }
         return responseString!!
     }
 
-    fun removeFileFromOutBoundDirectory(directory: String, fileName: String) =
-        sftpOutboundTemplate.remove("$directory/$fileName")
+    fun removeFileFromOutBoundDirectory(directory: String, fileName: String): Boolean {
+        logger.info { "Removing processed file [$fileName] from directory [$directory]" }
+        return sftpOutboundTemplate.remove(createFileNamePath(directory, fileName))
+    }
+
+    private fun createFileNamePath(fileDirectory: String, fileName: String) = "$fileDirectory/$fileName"
 }

@@ -30,7 +30,7 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
 
         // Then
         await.atMost(3, TimeUnit.SECONDS).untilAsserted {
-            assertThat(fileFoundInOutboundDirectory(filenameToProcess)).isFalse
+            assertThat(hasFilesPresentInOutboundDirectory(listOf(filenameToProcess))).isFalse
         }
 
         // todo assert db updates after completing service implementation
