@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="neil.massey@valtech.com" id="0001-EIP1-2386-create-certificate-table" context="ddl">
+        <createTable tableName="certificate">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="certificate_pkey"/>
+            </column>
+            <!-- Possibly rename this to vac_number (but that seems a bit cryptic) -->
+            <column name="certificate_number" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gss_code" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_reference" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_reference" type="varchar(255)"/>
+            <column name="application_received_date_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issuing_authority" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issue_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="suggested_expiry_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="neil.massey@valtech.com" id="0001-EIP1-2386-create-address-table" context="ddl">
+        <createTable tableName="address">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="address_pkey"/>
+            </column>
+            <column name="street" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="postcode" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="property" type="varchar(255)"/>
+            <column name="locality" type="varchar(255)"/>
+            <column name="town" type="varchar(255)"/>
+            <column name="area" type="varchar(255)"/>
+            <column name="uprn" type="varchar(12)"/>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="neil.massey@valtech.com" id="0001-EIP1-2386-create-delivery-table" context="ddl">
+        <createTable tableName="delivery">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="delivery_pkey"/>
+            </column>
+            <column name="address_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_delivery_address"
+                             references="address(id)"/>
+            </column>
+            <column name="addressee" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_class" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_method" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="neil.massey@valtech.com" id="0001-EIP1-2386-create-electoral-registration-office-table"
+               context="ddl">
+        <createTable tableName="electoral_registration_office">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="electoral_registration_office_pkey"/>
+            </column>
+            <column name="address_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ero_address"
+                             references="address(id)"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email_address" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="website" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="neil.massey@valtech.com" id="0001-EIP1-2386-create-print-request-table" context="ddl">
+        <createTable tableName="print_request">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="print_request_pkey"/>
+            </column>
+            <column name="certificate_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_print_request_certificate"
+                             references="certificate(id)"/>
+            </column>
+            <column name="delivery_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_certificate_delivery"
+                             references="delivery(id)"/>
+            </column>
+            <column name="english_ero_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_certificate_english_ero_id"
+                             references="electoral_registration_office(id)"/>
+            </column>
+            <column name="welsh_ero_id" type="uuid">
+                <constraints nullable="true"
+                             foreignKeyName="fk_certificate_welsh_ero_id"
+                             references="electoral_registration_office(id)"/>
+            </column>
+            <column name="request_id" type="varchar(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vac_version" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_date_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_names" type="varchar(255)"/>
+            <column name="surname" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certificate_language" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certificate_format" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="photo_location_arn" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="batch_id" type="varchar(255)"/>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <!--
+        // one to many with "Print Status" Table
+        // var statusHistory: Collection<Status> = Status.PENDING_ASSIGNMENT_TO_BATCH
+    -->
+
+
+</databaseChangeLog>

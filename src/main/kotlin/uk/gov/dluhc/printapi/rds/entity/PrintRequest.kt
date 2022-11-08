@@ -6,12 +6,11 @@ import org.hibernate.annotations.Type
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.CertificateFormat
+import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
 import uk.gov.dluhc.printapi.rds.repository.UseExistingOrGenerateUUID
 import java.time.Instant
-import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 import javax.persistence.CascadeType
@@ -19,12 +18,11 @@ import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
-import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
-import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.Table
 import javax.persistence.Version
 import javax.validation.constraints.NotNull
@@ -33,8 +31,7 @@ import javax.validation.constraints.Size
 @Table
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-class Certificate(
-
+class PrintRequest(
     @Id
     @Type(type = UUIDCharType)
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "UUID")
@@ -42,47 +39,57 @@ class Certificate(
     var id: UUID? = null,
 
     @NotNull
+    @Size(max = 24)
+    var requestId: String? = null,
+
+    @NotNull
     @Size(max = 20)
-    // var vacNumber: String? = null,
-    var certificateNumber: String? = null,
+    var vacVersion: String? = null,
+
+    @NotNull
+    var requestDateTime: OffsetDateTime? = null,
+
+    @NotNull
+    @Size(max = 255)
+    var firstName: String? = null,
+
+    @Size(max = 255)
+    var middleNames: String? = null,
+
+    @NotNull
+    @Size(max = 255)
+    var surname: String? = null,
 
     @NotNull
     @Size(max = 20)
     @Enumerated(EnumType.STRING)
-    var sourceType: SourceType? = null,
+    var certificateLanguage: CertificateLanguage? = null,
 
     @NotNull
-    @Size(max = 255)
-    var sourceReference: String? = null,
-
-    @Size(max = 255)
-    var applicationReference: String? = null,
-
-    @NotNull
-    var applicationReceivedDateTime: OffsetDateTime? = null,
-
-    @NotNull
-    @Size(max = 255)
-    var issuingAuthority: String? = null,
-
-    @NotNull
-    var issueDate: LocalDate = LocalDate.now(),
-
-    @NotNull
-    var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
-
-    @NotNull
-    @Size(max = 50)
+    @Size(max = 20)
     @Enumerated(EnumType.STRING)
-    var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+    var certificateFormat: CertificateFormat? = null,
 
     @NotNull
-    @Size(max = 80)
-    var gssCode: String? = null,
+    @Size(max = 255)
+    var photoLocationArn: String? = null,
 
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "certificate_id", nullable = false)
-    var printRequests: MutableList<PrintRequest> = mutableListOf(),
+    @OneToOne(cascade = [CascadeType.ALL])
+    var delivery: Delivery? = null,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "english_ero_id")
+    var eroEnglish: ElectoralRegistrationOffice? = null,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "welsh_ero_id")
+    var eroWelsh: ElectoralRegistrationOffice? = null,
+
+    @Size(max = 255)
+    var batchId: String? = null,
+
+    // one to many with "Print Status" Table
+    // var statusHistory: Collection<Status> = Status.PENDING_ASSIGNMENT_TO_BATCH
 
     @NotNull
     @UpdateTimestamp
@@ -95,17 +102,12 @@ class Certificate(
 
     @Version
     var version: Long? = null
+
 ) {
-
-    fun addPrintRequest(newPrintRequest: PrintRequest): Certificate {
-        printRequests += newPrintRequest
-        return this
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-        other as Certificate
+        other as PrintRequest
 
         return id != null && id == other.id
     }
@@ -114,6 +116,6 @@ class Certificate(
 
     @Override
     override fun toString(): String {
-        return this::class.simpleName + "(id = $id , certificateNumber = $certificateNumber , gssCode = $gssCode, dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
+        return this::class.simpleName + "(id = $id , batchId = $batchId , dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
     }
 }

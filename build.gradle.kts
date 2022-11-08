@@ -78,7 +78,6 @@ dependencies {
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.liquibase:liquibase-core")
-    implementation("org.hibernate:hibernate-envers")
     runtimeOnly("mysql:mysql-connector-java")
     runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.1")
     runtimeOnly("software.amazon.awssdk:rds")
