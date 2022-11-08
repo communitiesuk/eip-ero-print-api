@@ -69,8 +69,11 @@ class SftpService(
         return responseString!!
     }
 
-    fun removeFileFromOutBoundDirectory(directory: String, fileName: String) =
-        sftpOutboundTemplate.remove(createFileNamePath(directory, fileName))
+    fun removeFileFromOutBoundDirectory(directory: String, fileName: String): Boolean {
+        return sftpOutboundTemplate.remove(createFileNamePath(directory, fileName)).also {
+            logger.info { "Removing [removed=$it] processed file [$fileName] from directory [$directory]" }
+        }
+    }
 
     private fun createFileNamePath(fileDirectory: String, fileName: String) = "$fileDirectory/$fileName"
 }

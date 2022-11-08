@@ -29,7 +29,7 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
 
             // Then
             assertThat(actualPrintResponsesString).isEqualTo(expectedResponseString)
-            assertThat(fileFoundInOutboundDirectory(filenameToProcess)).isTrue
+            assertThat(hasFilesPresentInOutboundDirectory(listOf(filenameToProcess))).isTrue
         }
 
         @Test
@@ -66,7 +66,7 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
 
             // Then
             assertThat(actualRemovedResponses).isTrue
-            assertThat(fileFoundInOutboundDirectory(filenameToProcess)).isFalse
+            assertThat(hasFilesPresentInOutboundDirectory(listOf(filenameToProcess))).isFalse
         }
 
         @Test

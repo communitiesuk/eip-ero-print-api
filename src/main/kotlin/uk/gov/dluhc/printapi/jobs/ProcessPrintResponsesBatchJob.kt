@@ -28,24 +28,26 @@ class ProcessPrintResponsesBatchJob(
     @SchedulerLock(name = "\${jobs.process-print-responses.name}")
     fun pollAndProcessPrintResponses() {
         val outboundFolderPath = sftpProperties.printResponseDownloadDirectory
-        val pollingStartTime = dateTimeAsOfNowInMillis()
+        val jobStartTime = dateTimeAsOfNowInMillis()
 
-        logger.info { "Polling print response at [$pollingStartTime] from directory: [$outboundFolderPath]" }
+        logger.info { "Polling for print responses at [$jobStartTime] from directory: [$outboundFolderPath]" }
 
-        sftpService.identifyFilesToBeProcessed(outboundFolderPath)
-            .forEachIndexed { index, unprocessedFile ->
-                sftpService.markFileForProcessing(
-                    directory = outboundFolderPath,
-                    originalFileName = unprocessedFile.filename
-                ).also {
-                    val messagePayload = ProcessPrintResponseFileMessage(outboundFolderPath, it)
-                    logger.info { "Sending SQS message for recordNo: [$index] with payload: $messagePayload" }
-                    processPrintResponseFileQueue.submit(messagePayload)
-                }
+        val unprocessedFiles = sftpService.identifyFilesToBeProcessed(outboundFolderPath)
+        logger.info { "Found [${unprocessedFiles.size}] unprocessed print responses" }
+
+        unprocessedFiles.forEachIndexed { index, unprocessedFile ->
+            sftpService.markFileForProcessing(
+                directory = outboundFolderPath,
+                originalFileName = unprocessedFile.filename
+            ).also {
+                val messagePayload = ProcessPrintResponseFileMessage(outboundFolderPath, it)
+                logger.info { "Sending SQS message for file: [${index + 1} of ${unprocessedFiles.size}] with payload: $messagePayload" }
+                processPrintResponseFileQueue.submit(messagePayload)
             }
+        }
 
-        val pollingEndTime = dateTimeAsOfNowInMillis()
-        logger.info { "Completed print response processing at [$pollingEndTime}] from directory: [$outboundFolderPath] in [${Duration.between(pollingStartTime, pollingEndTime)}]" }
+        val jobCompletionTime = dateTimeAsOfNowInMillis()
+        logger.info { "Completed print response processing job at [$jobCompletionTime] from directory: [$outboundFolderPath] in [${Duration.between(jobStartTime, jobCompletionTime)}]" }
     }
 
     private fun dateTimeAsOfNowInMillis() =

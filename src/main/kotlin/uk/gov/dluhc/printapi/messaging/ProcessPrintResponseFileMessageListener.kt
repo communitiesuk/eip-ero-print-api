@@ -21,10 +21,9 @@ class ProcessPrintResponseFileMessageListener(
     @SqsListener("\${sqs.process-print-response-file-queue-name}")
     override fun handleMessage(@Valid @Payload payload: ProcessPrintResponseFileMessage) {
         with(payload) {
-            val filePath = "$directory/$fileName"
-            logger.info { "Begin processing PrintResponse file [$filePath]" }
+            logger.info { "Begin processing PrintResponse file [$fileName] from directory [$directory]" }
             printResponseFileService.processPrintResponseFile(directory, fileName)
-            logger.info { "Completed processing PrintResponse file [$filePath]" }
+            logger.info { "Completed processing PrintResponse file [$fileName] from directory [$directory]" }
         }
     }
 }

@@ -16,7 +16,7 @@ class PrintResponseFileService(
     }
 
     private fun processPrintResponseContent(printResponsesString: String) {
-        logger.info { "processing $printResponsesString" }
+        logger.debug { "processing $printResponsesString" }
         // TODO in EIP1-2262
     }
 }
