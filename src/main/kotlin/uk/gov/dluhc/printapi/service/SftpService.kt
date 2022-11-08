@@ -2,12 +2,14 @@ package uk.gov.dluhc.printapi.service
 
 import com.jcraft.jsch.ChannelSftp
 import mu.KotlinLogging
+import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.integration.file.FileHeaders
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.integration.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 private val logger = KotlinLogging.logger {}
 
@@ -51,4 +53,19 @@ class SftpService(
         sftpOutboundTemplate.rename("$fileDirectoryPath/$originalFileName", "$fileDirectoryPath/$newFileName")
         return newFileName
     }
+
+    /**
+     * Fetches the file from the path on the remote server
+     * @param directory the path to the file on the remote server
+     * @param fileName the path to the file on the remote server
+     * @return the contents of the remote file
+     */
+    fun fetchFileFromOutBoundDirectory(directory: String, fileName: String): String {
+        var responseString: String? = null
+        sftpOutboundTemplate.get("$directory/$fileName") { responseString = IOUtils.toString(it, StandardCharsets.UTF_8) }
+        return responseString!!
+    }
+
+    fun removeFileFromOutBoundDirectory(directory: String, fileName: String) =
+        sftpOutboundTemplate.remove("$directory/$fileName")
 }

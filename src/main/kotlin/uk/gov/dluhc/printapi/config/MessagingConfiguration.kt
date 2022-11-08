@@ -14,6 +14,7 @@ import org.springframework.messaging.handler.annotation.support.PayloadMethodArg
 import org.springframework.validation.Validator
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 
 @Configuration
 class MessagingConfiguration {
@@ -21,9 +22,16 @@ class MessagingConfiguration {
     @Value("\${sqs.process-print-request-batch-queue-name}")
     private lateinit var processPrintRequestBatchQueueName: String
 
+    @Value("\${sqs.process-print-response-file-queue-name}")
+    private lateinit var processPrintResponseFileQueueName: String
+
     @Bean
     fun processPrintRequestBatchQueue(queueMessagingTemplate: QueueMessagingTemplate) =
         MessageQueue<ProcessPrintRequestBatchMessage>(processPrintRequestBatchQueueName, queueMessagingTemplate)
+
+    @Bean
+    fun processPrintResponseFileQueue(queueMessagingTemplate: QueueMessagingTemplate) =
+        MessageQueue<ProcessPrintResponseFileMessage>(processPrintResponseFileQueueName, queueMessagingTemplate)
 
     @Bean
     fun queueMessageHandlerFactory(
