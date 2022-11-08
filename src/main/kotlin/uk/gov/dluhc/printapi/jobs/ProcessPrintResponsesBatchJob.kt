@@ -6,8 +6,8 @@ import org.apache.commons.lang3.time.StopWatch
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.config.SftpProperties
-import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
+import uk.gov.dluhc.printapi.service.PrintMessagingService
 import uk.gov.dluhc.printapi.service.SftpService
 
 private val logger = KotlinLogging.logger {}
@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger {}
 class ProcessPrintResponsesBatchJob(
     private val sftpService: SftpService,
     private val sftpProperties: SftpProperties,
-    private val processPrintResponseFileQueue: MessageQueue<ProcessPrintResponseFileMessage>
+    private val printMessagingService: PrintMessagingService
 ) {
 
     @Scheduled(cron = "\${jobs.process-print-responses.cron}")
@@ -35,8 +35,8 @@ class ProcessPrintResponsesBatchJob(
                 originalFileName = unprocessedFile.filename
             ).also {
                 val messagePayload = ProcessPrintResponseFileMessage(outboundFolderPath, it)
-                logger.info { "Sending SQS message for file: [${index + 1} of ${unprocessedFiles.size}] with payload: $messagePayload" }
-                processPrintResponseFileQueue.submit(messagePayload)
+                logger.info { "Submitting SQS message for file: [${index + 1} of ${unprocessedFiles.size}] with payload: $messagePayload" }
+                printMessagingService.submitPrintResponseFileForProcessing(messagePayload)
             }
         }
 
