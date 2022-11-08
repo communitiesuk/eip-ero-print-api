@@ -68,10 +68,13 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 eroEnglish = with(ero) {
                     ElectoralRegistrationOffice(
                         name = name,
-                        phoneNumber = null,
-                        emailAddress = null,
-                        website = null,
-                        address = null
+                        phoneNumber = "",
+                        emailAddress = "",
+                        website = "",
+                        address = Address(
+                            street = "",
+                            postcode = ""
+                        )
                     )
                 },
                 eroWelsh = null
