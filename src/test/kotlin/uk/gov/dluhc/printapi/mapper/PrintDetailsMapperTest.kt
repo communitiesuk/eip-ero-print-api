@@ -9,6 +9,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.CertificateDelivery
@@ -38,6 +39,9 @@ class PrintDetailsMapperTest {
     private lateinit var sourceTypeMapper: SourceTypeMapper
 
     @Mock
+    private lateinit var electoralRegistrationOfficeMapper: ElectoralRegistrationOfficeMapper
+
+    @Mock
     private lateinit var idFactory: IdFactory
 
     @ParameterizedTest
@@ -55,6 +59,17 @@ class PrintDetailsMapperTest {
         given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
         given(idFactory.requestId()).willReturn(requestId)
         given(idFactory.vacNumber()).willReturn(vacNumber)
+        val electoralRegistrationOffice = ElectoralRegistrationOffice(
+            name = "Croydon London Borough Council",
+            phoneNumber = "",
+            emailAddress = "",
+            website = "",
+            address = Address(
+                street = "",
+                postcode = ""
+            )
+        )
+        given(electoralRegistrationOfficeMapper.map(any())).willReturn(electoralRegistrationOffice)
 
         val expected = with(message) {
             PrintDetails(
@@ -92,24 +107,8 @@ class PrintDetailsMapperTest {
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.name,
                 issueDate = LocalDate.now(),
-                eroEnglish = with(ero) {
-                    ElectoralRegistrationOffice(
-                        name = name,
-                        phoneNumber = null,
-                        emailAddress = null,
-                        website = null,
-                        address = null
-                    )
-                },
-                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else with(ero) {
-                    ElectoralRegistrationOffice(
-                        name = name,
-                        phoneNumber = null,
-                        emailAddress = null,
-                        website = null,
-                        address = null
-                    )
-                }
+                eroEnglish = electoralRegistrationOffice,
+                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else electoralRegistrationOffice
             )
         }
         // When
@@ -122,5 +121,7 @@ class PrintDetailsMapperTest {
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).requestId()
         verify(idFactory).vacNumber()
+        val expectedElectoralRegistrationOfficeMapperInvocations = if (certificateLanguageModel == CertificateLanguage.EN) 1 else 2
+        verify(electoralRegistrationOfficeMapper, times(expectedElectoralRegistrationOfficeMapperInvocations)).map(ero)
     }
 }

@@ -13,7 +13,7 @@ import uk.gov.dluhc.printapi.service.IdFactory
 import java.util.UUID
 
 @Mapper(
-    uses = [SourceTypeMapper::class],
+    uses = [SourceTypeMapper::class, ElectoralRegistrationOfficeMapper::class],
     imports = [UUID::class, ObjectId::class, RandomStringUtils::class]
 )
 abstract class PrintDetailsMapper {
