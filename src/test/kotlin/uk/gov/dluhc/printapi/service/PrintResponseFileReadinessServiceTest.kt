@@ -79,34 +79,44 @@ internal class PrintResponseFileReadinessServiceTest {
     }
 
     @Test
-    fun `should continue marking print response file and sending to queue when one of the file marking fails due to exception`() {
+    fun `should continue marking print response file and sending to queue when some of files marking fails due to exception`() {
         // Given
-        val matchingFileName1 = "status-20221101171156056.json"
-        val matchingFileThatThrowsException = "status-20221101171156057.json"
-        val matchingFileName3 = "status-20221101171156058.json"
-        val renamedFileName1 = "$matchingFileName1.processing"
-        val renamedFileName3 = "$matchingFileName3.processing"
+        val matchingFile1ThatThrowsException = "status-20221101171156051.json"
+        val matchingFile3ThatThrowsException = "status-20221101171156053.json"
+        val matchingFileName2 = "status-20221101171156052.json"
+        val matchingFileName4 = "status-20221101171156054.json"
+        val renamedFileName2 = "$matchingFileName2.processing"
+        val renamedFileName4 = "$matchingFileName4.processing"
         val expectedExceptionThrown = RuntimeException("Some error")
 
         given(sftpProperties.printResponseDownloadDirectory).willReturn(DIRECTORY)
-        given(sftpService.identifyFilesToBeProcessed(any())).willReturn(listOf(matchingFileName1, matchingFileThatThrowsException, matchingFileName3))
-        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileName1))).willReturn(renamedFileName1)
-        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileThatThrowsException))).willThrow(expectedExceptionThrown)
-        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileName3))).willReturn(renamedFileName3)
+        given(sftpService.identifyFilesToBeProcessed(any())).willReturn(
+            listOf(
+                matchingFileName2,
+                matchingFile1ThatThrowsException,
+                matchingFileName4,
+                matchingFile3ThatThrowsException
+            )
+        )
+        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFile1ThatThrowsException))).willThrow(expectedExceptionThrown)
+        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileName2))).willReturn(renamedFileName2)
+        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFile3ThatThrowsException))).willThrow(expectedExceptionThrown)
+        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileName4))).willReturn(renamedFileName4)
 
         // When
         printResponseFileReadinessService.markPrintResponseFileForProcessing()
 
         // Then
         verify(sftpService).identifyFilesToBeProcessed(DIRECTORY)
-        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFileName1)
-        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFileThatThrowsException)
-        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFileName3)
+        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFile1ThatThrowsException)
+        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFileName2)
+        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFile3ThatThrowsException)
+        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFileName4)
         verify(printMessagingService).submitPrintResponseFileForProcessing(
-            ProcessPrintResponseFileMessage(DIRECTORY, renamedFileName1)
+            ProcessPrintResponseFileMessage(DIRECTORY, renamedFileName2)
         )
         verify(printMessagingService).submitPrintResponseFileForProcessing(
-            ProcessPrintResponseFileMessage(DIRECTORY, renamedFileName3)
+            ProcessPrintResponseFileMessage(DIRECTORY, renamedFileName4)
         )
         verifyNoMoreInteractions(sftpService, printMessagingService)
     }

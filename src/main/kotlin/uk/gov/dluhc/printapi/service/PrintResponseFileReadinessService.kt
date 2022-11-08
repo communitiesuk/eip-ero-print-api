@@ -23,6 +23,7 @@ class PrintResponseFileReadinessService(
         val unprocessedFiles = sftpService.identifyFilesToBeProcessed(outboundFolderPath)
         logger.info { "Found [${unprocessedFiles.size}] unprocessed print responses" }
 
+        val filesFailedToProcess = mutableListOf<String>()
         unprocessedFiles.forEachIndexed { index, unprocessedFileName ->
             try {
                 sftpService.markFileForProcessing(
@@ -34,10 +35,13 @@ class PrintResponseFileReadinessService(
                     printMessagingService.submitPrintResponseFileForProcessing(messagePayload)
                 }
             } catch (e: RuntimeException) {
+                filesFailedToProcess.add(unprocessedFileName)
                 logger.warn { "Error renaming [$unprocessedFileName] due to [${e.message}]. Processing will continue for rest of the files" }
             }
         }
+
         stopWatch.stop()
+        logger.warn { "${filesFailedToProcess.size} files failures that were not processed $filesFailedToProcess" }
         logger.info { "Completed marking and processing all print response files in [$stopWatch]" }
     }
 }
