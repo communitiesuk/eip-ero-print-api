@@ -173,6 +173,9 @@ internal abstract class IntegrationTest {
     protected fun getSftpOutboundDirectoryFileNames() =
         getSftpDirectoryFileNames(sftpOutboundTemplate, PRINT_RESPONSE_DOWNLOAD_PATH)
 
+    protected fun hasFilesPresentInOutboundDirectory(filenames: List<String>) =
+        getSftpOutboundDirectoryFileNames().containsAll(filenames)
+
     protected fun fileFoundInOutboundDirectory(filenameToProcess: String) =
         getSftpOutboundDirectoryFileNames()
             .any { fileName -> fileName.contains(filenameToProcess) }

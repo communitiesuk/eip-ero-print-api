@@ -3,7 +3,7 @@ package uk.gov.dluhc.printapi.testsupport.testdata.model
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
-import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
+import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import java.time.Instant
@@ -20,10 +20,10 @@ fun buildPrintResponses(
 
 private fun buildBatchResponse(
     batchId: String = aValidBatchId(),
-    message: String = DataFaker.faker.famousLastWords().lastWords(),
+    message: String = faker.harryPotter().spell(),
     status: BatchResponse.Status = BatchResponse.Status.SUCCESS,
     timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
-) = BatchResponse()
+): BatchResponse = BatchResponse()
     .withBatchId(batchId)
     .withMessage(message)
     .withStatus(status)
@@ -31,11 +31,11 @@ private fun buildBatchResponse(
 
 private fun buildPrintResponse(
     requestId: String = aValidRequestId(),
-    message: String = DataFaker.faker.famousLastWords().lastWords(),
+    message: String = faker.harryPotter().spell(),
     statusStep: PrintResponse.StatusStep = PrintResponse.StatusStep.IN_PRODUCTION,
     status: PrintResponse.Status = PrintResponse.Status.SUCCESS,
     timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
-) = PrintResponse()
+): PrintResponse = PrintResponse()
     .withMessage(message)
     .withRequestId(requestId)
     .withStatusStep(statusStep)
