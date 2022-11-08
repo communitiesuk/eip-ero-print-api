@@ -26,7 +26,8 @@ fun buildSendApplicationToPrintMessage(
     delivery: CertificateDelivery = buildCertificateDelivery(),
     gssCode: String = getRandomGssCode(),
     photoLocation: String = "arn:aws:s3:::source-document-storage/$gssCode/$sourceReference/${UUID.randomUUID()}/" +
-        faker.file().fileName("", null, "jpg", "")
+        faker.file().fileName("", null, "jpg", ""),
+    userId: String = faker.internet().emailAddress()
 ) = SendApplicationToPrintMessage(
     sourceReference = sourceReference,
     applicationReference = applicationReference,
@@ -40,4 +41,5 @@ fun buildSendApplicationToPrintMessage(
     photoLocation = photoLocation,
     delivery = delivery,
     gssCode = gssCode,
+    userId = userId
 )

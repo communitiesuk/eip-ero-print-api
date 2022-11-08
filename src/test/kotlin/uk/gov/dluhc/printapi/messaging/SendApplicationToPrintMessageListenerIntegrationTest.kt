@@ -77,7 +77,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                         )
                     )
                 },
-                eroWelsh = null
+                eroWelsh = null,
+                userId = userId
             )
         }
 

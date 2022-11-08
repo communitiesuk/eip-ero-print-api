@@ -107,8 +107,25 @@ class PrintDetailsMapperTest {
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.name,
                 issueDate = LocalDate.now(),
-                eroEnglish = electoralRegistrationOffice,
-                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else electoralRegistrationOffice
+                eroEnglish = with(ero) {
+                    ElectoralRegistrationOffice(
+                        name = name,
+                        phoneNumber = null,
+                        emailAddress = null,
+                        website = null,
+                        address = null
+                    )
+                },
+                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else with(ero) {
+                    ElectoralRegistrationOffice(
+                        name = name,
+                        phoneNumber = null,
+                        emailAddress = null,
+                        website = null,
+                        address = null
+                    )
+                },
+                userId = userId
             )
         }
         // When
