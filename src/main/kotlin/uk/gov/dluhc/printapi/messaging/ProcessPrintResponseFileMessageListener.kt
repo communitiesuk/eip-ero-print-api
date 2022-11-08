@@ -23,7 +23,7 @@ class ProcessPrintResponseFileMessageListener(
         with(payload) {
             val filePath = "$directory/$fileName"
             logger.info { "Begin processing PrintResponse file [$filePath]" }
-            printResponseFileService.processPrintResponseFile(payload.directory, payload.fileName)
+            printResponseFileService.processPrintResponseFile(directory, fileName)
             logger.info { "Completed processing PrintResponse file [$filePath]" }
         }
     }
