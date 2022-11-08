@@ -5,8 +5,9 @@ import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrationOffice
-import java.time.Instant
-import java.util.Date
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 fun buildPrintRequest(
     eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(),
@@ -14,9 +15,9 @@ fun buildPrintRequest(
     requestId: String = aValidRequestId(),
     issuingAuthorityEn: String = eroEnglish.name!!,
     issuingAuthorityCy: String? = eroWelsh?.name!!,
-    issueDate: String = "12/07/2023",
-    suggestedExpiryDate: String = "28/02/2033",
-    requestDateTime: Date = Date.from(Instant.now()),
+    issueDate: LocalDate = LocalDate.parse("2023-07-12"),
+    suggestedExpiryDate: LocalDate = LocalDate.parse("2033-02-28"),
+    requestDateTime: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     cardFirstname: String = faker.name().firstName(),
     cardMiddleNames: String? = faker.name().firstName(),
     cardSurname: String = faker.name().lastName(),
@@ -59,7 +60,7 @@ fun buildPrintRequest(
     request.issuingAuthorityEn = issuingAuthorityEn
     request.issueDate = issueDate
     request.suggestedExpiryDate = suggestedExpiryDate
-    request.requestDateTime = Date.from(requestDateTime.toInstant())
+    request.requestDateTime = requestDateTime
     request.cardFirstname = cardFirstname
     request.cardMiddleNames = cardMiddleNames
     request.cardSurname = cardSurname

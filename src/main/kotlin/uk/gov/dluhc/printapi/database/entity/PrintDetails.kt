@@ -34,6 +34,7 @@ data class PrintDetails(
     var eroEnglish: ElectoralRegistrationOffice? = null,
     var eroWelsh: ElectoralRegistrationOffice? = null,
     var printRequestStatuses: MutableList<PrintRequestStatus>? = null,
+    var userId: String? = null,
     @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var batchId: String? = null
 ) {
 

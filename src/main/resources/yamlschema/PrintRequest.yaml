@@ -1,4 +1,4 @@
-#version: 0.0.3
+#version: 0.0.4
 title: PrintRequest
 type: object
 description: Represents a single print request
@@ -6,9 +6,9 @@ properties:
   requestId:
     type: string
     description: |-
-      The request identifier of the print request
-      Mongo GUID (needs to be under 25 chars long)
-    example: 14ab70e8-bd3b-400f-bd95-246caf9e4810
+      The unique identifier of the print request
+      A 24 character hex string
+    example: 14ab70e8bd3b400fbd95246c
   issuingAuthorityEn:
     type: string
     maxLength: 255
@@ -76,6 +76,7 @@ properties:
       - standard
       - braille
       - largeprint
+      - audio
   deliveryOption:
     type: string
     enum:

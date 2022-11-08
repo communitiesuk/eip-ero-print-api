@@ -31,6 +31,8 @@ internal class SftpServiceTest {
     @Mock
     private lateinit var sftpOutboundTemplate: SftpRemoteFileTemplate
 
+    // @InjectMocks doesn't seem to be able to handle injecting 2 params of the same type
+    // so initialising in setUp method below
     private lateinit var sftpService: SftpService
 
     @BeforeEach

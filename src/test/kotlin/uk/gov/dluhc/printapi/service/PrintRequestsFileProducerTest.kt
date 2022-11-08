@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintRequest
 import java.io.ByteArrayOutputStream
-import java.time.Instant
-import java.util.Date
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
 internal class PrintRequestsFileProducerTest {
 
@@ -21,9 +21,9 @@ internal class PrintRequestsFileProducerTest {
                 requestId = "627ab400-5ae2-4cc5-9e91-5c050e43e4c1",
                 issuingAuthorityEn = "Lake Deedra",
                 issuingAuthorityCy = "Bradtketon",
-                issueDate = "2022-06-01",
-                suggestedExpiryDate = "2032-06-01",
-                requestDateTime = Date(Instant.parse("2022-06-01T12:23:03.000Z").toEpochMilli()),
+                issueDate = LocalDate.parse("2022-06-01"),
+                suggestedExpiryDate = LocalDate.parse("2032-06-01"),
+                requestDateTime = OffsetDateTime.parse("2022-06-01T12:23:03.000Z"),
                 cardFirstname = "Otelia",
                 cardMiddleNames = "Shamika",
                 cardSurname = "Ziemann",
@@ -86,9 +86,9 @@ internal class PrintRequestsFileProducerTest {
                 requestId = "627ab400-5ae2-4cc5-9e91-5c050e43e4c1",
                 issuingAuthorityEn = "Lake Deedra",
                 issuingAuthorityCy = null,
-                issueDate = "2022-06-01",
-                suggestedExpiryDate = "2032-06-01",
-                requestDateTime = Date(Instant.parse("2022-06-01T12:23:03.000Z").toEpochMilli()),
+                issueDate = LocalDate.parse("2022-06-01"),
+                suggestedExpiryDate = LocalDate.parse("2032-06-01"),
+                requestDateTime = OffsetDateTime.parse("2022-06-01T12:23:03.000Z"),
                 cardFirstname = "Otelia",
                 cardMiddleNames = null,
                 cardSurname = "Ziemann",

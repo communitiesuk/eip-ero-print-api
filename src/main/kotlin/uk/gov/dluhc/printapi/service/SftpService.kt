@@ -2,12 +2,14 @@ package uk.gov.dluhc.printapi.service
 
 import com.jcraft.jsch.ChannelSftp
 import mu.KotlinLogging
+import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.integration.file.FileHeaders
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.integration.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 private val logger = KotlinLogging.logger {}
 
@@ -42,13 +44,35 @@ class SftpService(
     /**
      * Renames the file by suffixing ".processing" to its original name. Returns the newly renamed file name
      * Note: The "/" is appended between fileDirectoryPath and fileName before it's renamed
-     * @param fileDirectoryPath the location of the status file to be renamed
+     * @param directory the location of the status file to be renamed
      * @param originalFileName the name of the file e.g. fileName.json
      */
-    fun markFileForProcessing(fileDirectoryPath: String, originalFileName: String): String {
+    fun markFileForProcessing(directory: String, originalFileName: String): String {
         val newFileName = "$originalFileName$PROCESSING_SUFFIX"
-        logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$fileDirectoryPath]" }
-        sftpOutboundTemplate.rename("$fileDirectoryPath/$originalFileName", "$fileDirectoryPath/$newFileName")
+        logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$directory]" }
+        sftpOutboundTemplate.rename(
+            createFileNamePath(directory, originalFileName),
+            createFileNamePath(directory, newFileName)
+        )
         return newFileName
     }
+
+    /**
+     * Fetches the file from the path on the remote server
+     * @param directory the path to the file on the remote server
+     * @param fileName the path to the file on the remote server
+     * @return the contents of the remote file
+     */
+    fun fetchFileFromOutBoundDirectory(directory: String, fileName: String): String {
+        var responseString: String? = null
+        sftpOutboundTemplate.get(createFileNamePath(directory, fileName)) { responseString = IOUtils.toString(it, StandardCharsets.UTF_8) }
+        return responseString!!
+    }
+
+    fun removeFileFromOutBoundDirectory(directory: String, fileName: String): Boolean {
+        logger.info { "Removing processed file [$fileName] from directory [$directory]" }
+        return sftpOutboundTemplate.remove(createFileNamePath(directory, fileName))
+    }
+
+    private fun createFileNamePath(fileDirectory: String, fileName: String) = "$fileDirectory/$fileName"
 }

@@ -16,7 +16,7 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @Mapper(
-    uses = [SourceTypeMapper::class],
+    uses = [SourceTypeMapper::class, ElectoralRegistrationOfficeMapper::class],
     imports = [UUID::class, ObjectId::class]
 )
 abstract class PrintDetailsMapper {
