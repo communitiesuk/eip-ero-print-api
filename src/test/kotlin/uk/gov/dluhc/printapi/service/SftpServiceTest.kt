@@ -118,8 +118,13 @@ internal class SftpServiceTest {
             // Then
             assertThat(fileList)
                 .hasSize(expectedFileCount)
-                .containsExactlyInAnyOrder(matchedFile1, matchedFile2, matchedFile3, matchedFile4)
-                .doesNotContain(alreadyProcessedFile)
+                .containsExactlyInAnyOrder(
+                    matchedFile1.filename,
+                    matchedFile2.filename,
+                    matchedFile3.filename,
+                    matchedFile4.filename
+                )
+                .doesNotContain(alreadyProcessedFile.filename)
             verify(sftpOutboundTemplate).list(filesDirectoryPath)
             verifyNoInteractions(sftpInboundTemplate)
         }

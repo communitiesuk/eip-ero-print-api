@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.service
 
-import com.jcraft.jsch.ChannelSftp
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Qualifier
@@ -32,14 +31,15 @@ class SftpService(
         )
 
     /**
-     * Returns list entry for all files present in the directory
+     * Returns list of all files present in the directory
      * @param filesDirectoryPath the location of the status files
      */
-    fun identifyFilesToBeProcessed(filesDirectoryPath: String): List<ChannelSftp.LsEntry> =
+    fun identifyFilesToBeProcessed(filesDirectoryPath: String): List<String> =
         sftpOutboundTemplate
             .list(filesDirectoryPath)
             .filterNot { lsEntry -> lsEntry.filename.endsWith(PROCESSING_SUFFIX) }
             .filter { lsEntry -> lsEntry.filename.matches(STATUS_RESPONSE_FILE_REGEX) }
+            .map { it.filename }
 
     /**
      * Renames the file by suffixing ".processing" to its original name. Returns the newly renamed file name
