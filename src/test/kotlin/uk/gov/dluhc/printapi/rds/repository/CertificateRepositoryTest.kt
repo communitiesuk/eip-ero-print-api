@@ -3,7 +3,6 @@ package uk.gov.dluhc.printapi.rds.repository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.rds.entity.Address
 import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.entity.Delivery
@@ -38,7 +37,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
-import java.time.Instant
 
 internal class CertificateRepositoryTest : IntegrationTest() {
 

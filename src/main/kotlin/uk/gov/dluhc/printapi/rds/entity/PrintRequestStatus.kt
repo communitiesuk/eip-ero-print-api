@@ -10,7 +10,6 @@ import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
 import uk.gov.dluhc.printapi.rds.repository.UseExistingOrGenerateUUID
 import java.time.Instant
-import java.time.OffsetDateTime
 import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
