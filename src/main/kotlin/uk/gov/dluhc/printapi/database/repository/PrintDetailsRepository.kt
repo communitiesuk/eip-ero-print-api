@@ -12,6 +12,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import uk.gov.dluhc.printapi.config.DynamoDbConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
+import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.REQUEST_ID_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.PrintDetails.Companion.STATUS_BATCH_ID_INDEX_NAME
 import uk.gov.dluhc.printapi.database.entity.Status
 import java.util.UUID
@@ -34,6 +35,18 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
             return table.getItem(key(id.toString()))
         } catch (ex: NullPointerException) {
             throw PrintDetailsNotFoundException(id)
+        }
+    }
+
+    fun getByRequestId(requestId: String): PrintDetails {
+        val queryConditional = QueryConditional.keyEqualTo(key(requestId))
+        val index = table.index(REQUEST_ID_INDEX_NAME)
+        val query = QueryEnhancedRequest.builder().queryConditional(queryConditional).build()
+
+        try {
+            return index.query(query).flatMap { it.items() }.first()
+        } catch (ex: NoSuchElementException) {
+            throw PrintDetailsNotFoundException(requestId)
         }
     }
 
@@ -65,6 +78,7 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
 
     private fun key(partitionValue: String, sortValue: String): Key =
         Key.builder().partitionValue(partitionValue).sortValue(sortValue).build()
+
     private fun key(partitionValue: String): Key =
         Key.builder().partitionValue(partitionValue).build()
 }
