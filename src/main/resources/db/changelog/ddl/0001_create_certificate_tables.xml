@@ -203,6 +203,9 @@
             <column name="date_created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_by" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>

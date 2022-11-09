@@ -60,6 +60,8 @@ fun aValidFirstName(): String = faker.name().firstName()
 
 fun aValidSurname(): String = faker.name().lastName()
 
+fun aValidUserId(): String = faker.name().username()
+
 fun aValidDeliveryName(): String = faker.name().fullName()
 
 fun aValidDeliveryClass(): DeliveryClass = DeliveryClass.STANDARD

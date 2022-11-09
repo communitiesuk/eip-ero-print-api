@@ -33,6 +33,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSuggestedExpiryDate
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
@@ -86,7 +87,8 @@ internal class CertificateRepositoryTest : IntegrationTest() {
             photoLocationArn = aPhotoArn(),
             delivery = delivery,
             eroEnglish = eroEnglish,
-            eroWelsh = null
+            eroWelsh = null,
+            userId = aValidUserId()
         )
         val printRequestStatus = PrintRequestStatus(
             status = aValidCertificateStatus(),

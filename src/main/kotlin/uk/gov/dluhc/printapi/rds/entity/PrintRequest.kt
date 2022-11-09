@@ -87,6 +87,10 @@ class PrintRequest(
     @JoinColumn(name = "welsh_ero_id")
     var eroWelsh: ElectoralRegistrationOffice? = null,
 
+    @NotNull
+    @Size(max = 255)
+    var userId: String? = null,
+
     @Size(max = 255)
     var batchId: String? = null,
 
