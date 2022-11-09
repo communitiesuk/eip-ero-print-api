@@ -44,7 +44,7 @@ internal class CertificateRepositoryTest : IntegrationTest() {
     fun `should return Certificate given persisted Certificate with all required properties`() {
         // Given
         val certificate = Certificate(
-            certificateNumber = aValidVacNumber(),
+            vacNumber = aValidVacNumber(),
             sourceType = aValidSourceType(),
             sourceReference = aValidSourceReference(),
             applicationReference = aValidApplicationReference(),

@@ -11,8 +11,7 @@
                 <constraints nullable="false" primaryKey="true" unique="true"
                              primaryKeyName="certificate_pkey"/>
             </column>
-            <!-- Possibly rename this to vac_number (but that seems a bit cryptic) -->
-            <column name="certificate_number" type="varchar(20)">
+            <column name="vac_number" type="varchar(20)">
                 <constraints nullable="false"/>
             </column>
             <column name="gss_code" type="varchar(80)">

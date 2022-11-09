@@ -43,8 +43,7 @@ class Certificate(
 
     @NotNull
     @Size(max = 20)
-    // var vacNumber: String? = null,
-    var certificateNumber: String? = null,
+    var vacNumber: String? = null,
 
     @NotNull
     @Size(max = 20)
@@ -114,6 +113,6 @@ class Certificate(
 
     @Override
     override fun toString(): String {
-        return this::class.simpleName + "(id = $id , certificateNumber = $certificateNumber , gssCode = $gssCode, dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
+        return this::class.simpleName + "(id = $id , certificateNumber = $vacNumber , gssCode = $gssCode, dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
     }
 }
