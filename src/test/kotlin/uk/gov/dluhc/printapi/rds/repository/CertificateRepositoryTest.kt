@@ -2,8 +2,6 @@ package uk.gov.dluhc.printapi.rds.repository
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style.name
-import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style.street
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.rds.entity.Address
 import uk.gov.dluhc.printapi.rds.entity.Certificate

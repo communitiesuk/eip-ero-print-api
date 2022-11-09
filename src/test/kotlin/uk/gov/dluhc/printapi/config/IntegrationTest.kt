@@ -17,8 +17,8 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.dao.TransientDataAccessException
+import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory
@@ -37,16 +37,13 @@ import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
-import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
-import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
 import java.io.File
 import java.nio.charset.Charset
 import java.time.Clock
-
-private val logger = KotlinLogging.logger {}
 
 private val logger = KotlinLogging.logger {}
 
@@ -103,9 +100,6 @@ internal abstract class IntegrationTest {
     protected lateinit var processPrintResponseFileMessageQueue: MessageQueue<ProcessPrintResponseFileMessage>
 
     @Autowired
-    protected lateinit var processPrintResponseMessageQueue: MessageQueue<ProcessPrintResponseMessage>
-
-    @Autowired
     protected lateinit var objectMapper: ObjectMapper
 
     @Value("\${sqs.send-application-to-print-queue-name}")
@@ -114,11 +108,11 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.process-print-request-batch-queue-name}")
     protected lateinit var processPrintRequestBatchQueueName: String
 
-    @Autowired
-    protected lateinit var certificateRepository: CertificateRepository
-
     @Value("\${sqs.process-print-response-file-queue-name}")
     protected lateinit var processPrintResponseFileQueueName: String
+
+    @Autowired
+    protected lateinit var certificateRepository: CertificateRepository
 
     @BeforeEach
     fun clearLogAppender() {
