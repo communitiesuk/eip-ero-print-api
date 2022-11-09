@@ -1,28 +1,30 @@
 package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
+import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
 import org.mockito.kotlin.given
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneId
 
 @ExtendWith(MockitoExtension::class)
 class PrintRequestsServiceTest {
 
+    @InjectMocks
     private lateinit var printRequestsService: PrintRequestsService
 
     @Mock
@@ -34,20 +36,11 @@ class PrintRequestsServiceTest {
     @Mock
     private lateinit var processPrintRequestQueue: MessageQueue<ProcessPrintRequestBatchMessage>
 
-    private val fixedClock = Clock.fixed(Instant.parse("2022-10-18T11:22:32.123Z"), ZoneId.of("UTC"))
-
-    @BeforeEach
-    fun setUp() {
-        printRequestsService = PrintRequestsService(
-            printDetailsRepository = printDetailsRepository,
-            idFactory = idFactory,
-            processPrintRequestQueue = processPrintRequestQueue,
-            clock = fixedClock,
-        )
-    }
+    @Captor
+    private lateinit var savedRecordArgumentCaptor: ArgumentCaptor<PrintDetails>
 
     @Test
-    fun `should batch print requests, save and submit to queue`() {
+    fun `should batch multiple print requests, save and submit to queue`() {
         // Given
         val batchSize = 5
         val numOfRequests = 12
@@ -74,6 +67,37 @@ class PrintRequestsServiceTest {
     }
 
     @Test
+    fun `should batch one print request, save and submit to queue`() {
+        // Given
+        val batchSize = 5
+
+        val aPrintDetailsRecord = buildPrintDetails(
+            batchId = null,
+            status = Status.PENDING_ASSIGNMENT_TO_BATCH
+        )
+        val items = listOf(aPrintDetailsRecord)
+        given(printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
+
+        val batchId = aValidBatchId()
+        given(idFactory.batchId()).willReturn(batchId)
+        val expectedMessage = ProcessPrintRequestBatchMessage(batchId)
+
+        // When
+        printRequestsService.processPrintRequests(batchSize)
+
+        // Then
+        verify(printDetailsRepository).getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
+        verify(idFactory).batchId()
+        verify(processPrintRequestQueue).submit(expectedMessage)
+
+        verify(printDetailsRepository).save(capture(savedRecordArgumentCaptor))
+        val savedPrintDetails = savedRecordArgumentCaptor.value!!
+        assertThat(savedPrintDetails.printRequestStatuses!!.sortedBy { it.eventDateTime }.map { it.status })
+            .containsExactly(Status.PENDING_ASSIGNMENT_TO_BATCH, Status.ASSIGNED_TO_BATCH)
+        assertThat(savedPrintDetails.status).isEqualTo(Status.ASSIGNED_TO_BATCH)
+    }
+
+    @Test
     fun `should correctly batch print requests`() {
         // Given
         val batchSize = 10
@@ -88,7 +112,7 @@ class PrintRequestsServiceTest {
         // Then
         assertThat(batches).hasSize(3)
         batches.map { (id, items) ->
-            assert(items.all { it.status == Status.PENDING_ASSIGNMENT_TO_BATCH })
+            assert(items.all { it.status == Status.ASSIGNED_TO_BATCH })
             assert(items.all { it.batchId == id })
         }
     }
