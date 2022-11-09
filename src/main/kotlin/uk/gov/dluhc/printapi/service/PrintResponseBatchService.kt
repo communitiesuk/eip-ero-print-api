@@ -14,33 +14,41 @@ class PrintResponseBatchService(
     private val idFactory: IdFactory,
     private val clock: Clock
 ) {
+    /**
+     * Updates print details for the batches based on the batch responses' statuses.
+     * If a batch is successful, a new printRequestStatus will be added for each corresponding print details with status
+     * being RECEIVED_BY_PRINT_PROVIDER.
+     *
+     * If a batch is not successful, the status will be set to SENT_TO_PRINT_PROVIDER and a new requestId will be set.
+     * The reason for the new requestId is, the print provider does not support duplicate print requests with the same requestId.
+     *
+     * dateCreated will be the timestamp the new printRequestStatus is created and eventDateTime will be the timestamp from
+     * the print provider's batch response.
+     */
     fun processBatchResponses(batchResponses: List<BatchResponse>) {
         batchResponses.forEach { batchResponse ->
-            val printDetails =
-                printDetailsRepository.getAllByStatusAndBatchId(SENT_TO_PRINT_PROVIDER, batchResponse.batchId)
+            with(batchResponse) {
+                val newStatus =
+                    if (status != SUCCESS) PENDING_ASSIGNMENT_TO_BATCH else RECEIVED_BY_PRINT_PROVIDER
 
-            if (batchResponse.status == SUCCESS) {
+                val printDetails =
+                    printDetailsRepository.getAllByStatusAndBatchId(SENT_TO_PRINT_PROVIDER, batchId)
+
                 printDetails.forEach {
                     it.addStatus(
-                        status = RECEIVED_BY_PRINT_PROVIDER,
+                        status = newStatus,
                         dateCreated = OffsetDateTime.now(clock),
-                        eventDateTime = batchResponse.timestamp,
+                        eventDateTime = timestamp,
                         message = null
                     )
+
+                    if (status != SUCCESS) {
+                        it.requestId = idFactory.requestId()
+                    }
                 }
-            } else {
-                printDetails.forEach {
-                    it.addStatus(
-                        status = PENDING_ASSIGNMENT_TO_BATCH,
-                        dateCreated = OffsetDateTime.now(clock),
-                        eventDateTime = batchResponse.timestamp,
-                        message = null
-                    )
-                    it.requestId = idFactory.requestId()
-                }
+
+                printDetailsRepository.updateItems(printDetails)
             }
-
-            printDetailsRepository.updateItems(printDetails)
         }
     }
 }
