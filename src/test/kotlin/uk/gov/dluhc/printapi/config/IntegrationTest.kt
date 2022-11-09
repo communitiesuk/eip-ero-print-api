@@ -35,6 +35,7 @@ import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
@@ -95,6 +96,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var processPrintResponseFileMessageQueue: MessageQueue<ProcessPrintResponseFileMessage>
+
+    @Autowired
+    protected lateinit var processPrintResponseMessageQueue: MessageQueue<ProcessPrintResponseMessage>
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
