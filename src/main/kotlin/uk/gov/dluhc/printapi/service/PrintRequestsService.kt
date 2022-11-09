@@ -3,10 +3,13 @@ package uk.gov.dluhc.printapi.service
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
+import java.time.Clock
+import java.time.OffsetDateTime
 
 private val logger = KotlinLogging.logger { }
 
@@ -14,12 +17,20 @@ private val logger = KotlinLogging.logger { }
 class PrintRequestsService(
     private val printDetailsRepository: PrintDetailsRepository,
     private val idFactory: IdFactory,
-    private val processPrintRequestQueue: MessageQueue<ProcessPrintRequestBatchMessage>
+    private val processPrintRequestQueue: MessageQueue<ProcessPrintRequestBatchMessage>,
+    private val clock: Clock,
 ) {
 
     fun processPrintRequests(batchSize: Int) {
         batchPrintRequests(batchSize).map { (batchId, printDetails) ->
-            printDetails.map { it.copy(status = Status.ASSIGNED_TO_BATCH, batchId = batchId) }
+            printDetails.map {
+                it.copy(
+                    batchId = batchId,
+                    printRequestStatuses = it.printRequestStatuses?.plus(
+                        PrintRequestStatus(Status.ASSIGNED_TO_BATCH, OffsetDateTime.now(clock))
+                    )?.toMutableList()
+                )
+            }
         }.forEach { batch ->
             batch.forEach { pd ->
                 printDetailsRepository.save(pd)

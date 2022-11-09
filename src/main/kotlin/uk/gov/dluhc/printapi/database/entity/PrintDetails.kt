@@ -6,6 +6,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecon
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 @DynamoDbBean
@@ -32,10 +33,37 @@ data class PrintDetails(
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
     var eroEnglish: ElectoralRegistrationOffice? = null,
     var eroWelsh: ElectoralRegistrationOffice? = null,
+    var printRequestStatuses: MutableList<PrintRequestStatus>? = null,
     var userId: String? = null,
-    @get:DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-    @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])var batchId: String? = null
+    @get:DynamoDbSecondarySortKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME]) var batchId: String? = null
 ) {
+
+    var status: Status?
+        @DynamoDbSecondaryPartitionKey(indexNames = [STATUS_BATCH_ID_INDEX_NAME])
+        get() = printRequestStatuses?.sortedBy { it.eventDateTime }?.last()?.status
+        @Deprecated(
+            """
+            Programmatically setting the status property is not supported and will have no effect.
+            The status property and its setter are provided so that dynamodb persists a status attribute, where the value
+            is the last element from the printRequestStatuses list (element with the most recent eventDateTime).
+            To set the status add a new PrintRequestStatus to the printRequestStatuses list.
+            """
+        )
+        set(_) { /* no-op setter */ }
+
+    fun addStatus(
+        status: Status,
+        dateCreated: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+        eventDateTime: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+        message: String? = null
+    ): PrintDetails {
+        if (printRequestStatuses == null) {
+            printRequestStatuses = mutableListOf()
+        }
+        printRequestStatuses!!.add(PrintRequestStatus(status, dateCreated, eventDateTime, message))
+        return this
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

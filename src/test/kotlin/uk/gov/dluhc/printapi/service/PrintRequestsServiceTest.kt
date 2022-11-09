@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -16,10 +16,13 @@ import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 @ExtendWith(MockitoExtension::class)
 class PrintRequestsServiceTest {
-    @InjectMocks
+
     private lateinit var printRequestsService: PrintRequestsService
 
     @Mock
@@ -30,6 +33,18 @@ class PrintRequestsServiceTest {
 
     @Mock
     private lateinit var processPrintRequestQueue: MessageQueue<ProcessPrintRequestBatchMessage>
+
+    private val fixedClock = Clock.fixed(Instant.parse("2022-10-18T11:22:32.123Z"), ZoneId.of("UTC"))
+
+    @BeforeEach
+    fun setUp() {
+        printRequestsService = PrintRequestsService(
+            printDetailsRepository = printDetailsRepository,
+            idFactory = idFactory,
+            processPrintRequestQueue = processPrintRequestQueue,
+            clock = fixedClock,
+        )
+    }
 
     @Test
     fun `should batch print requests, save and submit to queue`() {

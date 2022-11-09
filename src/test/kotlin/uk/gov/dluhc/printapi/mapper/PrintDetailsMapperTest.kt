@@ -1,29 +1,35 @@
 package uk.gov.dluhc.printapi.mapper
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.CertificateDelivery
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.UUID
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
 import uk.gov.dluhc.printapi.database.entity.SourceType as SourceTypeEntity
@@ -32,7 +38,12 @@ import uk.gov.dluhc.printapi.messaging.models.SourceType as SourceTypeModel
 
 @ExtendWith(MockitoExtension::class)
 class PrintDetailsMapperTest {
-    @InjectMocks
+
+    companion object {
+        private val FIXED_TIME = Instant.parse("2022-10-18T11:22:32.123Z")
+        private val FIXED_CLOCK = Clock.fixed(FIXED_TIME, ZoneOffset.UTC)
+    }
+
     private lateinit var mapper: PrintDetailsMapperImpl
 
     @Mock
@@ -43,6 +54,15 @@ class PrintDetailsMapperTest {
 
     @Mock
     private lateinit var idFactory: IdFactory
+
+    @BeforeEach
+    fun setup() {
+        mapper = PrintDetailsMapperImpl()
+        ReflectionTestUtils.setField(mapper, "sourceTypeMapper", sourceTypeMapper)
+        ReflectionTestUtils.setField(mapper, "idFactory", idFactory)
+        ReflectionTestUtils.setField(mapper, "clock", FIXED_CLOCK)
+        ReflectionTestUtils.setField(mapper, "electoralRegistrationOfficeMapper", electoralRegistrationOfficeMapper)
+    }
 
     @ParameterizedTest
     @CsvSource(value = ["EN, EN", "CY, CY"])
@@ -109,6 +129,13 @@ class PrintDetailsMapperTest {
                 issueDate = LocalDate.now(),
                 eroEnglish = electoralRegistrationOffice,
                 eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else electoralRegistrationOffice,
+                printRequestStatuses = mutableListOf(
+                    PrintRequestStatus(
+                        Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        dateCreated = FIXED_TIME.atOffset(ZoneOffset.UTC),
+                        eventDateTime = FIXED_TIME.atOffset(ZoneOffset.UTC)
+                    )
+                ),
                 userId = userId
             )
         }
@@ -118,6 +145,7 @@ class PrintDetailsMapperTest {
 
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
+        assertThat(actual.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
         assertThat(actual.id).isNotNull
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).requestId()

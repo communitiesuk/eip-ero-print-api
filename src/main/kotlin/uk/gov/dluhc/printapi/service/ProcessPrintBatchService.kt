@@ -45,7 +45,7 @@ class ProcessPrintBatchService(
     }
 
     private fun updateBatch(printList: List<PrintDetails>): List<PrintDetails> {
-        printList.forEach { printDetails -> printDetails.status = Status.SENT_TO_PRINT_PROVIDER }
+        printList.forEach { printDetails -> printDetails.addStatus(Status.SENT_TO_PRINT_PROVIDER) }
         return printList
     }
 }

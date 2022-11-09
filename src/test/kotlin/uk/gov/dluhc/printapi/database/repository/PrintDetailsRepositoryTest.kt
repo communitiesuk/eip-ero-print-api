@@ -5,8 +5,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 internal class PrintDetailsRepositoryTest : IntegrationTest() {
@@ -48,7 +53,7 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
             printDetailsRepository.save(details)
 
             // When
-            val results = printDetailsRepository.getAllByStatusAndBatchId(details.status, details.batchId!!)
+            val results = printDetailsRepository.getAllByStatusAndBatchId(details.status!!, details.batchId!!)
 
             // Then
             assertThat(results).containsExactly(details)
@@ -57,8 +62,12 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
         @Test
         fun `should find no matching print details given different status`() {
             // Given
-            val differentStatus = Status.SENT_TO_PRINT_PROVIDER
-            val details = buildPrintDetails(status = Status.PENDING_ASSIGNMENT_TO_BATCH)
+            val differentStatus = SENT_TO_PRINT_PROVIDER
+            val details = buildPrintDetails(
+                printRequestStatuses = mutableListOf(
+                    PrintRequestStatus(PENDING_ASSIGNMENT_TO_BATCH, OffsetDateTime.now(ZoneOffset.UTC))
+                )
+            )
             printDetailsRepository.save(details)
 
             // When
@@ -76,7 +85,7 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
             printDetailsRepository.save(details)
 
             // When
-            val results = printDetailsRepository.getAllByStatusAndBatchId(details.status, differentBatchId)
+            val results = printDetailsRepository.getAllByStatusAndBatchId(details.status!!, differentBatchId)
 
             // Then
             assertThat(results).isEmpty()
@@ -85,14 +94,14 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
         @Test
         fun `should get all print details by status`() {
             // Given
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.PENDING_ASSIGNMENT_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.ASSIGNED_TO_BATCH))
-            printDetailsRepository.save(buildPrintDetails(batchId = null, status = Status.SENT_TO_PRINT_PROVIDER))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = PENDING_ASSIGNMENT_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = ASSIGNED_TO_BATCH))
+            printDetailsRepository.save(buildPrintDetails(batchId = null, status = SENT_TO_PRINT_PROVIDER))
 
             // When
-            val results = printDetailsRepository.getAllByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
+            val results = printDetailsRepository.getAllByStatus(PENDING_ASSIGNMENT_TO_BATCH)
 
             // Then
             assertThat(results).hasSize(3)
@@ -102,11 +111,11 @@ internal class PrintDetailsRepositoryTest : IntegrationTest() {
     @Test
     fun `should update item as it exists in the repository`() {
         // Given
-        val initialStatus = Status.PENDING_ASSIGNMENT_TO_BATCH
+        val initialStatus = PENDING_ASSIGNMENT_TO_BATCH
         val details = buildPrintDetails(status = initialStatus)
         printDetailsRepository.save(details)
-        val updatedStatus = Status.SENT_TO_PRINT_PROVIDER
-        details.status = updatedStatus
+        val updatedStatus = SENT_TO_PRINT_PROVIDER
+        details.addStatus(updatedStatus)
 
         // When
         printDetailsRepository.updateItems(listOf(details))

@@ -40,6 +40,7 @@ import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
 import java.io.File
 import java.nio.charset.Charset
+import java.time.Clock
 
 private val logger = KotlinLogging.logger {}
 
@@ -88,6 +89,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var s3Client: S3Client
+
+    @Autowired
+    protected lateinit var clock: Clock
 
     @Autowired
     protected lateinit var processPrintResponseFileMessageQueue: MessageQueue<ProcessPrintResponseFileMessage>
