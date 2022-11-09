@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.6.0'
+  version: '1.7.0'
   description: |-
     Print API SQS Message Types
     
@@ -49,6 +49,16 @@ paths:
       responses:
         '204':
           description: No response content.
+  '/process-print-response':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/ProcessPrintResponseMessage'
+      responses:
+        '204':
+          description: No response content.
+
 components:
   #
   # Schema and Enum Definitions
@@ -242,6 +252,46 @@ components:
       required:
         - directory
         - fileName
+
+    ProcessPrintResponseMessage:
+      description: The SQS message for processing the status change for an individual Print Request
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: |-
+            The unique identifier of the Print Request
+            A 24 character hex string
+          example: 14ab70e8bd3b400fbd95246c
+        timestamp:
+          type: string
+          format: date-time
+          description: The date time the Print Provider issued this status change for the Print Request.
+          example: '2022-06-01T14:23:03.000Z'
+        statusStep:
+          type: string
+          description: The current print step this update relates to
+          enum:
+            - PROCESSED
+            - IN-PRODUCTION
+            - DISPATCHED
+            - NOT-DELIVERED
+        status:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILED
+          description: Indicates if the step change was successful or not.
+        message:
+          type: string
+          maxLength: 255
+          description: Error description. Only populated if `status` is `FAILED`
+      required:
+        - requestId
+        - timestamp
+        - statusStep
+        - status
+
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
@@ -266,3 +316,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ProcessPrintResponseFileMessage'
+    ProcessPrintResponseMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProcessPrintResponseMessage'

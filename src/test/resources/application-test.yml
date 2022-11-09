@@ -11,6 +11,7 @@ sqs:
   send-application-to-print-queue-name: send-application-to-print
   process-print-request-batch-queue-name: process-print-request-batch
   process-print-response-file-queue-name: process-print-response-file
+  process-print-response-queue-name: process-print-response
 
 api:
   ero-management:
