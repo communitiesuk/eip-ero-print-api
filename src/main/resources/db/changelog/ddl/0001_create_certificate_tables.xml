@@ -212,10 +212,35 @@
             </column>
         </createTable>
     </changeSet>
-    <!--
-        // one to many with "Print Status" Table
-        // var statusHistory: Collection<Status> = Status.PENDING_ASSIGNMENT_TO_BATCH
-    -->
 
+    <changeSet author="neil.massey@valtech.com" id="0001-EIP1-2386-create-print-request-status" context="ddl">
+        <createTable tableName="print_request_status">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="print_request_status_print_request_pkey"/>
+            </column>
+            <column name="print_request_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_print_request_status_print_request"
+                             references="print_request(id)"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_date_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="varchar(1024)"/>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>

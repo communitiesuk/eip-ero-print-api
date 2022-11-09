@@ -13,6 +13,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
+import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -74,3 +75,5 @@ fun aValidPhoneNumber(): String = faker.phoneNumber().cellPhone()
 fun aValidEmailAddress(): String = "contact@${aValidEroName().replaceSpacesWith("-")}.gov.uk"
 
 fun aValidWebsite(): String = "https://${aValidEroName().replaceSpacesWith("-")}.gov.uk"
+
+fun aValidPrintRequestStatusEventDateTime() = Instant.now()

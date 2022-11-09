@@ -18,10 +18,12 @@ import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.Table
 import javax.persistence.Version
@@ -88,8 +90,9 @@ class PrintRequest(
     @Size(max = 255)
     var batchId: String? = null,
 
-    // one to many with "Print Status" Table
-    // var statusHistory: Collection<Status> = Status.PENDING_ASSIGNMENT_TO_BATCH
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "print_request_id", nullable = false)
+    var statusHistory: MutableList<PrintRequestStatus> = mutableListOf(),
 
     @NotNull
     @UpdateTimestamp
@@ -104,6 +107,11 @@ class PrintRequest(
     var version: Long? = null
 
 ) {
+    fun addPrintRequestStatus(newPrintRequestStatus: PrintRequestStatus): PrintRequest {
+        statusHistory += newPrintRequestStatus
+        return this
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false

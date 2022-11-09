@@ -3,11 +3,13 @@ package uk.gov.dluhc.printapi.rds.repository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.rds.entity.Address
 import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.entity.Delivery
 import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.rds.entity.PrintRequest
+import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressPostcode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressStreet
@@ -25,6 +27,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidFirstName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssueDate
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssuingAuthority
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestStatusEventDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
@@ -35,6 +38,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
+import java.time.Instant
 
 internal class CertificateRepositoryTest : IntegrationTest() {
 
@@ -86,6 +90,11 @@ internal class CertificateRepositoryTest : IntegrationTest() {
             eroEnglish = eroEnglish,
             eroWelsh = null
         )
+        val printRequestStatus = PrintRequestStatus(
+            status = aValidCertificateStatus(),
+            eventDateTime = aValidPrintRequestStatusEventDateTime(),
+        )
+        printRequest.addPrintRequestStatus(printRequestStatus)
         certificate.addPrintRequest(printRequest)
         val expected = certificateRepository.save(certificate)
 
