@@ -7,6 +7,7 @@ import org.springframework.integration.file.FileHeaders
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.integration.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
 
@@ -37,16 +38,18 @@ class SftpService(
     fun identifyFilesToBeProcessed(filesDirectoryPath: String): List<String> =
         sftpOutboundTemplate
             .list(filesDirectoryPath)
-            .filterNot { lsEntry -> lsEntry.filename.endsWith(PROCESSING_SUFFIX) }
-            .filter { lsEntry -> lsEntry.filename.matches(STATUS_RESPONSE_FILE_REGEX) }
             .map { it.filename }
+            .filterNot { it.endsWith(PROCESSING_SUFFIX) }
+            .filter { it.matches(STATUS_RESPONSE_FILE_REGEX) }
 
     /**
      * Renames the file by suffixing ".processing" to its original name. Returns the newly renamed file name
      * Note: The "/" is appended between fileDirectoryPath and fileName before it's renamed
      * @param directory the location of the status file to be renamed
      * @param originalFileName the name of the file e.g. fileName.json
+     * @throws IOException while renaming the file.
      */
+    @Throws(IOException::class)
     fun markFileForProcessing(directory: String, originalFileName: String): String {
         val newFileName = "$originalFileName$PROCESSING_SUFFIX"
         logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$directory]" }

@@ -13,6 +13,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.config.SftpProperties
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
+import java.io.IOException
 
 @ExtendWith(MockitoExtension::class)
 internal class PrintResponseFileReadinessServiceTest {
@@ -41,7 +42,7 @@ internal class PrintResponseFileReadinessServiceTest {
         given(sftpService.identifyFilesToBeProcessed(any())).willReturn(emptyList())
 
         // When
-        printResponseFileReadinessService.markPrintResponseFileForProcessing()
+        printResponseFileReadinessService.markAndSubmitPrintResponseFileForProcessing()
 
         // Then
         verify(sftpService).identifyFilesToBeProcessed(DIRECTORY)
@@ -63,7 +64,7 @@ internal class PrintResponseFileReadinessServiceTest {
         given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileName2))).willReturn(renamedFileName2)
 
         // When
-        printResponseFileReadinessService.markPrintResponseFileForProcessing()
+        printResponseFileReadinessService.markAndSubmitPrintResponseFileForProcessing()
 
         // Then
         verify(sftpService).identifyFilesToBeProcessed(DIRECTORY)
@@ -81,36 +82,36 @@ internal class PrintResponseFileReadinessServiceTest {
     @Test
     fun `should continue marking print response file and sending to queue when some of files marking fails due to exception`() {
         // Given
-        val matchingFile1ThatThrowsException = "status-20221101171156051.json"
-        val matchingFile3ThatThrowsException = "status-20221101171156053.json"
+        val matchingFile1ThatThrowsIOException = "status-20221101171156051.json"
+        val matchingFile3ThatThrowsIOException = "status-20221101171156053.json"
         val matchingFileName2 = "status-20221101171156052.json"
         val matchingFileName4 = "status-20221101171156054.json"
         val renamedFileName2 = "$matchingFileName2.processing"
         val renamedFileName4 = "$matchingFileName4.processing"
-        val expectedExceptionThrown = RuntimeException("Some error")
+        val expectedIOException = IOException("Unable to rename file")
 
         given(sftpProperties.printResponseDownloadDirectory).willReturn(DIRECTORY)
         given(sftpService.identifyFilesToBeProcessed(any())).willReturn(
             listOf(
                 matchingFileName2,
-                matchingFile1ThatThrowsException,
+                matchingFile1ThatThrowsIOException,
                 matchingFileName4,
-                matchingFile3ThatThrowsException
+                matchingFile3ThatThrowsIOException
             )
         )
-        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFile1ThatThrowsException))).willThrow(expectedExceptionThrown)
+        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFile1ThatThrowsIOException))).willThrow(expectedIOException)
         given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileName2))).willReturn(renamedFileName2)
-        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFile3ThatThrowsException))).willThrow(expectedExceptionThrown)
+        given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFile3ThatThrowsIOException))).willThrow(expectedIOException)
         given(sftpService.markFileForProcessing(eq(DIRECTORY), eq(matchingFileName4))).willReturn(renamedFileName4)
 
         // When
-        printResponseFileReadinessService.markPrintResponseFileForProcessing()
+        printResponseFileReadinessService.markAndSubmitPrintResponseFileForProcessing()
 
         // Then
         verify(sftpService).identifyFilesToBeProcessed(DIRECTORY)
-        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFile1ThatThrowsException)
+        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFile1ThatThrowsIOException)
         verify(sftpService).markFileForProcessing(DIRECTORY, matchingFileName2)
-        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFile3ThatThrowsException)
+        verify(sftpService).markFileForProcessing(DIRECTORY, matchingFile3ThatThrowsIOException)
         verify(sftpService).markFileForProcessing(DIRECTORY, matchingFileName4)
         verify(printMessagingService).submitPrintResponseFileForProcessing(
             ProcessPrintResponseFileMessage(DIRECTORY, renamedFileName2)

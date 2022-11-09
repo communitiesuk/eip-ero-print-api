@@ -1,10 +1,10 @@
 package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
-import org.apache.commons.lang3.time.StopWatch
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.config.SftpProperties
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
+import java.io.IOException
 
 private val logger = KotlinLogging.logger {}
 
@@ -15,33 +15,32 @@ class PrintResponseFileReadinessService(
     private val printMessagingService: PrintMessagingService
 ) {
 
-    fun markPrintResponseFileForProcessing() {
-        val stopWatch = StopWatch.createStarted()
+    /**
+     * This method renames all the unprocessed files within the directory defined by [`sftpProperties.printResponseDownloadDirectory`] and
+     * sends a SQS message to the downstream queue to process each of the unprocessed renamed file.
+     * If there is any exception while renaming the file, then the process is fail-safe as it continues with the next unprocessed file.
+     */
+    fun markAndSubmitPrintResponseFileForProcessing() {
         val outboundFolderPath = sftpProperties.printResponseDownloadDirectory
         logger.info { "Finding matching print responses from directory: [$outboundFolderPath]" }
 
-        val unprocessedFiles = sftpService.identifyFilesToBeProcessed(outboundFolderPath)
-        logger.info { "Found [${unprocessedFiles.size}] unprocessed print responses" }
-
-        val filesFailedToProcess = mutableListOf<String>()
-        unprocessedFiles.forEachIndexed { index, unprocessedFileName ->
-            try {
-                sftpService.markFileForProcessing(
-                    directory = outboundFolderPath,
-                    originalFileName = unprocessedFileName
-                ).also {
-                    val messagePayload = ProcessPrintResponseFileMessage(outboundFolderPath, it)
-                    logger.info { "Submitting SQS message for file: [${index + 1} of ${unprocessedFiles.size}] with payload: $messagePayload" }
-                    printMessagingService.submitPrintResponseFileForProcessing(messagePayload)
+        with(sftpService.identifyFilesToBeProcessed(outboundFolderPath)) {
+            logger.info { "Found [$size] unprocessed print responses" }
+            forEachIndexed { index, unprocessedFileName ->
+                try {
+                    sftpService.markFileForProcessing(
+                        directory = outboundFolderPath,
+                        originalFileName = unprocessedFileName
+                    ).also {
+                        val messagePayload = ProcessPrintResponseFileMessage(outboundFolderPath, it)
+                        logger.info { "Submitting SQS message for file: [${index + 1} of $size] with payload: $messagePayload" }
+                        printMessagingService.submitPrintResponseFileForProcessing(messagePayload)
+                    }
+                } catch (e: IOException) {
+                    logger.warn { "Error renaming [$unprocessedFileName] due to error: [${e.message}]. Processing will continue for rest of the files" }
                 }
-            } catch (e: RuntimeException) {
-                filesFailedToProcess.add(unprocessedFileName)
-                logger.warn { "Error renaming [$unprocessedFileName] due to [${e.message}]. Processing will continue for rest of the files" }
             }
         }
-
-        stopWatch.stop()
-        logger.warn { "${filesFailedToProcess.size} files failures that were not processed $filesFailedToProcess" }
-        logger.info { "Completed marking and processing all print response files in [$stopWatch]" }
+        logger.info { "Completed marking and processing all print response files from directory: [$outboundFolderPath]" }
     }
 }

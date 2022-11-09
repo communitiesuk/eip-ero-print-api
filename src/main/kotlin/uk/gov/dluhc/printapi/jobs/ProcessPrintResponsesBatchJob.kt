@@ -17,7 +17,7 @@ class ProcessPrintResponsesBatchJob(
     @SchedulerLock(name = "\${jobs.process-print-responses.name}")
     fun pollAndProcessPrintResponses() {
         logger.info { "Polling for print responses from outbound directory" }
-        printResponseFileReadinessService.markPrintResponseFileForProcessing()
+        printResponseFileReadinessService.markAndSubmitPrintResponseFileForProcessing()
         logger.info { "Completed print response polling job from outbound directory" }
     }
 }
