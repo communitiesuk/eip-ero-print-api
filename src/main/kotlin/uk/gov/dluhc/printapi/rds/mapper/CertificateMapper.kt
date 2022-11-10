@@ -9,7 +9,6 @@ import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.entity.PrintRequest
 import uk.gov.dluhc.printapi.service.IdFactory
 
 @Mapper(uses = [SourceTypeMapper::class, InstantMapper::class])
