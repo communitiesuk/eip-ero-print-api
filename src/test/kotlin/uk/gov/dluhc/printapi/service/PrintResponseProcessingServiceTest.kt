@@ -6,8 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
@@ -20,12 +18,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.database.entity.Status.DISPATCHED
+import uk.gov.dluhc.printapi.database.entity.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
+import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
@@ -36,8 +34,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage.Status as ResponseStatus
-import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage.StatusStep as ResponseStatusStep
 
 @ExtendWith(MockitoExtension::class)
 class PrintResponseProcessingServiceTest {
@@ -49,6 +45,9 @@ class PrintResponseProcessingServiceTest {
     @Mock
     private lateinit var idFactory: IdFactory
 
+    @Mock
+    private lateinit var statusMapper: StatusMapper
+
     private val fixedClock = Clock.fixed(Instant.now().minusSeconds(10000), ZoneOffset.UTC)
 
     @Captor
@@ -58,13 +57,13 @@ class PrintResponseProcessingServiceTest {
 
     @BeforeEach
     fun setup() {
-        service = PrintResponseProcessingService(printDetailsRepository, idFactory, fixedClock)
+        service = PrintResponseProcessingService(printDetailsRepository, idFactory, fixedClock, statusMapper)
     }
 
     @Nested
     inner class ProcessBatchResponses {
         @Test
-        fun `should update print details`() {
+        fun `should update all print requests within each batch`() {
             // Given
             val batchResponse1 = buildBatchResponse(status = FAILED)
             val batchResponse2 = buildBatchResponse(status = SUCCESS)
@@ -84,7 +83,7 @@ class PrintResponseProcessingServiceTest {
                 status = PENDING_ASSIGNMENT_TO_BATCH,
                 dateCreated = now,
                 eventDateTime = batchResponse1.timestamp,
-                message = null
+                message = batchResponse1.message
             )
             val expectedPrintRequestStatus2 = PrintRequestStatus(
                 status = RECEIVED_BY_PRINT_PROVIDER,
@@ -95,6 +94,7 @@ class PrintResponseProcessingServiceTest {
             val expectedPrintDetails1 = printDetails1.copy().apply {
                 printRequestStatuses = printRequestStatuses!!.toMutableList().apply { add(expectedPrintRequestStatus1) }
                 requestId = newRequestId
+                batchId = null
             }
             val expectedPrintDetails2 = printDetails2.copy().apply {
                 printRequestStatuses = printRequestStatuses!!.toMutableList().apply { add(expectedPrintRequestStatus2) }
@@ -115,33 +115,15 @@ class PrintResponseProcessingServiceTest {
 
     @Nested
     inner class ProcessPrintResponse {
-        @ParameterizedTest
-        @CsvSource(
-            value = [
-                "RECEIVED_BY_PRINT_PROVIDER, PROCESSED, SUCCESS, VALIDATED_BY_PRINT_PROVIDER",
-                "VALIDATED_BY_PRINT_PROVIDER, IN_MINUS_PRODUCTION, SUCCESS, IN_PRODUCTION",
-                "IN_PRODUCTION, DISPATCHED, SUCCESS, DISPATCHED",
-                "DISPATCHED, NOT_MINUS_DELIVERED, FAILED, NOT_DELIVERED",
-                "RECEIVED_BY_PRINT_PROVIDER, PROCESSED, FAILED, PRINT_PROVIDER_VALIDATION_FAILED",
-                "VALIDATED_BY_PRINT_PROVIDER, IN_MINUS_PRODUCTION, FAILED, PRINT_PROVIDER_PRODUCTION_FAILED  ",
-                "IN_PRODUCTION, DISPATCHED, FAILED, PRINT_PROVIDER_DISPATCH_FAILED"
-            ]
-        )
-        fun `should update print details`(
-            initialStatus: Status,
-            statusStep: ResponseStatusStep,
-            status: ResponseStatus,
-            expectedStatus: Status
-        ) {
+        @Test
+        fun `should update print request given valid statusStep and status`() {
             // Given
-            val printDetails = buildPrintDetails(status = initialStatus)
+            val printDetails = buildPrintDetails()
             val requestId = printDetails.requestId!!
             given(printDetailsRepository.getByRequestId(any())).willReturn(printDetails)
-            val response = buildProcessPrintResponseMessage(
-                requestId = requestId,
-                statusStep = statusStep,
-                status = status
-            )
+            val response = buildProcessPrintResponseMessage(requestId = requestId)
+            val expectedStatus = IN_PRODUCTION
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
             val expectedPrintRequestStatus = PrintRequestStatus(
                 status = expectedStatus,
                 dateCreated = now,
@@ -155,6 +137,7 @@ class PrintResponseProcessingServiceTest {
             service.processPrintResponse(response)
 
             // Then
+            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(printDetailsRepository).getByRequestId(requestId)
             verify(printDetailsRepository).updateItems(capture(captor))
             assertThat(captor.value).usingRecursiveComparison().isEqualTo(listOf(expectedPrintDetails))
@@ -162,15 +145,11 @@ class PrintResponseProcessingServiceTest {
     }
 
     @Test
-    fun `should throw exception given non defined statusStep and status combination`() {
+    fun `should throw exception given statusMapper throws exception`() {
         // Given
-        val printDetails = buildPrintDetails(status = DISPATCHED)
-        val requestId = printDetails.requestId!!
-        val response = buildProcessPrintResponseMessage(
-            requestId = requestId,
-            statusStep = ResponseStatusStep.NOT_MINUS_DELIVERED,
-            status = ResponseStatus.SUCCESS
-        )
+        val response = buildProcessPrintResponseMessage()
+        val exception = IllegalArgumentException("Undefined statusStep and status combination")
+        given(statusMapper.toStatusEntityEnum(any(), any())).willThrow(exception)
 
         // When
         val ex = Assertions.catchThrowableOfType(
@@ -179,7 +158,8 @@ class PrintResponseProcessingServiceTest {
         )
 
         // Then
-        assertThat(ex).isNotNull.hasMessage("Undefined statusStep [NOT_MINUS_DELIVERED] and status [SUCCESS] combination")
+        assertThat(ex).isSameAs(exception)
+        verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
         verifyNoInteractions(printDetailsRepository)
     }
 }
