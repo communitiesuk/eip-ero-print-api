@@ -5,12 +5,6 @@ import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.apache.commons.lang3.RandomStringUtils.randomNumeric
 import org.bson.types.ObjectId
 import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style.name
-import uk.gov.dluhc.printapi.database.entity.CertificateFormat
-import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
-import uk.gov.dluhc.printapi.database.entity.DeliveryClass
-import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
-import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import java.time.Instant
@@ -36,8 +30,6 @@ fun aValidVacNumber(): String = randomAlphanumeric(20)
 
 fun aValidVacVersion(): String = randomAlphanumeric(20)
 
-fun aValidSourceType() = SourceType.VOTER_CARD
-
 fun aValidSourceReference(): String = getAMongoDbId()
 
 fun aValidApplicationReference(): String = "V${RandomStringUtils.randomAlphabetic(9).uppercase()}"
@@ -50,12 +42,6 @@ fun aValidIssueDate(): LocalDate = LocalDate.now()
 
 fun aValidSuggestedExpiryDate(): LocalDate = LocalDate.now().plusYears(10)
 
-fun aValidCertificateStatus() = Status.PENDING_ASSIGNMENT_TO_BATCH
-
-fun aValidCertificateLanguage() = CertificateLanguage.EN
-
-fun aValidCertificateFormat() = CertificateFormat.STANDARD
-
 fun aValidFirstName(): String = faker.name().firstName()
 
 fun aValidSurname(): String = faker.name().lastName()
@@ -63,10 +49,6 @@ fun aValidSurname(): String = faker.name().lastName()
 fun aValidUserId(): String = faker.name().username()
 
 fun aValidDeliveryName(): String = faker.name().fullName()
-
-fun aValidDeliveryClass(): DeliveryClass = DeliveryClass.STANDARD
-
-fun aValidDeliveryMethod(): DeliveryMethod = DeliveryMethod.DELIVERY
 
 fun aValidAddressStreet(): String = faker.address().streetName()
 
@@ -77,5 +59,4 @@ fun aValidPhoneNumber(): String = faker.phoneNumber().cellPhone()
 fun aValidEmailAddress(): String = "contact@${aValidEroName().replaceSpacesWith("-")}.gov.uk"
 
 fun aValidWebsite(): String = "https://${aValidEroName().replaceSpacesWith("-")}.gov.uk"
-
-fun aValidPrintRequestStatusEventDateTime() = Instant.now()
+fun aValidPrintRequestStatusEventDateTime(): Instant = Instant.now()
