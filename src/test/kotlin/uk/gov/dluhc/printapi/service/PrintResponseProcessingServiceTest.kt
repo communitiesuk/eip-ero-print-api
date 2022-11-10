@@ -12,7 +12,10 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.given
+import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -23,12 +26,16 @@ import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
+import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
+import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
 import java.time.Clock
 import java.time.Instant
@@ -48,16 +55,64 @@ class PrintResponseProcessingServiceTest {
     @Mock
     private lateinit var statusMapper: StatusMapper
 
+    @Mock
+    private lateinit var processPrintResponseMessageMapper: ProcessPrintResponseMessageMapper
+
+    @Mock
+    private lateinit var processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>
+
     private val fixedClock = Clock.fixed(Instant.now().minusSeconds(10000), ZoneOffset.UTC)
 
     @Captor
     private lateinit var captor: ArgumentCaptor<List<PrintDetails>>
 
+    @Captor
+    private lateinit var processPrintResponseMessageCaptor: ArgumentCaptor<ProcessPrintResponseMessage>
+
     private val now = OffsetDateTime.now(fixedClock)
 
     @BeforeEach
     fun setup() {
-        service = PrintResponseProcessingService(printDetailsRepository, idFactory, fixedClock, statusMapper)
+        service = PrintResponseProcessingService(
+            printDetailsRepository,
+            idFactory,
+            fixedClock,
+            statusMapper,
+            processPrintResponseMessageMapper,
+            processPrintResponseQueue
+        )
+    }
+
+    @Nested
+    inner class ProcessBatchAndPrintResponses {
+        @Test
+        fun `should process batch responses and queue print responses`() {
+            // Given
+            val responses = buildPrintResponses()
+            val batchResponses = responses.batchResponses
+            val printResponses = responses.printResponses
+            val processingService = spy(service)
+            doNothing().`when`(processingService).processBatchResponses(any())
+            val messages = printResponses.map {
+                val message = buildProcessPrintResponseMessage(
+                    requestId = it.requestId,
+                    timestamp = it.timestamp,
+                    message = it.message
+                )
+                given(processPrintResponseMessageMapper.toProcessPrintResponseMessage(it)).willReturn(message)
+                message
+            }
+
+            // When
+            processingService.processBatchAndPrintResponses(responses)
+
+            // Then
+            val inOrder = inOrder(processingService, processPrintResponseQueue)
+            inOrder.verify(processingService).processBatchResponses(batchResponses)
+            inOrder.verify(processPrintResponseQueue).submit(capture(processPrintResponseMessageCaptor))
+            val values = processPrintResponseMessageCaptor.allValues
+            assertThat(values).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(messages)
+        }
     }
 
     @Nested
