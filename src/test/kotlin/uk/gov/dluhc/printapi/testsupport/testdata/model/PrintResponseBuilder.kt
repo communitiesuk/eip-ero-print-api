@@ -20,8 +20,8 @@ fun buildPrintResponses(
 
 fun buildBatchResponse(
     batchId: String = aValidBatchId(),
-    message: String = faker.harryPotter().spell(),
     status: BatchResponse.Status = BatchResponse.Status.SUCCESS,
+    message: String? = if (status == BatchResponse.Status.SUCCESS) null else faker.harryPotter().spell(),
     timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
 ): BatchResponse = BatchResponse()
     .withBatchId(batchId)
