@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.rds.entity
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.dluhc.printapi.database.entity.Status
@@ -31,22 +31,19 @@ class PrintRequestStatus(
     @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
     var id: UUID? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
     var status: Status? = null,
 
-    @NotNull
+    @field:NotNull
     var eventDateTime: Instant? = null, // either the "timestamp" from the print provider, or the current time
 
-    @Size(max = 1024)
+    @field:Size(max = 1024)
     var message: String? = null,
 
-    @NotNull
-    @UpdateTimestamp
+    @CreationTimestamp
     var dateCreated: Instant? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:Size(max = 255)
     @LastModifiedBy
     var createdBy: String? = null,
 

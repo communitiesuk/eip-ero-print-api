@@ -38,6 +38,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.util.function.BiPredicate
 
 internal class CertificateRepositoryTest : IntegrationTest() {
 
@@ -102,7 +105,21 @@ internal class CertificateRepositoryTest : IntegrationTest() {
         val actual = certificateRepository.findById(expected.id!!)
 
         // Then
+        val offsetEqualToRoundedSeconds: BiPredicate<OffsetDateTime, OffsetDateTime> =
+            BiPredicate<OffsetDateTime, OffsetDateTime> { a, b -> withinSecond(a.toEpochSecond(), b.toEpochSecond()) }
+        val instantEqualToRoundedSeconds: BiPredicate<Instant, Instant> =
+            BiPredicate<Instant, Instant> { a, b -> withinSecond(a.epochSecond, b.epochSecond) }
         assertThat(actual).isPresent
-        assertThat(actual.get()).isEqualTo(expected)
+        assertThat(actual.get()).usingRecursiveComparison()
+            .withEqualsForType(offsetEqualToRoundedSeconds, OffsetDateTime::class.java)
+            .withEqualsForType(instantEqualToRoundedSeconds, Instant::class.java)
+            .isEqualTo(expected)
+    }
+
+    fun withinSecond(actual: Long, epochSeconds: Long): Boolean {
+        val variance = 1
+        val lowerBound: Long = epochSeconds - variance
+        val upperBound: Long = epochSeconds + variance
+        return actual in lowerBound..upperBound
     }
 }

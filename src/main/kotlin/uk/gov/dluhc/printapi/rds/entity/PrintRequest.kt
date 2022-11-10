@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.rds.entity
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.dluhc.printapi.database.entity.CertificateFormat
@@ -40,40 +40,38 @@ class PrintRequest(
     @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
     var id: UUID? = null,
 
-    @NotNull
-    @Size(max = 24)
+    @field:NotNull
+    @field:Size(max = 24)
     var requestId: String? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
+    @field:Size(max = 20)
     var vacVersion: String? = null,
 
-    @NotNull
+    @field:NotNull
     var requestDateTime: OffsetDateTime? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var firstName: String? = null,
 
-    @Size(max = 255)
+    @field:Size(max = 255)
     var middleNames: String? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var surname: String? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
     @Enumerated(EnumType.STRING)
     var certificateLanguage: CertificateLanguage? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
     @Enumerated(EnumType.STRING)
     var certificateFormat: CertificateFormat? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var photoLocationArn: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
@@ -87,23 +85,21 @@ class PrintRequest(
     @JoinColumn(name = "welsh_ero_id")
     var eroWelsh: ElectoralRegistrationOffice? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var userId: String? = null,
 
-    @Size(max = 255)
+    @field:Size(max = 255)
     var batchId: String? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "print_request_id", nullable = false)
     var statusHistory: MutableList<PrintRequestStatus> = mutableListOf(),
 
-    @NotNull
-    @UpdateTimestamp
+    @CreationTimestamp
     var dateCreated: Instant? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:Size(max = 255)
     @LastModifiedBy
     var createdBy: String? = null,
 

@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.rds.entity
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
@@ -34,27 +34,23 @@ class Delivery(
     @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
     var id: UUID? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var addressee: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
     var address: Address? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
     var deliveryClass: DeliveryClass? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
     var deliveryMethod: DeliveryMethod? = null,
 
-    @NotNull
-    @UpdateTimestamp
+    @CreationTimestamp
     var dateCreated: Instant? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:Size(max = 255)
     @LastModifiedBy
     var createdBy: String? = null,
 

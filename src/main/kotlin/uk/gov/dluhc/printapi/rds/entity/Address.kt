@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.rds.entity
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
@@ -30,35 +30,33 @@ class Address(
     @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
     var id: UUID? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var street: String? = null,
 
-    @NotNull
-    @Size(max = 10)
+    @field:NotNull
+    @field:Size(max = 10)
     var postcode: String? = null,
 
-    @Size(max = 255)
-    var `property`: String? = null,
+    @field:Size(max = 255)
+    var property: String? = null,
 
-    @Size(max = 255)
+    @field:Size(max = 255)
     var locality: String? = null,
 
-    @Size(max = 255)
+    @field:Size(max = 255)
     var town: String? = null,
 
-    @Size(max = 255)
+    @field:Size(max = 255)
     var area: String? = null,
 
-    @Size(max = 12)
+    @field:Size(max = 12)
     var uprn: String? = null,
 
-    @NotNull
-    @UpdateTimestamp
+    @CreationTimestamp
     var dateCreated: Instant? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:Size(max = 255)
     @LastModifiedBy
     var createdBy: String? = null,
 

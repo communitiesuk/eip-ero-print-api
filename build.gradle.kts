@@ -106,7 +106,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
-    testImplementation("org.testcontainers:testcontainers:1.17.4")
+    testImplementation("org.testcontainers:testcontainers:1.17.5")
     testImplementation("org.testcontainers:mysql:1.17.5")
 
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.34.0")

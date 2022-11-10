@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.rds.entity
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
@@ -32,31 +32,29 @@ class ElectoralRegistrationOffice(
     @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
     var id: UUID? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var name: String? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
+    @field:Size(max = 20)
     var phoneNumber: String? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var emailAddress: String? = null,
 
-    @NotNull
-    @Size(max = 1024)
+    @field:NotNull
+    @field:Size(max = 1024)
     var website: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
     var address: Address? = null,
 
-    @NotNull
-    @UpdateTimestamp
+    @CreationTimestamp
     var dateCreated: Instant? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:Size(max = 255)
     @LastModifiedBy
     var createdBy: String? = null,
 

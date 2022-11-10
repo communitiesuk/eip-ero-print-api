@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.rds.entity
 
 import org.hibernate.Hibernate
+import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.dluhc.printapi.database.entity.SourceType
@@ -41,54 +41,50 @@ class Certificate(
     @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
     var id: UUID? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
+    @field:Size(max = 20)
     var vacNumber: String? = null,
 
-    @NotNull
-    @Size(max = 20)
+    @field:NotNull
     @Enumerated(EnumType.STRING)
     var sourceType: SourceType? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var sourceReference: String? = null,
 
-    @Size(max = 255)
+    @field:Size(max = 255)
     var applicationReference: String? = null,
 
-    @NotNull
+    @field:NotNull
     var applicationReceivedDateTime: OffsetDateTime? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:NotNull
+    @field:Size(max = 255)
     var issuingAuthority: String? = null,
 
-    @NotNull
+    @field:NotNull
     var issueDate: LocalDate = LocalDate.now(),
 
-    @NotNull
+    @field:NotNull
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
 
-    @NotNull
-    @Size(max = 50)
+    @field:NotNull
     @Enumerated(EnumType.STRING)
     var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
 
-    @NotNull
-    @Size(max = 80)
+    @field:NotNull
+    @field:Size(max = 80)
     var gssCode: String? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "certificate_id", nullable = false)
     var printRequests: MutableList<PrintRequest> = mutableListOf(),
 
-    @NotNull
-    @UpdateTimestamp
+    @CreationTimestamp
     var dateCreated: Instant? = null,
 
-    @NotNull
-    @Size(max = 255)
+    @field:Size(max = 255)
     @LastModifiedBy
     var createdBy: String? = null,
 
@@ -113,6 +109,6 @@ class Certificate(
 
     @Override
     override fun toString(): String {
-        return this::class.simpleName + "(id = $id , certificateNumber = $vacNumber , gssCode = $gssCode, dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
+        return this::class.simpleName + "(id = $id , gssCode = $gssCode, dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
     }
 }
