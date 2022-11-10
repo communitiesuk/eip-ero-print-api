@@ -19,7 +19,7 @@ class StatusMapper {
                 StatusStep.PROCESSED -> VALIDATED_BY_PRINT_PROVIDER
                 StatusStep.IN_MINUS_PRODUCTION -> IN_PRODUCTION
                 StatusStep.DISPATCHED -> DISPATCHED
-                else -> throw IllegalArgumentException("Undefined statusStep [$statusStep] and status [SUCCESS] combination")
+                else -> throw IllegalArgumentException("Print status cannot be in statusStep [NOT_MINUS_DELIVERED] when the status is [SUCCESS]")
             }
         }
         return when (statusStep) {

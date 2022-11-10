@@ -51,6 +51,6 @@ class StatusMapperTest {
         )
 
         // Then
-        assertThat(ex).isNotNull.hasMessage("Undefined statusStep [NOT_MINUS_DELIVERED] and status [SUCCESS] combination")
+        assertThat(ex).isNotNull.hasMessage("Print status cannot be in statusStep [NOT_MINUS_DELIVERED] when the status is [SUCCESS]")
     }
 }
