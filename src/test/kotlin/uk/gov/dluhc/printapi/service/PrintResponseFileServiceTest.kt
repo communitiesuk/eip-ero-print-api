@@ -8,6 +8,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 
@@ -33,14 +34,18 @@ internal class PrintResponseFileServiceTest {
         val fileContent = "{\"BatchResponses\": [], \"PrintResponses\": []}"
 
         given(sftpService.fetchFileFromOutBoundDirectory(any(), any())).willReturn(fileContent)
+        val expectedPrintResponses = PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList())
         given(objectMapper.readValue(fileContent, PrintResponses::class.java))
-            .willReturn(PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList()))
+            .willReturn(expectedPrintResponses)
 
         // When
         printResponseFileService.processPrintResponseFile(directory, fileName)
 
         // Then
-        verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
-        verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
+        val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService)
+        inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
+        inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
+        inOrder.verify(printResponseProcessingService).processBatchAndPrintResponses(expectedPrintResponses)
+        inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
     }
 }

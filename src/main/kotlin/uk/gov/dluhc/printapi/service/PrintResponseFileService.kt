@@ -21,7 +21,7 @@ class PrintResponseFileService(
     }
 
     private fun parsePrintResponseContent(printResponsesString: String): PrintResponses {
-        logger.debug { "processing $printResponsesString" }
+        logger.debug { "Parsing print responses $printResponsesString" }
         return objectMapper.readValue(printResponsesString, PrintResponses::class.java)
     }
 }
