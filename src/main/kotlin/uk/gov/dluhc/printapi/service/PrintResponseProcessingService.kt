@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
+import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
@@ -8,15 +9,22 @@ import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
+import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import java.time.Clock
 import java.time.OffsetDateTime
 
+@Service
 class PrintResponseProcessingService(
     private val printDetailsRepository: PrintDetailsRepository,
     private val idFactory: IdFactory,
     private val clock: Clock,
     private val statusMapper: StatusMapper
 ) {
+
+    fun processBatchAndPrintResponses(printResponses: PrintResponses) {
+        // TODO: EIP1-2420
+    }
+
     /**
      * Updates print details for the batches based on the batch responses' statuses.
      * If a batch is successful, a new printRequestStatus will be added for each corresponding print details with status

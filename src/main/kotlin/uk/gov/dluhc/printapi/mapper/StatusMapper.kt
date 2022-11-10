@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.mapper
 
+import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Status.DISPATCHED
 import uk.gov.dluhc.printapi.database.entity.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.Status.NOT_DELIVERED
@@ -11,6 +12,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage.Status
 import uk.gov.dluhc.printapi.database.entity.Status as StatusEntityEnum
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage.Status as StatusModelEnum
 
+@Component
 class StatusMapper {
 
     fun toStatusEntityEnum(statusStep: StatusStep, statusModelEnum: StatusModelEnum): StatusEntityEnum {
