@@ -11,7 +11,6 @@ import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
 import uk.gov.dluhc.printapi.rds.repository.UseExistingOrGenerateUUID
 import java.time.Instant
-import java.time.OffsetDateTime
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -49,7 +48,7 @@ class PrintRequest(
     var vacVersion: String? = null,
 
     @field:NotNull
-    var requestDateTime: OffsetDateTime? = null,
+    var requestDateTime: Instant? = null,
 
     @field:NotNull
     @field:Size(max = 255)

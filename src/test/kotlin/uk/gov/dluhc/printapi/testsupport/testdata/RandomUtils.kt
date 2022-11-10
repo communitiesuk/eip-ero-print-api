@@ -24,7 +24,7 @@ fun getAMongoDbId(): String = ObjectId().toHexString()
 
 fun aValidRequestId(): String = getAMongoDbId()
 
-fun aValidRequestDateTime(): OffsetDateTime = OffsetDateTime.now()
+fun aValidRequestDateTime(): Instant = Instant.now()
 
 fun aValidVacNumber(): String = randomAlphanumeric(20)
 

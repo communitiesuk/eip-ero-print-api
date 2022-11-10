@@ -57,7 +57,7 @@ internal class CertificateRepositoryTest : IntegrationTest() {
             issueDate = aValidIssueDate(),
             suggestedExpiryDate = aValidSuggestedExpiryDate(),
             gssCode = aGssCode(),
-            status = aValidCertificateStatus()
+            status = null
         )
         val deliveryAddress = Address(
             street = aValidAddressStreet(),
@@ -114,6 +114,7 @@ internal class CertificateRepositoryTest : IntegrationTest() {
             .withEqualsForType(offsetEqualToRoundedSeconds, OffsetDateTime::class.java)
             .withEqualsForType(instantEqualToRoundedSeconds, Instant::class.java)
             .isEqualTo(expected)
+        assertThat(actual.get().status).isEqualTo(printRequestStatus.status)
     }
 
     fun withinSecond(actual: Long, epochSeconds: Long): Boolean {

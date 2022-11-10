@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rds.entity
 
+import liquibase.pro.packaged.it
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
@@ -25,6 +26,7 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
+import javax.persistence.PrePersist
 import javax.persistence.Table
 import javax.persistence.Version
 import javax.validation.constraints.NotNull
@@ -71,7 +73,7 @@ class Certificate(
 
     @field:NotNull
     @Enumerated(EnumType.STRING)
-    var status: Status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+    var status: Status? = null,
 
     @field:NotNull
     @field:Size(max = 80)
@@ -95,6 +97,23 @@ class Certificate(
     fun addPrintRequest(newPrintRequest: PrintRequest): Certificate {
         printRequests += newPrintRequest
         return this
+    }
+
+    @PrePersist
+    public fun prePersist() {
+        assignStatus()
+    }
+
+    private fun assignStatus() {
+        status = if (printRequests.isEmpty()) {
+            Status.PENDING_ASSIGNMENT_TO_BATCH
+        } else {
+            printRequests.sortByDescending { it.requestDateTime }
+            val latestPrintRequest = printRequests.first()
+            latestPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
+            val latestStatus = latestPrintRequest.statusHistory.first()
+            latestStatus.status
+        }
     }
 
     override fun equals(other: Any?): Boolean {
