@@ -1,8 +1,13 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
+import uk.gov.dluhc.printapi.domain.CertificateNumber
 import java.util.UUID.randomUUID
 
 fun aValidBatchId() = randomUUID().toString().replace("-", "")
+
+fun aValidCertificateNumber() = CertificateNumber.create()
+
+fun aGssCode() = "E99999999"
 
 fun aValidPrintRequestsFilename() = "05372cf5339447b39f98b248c2217b9f-20221018112232123-10.psv"
 

@@ -6,6 +6,7 @@ import com.jcraft.jsch.ChannelSftp.LsEntry
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -16,6 +17,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.dao.TransientDataAccessException
 import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
@@ -36,6 +38,7 @@ import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
+import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
@@ -112,6 +115,9 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.process-print-response-file-queue-name}")
     protected lateinit var processPrintResponseFileQueueName: String
 
+    @Autowired
+    protected lateinit var certificateRepository: CertificateRepository
+
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
@@ -139,7 +145,19 @@ internal abstract class IntegrationTest {
         wireMockService.resetAllStubsAndMappings()
     }
 
+    @BeforeEach
+    @AfterEach
+    fun clearRdsDatabase() {
+        try {
+            certificateRepository.deleteAll()
+        } catch (tdae: TransientDataAccessException) {
+            logger.warn("exception while cleaning up db with `certificateRepository.deleteAll()`", tdae)
+            certificateRepository.deleteAll()
+        }
+    }
+
     companion object {
+        val mysqlContainerConfiguration: MySQLContainerConfiguration = MySQLContainerConfiguration.getInstance()
         val localStackContainer = LocalStackContainerConfiguration.getInstance()
         val sftpContainer = SftpContainerConfiguration.getInstance()
         const val LOCAL_SFTP_OUTBOUND_TEST_DIRECTORY = "src/test/resources/sftp/local/OutBound"

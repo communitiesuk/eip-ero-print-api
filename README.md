@@ -45,6 +45,23 @@ The following environment variables must be set in order to run the application:
 * `SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY` - Directory on the remote host to write print request files
 * `SFTP_PRINT_RESPONSE_DOWNLOAD_DIRECTORY` - Directory on the remote host to read print response files
 
+#### MYSQL Configuration
+For local setup refer to src/main/resources/db/readme.
+* `MYSQL_HOST`
+* `MYSQL_PORT`
+* `MYSQL_USER`
+* `MYSQL_PASSWORD` - only used locally or when running tests
+
+#### Infrastructure overrides
+The following are overridden by the task definition in AWS:
+* `SPRING_DATASOURCE_URL` - This is set to the deployed RDS' URL.
+* `SPRING_DATASOURCE_DRIVERCLASSNAME` - This is overridden to use the AWS Aurora MySQL JDBC Driver.
+* `SPRING_LIQUIBASE_DRIVERCLASSNAME` - This is overridden to use the AWS Aurora MySQL JDBC Driver.
+*
+#### Liquibase Configuration
+* `LIQUIBASE_CONTEXT` Contexts for liquibase scripts.
+  For local setup use ddl.
+
 ### Authentication and authorisation
 Requests are authenticated by the presence of a signed cognito JWT as a bearer token in the HTTP request `authorization` header.  
 EG: `Authorization: Bearer xxxxxyyyyyyzzzzz.....`  

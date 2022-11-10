@@ -75,6 +75,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
+    // mysql
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.liquibase:liquibase-core")
+    runtimeOnly("mysql:mysql-connector-java")
+    runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.1")
+    runtimeOnly("software.amazon.awssdk:rds")
+
     // AWS messaging
     implementation("io.awspring.cloud:spring-cloud-starter-aws-messaging")
 
@@ -99,7 +106,8 @@ dependencies {
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
-    testImplementation("org.testcontainers:testcontainers:1.17.4")
+    testImplementation("org.testcontainers:testcontainers:1.17.5")
+    testImplementation("org.testcontainers:mysql:1.17.5")
 
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.34.0")
     testImplementation("net.datafaker:datafaker:1.6.0")
