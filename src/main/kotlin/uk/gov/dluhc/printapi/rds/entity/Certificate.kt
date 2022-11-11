@@ -98,19 +98,23 @@ class Certificate(
     }
 
     @PrePersist
-    public fun prePersist() {
+    fun prePersist() {
         assignStatus()
+    }
+
+    fun getCurrentPrintRequest(): PrintRequest? {
+        printRequests.sortByDescending { it.requestDateTime }
+        return printRequests.firstOrNull()
     }
 
     private fun assignStatus() {
         status = if (printRequests.isEmpty()) {
             Status.PENDING_ASSIGNMENT_TO_BATCH
         } else {
-            printRequests.sortByDescending { it.requestDateTime }
-            val latestPrintRequest = printRequests.first()
-            latestPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
-            val latestStatus = latestPrintRequest.statusHistory.first()
-            latestStatus.status
+            val currentPrintRequest = getCurrentPrintRequest()!!
+            currentPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
+            val currentStatus = currentPrintRequest.statusHistory.first()
+            currentStatus.status
         }
     }
 
