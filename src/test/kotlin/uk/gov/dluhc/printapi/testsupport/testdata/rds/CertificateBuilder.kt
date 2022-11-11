@@ -39,6 +39,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 
 fun certificateBuilder(
+    status: Status = aValidCertificateStatus(),
     printRequests: List<PrintRequest> = listOf(printRequestBuilder()),
 ): Certificate {
     val certificate = Certificate(
@@ -51,32 +52,36 @@ fun certificateBuilder(
         issueDate = aValidIssueDate(),
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
         gssCode = aGssCode(),
-        status = aValidCertificateStatus()
+        status = status
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate
 }
 
 fun printRequestBuilder(
+    requestId: String = aValidRequestId(),
     printRequestStatuses: List<PrintRequestStatus> = listOf(printRequestStatusBuilder()),
     requestDateTime: Instant? = aValidRequestDateTime(),
     eroEnglish: ElectoralRegistrationOffice = rdsElectoralRegistrationOfficeBuilder(),
     eroWelsh: ElectoralRegistrationOffice? = null,
-    delivery: Delivery = rdsDeliveryBuilder()
+    delivery: Delivery = rdsDeliveryBuilder(),
+    batchId: String? = null,
+    photoLocationArn: String? =aPhotoArn(),
 ): PrintRequest {
     val printRequest = PrintRequest(
-        requestId = aValidRequestId(),
+        requestId = requestId,
         vacVersion = aValidVacVersion(),
         requestDateTime = requestDateTime,
         firstName = aValidFirstName(),
         surname = aValidSurname(),
         certificateLanguage = aValidCertificateLanguage(),
         certificateFormat = aValidCertificateFormat(),
-        photoLocationArn = aPhotoArn(),
+        photoLocationArn = photoLocationArn,
         delivery = delivery,
         eroEnglish = eroEnglish,
         eroWelsh = eroWelsh,
-        userId = aValidUserId()
+        userId = aValidUserId(),
+        batchId = batchId
     )
     printRequestStatuses.forEach { printRequestStatus -> printRequest.addPrintRequestStatus(printRequestStatus) }
     return printRequest
