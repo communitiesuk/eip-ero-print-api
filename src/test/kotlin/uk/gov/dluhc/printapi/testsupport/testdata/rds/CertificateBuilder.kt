@@ -66,7 +66,7 @@ fun printRequestBuilder(
     eroWelsh: ElectoralRegistrationOffice? = null,
     delivery: Delivery = rdsDeliveryBuilder(),
     batchId: String? = null,
-    photoLocationArn: String? =aPhotoArn(),
+    photoLocationArn: String? = aPhotoArn(),
 ): PrintRequest {
     val printRequest = PrintRequest(
         requestId = requestId,
