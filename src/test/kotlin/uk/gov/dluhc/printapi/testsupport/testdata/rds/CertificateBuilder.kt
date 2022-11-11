@@ -60,27 +60,10 @@ fun certificateBuilder(
 fun printRequestBuilder(
     printRequestStatuses: List<PrintRequestStatus> = listOf(printRequestStatusBuilder()),
     requestDateTime: Instant? = aValidRequestDateTime(),
+    eroEnglish: ElectoralRegistrationOffice = rdsElectoralRegistrationOfficeBuilder(),
+    eroWelsh: ElectoralRegistrationOffice? = null,
+    delivery: Delivery = rdsDeliveryBuilder()
 ): PrintRequest {
-    val deliveryAddress = Address(
-        street = aValidAddressStreet(),
-        postcode = aValidAddressPostcode()
-    )
-    val delivery = Delivery(
-        addressee = aValidDeliveryName(),
-        address = deliveryAddress,
-        deliveryClass = aValidDeliveryClass(),
-        deliveryMethod = aValidDeliveryMethod()
-    )
-    val eroEnglish = ElectoralRegistrationOffice(
-        address = Address(
-            street = aValidAddressStreet(),
-            postcode = aValidAddressPostcode()
-        ),
-        name = aValidEroName(),
-        phoneNumber = aValidPhoneNumber(),
-        emailAddress = aValidEmailAddress(),
-        website = aValidWebsite()
-    )
     val printRequest = PrintRequest(
         requestId = aValidRequestId(),
         vacVersion = aValidVacVersion(),
@@ -92,7 +75,7 @@ fun printRequestBuilder(
         photoLocationArn = aPhotoArn(),
         delivery = delivery,
         eroEnglish = eroEnglish,
-        eroWelsh = null,
+        eroWelsh = eroWelsh,
         userId = aValidUserId()
     )
     printRequestStatuses.forEach { printRequestStatus -> printRequest.addPrintRequestStatus(printRequestStatus) }
@@ -106,5 +89,36 @@ fun printRequestStatusBuilder(
     return PrintRequestStatus(
         status = status,
         eventDateTime = eventDateTime
+    )
+}
+
+fun rdsElectoralRegistrationOfficeBuilder(
+    name: String = aValidEroName()
+): ElectoralRegistrationOffice {
+    return ElectoralRegistrationOffice(
+        address = Address(
+            street = aValidAddressStreet(),
+            postcode = aValidAddressPostcode()
+        ),
+        name = name,
+        phoneNumber = aValidPhoneNumber(),
+        emailAddress = aValidEmailAddress(),
+        website = aValidWebsite()
+    )
+}
+
+fun rdsAddressBuilder(): Address {
+    return Address(
+        street = aValidAddressStreet(),
+        postcode = aValidAddressPostcode()
+    )
+}
+
+fun rdsDeliveryBuilder(): Delivery {
+    return Delivery(
+        addressee = aValidDeliveryName(),
+        address = rdsAddressBuilder(),
+        deliveryClass = aValidDeliveryClass(),
+        deliveryMethod = aValidDeliveryMethod()
     )
 }

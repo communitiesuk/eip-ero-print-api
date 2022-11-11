@@ -9,7 +9,6 @@ import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 fun aValidEroName(): String = faker.address().city()
 fun aValidLocalAuthorityName(): String = faker.address().city()
@@ -34,7 +33,7 @@ fun aValidSourceReference(): String = getAMongoDbId()
 
 fun aValidApplicationReference(): String = "V${RandomStringUtils.randomAlphabetic(9).uppercase()}"
 
-fun aValidApplicationReceivedDateTime(): OffsetDateTime = OffsetDateTime.now()
+fun aValidApplicationReceivedDateTime(): Instant = Instant.now()
 
 fun aValidIssuingAuthority(): String = aValidLocalAuthorityName()
 

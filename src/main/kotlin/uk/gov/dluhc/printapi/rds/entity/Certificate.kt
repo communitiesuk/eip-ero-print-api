@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.rds.entity
 
-import liquibase.pro.packaged.it
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
@@ -13,7 +12,6 @@ import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
 import uk.gov.dluhc.printapi.rds.repository.UseExistingOrGenerateUUID
 import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -59,7 +57,7 @@ class Certificate(
     var applicationReference: String? = null,
 
     @field:NotNull
-    var applicationReceivedDateTime: OffsetDateTime? = null,
+    var applicationReceivedDateTime: Instant? = null,
 
     @field:NotNull
     @field:Size(max = 255)
