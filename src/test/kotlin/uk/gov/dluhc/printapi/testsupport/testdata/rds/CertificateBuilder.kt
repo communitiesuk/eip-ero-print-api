@@ -37,12 +37,15 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
+import java.util.UUID
 
 fun certificateBuilder(
+    id: UUID? = UUID.randomUUID(),
     status: Status = aValidCertificateStatus(),
     printRequests: List<PrintRequest> = listOf(printRequestBuilder()),
 ): Certificate {
     val certificate = Certificate(
+        id = id,
         vacNumber = aValidVacNumber(),
         sourceType = aValidSourceType(),
         sourceReference = aValidSourceReference(),
