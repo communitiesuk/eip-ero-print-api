@@ -150,7 +150,8 @@ class PrintDetailsMapperTest {
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).requestId()
         verify(idFactory).vacNumber()
-        val expectedElectoralRegistrationOfficeMapperInvocations = if (certificateLanguageModel == CertificateLanguage.EN) 1 else 2
-        verify(electoralRegistrationOfficeMapper, times(expectedElectoralRegistrationOfficeMapperInvocations)).map(ero)
+        verify(electoralRegistrationOfficeMapper).map(ero.englishContactDetails)
+        val expectedWelshContactMapperInvocations = if (certificateLanguageModel == CertificateLanguage.CY) 1 else 0
+        verify(electoralRegistrationOfficeMapper, times(expectedWelshContactMapperInvocations)).map(ero.welshContactDetails!!)
     }
 }
