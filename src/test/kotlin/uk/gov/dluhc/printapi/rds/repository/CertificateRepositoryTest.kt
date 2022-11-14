@@ -166,24 +166,6 @@ internal class CertificateRepositoryTest : IntegrationTest() {
         assertCertificateRecursiveEqual(actual[0], expected)
     }
 
-    // @Test
-    // fun `should batch update certificates`() {
-    //     // Given
-    //     val status = aValidCertificateStatus()
-    //     val certificate = certificateBuilder(
-    //         status = status,
-    //     )
-    //     val expected = certificateRepository.save(certificate)
-    //
-    //     // When
-    //     val actual = certificateRepository.saveAll(mutableListOf(certificate))
-    //
-    //     // Given
-    //     assertThat(actual).hasSize(1)
-    //     assertThat(actual[0].status).isEqualTo(status)
-    //     assertCertificateRecursiveEqual(actual[0], expected)
-    // }
-
     private fun assertCertificateRecursiveEqual(actual: Certificate, expected: Certificate) {
         val offsetEqualToRoundedSeconds: BiPredicate<OffsetDateTime, OffsetDateTime> =
             BiPredicate<OffsetDateTime, OffsetDateTime> { a, b -> withinSecond(a.toEpochSecond(), b.toEpochSecond()) }
