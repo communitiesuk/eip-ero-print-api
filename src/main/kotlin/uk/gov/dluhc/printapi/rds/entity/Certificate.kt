@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.rds.entity
 
-import liquibase.pro.packaged.it
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
@@ -13,7 +12,6 @@ import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
 import uk.gov.dluhc.printapi.rds.repository.UseExistingOrGenerateUUID
 import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -59,7 +57,7 @@ class Certificate(
     var applicationReference: String? = null,
 
     @field:NotNull
-    var applicationReceivedDateTime: OffsetDateTime? = null,
+    var applicationReceivedDateTime: Instant? = null,
 
     @field:NotNull
     @field:Size(max = 255)
@@ -100,19 +98,23 @@ class Certificate(
     }
 
     @PrePersist
-    public fun prePersist() {
+    fun prePersist() {
         assignStatus()
+    }
+
+    fun getCurrentPrintRequest(): PrintRequest? {
+        printRequests.sortByDescending { it.requestDateTime }
+        return printRequests.firstOrNull()
     }
 
     private fun assignStatus() {
         status = if (printRequests.isEmpty()) {
             Status.PENDING_ASSIGNMENT_TO_BATCH
         } else {
-            printRequests.sortByDescending { it.requestDateTime }
-            val latestPrintRequest = printRequests.first()
-            latestPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
-            val latestStatus = latestPrintRequest.statusHistory.first()
-            latestStatus.status
+            val currentPrintRequest = getCurrentPrintRequest()!!
+            currentPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
+            val currentStatus = currentPrintRequest.statusHistory.first()
+            currentStatus.status
         }
     }
 

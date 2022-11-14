@@ -13,6 +13,49 @@ import java.time.temporal.ChronoUnit
 internal class CertificateTest {
 
     @Nested
+    inner class GetCurrentPrintRequest {
+
+        @Test
+        fun `should get latest print request for Certificate with no Print Requests`() {
+            // Given
+            val certificate = certificateBuilder(printRequests = listOf())
+
+            // When
+            val actual = certificate.getCurrentPrintRequest()
+
+            // Then
+            assertThat(actual).isNull()
+        }
+
+        @Test
+        fun `should get latest status for Certificate with one Print Request`() {
+            // Given
+            val currentPrintRequest = printRequestBuilder()
+            val certificate = certificateBuilder(printRequests = listOf(currentPrintRequest))
+
+            // When
+            val actual = certificate.getCurrentPrintRequest()
+
+            // Then
+            assertThat(actual).isSameAs(currentPrintRequest)
+        }
+
+        @Test
+        fun `should determine latest status for Certificate with one Print Request with multiple statuses`() {
+            // Given
+            val previousPrintRequest = printRequestBuilder(requestDateTime = Instant.now().minus(8, ChronoUnit.DAYS))
+            val currentPrintRequest = printRequestBuilder(requestDateTime = Instant.now().minus(3, ChronoUnit.DAYS))
+            val certificate = certificateBuilder(printRequests = listOf(currentPrintRequest, previousPrintRequest))
+
+            // When
+            val actual = certificate.getCurrentPrintRequest()
+
+            // Then
+            assertThat(actual).isSameAs(currentPrintRequest)
+        }
+    }
+
+    @Nested
     inner class PrePersist {
 
         @Test
@@ -53,7 +96,7 @@ internal class CertificateTest {
         fun `should determine latest status for Certificate with one Print Request with multiple statuses`() {
             // Given
             val certificate = certificateBuilder(
-                listOf(
+                printRequests = listOf(
                     printRequestBuilder(
                         printRequestStatuses = listOf(
                             printRequestStatusBuilder(
@@ -126,7 +169,7 @@ internal class CertificateTest {
                     ),
                 )
             )
-            val certificate = certificateBuilder(listOf(firstPrintRequest, secondPrintRequest))
+            val certificate = certificateBuilder(printRequests = listOf(firstPrintRequest, secondPrintRequest))
 
             // When
             certificate.prePersist()

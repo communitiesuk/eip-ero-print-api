@@ -45,6 +45,9 @@ class CertificateMapperTest {
     private lateinit var sourceTypeMapper: SourceTypeMapper
 
     @Mock
+    private lateinit var instantMapper: InstantMapper
+
+    @Mock
     private lateinit var printRequestMapper: PrintRequestMapper
 
     @Mock
@@ -60,6 +63,7 @@ class CertificateMapperTest {
         val vacNumber = aValidVacNumber()
         given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
         given(idFactory.vacNumber()).willReturn(vacNumber)
+        given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
         val electoralRegistrationOffice = ElectoralRegistrationOffice(
             name = "Croydon London Borough Council",
@@ -120,7 +124,7 @@ class CertificateMapperTest {
                 applicationReference = applicationReference,
                 sourceType = SourceTypeEntity.VOTER_CARD,
                 vacNumber = vacNumber,
-                applicationReceivedDateTime = applicationReceivedDateTime,
+                applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.name,
                 issueDate = LocalDate.now(),
@@ -138,5 +142,6 @@ class CertificateMapperTest {
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
+        verify(instantMapper).toInstant(message.applicationReceivedDateTime)
     }
 }

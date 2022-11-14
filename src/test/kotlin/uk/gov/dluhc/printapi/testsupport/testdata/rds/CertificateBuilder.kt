@@ -39,6 +39,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 
 fun certificateBuilder(
+    status: Status = aValidCertificateStatus(),
     printRequests: List<PrintRequest> = listOf(printRequestBuilder()),
 ): Certificate {
     val certificate = Certificate(
@@ -51,49 +52,36 @@ fun certificateBuilder(
         issueDate = aValidIssueDate(),
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
         gssCode = aGssCode(),
-        status = aValidCertificateStatus()
+        status = status
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate
 }
 
 fun printRequestBuilder(
+    requestId: String = aValidRequestId(),
     printRequestStatuses: List<PrintRequestStatus> = listOf(printRequestStatusBuilder()),
     requestDateTime: Instant? = aValidRequestDateTime(),
+    eroEnglish: ElectoralRegistrationOffice = rdsElectoralRegistrationOfficeBuilder(),
+    eroWelsh: ElectoralRegistrationOffice? = null,
+    delivery: Delivery = rdsDeliveryBuilder(),
+    batchId: String? = null,
+    photoLocationArn: String? = aPhotoArn(),
 ): PrintRequest {
-    val deliveryAddress = Address(
-        street = aValidAddressStreet(),
-        postcode = aValidAddressPostcode()
-    )
-    val delivery = Delivery(
-        addressee = aValidDeliveryName(),
-        address = deliveryAddress,
-        deliveryClass = aValidDeliveryClass(),
-        deliveryMethod = aValidDeliveryMethod()
-    )
-    val eroEnglish = ElectoralRegistrationOffice(
-        address = Address(
-            street = aValidAddressStreet(),
-            postcode = aValidAddressPostcode()
-        ),
-        name = aValidEroName(),
-        phoneNumber = aValidPhoneNumber(),
-        emailAddress = aValidEmailAddress(),
-        website = aValidWebsite()
-    )
     val printRequest = PrintRequest(
-        requestId = aValidRequestId(),
+        requestId = requestId,
         vacVersion = aValidVacVersion(),
         requestDateTime = requestDateTime,
         firstName = aValidFirstName(),
         surname = aValidSurname(),
         certificateLanguage = aValidCertificateLanguage(),
         certificateFormat = aValidCertificateFormat(),
-        photoLocationArn = aPhotoArn(),
+        photoLocationArn = photoLocationArn,
         delivery = delivery,
         eroEnglish = eroEnglish,
-        eroWelsh = null,
-        userId = aValidUserId()
+        eroWelsh = eroWelsh,
+        userId = aValidUserId(),
+        batchId = batchId
     )
     printRequestStatuses.forEach { printRequestStatus -> printRequest.addPrintRequestStatus(printRequestStatus) }
     return printRequest
@@ -106,5 +94,36 @@ fun printRequestStatusBuilder(
     return PrintRequestStatus(
         status = status,
         eventDateTime = eventDateTime
+    )
+}
+
+fun rdsElectoralRegistrationOfficeBuilder(
+    name: String = aValidEroName()
+): ElectoralRegistrationOffice {
+    return ElectoralRegistrationOffice(
+        address = Address(
+            street = aValidAddressStreet(),
+            postcode = aValidAddressPostcode()
+        ),
+        name = name,
+        phoneNumber = aValidPhoneNumber(),
+        emailAddress = aValidEmailAddress(),
+        website = aValidWebsite()
+    )
+}
+
+fun rdsAddressBuilder(): Address {
+    return Address(
+        street = aValidAddressStreet(),
+        postcode = aValidAddressPostcode()
+    )
+}
+
+fun rdsDeliveryBuilder(): Delivery {
+    return Delivery(
+        addressee = aValidDeliveryName(),
+        address = rdsAddressBuilder(),
+        deliveryClass = aValidDeliveryClass(),
+        deliveryMethod = aValidDeliveryMethod()
     )
 }

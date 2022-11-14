@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class InstantMapperTest {
 
@@ -64,6 +65,23 @@ class InstantMapperTest {
 
             // Then
             assertThat(actual).isNull()
+        }
+    }
+
+    @Nested
+    inner class FromInstantToOffsetDateTime {
+
+        @Test
+        fun `should convert Instant to UTC OffsetDateTime`() {
+            // Given
+            val instant = Instant.now()
+            val expected = instant.atOffset(ZoneOffset.UTC)
+
+            // When
+            val actual = instantMapper.toOffsetDateTime(instant)
+
+            // Then
+            assertThat(actual).isEqualTo(expected)
         }
     }
 }
