@@ -24,7 +24,6 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
-import javax.persistence.PrePersist
 import javax.persistence.Table
 import javax.persistence.Version
 import javax.validation.constraints.NotNull
@@ -94,28 +93,39 @@ class Certificate(
 
     fun addPrintRequest(newPrintRequest: PrintRequest): Certificate {
         printRequests += newPrintRequest
+        assignStatus()
         return this
     }
 
-    @PrePersist
-    fun prePersist() {
+    fun getCurrentPrintRequest(): PrintRequest {
+        printRequests.sortByDescending { it.requestDateTime }
+        return printRequests.first()
+    }
+
+    /**
+     * Adds the new status to the current PrintRequest and updates the current Certificate status.
+     */
+    fun addStatus(
+        status: Status,
+        eventDateTime: Instant = Instant.now(),
+        message: String? = null
+    ) {
+        val currentPrintRequest = getCurrentPrintRequest()
+        currentPrintRequest.addPrintRequestStatus(
+            PrintRequestStatus(
+                status = status,
+                eventDateTime = eventDateTime,
+                message = message
+            )
+        )
         assignStatus()
     }
 
-    fun getCurrentPrintRequest(): PrintRequest? {
-        printRequests.sortByDescending { it.requestDateTime }
-        return printRequests.firstOrNull()
-    }
-
     private fun assignStatus() {
-        status = if (printRequests.isEmpty()) {
-            Status.PENDING_ASSIGNMENT_TO_BATCH
-        } else {
-            val currentPrintRequest = getCurrentPrintRequest()!!
-            currentPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
-            val currentStatus = currentPrintRequest.statusHistory.first()
-            currentStatus.status
-        }
+        val currentPrintRequest = getCurrentPrintRequest()
+        currentPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
+        val currentStatus = currentPrintRequest.statusHistory.first()
+        status = currentStatus.status
     }
 
     override fun equals(other: Any?): Boolean {

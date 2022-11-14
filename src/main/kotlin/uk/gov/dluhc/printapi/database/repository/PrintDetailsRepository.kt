@@ -63,7 +63,7 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
             .expressionNames(mapOf(Pair("#print_status", "status")))
             .expressionValues(
                 mapOf(
-                    Pair(":status", AttributeValue.builder().s(Status.PENDING_ASSIGNMENT_TO_BATCH.toString()).build())
+                    Pair(":status", AttributeValue.builder().s(status.toString()).build())
                 )
             )
             .build()
