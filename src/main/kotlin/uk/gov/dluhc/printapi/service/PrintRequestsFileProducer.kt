@@ -22,7 +22,7 @@ class PrintRequestsFileProducer {
         val writer = CSVWriter(
             osw,
             '|',
-            ICSVWriter.NO_QUOTE_CHARACTER,
+            ICSVWriter.DEFAULT_QUOTE_CHARACTER,
             ICSVWriter.NO_ESCAPE_CHARACTER,
             ICSVWriter.DEFAULT_LINE_END
         )
