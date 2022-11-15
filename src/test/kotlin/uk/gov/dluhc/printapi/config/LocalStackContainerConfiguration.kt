@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import net.javacrumbs.shedlock.provider.dynamodb2.DynamoDBUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ConfigurableApplicationContext
@@ -192,7 +191,6 @@ class LocalStackContainerConfiguration {
             .build()
 
         createPrintDetailsTable(dynamoDbClient, dbConfiguration.printDetailsTableName)
-        createSchedulerLockTable(dynamoDbClient, dbConfiguration.schedulerLockTableName)
         return dynamoDbClient
     }
 
@@ -261,18 +259,5 @@ class LocalStackContainerConfiguration {
         val ipAddress = InetAddress.getByName(host).hostAddress
         val mappedPort = getMappedPort(DEFAULT_PORT)
         return URI("http://$ipAddress:$mappedPort")
-    }
-
-    private fun createSchedulerLockTable(dynamoDbClient: DynamoDbClient, tableName: String) {
-        if (dynamoDbClient.listTables().tableNames().contains(tableName)) {
-            return
-        }
-
-        val throughput = ProvisionedThroughput.builder().readCapacityUnits(1L).writeCapacityUnits(1L).build()
-        DynamoDBUtils.createLockTable(
-            dynamoDbClient,
-            tableName,
-            throughput
-        )
     }
 }

@@ -8,4 +8,5 @@
 
     <include relativeToChangelogFile="true" file="ddl/0001_create_certificate_tables.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0002_persist_delivery_enum_names.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0003_create_shedlock_table.xml"/>
 </databaseChangeLog>
