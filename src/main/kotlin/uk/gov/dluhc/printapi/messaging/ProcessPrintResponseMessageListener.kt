@@ -20,9 +20,7 @@ class ProcessPrintResponseMessageListener(
 
     @SqsListener("\${sqs.process-print-response-queue-name}")
     override fun handleMessage(@Valid @Payload payload: ProcessPrintResponseMessage) {
-        with(payload) {
-            logger.info { "Begin processing PrintResponse with requestId ${payload.requestId}" }
-            printResponseProcessingService.processPrintResponse(payload)
-        }
+        logger.info { "Begin processing PrintResponse with requestId ${payload.requestId}" }
+        printResponseProcessingService.processPrintResponse(payload)
     }
 }

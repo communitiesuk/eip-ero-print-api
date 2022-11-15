@@ -45,7 +45,7 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.util.function.BiPredicate
 
-internal class CertificateRepositoryTest : IntegrationTest() {
+internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
     @Test
     fun `should return Certificate given persisted Certificate with all required properties`() {
@@ -124,7 +124,20 @@ internal class CertificateRepositoryTest : IntegrationTest() {
         val actual = certificateRepository.getByPrintRequestsRequestId(requestId)
 
         // Given
-        assertCertificateRecursiveEqual(actual, expected)
+        assertCertificateRecursiveEqual(actual!!, expected)
+    }
+
+    @Test
+    fun `should return null given no certificate by the requestId`() {
+        // Given
+        val certificate = certificateBuilder(printRequests = listOf(printRequestBuilder()))
+        certificateRepository.save(certificate)
+
+        // When
+        val actual = certificateRepository.getByPrintRequestsRequestId("non-existing-request-id")
+
+        // Given
+        assertThat(actual).isNull()
     }
 
     @Test
