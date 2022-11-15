@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import javax.sql.DataSource
 
-
 @Configuration
 @EnableScheduling
 @ConditionalOnProperty("jobs.enabled", havingValue = "true")
