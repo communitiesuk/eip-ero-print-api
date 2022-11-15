@@ -25,6 +25,8 @@ import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
 import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
 import uk.gov.dluhc.printapi.dto.EroManagementApiLocalAuthorityDto
 import uk.gov.dluhc.printapi.mapper.EroManagementApiEroDtoMapper
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aWelshEroContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -79,7 +81,9 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
                         gssCode = localAuthorities[1].gssCode!!,
                         name = localAuthorities[1].name!!
                     ),
-                )
+                ),
+                englishContactDetails = anEnglishEroContactDetails(),
+                welshContactDetails = aWelshEroContactDetails(),
             )
         }
         given(eroMapper.toEroManagementApiEroDto(any())).willReturn(expected)

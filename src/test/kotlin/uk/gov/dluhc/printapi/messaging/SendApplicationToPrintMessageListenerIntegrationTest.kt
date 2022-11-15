@@ -31,7 +31,23 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val localAuthority = ero.localAuthorities[1]
         val gssCode = localAuthority.gssCode!!
         val payload = buildSendApplicationToPrintMessage(gssCode = gssCode)
+
         wireMockService.stubEroManagementGetEro(ero, gssCode)
+        // TODO - when ERO Management returns contact data wiremock will return relevant contact details and the expected ERO can reflect this
+        val expectedEnglishEro = ElectoralRegistrationOffice(
+            name = "Gwynedd Council Elections",
+            phoneNumber = "01766 771000",
+            website = "https://www.gwynedd.llyw.cymru/en/Council/Contact-us/Contact-us.aspx",
+            emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
+            address = Address(
+                property = "Gwynedd Council Headquarters",
+                street = "Shirehall Street",
+                town = "Caernarfon",
+                area = "Gwynedd",
+                postcode = "LL55 1SH",
+            )
+        )
+
         val expected = with(payload) {
             PrintDetails(
                 id = UUID.randomUUID(),
@@ -68,22 +84,13 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.name,
                 issueDate = LocalDate.now(),
-                eroEnglish = with(ero) {
-                    ElectoralRegistrationOffice(
-                        name = name,
-                        phoneNumber = "",
-                        emailAddress = "",
-                        website = "",
-                        address = Address(
-                            street = "",
-                            postcode = ""
-                        )
-                    )
-                },
+                eroEnglish = expectedEnglishEro,
                 eroWelsh = null,
                 printRequestStatuses = mutableListOf(
                     PrintRequestStatus(
-                        Status.PENDING_ASSIGNMENT_TO_BATCH, dateCreated = OffsetDateTime.now(), eventDateTime = OffsetDateTime.now()
+                        Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        dateCreated = OffsetDateTime.now(),
+                        eventDateTime = OffsetDateTime.now()
                     )
                 ),
                 userId = userId
@@ -103,7 +110,13 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             val id = UUID.fromString(response.items()[0]["id"]!!.s())
             val saved = printDetailsRepository.get(id)
             assertThat(saved).usingRecursiveComparison()
-                .ignoringFields("id", "requestId", "vacNumber", "printRequestStatuses.dateCreated", "printRequestStatuses.eventDateTime")
+                .ignoringFields(
+                    "id",
+                    "requestId",
+                    "vacNumber",
+                    "printRequestStatuses.dateCreated",
+                    "printRequestStatuses.eventDateTime"
+                )
                 .isEqualTo(expected)
             assertThat(saved.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
             assertThat(saved.requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
