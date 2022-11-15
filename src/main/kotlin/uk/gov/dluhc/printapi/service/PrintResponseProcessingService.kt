@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import java.time.Clock
 import java.time.OffsetDateTime
+import javax.transaction.Transactional
 
 @Service
 class PrintResponseProcessingService(
@@ -29,6 +30,7 @@ class PrintResponseProcessingService(
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>
 ) {
 
+    @Transactional
     fun processBatchAndPrintResponses(printResponses: PrintResponses) {
         processBatchResponses(printResponses.batchResponses)
         printResponses.printResponses.forEach {
@@ -47,6 +49,7 @@ class PrintResponseProcessingService(
      * dateCreated will be the timestamp the new printRequestStatus is created and eventDateTime will be the timestamp from
      * the print provider's batch response.
      */
+    @Transactional
     fun processBatchResponses(batchResponses: List<BatchResponse>) {
         processBatchResponsesDynamo(batchResponses)
         processBatchResponsesMySql(batchResponses)
