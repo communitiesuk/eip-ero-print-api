@@ -13,7 +13,7 @@ import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.Clock
 import java.time.Instant
 
-@Mapper(uses = [InstantMapper::class, RdsElectoralRegistrationOfficeMapper::class])
+@Mapper(uses = [InstantMapper::class])
 abstract class PrintRequestMapper {
 
     @Autowired

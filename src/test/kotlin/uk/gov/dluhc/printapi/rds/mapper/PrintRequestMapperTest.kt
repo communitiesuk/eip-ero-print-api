@@ -9,7 +9,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.dluhc.printapi.database.entity.CertificateFormat
@@ -43,9 +42,6 @@ class PrintRequestMapperTest {
     private lateinit var mapper: PrintRequestMapperImpl
 
     @Mock
-    private lateinit var rdsElectoralRegistrationOfficeMapper: RdsElectoralRegistrationOfficeMapper
-
-    @Mock
     private lateinit var idFactory: IdFactory
 
     @Mock
@@ -57,7 +53,6 @@ class PrintRequestMapperTest {
         ReflectionTestUtils.setField(mapper, "idFactory", idFactory)
         ReflectionTestUtils.setField(mapper, "clock", FIXED_CLOCK)
         ReflectionTestUtils.setField(mapper, "instantMapper", instantMapper)
-        ReflectionTestUtils.setField(mapper, "rdsElectoralRegistrationOfficeMapper", rdsElectoralRegistrationOfficeMapper)
     }
 
     @ParameterizedTest
@@ -71,17 +66,32 @@ class PrintRequestMapperTest {
         val message = buildSendApplicationToPrintMessage(certificateLanguage = certificateLanguageModel)
         val requestId = aValidRequestId()
         given(idFactory.requestId()).willReturn(requestId)
-        val electoralRegistrationOffice = ElectoralRegistrationOffice(
-            name = "Croydon London Borough Council",
-            phoneNumber = "",
-            emailAddress = "",
-            website = "",
+        val expectedEnglishEroContactDetails = ElectoralRegistrationOffice(
+            name = "Gwynedd Council Elections",
+            phoneNumber = "01766 771000",
+            website = "https://www.gwynedd.llyw.cymru/en/Council/Contact-us/Contact-us.aspx",
+            emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
             address = Address(
-                street = "",
-                postcode = ""
+                property = "Gwynedd Council Headquarters",
+                street = "Shirehall Street",
+                town = "Caernarfon",
+                area = "Gwynedd",
+                postcode = "LL55 1SH",
             )
         )
-        given(rdsElectoralRegistrationOfficeMapper.map(any())).willReturn(electoralRegistrationOffice)
+        val expectedWelshEroContactDetails = ElectoralRegistrationOffice(
+            name = "Etholiadau Cyngor Gwynedd",
+            phoneNumber = "01766 771000",
+            website = "https://www.gwynedd.llyw.cymru/cy/Cyngor/Cysylltu-%c3%a2-ni/Cysylltu-%c3%a2-ni.aspx",
+            emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
+            address = Address(
+                property = "Pencadlys Cyngor Gwynedd",
+                street = "Stryd y Jêl",
+                town = "Caernarfon",
+                area = "Gwynedd",
+                postcode = "LL55 1SH",
+            )
+        )
         val expectedRequestDateTime = message.requestDateTime.toInstant()
         given(instantMapper.toInstant(any())).willReturn(expectedRequestDateTime)
         val expected = with(message) {
@@ -113,8 +123,8 @@ class PrintRequestMapperTest {
                         deliveryMethod = DeliveryMethod.DELIVERY
                     )
                 },
-                eroEnglish = electoralRegistrationOffice,
-                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else electoralRegistrationOffice,
+                eroEnglish = expectedEnglishEroContactDetails,
+                eroWelsh = if (certificateLanguageModel == CertificateLanguage.EN) null else expectedWelshEroContactDetails,
                 statusHistory = mutableListOf(
                     PrintRequestStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
@@ -132,7 +142,5 @@ class PrintRequestMapperTest {
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
         verify(idFactory).requestId()
-        val expectedElectoralRegistrationOfficeMapperInvocations = if (certificateLanguageModel == CertificateLanguage.EN) 1 else 2
-        verify(rdsElectoralRegistrationOfficeMapper, times(expectedElectoralRegistrationOfficeMapperInvocations)).map(ero)
     }
 }
