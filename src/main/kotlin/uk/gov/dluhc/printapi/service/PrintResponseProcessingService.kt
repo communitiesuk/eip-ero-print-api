@@ -1,10 +1,13 @@
 package uk.gov.dluhc.printapi.service
 
+import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.repository.PrintDetailsNotFoundException
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
@@ -18,6 +21,8 @@ import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import java.time.Clock
 import java.time.OffsetDateTime
 import javax.transaction.Transactional
+
+private val logger = KotlinLogging.logger {}
 
 @Service
 class PrintResponseProcessingService(
@@ -118,7 +123,15 @@ class PrintResponseProcessingService(
 
     @Transactional
     fun processPrintResponse(printResponse: ProcessPrintResponseMessage) {
-        val newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
+        val newStatus: Status
+
+        try {
+            newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
+        } catch (ex: IllegalArgumentException) {
+            logger.error(ex.message)
+            return
+        }
+
         processPrintResponseDynamo(printResponse, newStatus)
         processPrintResponseMySql(printResponse, newStatus)
     }
@@ -127,7 +140,13 @@ class PrintResponseProcessingService(
         printResponse: ProcessPrintResponseMessage,
         newStatus: Status
     ) {
-        val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
+        val requestId = printResponse.requestId
+        val certificate = certificateRepository.getByPrintRequestsRequestId(requestId)
+
+        if (certificate == null) {
+            logger.error("Certificate not found for the requestId $requestId")
+            return
+        }
 
         with(printResponse) {
             certificate.addStatus(
@@ -144,7 +163,14 @@ class PrintResponseProcessingService(
         printResponse: ProcessPrintResponseMessage,
         newStatus: Status
     ) {
-        val printDetails = printDetailsRepository.getByRequestId(printResponse.requestId)
+        val printDetails: PrintDetails
+
+        try {
+            printDetails = printDetailsRepository.getByRequestId(printResponse.requestId)
+        } catch (ex: PrintDetailsNotFoundException) {
+            logger.error(ex.message)
+            return
+        }
 
         with(printResponse) {
             printDetails.addStatus(

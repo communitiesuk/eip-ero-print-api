@@ -79,7 +79,8 @@ internal class CertificateTest {
             val printRequest = printRequestBuilder(
                 printRequestStatuses = listOf(
                     printRequestStatusBuilder(
-                        status = Status.ASSIGNED_TO_BATCH
+                        status = Status.ASSIGNED_TO_BATCH,
+                        eventDateTime = Instant.now().minusSeconds(1)
                     )
                 )
             )

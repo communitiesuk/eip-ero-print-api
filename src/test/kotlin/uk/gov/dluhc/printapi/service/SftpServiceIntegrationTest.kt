@@ -1,5 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
+import com.jcraft.jsch.ChannelSftp
+import com.jcraft.jsch.SftpException
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -25,7 +27,8 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
             writeContentToRemoteOutBoundDirectory(filenameToProcess, expectedResponseString)
 
             // When
-            val actualPrintResponsesString = sftpService.fetchFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
+            val actualPrintResponsesString =
+                sftpService.fetchFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
 
             // Then
             assertThat(actualPrintResponsesString).isEqualTo(expectedResponseString)
@@ -62,7 +65,8 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
             writeContentToRemoteOutBoundDirectory(filenameToProcess, expectedResponseString)
 
             // When
-            val actualRemovedResponses = sftpService.removeFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
+            val actualRemovedResponses =
+                sftpService.removeFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
 
             // Then
             assertThat(actualRemovedResponses).isTrue
@@ -78,12 +82,15 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
             val ex =
                 Assertions.catchThrowableOfType(
                     { sftpService.removeFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess) },
-                    MessagingException::class.java
+                    IOException::class.java
                 )
 
             // Then
-            assertThat(ex).hasMessageContaining("Failed to execute on session; nested exception is java.io.IOException: Failed to remove file")
-            assertThat(ex).hasCauseInstanceOf(IOException::class.java)
+            assertThat(ex).isInstanceOf(IOException::class.java)
+            assertThat(ex.cause).isNotNull.isInstanceOf(MessagingException::class.java)
+                .extracting("cause").isInstanceOf(IOException::class.java)
+                .extracting("cause").isInstanceOf(SftpException::class.java)
+                .extracting("id").isEqualTo(ChannelSftp.SSH_FX_NO_SUCH_FILE)
         }
     }
 }

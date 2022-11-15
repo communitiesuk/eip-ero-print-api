@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.integration.file.FileHeaders
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.integration.support.MessageBuilder
+import org.springframework.messaging.MessagingException
 import org.springframework.stereotype.Service
 import java.io.IOException
 import java.io.InputStream
@@ -68,13 +69,20 @@ class SftpService(
      */
     fun fetchFileFromOutBoundDirectory(directory: String, fileName: String): String {
         var responseString: String? = null
-        sftpOutboundTemplate.get(createFileNamePath(directory, fileName)) { responseString = IOUtils.toString(it, StandardCharsets.UTF_8) }
+        sftpOutboundTemplate.get(createFileNamePath(directory, fileName)) {
+            responseString = IOUtils.toString(it, StandardCharsets.UTF_8)
+        }
         return responseString!!
     }
 
+    @Throws(IOException::class)
     fun removeFileFromOutBoundDirectory(directory: String, fileName: String): Boolean {
         logger.info { "Removing processed file [$fileName] from directory [$directory]" }
-        return sftpOutboundTemplate.remove(createFileNamePath(directory, fileName))
+        try {
+            return sftpOutboundTemplate.remove(createFileNamePath(directory, fileName))
+        } catch (ex: MessagingException) {
+            throw IOException(ex)
+        }
     }
 
     private fun createFileNamePath(fileDirectory: String, fileName: String) = "$fileDirectory/$fileName"
