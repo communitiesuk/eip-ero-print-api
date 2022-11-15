@@ -116,6 +116,7 @@ class PrintResponseProcessingService(
         }
     }
 
+    @Transactional
     fun processPrintResponse(printResponse: ProcessPrintResponseMessage) {
         val newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
         processPrintResponseDynamo(printResponse, newStatus)
