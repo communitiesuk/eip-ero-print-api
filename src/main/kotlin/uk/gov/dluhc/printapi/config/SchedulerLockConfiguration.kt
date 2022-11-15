@@ -22,6 +22,7 @@ class SchedulerLockConfiguration {
             JdbcTemplateLockProvider.Configuration.builder()
                 .withJdbcTemplate(JdbcTemplate(dataSource))
                 .usingDbTime()
+                .withTableName("scheduler-locks")
                 .build()
         )
     }
