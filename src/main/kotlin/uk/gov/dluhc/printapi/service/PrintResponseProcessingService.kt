@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
@@ -12,12 +13,15 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
+import uk.gov.dluhc.printapi.rds.entity.Certificate
+import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import java.time.Clock
 import java.time.OffsetDateTime
 
 @Service
 class PrintResponseProcessingService(
     private val printDetailsRepository: PrintDetailsRepository,
+    private val certificateRepository: CertificateRepository,
     private val idFactory: IdFactory,
     private val clock: Clock,
     private val statusMapper: StatusMapper,
@@ -44,6 +48,11 @@ class PrintResponseProcessingService(
      * the print provider's batch response.
      */
     fun processBatchResponses(batchResponses: List<BatchResponse>) {
+        processBatchResponsesDynamo(batchResponses)
+        processBatchResponsesMySql(batchResponses)
+    }
+
+    private fun processBatchResponsesDynamo(batchResponses: List<BatchResponse>) {
         batchResponses.forEach { batchResponse ->
             with(batchResponse) {
                 val newStatus =
@@ -71,8 +80,66 @@ class PrintResponseProcessingService(
         }
     }
 
+    private fun processBatchResponsesMySql(batchResponses: List<BatchResponse>) {
+        batchResponses.forEach { batchResponse ->
+            val certificates =
+                certificateRepository.findByStatusAndPrintRequestsBatchId(
+                    SENT_TO_PRINT_PROVIDER,
+                    batchResponse.batchId
+                )
+            processBatchCertificates(batchResponse, certificates)
+            certificateRepository.saveAll(certificates)
+        }
+    }
+
+    private fun processBatchCertificates(batchResponse: BatchResponse, certificates: List<Certificate>) {
+        with(batchResponse) {
+            val newStatus =
+                if (status == SUCCESS) RECEIVED_BY_PRINT_PROVIDER else PENDING_ASSIGNMENT_TO_BATCH
+
+            certificates.forEach {
+                it.addStatus(
+                    status = newStatus,
+                    eventDateTime = timestamp.toInstant(),
+                    message = message
+                )
+
+                if (status != SUCCESS) {
+                    val currentPrintRequest = it.getCurrentPrintRequest()
+                    currentPrintRequest.requestId = idFactory.requestId()
+                    currentPrintRequest.batchId = null
+                }
+            }
+        }
+    }
+
     fun processPrintResponse(printResponse: ProcessPrintResponseMessage) {
         val newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
+        processPrintResponseDynamo(printResponse, newStatus)
+        processPrintResponseMySql(printResponse, newStatus)
+    }
+
+    private fun processPrintResponseMySql(
+        printResponse: ProcessPrintResponseMessage,
+        newStatus: Status
+    ) {
+        val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
+
+        with(printResponse) {
+            certificate.addStatus(
+                status = newStatus,
+                eventDateTime = timestamp.toInstant(),
+                message = message
+            )
+        }
+
+        certificateRepository.save(certificate)
+    }
+
+    private fun processPrintResponseDynamo(
+        printResponse: ProcessPrintResponseMessage,
+        newStatus: Status
+    ) {
         val printDetails = printDetailsRepository.getByRequestId(printResponse.requestId)
 
         with(printResponse) {
