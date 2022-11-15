@@ -47,7 +47,7 @@ class ProcessPrintBatchService(
         val certificates = certificateRepository.findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
         val fileContents = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
 
-        val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(dynamoFileContents)
+        val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(fileContents)
         val sftpFilename = filenameFactory.createZipFilename(batchId, printList.size)
         sftpService.sendFile(sftpInputStream, sftpFilename)
         printDetailsRepository.updateItems(updateBatch(printList))

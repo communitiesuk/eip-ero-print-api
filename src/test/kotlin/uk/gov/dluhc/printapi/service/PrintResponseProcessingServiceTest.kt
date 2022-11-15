@@ -32,11 +32,15 @@ import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
+import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
+import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestStatusBuilder
 import java.time.Clock
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -48,6 +52,9 @@ class PrintResponseProcessingServiceTest {
 
     @Mock
     private lateinit var printDetailsRepository: PrintDetailsRepository
+
+    @Mock
+    private lateinit var certificateRepository: CertificateRepository
 
     @Mock
     private lateinit var idFactory: IdFactory
@@ -75,6 +82,7 @@ class PrintResponseProcessingServiceTest {
     fun setup() {
         service = PrintResponseProcessingService(
             printDetailsRepository,
+            certificateRepository,
             idFactory,
             fixedClock,
             statusMapper,
@@ -166,6 +174,80 @@ class PrintResponseProcessingServiceTest {
             assertThat(captor.allValues[1]).usingRecursiveComparison().isEqualTo(listOf(expectedPrintDetails2))
             verify(idFactory).requestId()
         }
+
+        @Test
+        fun `should update all certificates within each batch`() {
+            // Given
+            val batchResponse1 = buildBatchResponse(status = FAILED)
+            val batchResponse2 = buildBatchResponse(status = SUCCESS)
+            val batchId1 = batchResponse1.batchId
+            val batchId2 = batchResponse2.batchId
+            val certificate1 = certificateBuilder(
+                printRequests = listOf(
+                    printRequestBuilder(
+                        batchId = batchId1,
+                        printRequestStatuses = listOf(
+                            printRequestStatusBuilder(
+                                status = SENT_TO_PRINT_PROVIDER,
+                                eventDateTime = batchResponse1.timestamp.toInstant().minusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+            val certificate2 = certificateBuilder(
+                printRequests = listOf(
+                    printRequestBuilder(
+                        batchId = batchId2,
+                        printRequestStatuses = listOf(
+                            printRequestStatusBuilder(
+                                status = SENT_TO_PRINT_PROVIDER,
+                                eventDateTime = batchResponse2.timestamp.toInstant().minusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+
+            val newRequestId = aValidRequestId()
+            given(certificateRepository.findByStatusAndPrintRequestsBatchId(any(), any()))
+                .willReturn(listOf(certificate1), listOf(certificate2))
+            given(idFactory.requestId()).willReturn(newRequestId)
+
+            // When
+            service.processBatchResponses(listOf(batchResponse1, batchResponse2))
+
+            // Then
+            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(SENT_TO_PRINT_PROVIDER, batchResponse1.batchId)
+            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(SENT_TO_PRINT_PROVIDER, batchResponse2.batchId)
+            verify(certificateRepository).saveAll(listOf(certificate1))
+            verify(certificateRepository).saveAll(listOf(certificate2))
+            assertThat(certificate1.getCurrentPrintRequest().requestId).isEqualTo(newRequestId)
+            assertThat(certificate1.getCurrentPrintRequest().batchId).isNull()
+            assertThat(
+                certificate1.getCurrentPrintRequest().statusHistory.sortedByDescending { it.eventDateTime }
+                    .first()
+            )
+                .usingRecursiveComparison().isEqualTo(
+                    uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus(
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
+                        eventDateTime = batchResponse1.timestamp.toInstant(),
+                        message = batchResponse1.message
+                    )
+                )
+            assertThat(
+                certificate2.getCurrentPrintRequest().statusHistory.sortedByDescending { it.eventDateTime }
+                    .first()
+            )
+                .usingRecursiveComparison().isEqualTo(
+                    uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus(
+                        status = RECEIVED_BY_PRINT_PROVIDER,
+                        eventDateTime = batchResponse2.timestamp.toInstant(),
+                        message = batchResponse2.message
+                    )
+                )
+            verify(idFactory).requestId()
+        }
     }
 
     @Nested
@@ -188,14 +270,44 @@ class PrintResponseProcessingServiceTest {
             val expectedPrintDetails = printDetails.copy().apply {
                 printRequestStatuses = printRequestStatuses!!.toMutableList().apply { add(expectedPrintRequestStatus) }
             }
+
+            val certificate = certificateBuilder(
+                printRequests = listOf(
+                    printRequestBuilder(
+                        requestId = requestId,
+                        printRequestStatuses = listOf(
+                            printRequestStatusBuilder(
+                                status = SENT_TO_PRINT_PROVIDER,
+                                eventDateTime = response.timestamp.toInstant().minusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+
             // When
             service.processPrintResponse(response)
 
             // Then
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(printDetailsRepository).getByRequestId(requestId)
+            verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(printDetailsRepository).updateItems(capture(captor))
             assertThat(captor.value).usingRecursiveComparison().isEqualTo(listOf(expectedPrintDetails))
+            verify(certificateRepository).save(certificate)
+            assertThat(certificate.status).isEqualTo(expectedStatus)
+            assertThat(
+                certificate.getCurrentPrintRequest().statusHistory.sortedByDescending { it.eventDateTime }
+                    .first()
+            )
+                .usingRecursiveComparison().isEqualTo(
+                    uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus(
+                        status = expectedStatus,
+                        eventDateTime = response.timestamp.toInstant(),
+                        message = response.message
+                    )
+                )
         }
     }
 
