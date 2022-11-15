@@ -60,7 +60,8 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
             val saved = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
-            assertThat(saved.status).isEqualTo(Status.IN_PRODUCTION)
+            assertThat(saved).isNotNull
+            assertThat(saved!!.status).isEqualTo(Status.IN_PRODUCTION)
         }
     }
 }

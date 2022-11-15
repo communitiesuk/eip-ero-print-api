@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
+import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -15,6 +16,7 @@ import org.mockito.kotlin.capture
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.given
 import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -22,6 +24,7 @@ import uk.gov.dluhc.printapi.database.entity.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.repository.PrintDetailsNotFoundException
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -29,6 +32,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
@@ -225,23 +229,41 @@ class PrintResponseProcessingServiceTest {
                     )
                 )
         }
+
+        @Test
+        fun `should log and not throw exception given no print details for the requestId`() {
+            // Given
+            val response = buildProcessPrintResponseMessage()
+            val requestId = response.requestId
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(IN_PRODUCTION)
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(null)
+            TestLogAppender.reset()
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            assertThat(TestLogAppender.hasLog("Certificate not found for the requestId $requestId", Level.ERROR)).isTrue
+            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
+            verify(certificateRepository).getByPrintRequestsRequestId(requestId)
+            verify(certificateRepository, never()).save(any())
+        }
     }
 
     @Test
-    fun `should throw exception given statusMapper throws exception`() {
+    fun `should log and not throw exception given statusMapper throws exception`() {
         // Given
         val response = buildProcessPrintResponseMessage()
-        val exception = IllegalArgumentException("Undefined statusStep and status combination")
+        val message = "Undefined statusStep and status combination"
+        val exception = IllegalArgumentException(message)
         given(statusMapper.toStatusEntityEnum(any(), any())).willThrow(exception)
+        TestLogAppender.reset()
 
         // When
-        val ex = Assertions.catchThrowableOfType(
-            { service.processPrintResponse(response) },
-            IllegalArgumentException::class.java
-        )
+        service.processPrintResponse(response)
 
         // Then
-        assertThat(ex).isSameAs(exception)
+        assertThat(TestLogAppender.hasLog(message, Level.ERROR)).isTrue
         verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
         verifyNoInteractions(certificateRepository)
     }
