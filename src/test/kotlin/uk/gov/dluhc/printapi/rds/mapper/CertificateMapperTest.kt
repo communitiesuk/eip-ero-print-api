@@ -65,14 +65,17 @@ class CertificateMapperTest {
         given(idFactory.vacNumber()).willReturn(vacNumber)
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
-        val electoralRegistrationOffice = ElectoralRegistrationOffice(
-            name = "Croydon London Borough Council",
-            phoneNumber = "",
-            emailAddress = "",
-            website = "",
+        val englishEro = ElectoralRegistrationOffice(
+            name = "Gwynedd Council Elections",
+            phoneNumber = "01766 771000",
+            website = "https://www.gwynedd.llyw.cymru/en/Council/Contact-us/Contact-us.aspx",
+            emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
             address = Address(
-                street = "",
-                postcode = ""
+                property = "Gwynedd Council Headquarters",
+                street = "Shirehall Street",
+                town = "Caernarfon",
+                area = "Gwynedd",
+                postcode = "LL55 1SH",
             )
         )
 
@@ -103,7 +106,7 @@ class CertificateMapperTest {
                         deliveryMethod = DeliveryMethod.DELIVERY
                     )
                 },
-                eroEnglish = electoralRegistrationOffice,
+                eroEnglish = englishEro,
                 eroWelsh = null,
                 statusHistory = mutableListOf(
                     PrintRequestStatus(

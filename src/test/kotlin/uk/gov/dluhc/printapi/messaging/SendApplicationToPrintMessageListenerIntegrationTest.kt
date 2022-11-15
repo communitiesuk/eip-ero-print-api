@@ -5,20 +5,24 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.database.entity.Address
-import uk.gov.dluhc.printapi.database.entity.CertificateDelivery
+import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
-import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.database.entity.PrintDetails
-import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.DeliveryClass
+import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.rds.entity.Address
+import uk.gov.dluhc.printapi.rds.entity.Certificate
+import uk.gov.dluhc.printapi.rds.entity.Delivery
+import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
+import uk.gov.dluhc.printapi.rds.entity.PrintRequest
+import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
+import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 
@@ -49,22 +53,30 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         )
 
         val expected = with(payload) {
-            PrintDetails(
+            val certificate = Certificate(
                 id = UUID.randomUUID(),
-                requestId = aValidRequestId(),
                 sourceReference = sourceReference,
                 applicationReference = applicationReference,
                 sourceType = SourceType.VOTER_CARD,
                 vacNumber = aValidVacNumber(),
-                requestDateTime = requestDateTime,
-                applicationReceivedDateTime = applicationReceivedDateTime,
+                applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
+                gssCode = gssCode,
+                issuingAuthority = localAuthority.name,
+                issueDate = LocalDate.now(),
+
+            )
+            val printRequest = PrintRequest(
+                requestId = aValidRequestId(),
+                vacVersion = "1",
+                requestDateTime = requestDateTime.toInstant(),
                 firstName = firstName,
                 middleNames = middleNames,
                 surname = surname,
                 certificateLanguage = CertificateLanguage.EN,
-                photoLocation = photoLocation,
+                certificateFormat = CertificateFormat.STANDARD,
+                photoLocationArn = photoLocation,
                 delivery = with(delivery) {
-                    CertificateDelivery(
+                    Delivery(
                         addressee = addressee,
                         address = with(address) {
                             Address(
@@ -77,24 +89,21 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                                 uprn = uprn
                             )
                         },
-                        deliveryClass = uk.gov.dluhc.printapi.database.entity.DeliveryClass.STANDARD,
-                        deliveryMethod = uk.gov.dluhc.printapi.database.entity.DeliveryMethod.DELIVERY,
+                        deliveryClass = DeliveryClass.STANDARD,
+                        deliveryMethod = DeliveryMethod.DELIVERY,
                     )
                 },
-                gssCode = gssCode,
-                issuingAuthority = localAuthority.name,
-                issueDate = LocalDate.now(),
                 eroEnglish = expectedEnglishEro,
                 eroWelsh = null,
-                printRequestStatuses = mutableListOf(
+                statusHistory = mutableListOf(
                     PrintRequestStatus(
-                        Status.PENDING_ASSIGNMENT_TO_BATCH,
-                        dateCreated = OffsetDateTime.now(),
-                        eventDateTime = OffsetDateTime.now()
+                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        eventDateTime = Instant.now().minusSeconds(10)
                     )
                 ),
                 userId = userId
             )
+            certificate.addPrintRequest(printRequest)
         }
 
         // When
@@ -103,23 +112,48 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
-            val response = dynamoDbClient.scan(
-                ScanRequest.builder().tableName(dynamoDbConfiguration.printDetailsTableName).build()
-            )
-            assertThat(response.items().count()).isEqualTo(1)
-            val id = UUID.fromString(response.items()[0]["id"]!!.s())
-            val saved = printDetailsRepository.get(id)
+            val response = certificateRepository.findAll()
+            assertThat(response).hasSize(1)
+            val saved = response[0]
             assertThat(saved).usingRecursiveComparison()
                 .ignoringFields(
                     "id",
-                    "requestId",
+                    "version",
+                    "createdBy",
+                    "dateCreated",
                     "vacNumber",
-                    "printRequestStatuses.dateCreated",
-                    "printRequestStatuses.eventDateTime"
+                    "applicationReceivedDateTime",
+                    "printRequests.id",
+                    "printRequests.version",
+                    "printRequests.dateCreated",
+                    "printRequests.createdBy",
+                    "printRequests.requestId",
+                    "printRequests.requestDateTime",
+                    "printRequests.eroEnglish.id",
+                    "printRequests.eroEnglish.version",
+                    "printRequests.eroEnglish.dateCreated",
+                    "printRequests.eroEnglish.createdBy",
+                    "printRequests.eroEnglish.address.id",
+                    "printRequests.eroEnglish.address.version",
+                    "printRequests.eroEnglish.address.dateCreated",
+                    "printRequests.eroEnglish.address.createdBy",
+                    "printRequests.delivery.id",
+                    "printRequests.delivery.version",
+                    "printRequests.delivery.dateCreated",
+                    "printRequests.delivery.createdBy",
+                    "printRequests.delivery.address.id",
+                    "printRequests.delivery.address.version",
+                    "printRequests.delivery.address.dateCreated",
+                    "printRequests.delivery.address.createdBy",
+                    "printRequests.statusHistory.id",
+                    "printRequests.statusHistory.version",
+                    "printRequests.statusHistory.dateCreated",
+                    "printRequests.statusHistory.createdBy",
+                    "printRequests.statusHistory.eventDateTime"
                 )
                 .isEqualTo(expected)
             assertThat(saved.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
-            assertThat(saved.requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
+            assertThat(saved.getCurrentPrintRequest().requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
             assertThat(saved.vacNumber).containsPattern(Regex("^[A-Za-z\\d]{20}$").pattern)
         }
     }
