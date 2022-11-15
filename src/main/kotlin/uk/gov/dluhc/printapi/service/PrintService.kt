@@ -6,6 +6,7 @@ import uk.gov.dluhc.printapi.mapper.PrintDetailsMapper
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.rds.mapper.CertificateMapper
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import javax.transaction.Transactional
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient as EroClient
 
 @Service
@@ -16,6 +17,7 @@ class PrintService(
     private val certificateMapper: CertificateMapper,
     private val certificateRepository: CertificateRepository
 ) {
+    @Transactional
     fun savePrintMessage(message: SendApplicationToPrintMessage) {
         val ero = eroClient.getElectoralRegistrationOffice(message.gssCode!!)
         val localAuthority = ero.localAuthorities.first { it.gssCode == message.gssCode }

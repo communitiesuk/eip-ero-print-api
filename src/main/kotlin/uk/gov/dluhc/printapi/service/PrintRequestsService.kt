@@ -9,6 +9,7 @@ import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import javax.transaction.Transactional
 
 private val logger = KotlinLogging.logger { }
 
@@ -20,6 +21,7 @@ class PrintRequestsService(
     private val processPrintRequestQueue: MessageQueue<ProcessPrintRequestBatchMessage>,
 ) {
 
+    @Transactional
     fun processPrintRequests(batchSize: Int) {
         processDynamoBatch(batchSize)
         processBatch(batchSize)
