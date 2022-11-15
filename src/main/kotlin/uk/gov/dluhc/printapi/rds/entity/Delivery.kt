@@ -15,6 +15,8 @@ import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -42,9 +44,11 @@ class Delivery(
     var address: Address? = null,
 
     @field:NotNull
+    @Enumerated(EnumType.STRING)
     var deliveryClass: DeliveryClass? = null,
 
     @field:NotNull
+    @Enumerated(EnumType.STRING)
     var deliveryMethod: DeliveryMethod? = null,
 
     @CreationTimestamp

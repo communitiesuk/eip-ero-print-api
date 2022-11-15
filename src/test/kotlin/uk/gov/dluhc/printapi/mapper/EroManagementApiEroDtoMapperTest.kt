@@ -4,6 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
 import uk.gov.dluhc.printapi.dto.EroManagementApiLocalAuthorityDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aWelshEroContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 
 class EroManagementApiEroDtoMapperTest {
@@ -22,7 +24,9 @@ class EroManagementApiEroDtoMapperTest {
                         gssCode = it.gssCode!!,
                         name = it.name!!
                     )
-                }
+                },
+                englishContactDetails = anEnglishEroContactDetails(),
+                welshContactDetails = aWelshEroContactDetails(),
             )
         }
 

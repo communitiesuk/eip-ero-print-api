@@ -16,7 +16,7 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @Mapper(
-    uses = [SourceTypeMapper::class, ElectoralRegistrationOfficeMapper::class],
+    uses = [SourceTypeMapper::class],
     imports = [UUID::class, ObjectId::class]
 )
 abstract class PrintDetailsMapper {
@@ -31,8 +31,8 @@ abstract class PrintDetailsMapper {
     @Mapping(target = "requestId", expression = "java( idFactory.requestId() )")
     @Mapping(target = "vacNumber", expression = "java( idFactory.vacNumber() )")
     @Mapping(target = "printRequestStatuses", expression = "java( initialStatus() )")
-    @Mapping(source = "ero", target = "eroEnglish")
-    @Mapping(source = "ero", target = "eroWelsh", conditionExpression = "java( isWelsh(message) )")
+    @Mapping(source = "ero.englishContactDetails", target = "eroEnglish")
+    @Mapping(source = "ero.welshContactDetails", target = "eroWelsh", conditionExpression = "java( isWelsh(message) )")
     @Mapping(source = "localAuthority", target = "issuingAuthority")
     abstract fun toPrintDetails(
         message: SendApplicationToPrintMessage,
