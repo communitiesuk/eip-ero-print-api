@@ -1,8 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Component
-import uk.gov.dluhc.printapi.database.entity.PrintDetails
-import uk.gov.dluhc.printapi.mapper.PrintDetailsToPrintRequestMapper
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.mapper.CertificateToPrintRequestMapper
@@ -11,37 +9,8 @@ import uk.gov.dluhc.printapi.rds.mapper.CertificateToPrintRequestMapper
 class PrintFileDetailsFactory(
     private val filenameFactory: FilenameFactory,
     private val photoLocationFactory: PhotoLocationFactory,
-    private val printDetailsToPrintRequestMapper: PrintDetailsToPrintRequestMapper,
     private val certificateToPrintRequestMapper: CertificateToPrintRequestMapper
 ) {
-
-    fun createFileDetails(batchId: String, printList: List<PrintDetails>): FileDetails {
-        val fileContents = createFrom(printList)
-        return FileDetails(
-            printRequestsFilename = filenameFactory.createPrintRequestsFilename(batchId, printList.size),
-            printRequests = fileContents.printRequests,
-            photoLocations = fileContents.photoLocations
-        )
-    }
-
-    private fun createFrom(printList: List<PrintDetails>): FileContents {
-        val printRequests = mutableListOf<PrintRequest>()
-        val photoLocations = mutableListOf<PhotoLocation>()
-        printList.forEach { printDetails -> parsePrintDetails(printDetails, printRequests, photoLocations) }
-        return FileContents(printRequests, photoLocations)
-    }
-
-    private fun parsePrintDetails(
-        details: PrintDetails,
-        requests: MutableList<PrintRequest>,
-        photos: MutableList<PhotoLocation>
-    ) {
-        val photoArn = details.photoLocation!!
-        val photoLocation = photoLocationFactory.create(details.batchId!!, details.requestId!!, photoArn)
-        val printRequest = printDetailsToPrintRequestMapper.map(details, photoLocation.zipPath)
-        requests.add(printRequest)
-        photos.add(photoLocation)
-    }
 
     fun createFileDetailsFromCertificates(batchId: String, certificates: List<Certificate>): FileDetails {
         val fileContents = createFromCertificates(certificates)

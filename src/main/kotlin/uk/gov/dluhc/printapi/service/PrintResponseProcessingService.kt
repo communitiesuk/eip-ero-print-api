@@ -2,13 +2,10 @@ package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
-import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
-import uk.gov.dluhc.printapi.database.repository.PrintDetailsNotFoundException
-import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -18,18 +15,14 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
-import java.time.Clock
-import java.time.OffsetDateTime
 import javax.transaction.Transactional
 
 private val logger = KotlinLogging.logger {}
 
 @Service
 class PrintResponseProcessingService(
-    private val printDetailsRepository: PrintDetailsRepository,
     private val certificateRepository: CertificateRepository,
     private val idFactory: IdFactory,
-    private val clock: Clock,
     private val statusMapper: StatusMapper,
     private val processPrintResponseMessageMapper: ProcessPrintResponseMessageMapper,
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>
@@ -56,39 +49,6 @@ class PrintResponseProcessingService(
      */
     @Transactional
     fun processBatchResponses(batchResponses: List<BatchResponse>) {
-        processBatchResponsesDynamo(batchResponses)
-        processBatchResponsesMySql(batchResponses)
-    }
-
-    private fun processBatchResponsesDynamo(batchResponses: List<BatchResponse>) {
-        batchResponses.forEach { batchResponse ->
-            with(batchResponse) {
-                val newStatus =
-                    if (status == SUCCESS) RECEIVED_BY_PRINT_PROVIDER else PENDING_ASSIGNMENT_TO_BATCH
-
-                val printDetails =
-                    printDetailsRepository.getAllByStatusAndBatchId(SENT_TO_PRINT_PROVIDER, batchId)
-
-                printDetails.forEach {
-                    it.addStatus(
-                        status = newStatus,
-                        dateCreated = OffsetDateTime.now(clock),
-                        eventDateTime = timestamp,
-                        message = message
-                    )
-
-                    if (status != SUCCESS) {
-                        it.requestId = idFactory.requestId()
-                        it.batchId = null
-                    }
-                }
-
-                printDetailsRepository.updateItems(printDetails)
-            }
-        }
-    }
-
-    private fun processBatchResponsesMySql(batchResponses: List<BatchResponse>) {
         batchResponses.forEach { batchResponse ->
             val certificates =
                 certificateRepository.findByStatusAndPrintRequestsBatchId(
@@ -132,19 +92,10 @@ class PrintResponseProcessingService(
             return
         }
 
-        processPrintResponseDynamo(printResponse, newStatus)
-        processPrintResponseMySql(printResponse, newStatus)
-    }
-
-    private fun processPrintResponseMySql(
-        printResponse: ProcessPrintResponseMessage,
-        newStatus: Status
-    ) {
-        val requestId = printResponse.requestId
-        val certificate = certificateRepository.getByPrintRequestsRequestId(requestId)
+        val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
 
         if (certificate == null) {
-            logger.error("Certificate not found for the requestId $requestId")
+            logger.error("Certificate not found for the requestId ${printResponse.requestId}")
             return
         }
 
@@ -157,30 +108,5 @@ class PrintResponseProcessingService(
         }
 
         certificateRepository.save(certificate)
-    }
-
-    private fun processPrintResponseDynamo(
-        printResponse: ProcessPrintResponseMessage,
-        newStatus: Status
-    ) {
-        val printDetails: PrintDetails
-
-        try {
-            printDetails = printDetailsRepository.getByRequestId(printResponse.requestId)
-        } catch (ex: PrintDetailsNotFoundException) {
-            logger.error(ex.message)
-            return
-        }
-
-        with(printResponse) {
-            printDetails.addStatus(
-                status = newStatus,
-                dateCreated = OffsetDateTime.now(clock),
-                eventDateTime = timestamp,
-                message = message
-            )
-        }
-
-        printDetailsRepository.updateItems(listOf(printDetails))
     }
 }
