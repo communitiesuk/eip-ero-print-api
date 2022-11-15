@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
   <changeSet id="0002-EIP1-2514-create-shedlock-table" author="fayimora.femi-balogun@valtech.com" context="ddl">
-    <createTable tableName="shedlock">
+    <createTable tableName="scheduler-locks">
       <column name="name" type="varchar(64)">
         <constraints primaryKey="true" nullable="false"/>
       </column>
