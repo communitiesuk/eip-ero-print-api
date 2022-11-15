@@ -12,6 +12,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.Status
@@ -87,10 +88,12 @@ class PrintRequestMapperTest {
             PrintRequest(
                 requestDateTime = expectedRequestDateTime,
                 requestId = requestId,
+                vacVersion = "1",
                 firstName = firstName,
                 middleNames = middleNames,
                 surname = surname,
                 certificateLanguage = certificateLanguageEntity,
+                certificateFormat = CertificateFormat.STANDARD,
                 photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(
