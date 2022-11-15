@@ -53,7 +53,7 @@ internal class ProcessPrintBatchServiceTest {
         val zipFilename = aValidZipFilename()
         val sftpPath = aValidSftpPath()
         given(printDetailsRepository.getAllByStatusAndBatchId(any(), any())).willReturn(printList)
-        given(certificateRepository.findByStatusAndPrintRequestsBatchIdIs(any(), any())).willReturn(certificates)
+        given(certificateRepository.findByStatusAndPrintRequestsBatchId(any(), any())).willReturn(certificates)
         given(printFileDetailsFactory.createFileDetails(any(), any())).willReturn(fileDetails)
         given(printFileDetailsFactory.createFileDetailsFromCertificates(any(), any())).willReturn(fileDetails)
         given(sftpZipInputStreamProvider.createSftpInputStream(any())).willReturn(sftpInputStream)
@@ -65,7 +65,7 @@ internal class ProcessPrintBatchServiceTest {
 
         // Then
         verify(printDetailsRepository).getAllByStatusAndBatchId(ASSIGNED_TO_BATCH, batchId)
-        verify(certificateRepository).findByStatusAndPrintRequestsBatchIdIs(ASSIGNED_TO_BATCH, batchId)
+        verify(certificateRepository).findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
         verify(printFileDetailsFactory).createFileDetails(batchId, printList)
         verify(printFileDetailsFactory).createFileDetailsFromCertificates(batchId, certificates)
         verify(sftpZipInputStreamProvider).createSftpInputStream(fileDetails)

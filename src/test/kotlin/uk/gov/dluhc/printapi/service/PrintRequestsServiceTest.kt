@@ -14,7 +14,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.PrintDetails
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -67,7 +67,7 @@ class PrintRequestsServiceTest {
         val batchId6 = aValidBatchId()
 
         given(printDetailsRepository.getAllByStatus(PENDING_ASSIGNMENT_TO_BATCH)).willReturn(items)
-        given(certificateRepository.findByStatusIs(PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
+        given(certificateRepository.findByStatus(PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
         given(idFactory.batchId()).willReturn(batchId1, batchId2, batchId3, batchId4, batchId5, batchId6)
 
         // When
@@ -75,7 +75,7 @@ class PrintRequestsServiceTest {
 
         // Then
         verify(printDetailsRepository).getAllByStatus(PENDING_ASSIGNMENT_TO_BATCH)
-        verify(certificateRepository).findByStatusIs(PENDING_ASSIGNMENT_TO_BATCH)
+        verify(certificateRepository).findByStatus(PENDING_ASSIGNMENT_TO_BATCH)
         verify(idFactory, times(3 * 2)).batchId()
         verify(printDetailsRepository, times(12)).save(any())
         verify(certificateRepository, times(12)).save(any())
@@ -107,7 +107,7 @@ class PrintRequestsServiceTest {
             )
         )
         val certificates = listOf(certificateBuilder(printRequests = printRequests))
-        given(certificateRepository.findByStatusIs(PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
+        given(certificateRepository.findByStatus(PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
 
         val batchId = aValidBatchId()
         given(idFactory.batchId()).willReturn(batchId)
@@ -118,21 +118,21 @@ class PrintRequestsServiceTest {
 
         // Then
         verify(printDetailsRepository).getAllByStatus(PENDING_ASSIGNMENT_TO_BATCH)
-        verify(certificateRepository).findByStatusIs(PENDING_ASSIGNMENT_TO_BATCH)
+        verify(certificateRepository).findByStatus(PENDING_ASSIGNMENT_TO_BATCH)
         verify(idFactory, times(2)).batchId()
         verify(processPrintRequestQueue, times(2)).submit(expectedMessage)
 
         verify(printDetailsRepository).save(capture(savedRecordArgumentCaptor))
         val savedPrintDetails = savedRecordArgumentCaptor.value!!
         assertThat(savedPrintDetails.printRequestStatuses!!.sortedBy { it.eventDateTime }.map { it.status })
-            .containsExactly(PENDING_ASSIGNMENT_TO_BATCH, Status.ASSIGNED_TO_BATCH)
-        assertThat(savedPrintDetails.status).isEqualTo(Status.ASSIGNED_TO_BATCH)
+            .containsExactly(PENDING_ASSIGNMENT_TO_BATCH, ASSIGNED_TO_BATCH)
+        assertThat(savedPrintDetails.status).isEqualTo(ASSIGNED_TO_BATCH)
 
         verify(certificateRepository).save(capture(savedCertificateArgumentCaptor))
         val savedCertificates = savedCertificateArgumentCaptor.value!!
         assertThat(savedCertificates.getCurrentPrintRequest().statusHistory.sortedBy { it.eventDateTime }.map { it.status })
-            .containsExactly(PENDING_ASSIGNMENT_TO_BATCH, Status.ASSIGNED_TO_BATCH)
-        assertThat(savedCertificates.status).isEqualTo(Status.ASSIGNED_TO_BATCH)
+            .containsExactly(PENDING_ASSIGNMENT_TO_BATCH, ASSIGNED_TO_BATCH)
+        assertThat(savedCertificates.status).isEqualTo(ASSIGNED_TO_BATCH)
     }
 
     @Test
@@ -150,7 +150,7 @@ class PrintRequestsServiceTest {
         // Then
         assertThat(batches).hasSize(3)
         batches.map { (id, items) ->
-            assert(items.all { it.status == Status.ASSIGNED_TO_BATCH })
+            assert(items.all { it.status == ASSIGNED_TO_BATCH })
             assert(items.all { it.batchId == id })
         }
     }

@@ -121,7 +121,7 @@ internal class CertificateRepositoryTest : IntegrationTest() {
         val expected = certificateRepository.save(certificate)
 
         // When
-        val actual = certificateRepository.getByPrintRequestsRequestIdIs(requestId)
+        val actual = certificateRepository.getByPrintRequestsRequestId(requestId)
 
         // Given
         assertCertificateRecursiveEqual(actual, expected)
@@ -139,7 +139,7 @@ internal class CertificateRepositoryTest : IntegrationTest() {
         val expected = certificateRepository.save(certificate)
 
         // When
-        val actual = certificateRepository.findByStatusAndPrintRequestsBatchIdIs(status, batchId)
+        val actual = certificateRepository.findByStatusAndPrintRequestsBatchId(status, batchId)
 
         // Given
         assertThat(actual).hasSize(1)
@@ -158,7 +158,7 @@ internal class CertificateRepositoryTest : IntegrationTest() {
         val expected = certificateRepository.save(certificate)
 
         // When
-        val actual = certificateRepository.findByStatusIs(status)
+        val actual = certificateRepository.findByStatus(status)
 
         // Given
         assertThat(actual).hasSize(1)

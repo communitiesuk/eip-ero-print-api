@@ -37,7 +37,7 @@ class PrintRequestsService(
     }
 
     fun batchCertificates(batchSize: Int): Map<String, List<Certificate>> {
-        val certificatesPendingAssignment = certificateRepository.findByStatusIs(Status.PENDING_ASSIGNMENT_TO_BATCH)
+        val certificatesPendingAssignment = certificateRepository.findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
         return certificatesPendingAssignment.chunked(batchSize).associate { batchOfCertificates ->
             val batchId = idFactory.batchId()
             batchId to batchOfCertificates.onEach {

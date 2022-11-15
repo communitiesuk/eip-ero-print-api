@@ -9,9 +9,9 @@ import java.util.UUID
 @Repository
 interface CertificateRepository : JpaRepository<Certificate, UUID> {
 
-    fun getByPrintRequestsRequestIdIs(requestId: String): Certificate
+    fun getByPrintRequestsRequestId(requestId: String): Certificate
 
-    fun findByStatusAndPrintRequestsBatchIdIs(certificateStatus: Status, batchId: String): List<Certificate>
+    fun findByStatusAndPrintRequestsBatchId(certificateStatus: Status, batchId: String): List<Certificate>
 
-    fun findByStatusIs(certificateStatus: Status): List<Certificate>
+    fun findByStatus(certificateStatus: Status): List<Certificate>
 }

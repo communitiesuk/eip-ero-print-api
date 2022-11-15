@@ -60,12 +60,8 @@ class PrintDetailsRepository(client: DynamoDbEnhancedClient, tableConfig: Dynamo
     fun getAllByStatus(status: Status): List<PrintDetails> {
         val expression = Expression.builder()
             .expression("#print_status = :status")
-            .expressionNames(mapOf(Pair("#print_status", "status")))
-            .expressionValues(
-                mapOf(
-                    Pair(":status", AttributeValue.builder().s(status.toString()).build())
-                )
-            )
+            .expressionNames(mapOf("#print_status" to "status"))
+            .expressionValues(mapOf(":status" to AttributeValue.builder().s(status.toString()).build()))
             .build()
         return table.scan(ScanEnhancedRequest.builder().filterExpression(expression).build()).items().toList()
     }
