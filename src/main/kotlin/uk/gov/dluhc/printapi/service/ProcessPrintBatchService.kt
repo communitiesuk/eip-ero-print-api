@@ -5,6 +5,9 @@ import uk.gov.dluhc.printapi.database.entity.PrintDetails
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
+import uk.gov.dluhc.printapi.rds.entity.Certificate
+import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import javax.transaction.Transactional
 
 /**
  * Processes a print batch request by streaming a zip file containing manifest and photo images
@@ -14,6 +17,7 @@ import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 class ProcessPrintBatchService(
     private val printDetailsRepository: PrintDetailsRepository,
     private val printFileDetailsFactory: PrintFileDetailsFactory,
+    private val certificateRepository: CertificateRepository,
     private val sftpZipInputStreamProvider: SftpInputStreamProvider,
     private val filenameFactory: FilenameFactory,
     private val sftpService: SftpService
@@ -35,17 +39,29 @@ class ProcessPrintBatchService(
      *
      * Step 4: Update Dynamo batch records with new status
      */
+    @Transactional
     fun processBatch(batchId: String) {
         val printList = printDetailsRepository.getAllByStatusAndBatchId(ASSIGNED_TO_BATCH, batchId)
-        val fileContents = printFileDetailsFactory.createFileDetails(batchId, printList)
-        val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(fileContents)
+        val dynamoFileContents = printFileDetailsFactory.createFileDetails(batchId, printList)
+
+        val certificates = certificateRepository.findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
+        val fileContents = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
+
+        val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(dynamoFileContents)
         val sftpFilename = filenameFactory.createZipFilename(batchId, printList.size)
         sftpService.sendFile(sftpInputStream, sftpFilename)
         printDetailsRepository.updateItems(updateBatch(printList))
+        updateCertificates(certificates)
     }
 
     private fun updateBatch(printList: List<PrintDetails>): List<PrintDetails> {
         printList.forEach { printDetails -> printDetails.addStatus(Status.SENT_TO_PRINT_PROVIDER) }
         return printList
+    }
+
+    private fun updateCertificates(certificates: List<Certificate>) {
+        certificates.forEach { certificate ->
+            certificate.addStatus(Status.SENT_TO_PRINT_PROVIDER)
+        }
     }
 }

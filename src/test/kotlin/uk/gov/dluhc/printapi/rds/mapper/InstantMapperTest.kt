@@ -72,6 +72,18 @@ class InstantMapperTest {
     inner class FromInstantToOffsetDateTime {
 
         @Test
+        fun `should convert null`() {
+            // Given
+            val instant = null
+
+            // When
+            val actual = instantMapper.toOffsetDateTime(instant)
+
+            // Then
+            assertThat(actual).isNull()
+        }
+
+        @Test
         fun `should convert Instant to UTC OffsetDateTime`() {
             // Given
             val instant = Instant.now()

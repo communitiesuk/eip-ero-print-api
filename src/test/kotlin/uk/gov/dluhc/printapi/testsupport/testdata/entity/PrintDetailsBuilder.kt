@@ -14,6 +14,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import java.time.Instant
@@ -27,6 +28,7 @@ fun buildPrintDetails(
     requestId: String = aValidRequestId(),
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
+    applicationReceivedDateTime: OffsetDateTime = OffsetDateTime.now(),
     vacNumber: String = aValidVacNumber(),
     vacVersion: String = "1",
     sourceType: SourceType = SourceType.VOTER_CARD,
@@ -49,11 +51,13 @@ fun buildPrintDetails(
         PrintRequestStatus(Status.PENDING_ASSIGNMENT_TO_BATCH, OffsetDateTime.now(UTC))
     ),
     batchId: String? = aValidBatchId(),
+    userId: String = aValidUserId()
 ) = PrintDetails(
     id = id,
     requestId = requestId,
     sourceReference = sourceReference,
     applicationReference = applicationReference,
+    applicationReceivedDateTime = applicationReceivedDateTime,
     sourceType = sourceType,
     vacNumber = vacNumber,
     vacVersion = vacVersion,
@@ -73,6 +77,7 @@ fun buildPrintDetails(
     eroWelsh = eroWelsh,
     batchId = batchId,
     printRequestStatuses = printRequestStatuses,
+    userId = userId,
 )
 
 fun buildPrintDetails(

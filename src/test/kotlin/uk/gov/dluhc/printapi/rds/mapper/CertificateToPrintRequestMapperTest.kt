@@ -116,8 +116,8 @@ class CertificateToPrintRequestMapperTest {
         val expected = uk.gov.dluhc.printapi.printprovider.models.PrintRequest()
         expected.requestId = requestId
         expected.issuingAuthorityEn = eroEnglish.name
-        expected.issueDate = LocalDate.parse("2022-10-21")
-        expected.suggestedExpiryDate = LocalDate.parse("2032-10-21")
+        expected.issueDate = issueDate
+        expected.suggestedExpiryDate = suggestedExpiryDate
         expected.requestDateTime = requestDateTime.atOffset(UTC)
         expected.cardFirstname = firstName
         expected.cardMiddleNames = middleNames

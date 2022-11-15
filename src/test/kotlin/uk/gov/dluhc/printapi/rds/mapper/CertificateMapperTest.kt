@@ -128,7 +128,8 @@ class CertificateMapperTest {
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.name,
                 issueDate = LocalDate.now(),
-                printRequests = mutableListOf(printRequest)
+                printRequests = mutableListOf(printRequest),
+                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
             )
         }
 
@@ -136,9 +137,7 @@ class CertificateMapperTest {
         val actual = mapper.toCertificate(message, ero, localAuthority.name)
 
         // Then
-        assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
-        assertThat(actual.status).isNull()
-        assertThat(actual.id).isNull()
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
