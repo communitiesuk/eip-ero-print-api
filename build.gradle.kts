@@ -86,8 +86,6 @@ dependencies {
     implementation("io.awspring.cloud:spring-cloud-starter-aws-messaging")
 
     // AWS v2 dependencies
-    implementation("software.amazon.awssdk:dynamodb")
-    implementation("software.amazon.awssdk:dynamodb-enhanced")
     implementation("software.amazon.awssdk:s3")
 
     // mongo core datatypes, so that we can generate a Mongo ObjectId (a 12 byte/24 char hex string ID)
