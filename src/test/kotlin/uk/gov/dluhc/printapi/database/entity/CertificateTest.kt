@@ -5,9 +5,9 @@ import org.assertj.core.api.Assertions.catchException
 import org.assertj.core.groups.Tuple
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -19,7 +19,7 @@ internal class CertificateTest {
         @Test
         fun `should fail to get latest print request for Certificate with no Print Requests`() {
             // Given
-            val certificate = certificateBuilder(printRequests = emptyList())
+            val certificate = buildCertificate(printRequests = emptyList())
 
             // When
             val actual = catchException { certificate.getCurrentPrintRequest() }
@@ -31,8 +31,8 @@ internal class CertificateTest {
         @Test
         fun `should get latest status for Certificate with one Print Request`() {
             // Given
-            val currentPrintRequest = printRequestBuilder()
-            val certificate = certificateBuilder(printRequests = listOf(currentPrintRequest))
+            val currentPrintRequest = buildPrintRequest()
+            val certificate = buildCertificate(printRequests = listOf(currentPrintRequest))
 
             // When
             val actual = certificate.getCurrentPrintRequest()
@@ -44,9 +44,9 @@ internal class CertificateTest {
         @Test
         fun `should determine latest status for Certificate with one Print Request with multiple statuses`() {
             // Given
-            val previousPrintRequest = printRequestBuilder(requestDateTime = Instant.now().minus(8, ChronoUnit.DAYS))
-            val currentPrintRequest = printRequestBuilder(requestDateTime = Instant.now().minus(3, ChronoUnit.DAYS))
-            val certificate = certificateBuilder(printRequests = listOf(currentPrintRequest, previousPrintRequest))
+            val previousPrintRequest = buildPrintRequest(requestDateTime = Instant.now().minus(8, ChronoUnit.DAYS))
+            val currentPrintRequest = buildPrintRequest(requestDateTime = Instant.now().minus(3, ChronoUnit.DAYS))
+            val certificate = buildCertificate(printRequests = listOf(currentPrintRequest, previousPrintRequest))
 
             // When
             val actual = certificate.getCurrentPrintRequest()
@@ -62,7 +62,7 @@ internal class CertificateTest {
         @Test
         fun `should fail to add status for Certificate with no existing Print Requests`() {
             // Given
-            val certificate = certificateBuilder(printRequests = emptyList())
+            val certificate = buildCertificate(printRequests = emptyList())
             val status = Status.VALIDATED_BY_PRINT_PROVIDER
 
             // When
@@ -75,15 +75,15 @@ internal class CertificateTest {
         @Test
         fun `should add status for Certificate with one Print Request with one status`() {
             // Given
-            val printRequest = printRequestBuilder(
+            val printRequest = buildPrintRequest(
                 printRequestStatuses = listOf(
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minusSeconds(1)
                     )
                 )
             )
-            val certificate = certificateBuilder(printRequests = listOf(printRequest))
+            val certificate = buildCertificate(printRequests = listOf(printRequest))
             val status = Status.VALIDATED_BY_PRINT_PROVIDER
 
             // When
@@ -97,23 +97,23 @@ internal class CertificateTest {
         @Test
         fun `should add status for Certificate with one Print Request with multiple statuses`() {
             // Given
-            val printRequest = printRequestBuilder(
+            val printRequest = buildPrintRequest(
                 printRequestStatuses = listOf(
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(10, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minus(9, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS)
                     ),
                 )
             )
-            val certificate = certificateBuilder(printRequests = listOf(printRequest))
+            val certificate = buildCertificate(printRequests = listOf(printRequest))
             val status = Status.VALIDATED_BY_PRINT_PROVIDER
 
             // When
@@ -127,50 +127,50 @@ internal class CertificateTest {
         @Test
         fun `should add status for Certificate with multiple Print Requests with multiple statuses`() {
             // Given
-            val firstPrintRequest = printRequestBuilder(
+            val firstPrintRequest = buildPrintRequest(
                 requestDateTime = Instant.now().minus(30, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.PRINT_PROVIDER_DISPATCH_FAILED,
                         eventDateTime = Instant.now().minus(20, ChronoUnit.DAYS)
                     ),
                 )
             )
 
-            val secondPrintRequest = printRequestBuilder(
+            val secondPrintRequest = buildPrintRequest(
                 requestDateTime = Instant.now().minus(10, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(10, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minus(9, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS)
                     ),
-                    printRequestStatusBuilder(
+                    buildPrintStatus(
                         status = Status.DISPATCHED,
                         eventDateTime = Instant.now().minus(3, ChronoUnit.DAYS)
                     ),
                 )
             )
-            val certificate = certificateBuilder(printRequests = listOf(firstPrintRequest, secondPrintRequest))
+            val certificate = buildCertificate(printRequests = listOf(firstPrintRequest, secondPrintRequest))
             val status = Status.VALIDATED_BY_PRINT_PROVIDER
 
             // When

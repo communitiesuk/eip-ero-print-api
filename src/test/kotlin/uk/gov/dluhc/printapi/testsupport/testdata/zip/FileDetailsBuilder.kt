@@ -6,10 +6,10 @@ import uk.gov.dluhc.printapi.service.PhotoLocation
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestsFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.model.aPrintRequestList
 
-fun aFileDetailsBuilder(
+fun buildFileDetails(
     printRequestsFilename: String = aValidPrintRequestsFilename(),
     printRequests: List<PrintRequest> = aPrintRequestList(),
     photoLocations: List<PhotoLocation> = aPhotoLocationList()
 ) = FileDetails(printRequestsFilename, printRequests, photoLocations)
 
-fun aFileDetails(): FileDetails = aFileDetailsBuilder()
+fun aFileDetails(): FileDetails = buildFileDetails()

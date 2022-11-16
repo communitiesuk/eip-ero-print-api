@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.testsupport.testdata
+package uk.gov.dluhc.printapi.testsupport
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

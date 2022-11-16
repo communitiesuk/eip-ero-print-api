@@ -17,9 +17,9 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
 
 @ExtendWith(MockitoExtension::class)
 internal class CertificateBatchingServiceTest {
@@ -41,7 +41,7 @@ internal class CertificateBatchingServiceTest {
         // Given
         val batchSize = 5
         val numOfRequests = 12
-        val certificates = (1..numOfRequests).map { certificateBuilder(status = Status.PENDING_ASSIGNMENT_TO_BATCH) }
+        val certificates = (1..numOfRequests).map { buildCertificate(status = Status.PENDING_ASSIGNMENT_TO_BATCH) }
 
         val batchId1 = aValidBatchId()
         val batchId2 = aValidBatchId()
@@ -65,12 +65,12 @@ internal class CertificateBatchingServiceTest {
         val batchSize = 5
 
         val printRequests = listOf(
-            printRequestBuilder(
-                printRequestStatuses = listOf(printRequestStatusBuilder(status = Status.PENDING_ASSIGNMENT_TO_BATCH)),
+            buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintStatus(status = Status.PENDING_ASSIGNMENT_TO_BATCH)),
                 batchId = null
             )
         )
-        val certificates = listOf(certificateBuilder(printRequests = printRequests))
+        val certificates = listOf(buildCertificate(printRequests = printRequests))
         given(certificateRepository.findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
 
         val batchId = aValidBatchId()
@@ -99,7 +99,7 @@ internal class CertificateBatchingServiceTest {
         // Given
         val batchSize = 10
         val numOfRequests = 23
-        val certificates = (1..numOfRequests).map { certificateBuilder() }
+        val certificates = (1..numOfRequests).map { buildCertificate() }
         given(certificateRepository.findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
         given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId())
 

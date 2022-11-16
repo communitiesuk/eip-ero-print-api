@@ -17,7 +17,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidInputStream
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSftpPath
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidZipFilename
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aFileDetails
 
 @ExtendWith(MockitoExtension::class)
@@ -44,7 +44,7 @@ internal class ProcessPrintBatchServiceTest {
     fun `should send file to SFTP`() {
         // Given
         val batchId = aValidBatchId()
-        val certificates = listOf(certificateBuilder())
+        val certificates = listOf(buildCertificate())
         val fileDetails = aFileDetails()
         val sftpInputStream = aValidInputStream()
         val zipFilename = aValidZipFilename()

@@ -9,9 +9,9 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -23,14 +23,14 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
         // Given
         val requestId = aValidRequestId()
         val batchId = aValidBatchId()
-        val certificate = certificateBuilder(
+        val certificate = buildCertificate(
             status = Status.ASSIGNED_TO_BATCH,
             printRequests = mutableListOf(
-                printRequestBuilder(
+                buildPrintRequest(
                     batchId = batchId,
                     requestId = requestId,
                     printRequestStatuses = listOf(
-                        printRequestStatusBuilder(
+                        buildPrintStatus(
                             status = Status.ASSIGNED_TO_BATCH,
                             eventDateTime = Instant.now().minusSeconds(10)
                         )

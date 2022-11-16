@@ -32,9 +32,9 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
@@ -109,12 +109,12 @@ class PrintResponseProcessingServiceTest {
             val batchResponse2 = buildBatchResponse(status = SUCCESS)
             val batchId1 = batchResponse1.batchId
             val batchId2 = batchResponse2.batchId
-            val certificate1 = certificateBuilder(
+            val certificate1 = buildCertificate(
                 printRequests = listOf(
-                    printRequestBuilder(
+                    buildPrintRequest(
                         batchId = batchId1,
                         printRequestStatuses = listOf(
-                            printRequestStatusBuilder(
+                            buildPrintStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
                                 eventDateTime = batchResponse1.timestamp.toInstant().minusSeconds(10)
                             )
@@ -122,12 +122,12 @@ class PrintResponseProcessingServiceTest {
                     )
                 )
             )
-            val certificate2 = certificateBuilder(
+            val certificate2 = buildCertificate(
                 printRequests = listOf(
-                    printRequestBuilder(
+                    buildPrintRequest(
                         batchId = batchId2,
                         printRequestStatuses = listOf(
-                            printRequestStatusBuilder(
+                            buildPrintStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
                                 eventDateTime = batchResponse2.timestamp.toInstant().minusSeconds(10)
                             )
@@ -186,12 +186,12 @@ class PrintResponseProcessingServiceTest {
             val response = buildProcessPrintResponseMessage(requestId = requestId)
             val expectedStatus = IN_PRODUCTION
             given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
-            val certificate = certificateBuilder(
+            val certificate = buildCertificate(
                 printRequests = listOf(
-                    printRequestBuilder(
+                    buildPrintRequest(
                         requestId = requestId,
                         printRequestStatuses = listOf(
-                            printRequestStatusBuilder(
+                            buildPrintStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
                                 eventDateTime = response.timestamp.toInstant().minusSeconds(10)
                             )

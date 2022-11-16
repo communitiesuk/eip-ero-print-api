@@ -21,8 +21,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.deliveryBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.electoralRegistrationOfficeBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
@@ -46,7 +46,7 @@ class CertificateToPrintRequestMapperTest {
         private fun welshEro(): Stream<Arguments> {
             return Stream.of(
                 Arguments.of(null),
-                Arguments.of(electoralRegistrationOfficeBuilder(name = aValidLocalAuthorityName())),
+                Arguments.of(buildElectoralRegistrationOffice(name = aValidLocalAuthorityName())),
             )
         }
     }
@@ -67,12 +67,12 @@ class CertificateToPrintRequestMapperTest {
         val surname = "Doe"
         val certificateLanguage = CertificateLanguage.EN
         val certificateFormat = CertificateFormat.STANDARD
-        val delivery = deliveryBuilder()
+        val delivery = buildDelivery()
         val gssCode: String = getRandomGssCode()
         val issuingAuthority: String = aValidLocalAuthorityName()
         val issueDate = LocalDate.of(2022, 10, 21)
         val suggestedExpiryDate = LocalDate.of(2032, 10, 21)
-        val eroEnglish: ElectoralRegistrationOffice = electoralRegistrationOfficeBuilder(name = issuingAuthority)
+        val eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(name = issuingAuthority)
         val photoLocation = aPhotoArn()
         val statusHistory = mutableListOf(
             PrintRequestStatus(

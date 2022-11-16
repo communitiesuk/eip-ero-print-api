@@ -38,8 +38,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -117,7 +117,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     fun `should get by requestId given one exists`() {
         // Given
         val requestId = aValidRequestId()
-        val certificate = certificateBuilder(printRequests = listOf(printRequestBuilder(requestId = requestId)))
+        val certificate = buildCertificate(printRequests = listOf(buildPrintRequest(requestId = requestId)))
         val expected = certificateRepository.save(certificate)
 
         // When
@@ -130,7 +130,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     @Test
     fun `should return null given no certificate by the requestId`() {
         // Given
-        val certificate = certificateBuilder(printRequests = listOf(printRequestBuilder()))
+        val certificate = buildCertificate(printRequests = listOf(buildPrintRequest()))
         certificateRepository.save(certificate)
 
         // When
@@ -145,9 +145,9 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
         // Given
         val batchId = aValidBatchId()
         val status = aValidCertificateStatus()
-        val certificate = certificateBuilder(
+        val certificate = buildCertificate(
             status = status,
-            printRequests = listOf(printRequestBuilder(batchId = batchId))
+            printRequests = listOf(buildPrintRequest(batchId = batchId))
         )
         val expected = certificateRepository.save(certificate)
 
@@ -165,7 +165,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     fun `should get by status`() {
         // Given
         val status = aValidCertificateStatus()
-        val certificate = certificateBuilder(
+        val certificate = buildCertificate(
             status = status,
         )
         val expected = certificateRepository.save(certificate)

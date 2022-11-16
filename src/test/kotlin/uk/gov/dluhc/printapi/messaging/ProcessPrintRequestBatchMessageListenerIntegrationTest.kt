@@ -16,9 +16,9 @@ import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintRequestBatchMessage
 import java.io.ByteArrayInputStream
 import java.time.Instant
@@ -51,15 +51,15 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         )
 
         // save certificates in MySQL
-        var certificate = certificateBuilder(
+        var certificate = buildCertificate(
             status = ASSIGNED_TO_BATCH,
             printRequests = mutableListOf(
-                printRequestBuilder(
+                buildPrintRequest(
                     batchId = batchId,
                     requestId = requestId,
                     photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
                     printRequestStatuses = listOf(
-                        printRequestStatusBuilder(
+                        buildPrintStatus(
                             status = ASSIGNED_TO_BATCH,
                             eventDateTime = Instant.now().minusSeconds(10)
                         )

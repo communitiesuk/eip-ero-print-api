@@ -2,13 +2,13 @@ package uk.gov.dluhc.printapi.testsupport.testdata.zip
 
 import uk.gov.dluhc.printapi.service.PhotoLocation
 
-fun photoLocationBuilder(
+fun buildPhotoLocation(
     zipPath: String = aPhotoZipPath(),
     sourceBucket: String = aPhotoBucket(),
     sourcePath: String = aPhotoBucketPath()
 ) = PhotoLocation(zipPath, sourceBucket, sourcePath)
 
-fun aPhotoLocation(): PhotoLocation = photoLocationBuilder()
+fun aPhotoLocation(): PhotoLocation = buildPhotoLocation()
 
 fun aPhotoLocationList(): List<PhotoLocation> = listOf(aPhotoLocation())
 
