@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rds.mapper
+package uk.gov.dluhc.printapi.mapper
 
 import org.springframework.stereotype.Component
 import java.time.Instant

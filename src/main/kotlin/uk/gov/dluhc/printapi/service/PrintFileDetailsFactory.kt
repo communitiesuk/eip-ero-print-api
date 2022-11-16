@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Component
+import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.mapper.CertificateToPrintRequestMapper
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.mapper.CertificateToPrintRequestMapper
 
 @Component
 class PrintFileDetailsFactory(

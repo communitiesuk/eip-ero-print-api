@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rds.mapper
+package uk.gov.dluhc.printapi.mapper
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -6,14 +6,14 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
+import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
+import uk.gov.dluhc.printapi.database.entity.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.rds.entity.PrintRequest
-import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
@@ -21,9 +21,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.deliveryBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.electoralRegistrationOfficeBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.rdsDeliveryBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.rdsElectoralRegistrationOfficeBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
 import java.time.Instant
@@ -46,7 +46,7 @@ class CertificateToPrintRequestMapperTest {
         private fun welshEro(): Stream<Arguments> {
             return Stream.of(
                 Arguments.of(null),
-                Arguments.of(rdsElectoralRegistrationOfficeBuilder(name = aValidLocalAuthorityName())),
+                Arguments.of(electoralRegistrationOfficeBuilder(name = aValidLocalAuthorityName())),
             )
         }
     }
@@ -67,12 +67,12 @@ class CertificateToPrintRequestMapperTest {
         val surname = "Doe"
         val certificateLanguage = CertificateLanguage.EN
         val certificateFormat = CertificateFormat.STANDARD
-        val delivery = rdsDeliveryBuilder()
+        val delivery = deliveryBuilder()
         val gssCode: String = getRandomGssCode()
         val issuingAuthority: String = aValidLocalAuthorityName()
         val issueDate = LocalDate.of(2022, 10, 21)
         val suggestedExpiryDate = LocalDate.of(2032, 10, 21)
-        val eroEnglish: ElectoralRegistrationOffice = rdsElectoralRegistrationOfficeBuilder(name = issuingAuthority)
+        val eroEnglish: ElectoralRegistrationOffice = electoralRegistrationOfficeBuilder(name = issuingAuthority)
         val photoLocation = aPhotoArn()
         val statusHistory = mutableListOf(
             PrintRequestStatus(

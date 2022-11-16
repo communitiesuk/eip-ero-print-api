@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rds.repository
+package uk.gov.dluhc.printapi.database.repository
 
 import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.id.UUIDGenerator
@@ -6,7 +6,7 @@ import java.io.Serializable
 
 class UseExistingOrGenerateUUID : UUIDGenerator() {
     companion object {
-        const val NAME = "uk.gov.dluhc.printapi.rds.repository.UseExistingOrGenerateUUID"
+        const val NAME = "uk.gov.dluhc.printapi.database.repository.UseExistingOrGenerateUUID"
     }
 
     override fun generate(session: SharedSessionContractImplementor, entity: Any?): Serializable {

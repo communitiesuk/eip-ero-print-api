@@ -1,13 +1,13 @@
-package uk.gov.dluhc.printapi.testsupport.testdata.rds
+package uk.gov.dluhc.printapi.testsupport.testdata.entity
 
 import org.apache.commons.lang3.RandomStringUtils
+import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
+import uk.gov.dluhc.printapi.database.entity.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.rds.entity.Address
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.entity.Delivery
-import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.rds.entity.PrintRequest
-import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
@@ -65,9 +65,9 @@ fun printRequestBuilder(
     requestId: String = aValidRequestId(),
     printRequestStatuses: List<PrintRequestStatus> = listOf(printRequestStatusBuilder()),
     requestDateTime: Instant? = aValidRequestDateTime(),
-    eroEnglish: ElectoralRegistrationOffice = rdsElectoralRegistrationOfficeBuilder(),
+    eroEnglish: ElectoralRegistrationOffice = electoralRegistrationOfficeBuilder(),
     eroWelsh: ElectoralRegistrationOffice? = null,
-    delivery: Delivery = rdsDeliveryBuilder(),
+    delivery: Delivery = deliveryBuilder(),
     batchId: String? = null,
     photoLocationArn: String? = aPhotoArn(),
 ): PrintRequest {
@@ -100,9 +100,9 @@ fun printRequestStatusBuilder(
     )
 }
 
-fun rdsElectoralRegistrationOfficeBuilder(
+fun electoralRegistrationOfficeBuilder(
     name: String = aValidEroName(),
-    address: Address = rdsAddressBuilder()
+    address: Address = addressBuilder()
 ): ElectoralRegistrationOffice {
     return ElectoralRegistrationOffice(
         address = address,
@@ -113,7 +113,7 @@ fun rdsElectoralRegistrationOfficeBuilder(
     )
 }
 
-fun rdsAddressBuilder(
+fun addressBuilder(
     street: String = DataFaker.faker.address().streetName(),
     postcode: String = DataFaker.faker.address().postcode(),
     property: String? = DataFaker.faker.address().buildingNumber(),
@@ -131,10 +131,10 @@ fun rdsAddressBuilder(
     uprn = uprn,
 )
 
-fun rdsDeliveryBuilder(): Delivery {
+fun deliveryBuilder(): Delivery {
     return Delivery(
         addressee = aValidDeliveryName(),
-        address = rdsAddressBuilder(),
+        address = addressBuilder(),
         deliveryClass = aValidDeliveryClass(),
         deliveryMethod = aValidDeliveryMethod()
     )

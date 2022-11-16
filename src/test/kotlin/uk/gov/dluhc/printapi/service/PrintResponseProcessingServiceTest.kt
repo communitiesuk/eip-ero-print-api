@@ -18,25 +18,26 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
-import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestStatusBuilder
 
 @ExtendWith(MockitoExtension::class)
 class PrintResponseProcessingServiceTest {
@@ -155,7 +156,7 @@ class PrintResponseProcessingServiceTest {
                     .first()
             )
                 .usingRecursiveComparison().isEqualTo(
-                    uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus(
+                    PrintRequestStatus(
                         status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = batchResponse1.timestamp.toInstant(),
                         message = batchResponse1.message
@@ -166,7 +167,7 @@ class PrintResponseProcessingServiceTest {
                     .first()
             )
                 .usingRecursiveComparison().isEqualTo(
-                    uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus(
+                    PrintRequestStatus(
                         status = RECEIVED_BY_PRINT_PROVIDER,
                         eventDateTime = batchResponse2.timestamp.toInstant(),
                         message = batchResponse2.message
@@ -213,7 +214,7 @@ class PrintResponseProcessingServiceTest {
                     .first()
             )
                 .usingRecursiveComparison().isEqualTo(
-                    uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus(
+                    PrintRequestStatus(
                         status = expectedStatus,
                         eventDateTime = response.timestamp.toInstant(),
                         message = response.message

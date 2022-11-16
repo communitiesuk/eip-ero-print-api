@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.mapper.CertificateMapper
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
-import uk.gov.dluhc.printapi.rds.mapper.CertificateMapper
-import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import javax.transaction.Transactional
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient as EroClient
 

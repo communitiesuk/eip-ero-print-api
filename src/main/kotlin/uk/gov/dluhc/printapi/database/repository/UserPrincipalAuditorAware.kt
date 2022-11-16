@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rds.repository
+package uk.gov.dluhc.printapi.database.repository
 
 import org.springframework.data.domain.AuditorAware
 import org.springframework.security.core.context.SecurityContextHolder

@@ -10,14 +10,14 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidInputStream
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSftpPath
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidZipFilename
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aFileDetails
 
 @ExtendWith(MockitoExtension::class)
