@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClie
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.CertificateMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 
 @ExtendWith(MockitoExtension::class)
@@ -35,7 +35,7 @@ class PrintServiceTest {
         val ero = buildEroManagementApiEroDto()
         val localAuthority = ero.localAuthorities[1]
         val message = buildSendApplicationToPrintMessage(gssCode = localAuthority.gssCode)
-        val certificate = certificateBuilder()
+        val certificate = buildCertificate()
         given(eroClient.getElectoralRegistrationOffice(any())).willReturn(ero)
         given(certificateMapper.toCertificate(any(), any(), any())).willReturn(certificate)
 

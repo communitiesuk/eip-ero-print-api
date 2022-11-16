@@ -19,17 +19,16 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestsFilename
-import uk.gov.dluhc.printapi.testsupport.testdata.zip.aFileDetailsBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucket
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
-import uk.gov.dluhc.printapi.testsupport.testdata.zip.photoLocationBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.buildFileDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.buildPhotoLocation
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
-import java.lang.RuntimeException
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
@@ -54,10 +53,10 @@ internal class ZipOutputStreamProducerRunnableTest {
         val psvFileContents = "PSV File contents"
         val printRequestsFilename = aValidPrintRequestsFilename()
         val zipPath = aPhotoZipPath()
-        val fileDetails = aFileDetailsBuilder(
+        val fileDetails = buildFileDetails(
             printRequestsFilename = printRequestsFilename,
             photoLocations = listOf(
-                photoLocationBuilder(
+                buildPhotoLocation(
                     zipPath = zipPath,
                     sourceBucket = s3Bucket,
                     sourcePath = s3Path
@@ -103,7 +102,7 @@ internal class ZipOutputStreamProducerRunnableTest {
         // Given
         val zipOutputStream = PipedOutputStream()
         val sftpInputStream = PipedInputStream(zipOutputStream)
-        val fileDetails = aFileDetailsBuilder()
+        val fileDetails = buildFileDetails()
         val zipOutputStreamProducerRunnable = createRunnable(zipOutputStream, sftpInputStream, fileDetails)
         doThrow(RuntimeException::class).`when`(printRequestsFileProducer).writeFileToStream(any(), any())
 

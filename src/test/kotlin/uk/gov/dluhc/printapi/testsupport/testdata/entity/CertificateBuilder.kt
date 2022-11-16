@@ -39,10 +39,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.util.UUID
 
-fun certificateBuilder(
+fun buildCertificate(
     id: UUID? = UUID.randomUUID(),
     status: Status = aValidCertificateStatus(),
-    printRequests: List<PrintRequest> = listOf(printRequestBuilder()),
+    printRequests: List<PrintRequest> = listOf(buildPrintRequest()),
 ): Certificate {
     val certificate = Certificate(
         id = id,
@@ -61,13 +61,13 @@ fun certificateBuilder(
     return certificate
 }
 
-fun printRequestBuilder(
+fun buildPrintRequest(
     requestId: String = aValidRequestId(),
-    printRequestStatuses: List<PrintRequestStatus> = listOf(printRequestStatusBuilder()),
+    printRequestStatuses: List<PrintRequestStatus> = listOf(buildPrintStatus()),
     requestDateTime: Instant? = aValidRequestDateTime(),
-    eroEnglish: ElectoralRegistrationOffice = electoralRegistrationOfficeBuilder(),
+    eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(),
     eroWelsh: ElectoralRegistrationOffice? = null,
-    delivery: Delivery = deliveryBuilder(),
+    delivery: Delivery = buildDelivery(),
     batchId: String? = null,
     photoLocationArn: String? = aPhotoArn(),
 ): PrintRequest {
@@ -90,19 +90,21 @@ fun printRequestBuilder(
     return printRequest
 }
 
-fun printRequestStatusBuilder(
+fun buildPrintStatus(
     status: Status = aValidCertificateStatus(),
     eventDateTime: Instant = aValidPrintRequestStatusEventDateTime(),
+    message: String? = null
 ): PrintRequestStatus {
     return PrintRequestStatus(
         status = status,
-        eventDateTime = eventDateTime
+        eventDateTime = eventDateTime,
+        message = message
     )
 }
 
-fun electoralRegistrationOfficeBuilder(
+fun buildElectoralRegistrationOffice(
     name: String = aValidEroName(),
-    address: Address = addressBuilder()
+    address: Address = buildAddress()
 ): ElectoralRegistrationOffice {
     return ElectoralRegistrationOffice(
         address = address,
@@ -113,7 +115,7 @@ fun electoralRegistrationOfficeBuilder(
     )
 }
 
-fun addressBuilder(
+fun buildAddress(
     street: String = DataFaker.faker.address().streetName(),
     postcode: String = DataFaker.faker.address().postcode(),
     property: String? = DataFaker.faker.address().buildingNumber(),
@@ -131,10 +133,10 @@ fun addressBuilder(
     uprn = uprn,
 )
 
-fun deliveryBuilder(): Delivery {
+fun buildDelivery(): Delivery {
     return Delivery(
         addressee = aValidDeliveryName(),
-        address = addressBuilder(),
+        address = buildAddress(),
         deliveryClass = aValidDeliveryClass(),
         deliveryMethod = aValidDeliveryMethod()
     )

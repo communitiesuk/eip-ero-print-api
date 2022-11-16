@@ -31,9 +31,9 @@ fun buildBatchResponse(
 
 fun buildPrintResponse(
     requestId: String = aValidRequestId(),
-    message: String = faker.harryPotter().spell(),
     statusStep: PrintResponse.StatusStep = PrintResponse.StatusStep.IN_PRODUCTION,
     status: PrintResponse.Status = PrintResponse.Status.SUCCESS,
+    message: String? = if (status == PrintResponse.Status.SUCCESS) null else faker.harryPotter().spell(),
     timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
 ): PrintResponse = PrintResponse()
     .withMessage(message)

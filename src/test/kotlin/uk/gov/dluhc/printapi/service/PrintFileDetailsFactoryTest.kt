@@ -13,12 +13,12 @@ import uk.gov.dluhc.printapi.mapper.CertificateToPrintRequestMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestsFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.aPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
-import uk.gov.dluhc.printapi.testsupport.testdata.zip.photoLocationBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.buildPhotoLocation
 
 @ExtendWith(MockitoExtension::class)
 internal class PrintFileDetailsFactoryTest {
@@ -41,15 +41,15 @@ internal class PrintFileDetailsFactoryTest {
         val batchId = aValidBatchId()
         val requestId = aValidRequestId()
         val photoArn = aPhotoArn()
-        val currentPrintRequest = printRequestBuilder(batchId = batchId, requestId = requestId, photoLocationArn = photoArn)
-        val certificate = certificateBuilder(
+        val currentPrintRequest = buildPrintRequest(batchId = batchId, requestId = requestId, photoLocationArn = photoArn)
+        val certificate = buildCertificate(
             printRequests = mutableListOf(currentPrintRequest)
         )
         val certificates = listOf(certificate)
         val psvFilename = aValidPrintRequestsFilename()
         given(filenameFactory.createPrintRequestsFilename(any(), any())).willReturn(psvFilename)
         val zipPath = aPhotoZipPath()
-        val photoLocation = photoLocationBuilder(zipPath = zipPath)
+        val photoLocation = buildPhotoLocation(zipPath = zipPath)
         given(photoLocationFactory.create(any(), any(), any())).willReturn(photoLocation)
         val printRequest = aPrintRequest()
         given(certificateToPrintRequestMapper.map(any(), any(), any())).willReturn(printRequest)
