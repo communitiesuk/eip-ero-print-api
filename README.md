@@ -34,9 +34,6 @@ The following environment variables must be set in order to run the application:
 * `SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME` - the queue name for processing print response files
 * `SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME` - the queue name for processing individual print responses
 * `API_ERO_MANAGEMENT_URL` - the base URL of the ERO Management REST API service.
-* `DYNAMODB_ENDPOINT` - the localstack endpoint
-* `DYNAMODB_PRINT_DETAILS_TABLE_NAME` - table name to persist print details
-* `DYNAMODB_SCHEDULER_LOCKS_TABLE_NAME` - table name to persist scheduler locks
 * `THREAD_POOL_ZIP_CORE_SIZE` - number of core threads for the Zip producer thread pool 
 * `THREAD_POOL_ZIP_MAX_SIZE` - maximum number of threads for the Zip producer thread pool
 * `SFTP_HOST` - Hostname of the SFTP server to send print requests
