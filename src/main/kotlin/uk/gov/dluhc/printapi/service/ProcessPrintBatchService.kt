@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.service
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.exception.EmptyBatchException
 import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import javax.transaction.Transactional
@@ -39,13 +40,14 @@ class ProcessPrintBatchService(
     @Transactional
     fun processBatch(batchId: String) {
         val certificates = certificateRepository.findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
-        if (certificates.isNotEmpty()) {
-            val fileContents = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
-            val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(fileContents)
-            val sftpFilename = filenameFactory.createZipFilename(batchId, certificates.size)
-            sftpService.sendFile(sftpInputStream, sftpFilename)
-            updateCertificates(certificates)
+        if (certificates.isEmpty()) {
+            throw EmptyBatchException(batchId, ASSIGNED_TO_BATCH)
         }
+        val fileContents = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
+        val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(fileContents)
+        val sftpFilename = filenameFactory.createZipFilename(batchId, certificates.size)
+        sftpService.sendFile(sftpInputStream, sftpFilename)
+        updateCertificates(certificates)
     }
 
     private fun updateCertificates(certificates: List<Certificate>) {
