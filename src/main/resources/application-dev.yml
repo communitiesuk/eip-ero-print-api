@@ -1,4 +1,7 @@
 jobs:
   process-print-responses:
     name: "ProcessPrintResponses"
-    cron: "0 */5 * ? * *" # every 5 minutes by default
+    cron: "0 */10 * ? * *" # every 10 minutes
+  batch-print-requests:
+    name: "BatchPrintRequests"
+    cron: "0 */10 * ? * *" # every 10 minutes

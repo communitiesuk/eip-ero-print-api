@@ -20,6 +20,7 @@ class PrintRequestsService(
 
     @Transactional
     fun processPrintRequests(batchSize: Int) {
+        logger.info { "Looking for certificate Print Requests to assign to a new batch" }
         batchCertificates(batchSize).forEach { (batchId, batchOfCertificates) ->
             batchOfCertificates.forEach { certificate ->
                 certificateRepository.save(certificate)
@@ -28,6 +29,7 @@ class PrintRequestsService(
             processPrintRequestQueue.submit(ProcessPrintRequestBatchMessage(batchId))
             logger.info { "Batch [$batchId] submitted to queue" }
         }
+        logger.info { "Completed batching certificate Print Requests" }
     }
 
     fun batchCertificates(batchSize: Int): Map<String, List<Certificate>> {
