@@ -20,7 +20,8 @@ class PrintResponseFileService(
     fun processPrintResponseFile(directory: String, fileName: String) {
         val printResponsesString = sftpService.fetchFileFromOutBoundDirectory(directory, fileName)
         val printResponses = parsePrintResponseContent(printResponsesString)
-        printResponseProcessingService.processBatchAndPrintResponses(printResponses)
+        printResponseProcessingService.processBatchResponses(printResponses.batchResponses)
+        printResponseProcessingService.processPrintResponses(printResponses.printResponses)
         removeFile(directory, fileName)
     }
 

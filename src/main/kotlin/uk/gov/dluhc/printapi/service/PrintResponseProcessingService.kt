@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
-import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
+import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import javax.transaction.Transactional
@@ -28,10 +28,8 @@ class PrintResponseProcessingService(
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>
 ) {
 
-    @Transactional
-    fun processBatchAndPrintResponses(printResponses: PrintResponses) {
-        processBatchResponses(printResponses.batchResponses)
-        printResponses.printResponses.forEach {
+    fun processPrintResponses(printResponses: List<PrintResponse>) {
+        printResponses.forEach {
             processPrintResponseQueue.submit(processPrintResponseMessageMapper.toProcessPrintResponseMessage(it))
         }
     }
