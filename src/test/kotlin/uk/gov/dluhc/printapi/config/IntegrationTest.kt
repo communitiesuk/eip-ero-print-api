@@ -26,14 +26,9 @@ import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
 import org.springframework.integration.support.MessageBuilder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest
-import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import software.amazon.awssdk.services.s3.S3Client
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
-import uk.gov.dluhc.printapi.database.repository.PrintDetailsRepository
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
@@ -67,15 +62,6 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var sqsMessagingTemplate: QueueMessagingTemplate
-
-    @Autowired
-    protected lateinit var dynamoDbClient: DynamoDbClient
-
-    @Autowired
-    protected lateinit var dynamoDbConfiguration: DynamoDbConfiguration
-
-    @Autowired
-    protected lateinit var printDetailsRepository: PrintDetailsRepository
 
     @Autowired
     protected lateinit var sftpService: SftpService
@@ -121,11 +107,6 @@ internal abstract class IntegrationTest {
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
-    }
-
-    @BeforeEach
-    fun clearDatabase() {
-        clearTable(dynamoDbConfiguration.printDetailsTableName)
     }
 
     @BeforeEach
@@ -175,26 +156,6 @@ internal abstract class IntegrationTest {
             factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
             factory.setAllowUnknownKeys(true)
             return CachingSessionFactory(factory)
-        }
-    }
-
-    protected fun clearTable(tableName: String, partitionKey: String = "id", sortKey: String? = null) {
-        val response = dynamoDbClient.scan(ScanRequest.builder().tableName(tableName).build())
-        response.items().forEach {
-            val keys = mutableMapOf<String, AttributeValue>(
-                partitionKey to AttributeValue.builder().s(it[partitionKey]!!.s()).build(),
-            )
-
-            if (sortKey != null) {
-                keys[sortKey] = AttributeValue.builder().s(it[partitionKey]!!.s()).build()
-            }
-
-            val deleteRequest = DeleteItemRequest.builder()
-                .tableName(tableName)
-                .key(keys)
-                .build()
-
-            dynamoDbClient.deleteItem(deleteRequest)
         }
     }
 

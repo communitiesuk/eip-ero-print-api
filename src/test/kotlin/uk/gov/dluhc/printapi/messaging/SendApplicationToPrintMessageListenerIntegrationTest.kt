@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.messaging
 
+import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
-import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.rds.entity.Delivery
 import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.rds.entity.PrintRequest
 import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasLog
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
@@ -25,6 +26,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
+import java.util.function.BiPredicate
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
@@ -98,7 +100,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 statusHistory = mutableListOf(
                     PrintRequestStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-                        eventDateTime = Instant.now().minusSeconds(10)
+                        eventDateTime = Instant.now()
                     )
                 ),
                 userId = userId
@@ -115,47 +117,33 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
+            val instantEqualToRoundedSeconds: BiPredicate<Instant, Instant> =
+                BiPredicate<Instant, Instant> { a, b -> withinSecond(a.epochSecond, b.epochSecond) }
             assertThat(saved).usingRecursiveComparison()
+                .withEqualsForType(instantEqualToRoundedSeconds, Instant::class.java)
                 .ignoringFields(
-                    "id",
-                    "version",
-                    "createdBy",
-                    "dateCreated",
                     "vacNumber",
-                    "applicationReceivedDateTime",
-                    "printRequests.id",
-                    "printRequests.version",
-                    "printRequests.dateCreated",
-                    "printRequests.createdBy",
                     "printRequests.requestId",
-                    "printRequests.requestDateTime",
-                    "printRequests.eroEnglish.id",
-                    "printRequests.eroEnglish.version",
-                    "printRequests.eroEnglish.dateCreated",
-                    "printRequests.eroEnglish.createdBy",
-                    "printRequests.eroEnglish.address.id",
-                    "printRequests.eroEnglish.address.version",
-                    "printRequests.eroEnglish.address.dateCreated",
-                    "printRequests.eroEnglish.address.createdBy",
-                    "printRequests.delivery.id",
-                    "printRequests.delivery.version",
-                    "printRequests.delivery.dateCreated",
-                    "printRequests.delivery.createdBy",
-                    "printRequests.delivery.address.id",
-                    "printRequests.delivery.address.version",
-                    "printRequests.delivery.address.dateCreated",
-                    "printRequests.delivery.address.createdBy",
-                    "printRequests.statusHistory.id",
-                    "printRequests.statusHistory.version",
-                    "printRequests.statusHistory.dateCreated",
-                    "printRequests.statusHistory.createdBy",
                     "printRequests.statusHistory.eventDateTime"
+                )
+                .ignoringFieldsMatchingRegexes(
+                    ".*id",
+                    ".*version",
+                    ".*createdBy",
+                    ".*dateCreated",
                 )
                 .isEqualTo(expected)
             assertThat(saved.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
             assertThat(saved.getCurrentPrintRequest().requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
             assertThat(saved.vacNumber).containsPattern(Regex("^[A-Za-z\\d]{20}$").pattern)
         }
+    }
+
+    fun withinSecond(actual: Long, epochSeconds: Long): Boolean {
+        val variance = 1
+        val lowerBound: Long = epochSeconds - variance
+        val upperBound: Long = epochSeconds + variance
+        return actual in lowerBound..upperBound
     }
 
     @Test
@@ -167,12 +155,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
 
         // Then
-        await.during(5, SECONDS).until {
-            val response = dynamoDbClient.scan(
-                ScanRequest.builder().tableName(dynamoDbConfiguration.printDetailsTableName).build()
-            )
-            assertThat(response.items()).isEmpty()
-            true
+        await.atMost(5, SECONDS).untilAsserted {
+            assertThat(hasLog("An exception occurred while invoking the handler method", Level.ERROR)).isTrue()
         }
     }
 }

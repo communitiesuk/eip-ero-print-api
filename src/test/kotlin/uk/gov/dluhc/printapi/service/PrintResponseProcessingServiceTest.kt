@@ -31,7 +31,6 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
@@ -182,8 +181,7 @@ class PrintResponseProcessingServiceTest {
         @Test
         fun `should update print request given valid statusStep and status`() {
             // Given
-            val printDetails = buildPrintDetails()
-            val requestId = printDetails.requestId!!
+            val requestId = aValidRequestId()
             val response = buildProcessPrintResponseMessage(requestId = requestId)
             val expectedStatus = IN_PRODUCTION
             given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)

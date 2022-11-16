@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.rds
 
+import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.rds.entity.Address
 import uk.gov.dluhc.printapi.rds.entity.Certificate
@@ -7,9 +8,8 @@ import uk.gov.dluhc.printapi.rds.entity.Delivery
 import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.rds.entity.PrintRequest
 import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressPostcode
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressStreet
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateFormat
@@ -101,13 +101,11 @@ fun printRequestStatusBuilder(
 }
 
 fun rdsElectoralRegistrationOfficeBuilder(
-    name: String = aValidEroName()
+    name: String = aValidEroName(),
+    address: Address = rdsAddressBuilder()
 ): ElectoralRegistrationOffice {
     return ElectoralRegistrationOffice(
-        address = Address(
-            street = aValidAddressStreet(),
-            postcode = aValidAddressPostcode()
-        ),
+        address = address,
         name = name,
         phoneNumber = aValidPhoneNumber(),
         emailAddress = aValidEmailAddress(),
@@ -115,12 +113,23 @@ fun rdsElectoralRegistrationOfficeBuilder(
     )
 }
 
-fun rdsAddressBuilder(): Address {
-    return Address(
-        street = aValidAddressStreet(),
-        postcode = aValidAddressPostcode()
-    )
-}
+fun rdsAddressBuilder(
+    street: String = DataFaker.faker.address().streetName(),
+    postcode: String = DataFaker.faker.address().postcode(),
+    property: String? = DataFaker.faker.address().buildingNumber(),
+    locality: String? = DataFaker.faker.address().streetName(),
+    town: String? = DataFaker.faker.address().city(),
+    area: String? = DataFaker.faker.address().state(),
+    uprn: String? = RandomStringUtils.randomNumeric(12)
+) = Address(
+    street = street,
+    postcode = postcode,
+    property = property,
+    locality = locality,
+    town = town,
+    area = area,
+    uprn = uprn,
+)
 
 fun rdsDeliveryBuilder(): Delivery {
     return Delivery(
