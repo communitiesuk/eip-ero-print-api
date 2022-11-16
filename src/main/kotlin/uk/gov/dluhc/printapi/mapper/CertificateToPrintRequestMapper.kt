@@ -1,9 +1,9 @@
-package uk.gov.dluhc.printapi.rds.mapper
+package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
-import uk.gov.dluhc.printapi.rds.entity.Certificate
 
 @Mapper(uses = [InstantMapper::class])
 abstract class CertificateToPrintRequestMapper {
@@ -47,5 +47,5 @@ abstract class CertificateToPrintRequestMapper {
     @Mapping(source = "printRequest.eroWelsh.name", target = "issuingAuthorityCy")
     @Mapping(source = "printRequest.requestDateTime", target = "requestDateTime")
     @Mapping(source = "photoZipPath", target = "photo")
-    abstract fun map(certificate: Certificate, printRequest: uk.gov.dluhc.printapi.rds.entity.PrintRequest, photoZipPath: String): PrintRequest
+    abstract fun map(certificate: Certificate, printRequest: uk.gov.dluhc.printapi.database.entity.PrintRequest, photoZipPath: String): PrintRequest
 }

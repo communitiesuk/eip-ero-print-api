@@ -9,11 +9,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
-import uk.gov.dluhc.printapi.rds.mapper.CertificateMapper
-import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.mapper.CertificateMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
 
 @ExtendWith(MockitoExtension::class)
 class PrintServiceTest {

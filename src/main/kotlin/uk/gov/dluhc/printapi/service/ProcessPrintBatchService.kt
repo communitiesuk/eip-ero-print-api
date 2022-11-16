@@ -1,11 +1,11 @@
 package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.exception.EmptyBatchException
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import javax.transaction.Transactional
 
 /**

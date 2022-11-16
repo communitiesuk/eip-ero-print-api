@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rds.entity
+package uk.gov.dluhc.printapi.database.entity
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
@@ -6,8 +6,8 @@ import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import uk.gov.dluhc.printapi.rds.repository.UUIDCharType
-import uk.gov.dluhc.printapi.rds.repository.UseExistingOrGenerateUUID
+import uk.gov.dluhc.printapi.database.repository.UUIDCharType
+import uk.gov.dluhc.printapi.database.repository.UseExistingOrGenerateUUID
 import java.time.Instant
 import java.util.UUID
 import javax.persistence.Entity

@@ -16,10 +16,10 @@ import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintRequestBatchMessage
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestStatusBuilder
 import java.io.ByteArrayInputStream
 import java.time.Instant
 import java.util.concurrent.TimeUnit

@@ -9,13 +9,13 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import uk.gov.dluhc.printapi.rds.mapper.CertificateToPrintRequestMapper
+import uk.gov.dluhc.printapi.mapper.CertificateToPrintRequestMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestsFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.model.aPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.photoLocationBuilder

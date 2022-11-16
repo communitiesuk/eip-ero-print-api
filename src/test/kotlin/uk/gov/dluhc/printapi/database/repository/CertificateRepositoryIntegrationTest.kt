@@ -1,14 +1,14 @@
-package uk.gov.dluhc.printapi.rds.repository
+package uk.gov.dluhc.printapi.database.repository
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.rds.entity.Address
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.entity.Delivery
-import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.rds.entity.PrintRequest
-import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
+import uk.gov.dluhc.printapi.database.entity.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressPostcode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressStreet
@@ -38,8 +38,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.time.OffsetDateTime

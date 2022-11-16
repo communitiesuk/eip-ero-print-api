@@ -13,13 +13,13 @@ import org.mockito.kotlin.capture
 import org.mockito.kotlin.given
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestStatusBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
 
 @ExtendWith(MockitoExtension::class)
 internal class CertificateBatchingServiceTest {

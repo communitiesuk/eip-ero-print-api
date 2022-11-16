@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rds.repository
+package uk.gov.dluhc.printapi.database.repository
 
 import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.id.UUIDGenerator

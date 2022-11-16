@@ -1,14 +1,13 @@
-package uk.gov.dluhc.printapi.rds.entity
+package uk.gov.dluhc.printapi.database.entity
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchException
 import org.assertj.core.groups.Tuple
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestStatusBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 

@@ -2,9 +2,9 @@ package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.rds.entity.Certificate
-import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import javax.transaction.Transactional
 
 private val logger = KotlinLogging.logger { }

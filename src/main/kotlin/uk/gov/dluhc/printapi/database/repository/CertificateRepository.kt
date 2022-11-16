@@ -1,9 +1,9 @@
-package uk.gov.dluhc.printapi.rds.repository
+package uk.gov.dluhc.printapi.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.rds.entity.Certificate
 import java.util.UUID
 
 @Repository

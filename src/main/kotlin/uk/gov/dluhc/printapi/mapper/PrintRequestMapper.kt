@@ -1,14 +1,14 @@
-package uk.gov.dluhc.printapi.rds.mapper
+package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.dluhc.printapi.database.entity.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
-import uk.gov.dluhc.printapi.rds.entity.PrintRequest
-import uk.gov.dluhc.printapi.rds.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.Clock
 import java.time.Instant

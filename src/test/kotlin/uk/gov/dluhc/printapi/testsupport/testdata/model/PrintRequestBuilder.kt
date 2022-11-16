@@ -1,17 +1,17 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.model
 
+import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
-import uk.gov.dluhc.printapi.rds.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.rds.rdsElectoralRegistrationOfficeBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.electoralRegistrationOfficeBuilder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 fun buildPrintRequest(
-    eroEnglish: ElectoralRegistrationOffice = rdsElectoralRegistrationOfficeBuilder(),
-    eroWelsh: ElectoralRegistrationOffice? = rdsElectoralRegistrationOfficeBuilder(),
+    eroEnglish: ElectoralRegistrationOffice = electoralRegistrationOfficeBuilder(),
+    eroWelsh: ElectoralRegistrationOffice? = electoralRegistrationOfficeBuilder(),
     requestId: String = aValidRequestId(),
     issuingAuthorityEn: String = eroEnglish.name!!,
     issuingAuthorityCy: String? = eroWelsh?.name!!,

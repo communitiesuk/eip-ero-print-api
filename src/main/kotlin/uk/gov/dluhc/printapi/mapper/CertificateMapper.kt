@@ -1,14 +1,13 @@
-package uk.gov.dluhc.printapi.rds.mapper
+package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.AfterMapping
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.MappingTarget
 import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
-import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
-import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.service.IdFactory
 
 @Mapper(uses = [SourceTypeMapper::class, InstantMapper::class])
