@@ -67,10 +67,6 @@ sftp:
   print-request-upload-directory: EROP/Dev/InBound
   print-response-download-directory: EROP/Dev/OutBound
 
-dynamodb:
-  print-details-table-name: print-details
-  scheduler-lock-table-name: scheduler-locks
-
 jobs:
   enabled: false
   batch-print-requests:

@@ -26,10 +26,6 @@ sftp:
   print-request-upload-directory: ${SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY}
   print-response-download-directory: ${SFTP_PRINT_RESPONSE_DOWNLOAD_DIRECTORY}
 
-dynamodb:
-  print-details-table-name: ${DYNAMODB_PRINT_DETAILS_TABLE_NAME}
-  scheduler-lock-table-name: ${DYNAMODB_SCHEDULER_LOCKS_TABLE_NAME}
-
 jobs:
   enabled: true
   lock-at-most-for: "PT10M"
