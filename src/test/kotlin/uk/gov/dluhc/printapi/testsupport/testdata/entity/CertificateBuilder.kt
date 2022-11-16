@@ -93,10 +93,12 @@ fun printRequestBuilder(
 fun printRequestStatusBuilder(
     status: Status = aValidCertificateStatus(),
     eventDateTime: Instant = aValidPrintRequestStatusEventDateTime(),
+    message: String? = null
 ): PrintRequestStatus {
     return PrintRequestStatus(
         status = status,
-        eventDateTime = eventDateTime
+        eventDateTime = eventDateTime,
+        message = message
     )
 }
 

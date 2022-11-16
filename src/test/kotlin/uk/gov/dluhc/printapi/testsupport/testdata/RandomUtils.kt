@@ -4,11 +4,11 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.apache.commons.lang3.RandomStringUtils.randomNumeric
 import org.bson.types.ObjectId
-import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style.name
 import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit.SECONDS
 
 fun aValidEroName(): String = faker.address().city()
 fun aValidLocalAuthorityName(): String = faker.address().city()
@@ -58,4 +58,5 @@ fun aValidPhoneNumber(): String = faker.phoneNumber().cellPhone()
 fun aValidEmailAddress(): String = "contact@${aValidEroName().replaceSpacesWith("-")}.gov.uk"
 
 fun aValidWebsite(): String = "https://${aValidEroName().replaceSpacesWith("-")}.gov.uk"
-fun aValidPrintRequestStatusEventDateTime(): Instant = Instant.now()
+
+fun aValidPrintRequestStatusEventDateTime(): Instant = Instant.now().truncatedTo(SECONDS)

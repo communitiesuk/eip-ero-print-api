@@ -2,13 +2,27 @@ package uk.gov.dluhc.printapi.jobs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
+import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
+import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
+import uk.gov.dluhc.printapi.testsupport.deepCopy
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.certificateBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestBuilder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.printRequestStatusBuilder
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() {
-
     @Test
     fun `should process outbound directory for print responses`() {
         // Given
@@ -23,7 +37,8 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
         writeContentToRemoteOutBoundDirectory(unknownFileTypeFileName, "This is an unknown file type")
 
         val originalFileList = listOf(validFile1, validFile2, validFile3, unknownFileTypeFileName)
-        val renamedToProcessingList = listOf("$validFile1.processing", "$validFile2.processing", "$validFile3.processing")
+        val renamedToProcessingList =
+            listOf("$validFile1.processing", "$validFile2.processing", "$validFile3.processing")
 
         val totalFilesOnSftpServerBeforeProcessing = getSftpOutboundDirectoryFileNames()
         // Files are present on the server before processing
@@ -40,5 +55,165 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
             assertThat(hasFilesPresentInOutboundDirectory(listOf(unknownFileTypeFileName))).isTrue
             assertThat(getSftpOutboundDirectoryFileNames()).hasSize(1)
         }
+    }
+
+    @RepeatedTest(100)
+    fun `should update print requests for print responses`() {
+        // Given
+        val batchId1 = aValidBatchId()
+        val batchId2 = aValidBatchId()
+        val certificate1 = certificateBuilder(
+            printRequests = listOf(
+                printRequestBuilder(
+                    batchId = batchId1,
+                    printRequestStatuses = listOf(
+                        printRequestStatusBuilder(
+                            status = Status.SENT_TO_PRINT_PROVIDER,
+                            eventDateTime = Instant.now().minusSeconds(2).truncatedTo(ChronoUnit.SECONDS)
+                        )
+                    )
+                )
+            )
+        )
+        val certificate2 = certificateBuilder(
+            printRequests = listOf(
+                printRequestBuilder(
+                    batchId = batchId2,
+                    printRequestStatuses = listOf(
+                        printRequestStatusBuilder(
+                            status = Status.SENT_TO_PRINT_PROVIDER,
+                            eventDateTime = Instant.now().minusSeconds(2).truncatedTo(ChronoUnit.SECONDS)
+                        )
+                    )
+                )
+            )
+        )
+        val requestId1 = certificate1.printRequests.first().requestId!!
+        certificateRepository.save(certificate1)
+        certificateRepository.save(certificate2)
+
+        val fileName = "status-20220928235441000.json"
+        val printResponses = getPrintResponses(batchId1, batchId2, requestId1)
+        writeContentToRemoteOutBoundDirectory(fileName, objectMapper.writeValueAsString(printResponses))
+
+        val expectedStatuses1 = certificate1.printRequests.first().statusHistory.toMutableList()
+        expectedStatuses1.addAll(
+            listOf(
+                printRequestStatusBuilder(
+                    status = Status.RECEIVED_BY_PRINT_PROVIDER,
+                    eventDateTime = printResponses.batchResponses[0].timestamp.toInstant(),
+                    message = null
+                ),
+                printRequestStatusBuilder(
+                    status = Status.VALIDATED_BY_PRINT_PROVIDER,
+                    eventDateTime = printResponses.printResponses[0].timestamp.toInstant(),
+                    message = null
+                ),
+                printRequestStatusBuilder(
+                    status = Status.IN_PRODUCTION,
+                    eventDateTime = printResponses.printResponses[1].timestamp.toInstant(),
+                    message = null
+                ),
+                printRequestStatusBuilder(
+                    status = Status.PRINT_PROVIDER_DISPATCH_FAILED,
+                    eventDateTime = printResponses.printResponses[2].timestamp.toInstant(),
+                    message = printResponses.printResponses[2].message
+                ),
+            )
+        )
+        val expectedStatuses2 = certificate2.printRequests.first().statusHistory.toMutableList()
+        expectedStatuses2.add(
+            printRequestStatusBuilder(
+                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                eventDateTime = printResponses.batchResponses[0].timestamp.toInstant(),
+                message = printResponses.batchResponses[1].message
+            )
+        )
+        val expectedCertificate1 = certificate1.deepCopy()
+        expectedCertificate1.status = Status.PRINT_PROVIDER_DISPATCH_FAILED
+        expectedCertificate1.printRequests.first().statusHistory = expectedStatuses1
+
+        val expectedCertificate2 = certificate2.deepCopy()
+        expectedCertificate2.printRequests.first().batchId = null
+        expectedCertificate2.printRequests.first().statusHistory = expectedStatuses2
+        expectedCertificate2.status = Status.PENDING_ASSIGNMENT_TO_BATCH
+
+        // When
+        processPrintResponsesBatchJob.pollAndProcessPrintResponses()
+
+        // Then
+        await.atMost(3, TimeUnit.SECONDS).untilAsserted {
+            val generatedFields = arrayOf(
+                "applicationReceivedDateTime",
+                "printRequests.requestDateTime",
+                ".*dateCreated",
+                ".*createdBy",
+                ".*version",
+                ".*id"
+            )
+
+            val actualCertificate1 = certificateRepository.findById(certificate1.id!!).get()
+            assertThat(actualCertificate1).usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*generatedFields)
+                .ignoringCollectionOrder()
+                .isEqualTo(expectedCertificate1)
+
+            val actualCertificate2 = certificateRepository.findById(certificate2.id!!).get()
+            assertThat(actualCertificate2).usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*generatedFields, "printRequests.requestId")
+                .ignoringCollectionOrder()
+                .isEqualTo(expectedCertificate2)
+            assertThat(actualCertificate2.printRequests.first().requestId)
+                .isNotEqualTo(certificate2.printRequests.first().requestId)
+                .containsPattern(Regex("^[a-f\\d]{24}$").pattern)
+        }
+    }
+
+    private fun getPrintResponses(
+        batchId1: String,
+        batchId2: String,
+        requestId1: String
+    ): PrintResponses {
+        val timestamp1 = Instant.now().truncatedTo(ChronoUnit.SECONDS).atOffset(ZoneOffset.UTC)
+        val timestamp2 = timestamp1.plusSeconds(2)
+        val timestamp3 = timestamp2.plusSeconds(2)
+        val timestamp4 = timestamp3.plusSeconds(2)
+
+        return buildPrintResponses(
+            batchResponses = listOf(
+                buildBatchResponse(
+                    batchId = batchId1,
+                    status = BatchResponse.Status.SUCCESS,
+                    timestamp = timestamp1
+                ),
+                buildBatchResponse(
+                    batchId = batchId2,
+                    status = BatchResponse.Status.FAILED,
+                    message = "$batchId2 batch failed",
+                    timestamp = timestamp1
+                ),
+            ),
+            printResponses = listOf(
+                buildPrintResponse(
+                    requestId = requestId1,
+                    statusStep = PrintResponse.StatusStep.PROCESSED,
+                    status = PrintResponse.Status.SUCCESS,
+                    timestamp = timestamp2
+                ),
+                buildPrintResponse(
+                    requestId = requestId1,
+                    statusStep = PrintResponse.StatusStep.IN_PRODUCTION,
+                    status = PrintResponse.Status.SUCCESS,
+                    timestamp = timestamp3
+                ),
+                buildPrintResponse(
+                    requestId = requestId1,
+                    statusStep = PrintResponse.StatusStep.DISPATCHED,
+                    status = PrintResponse.Status.FAILED,
+                    message = "$requestId1 dispatch failed",
+                    timestamp = timestamp4
+                )
+            )
+        )
     }
 }
