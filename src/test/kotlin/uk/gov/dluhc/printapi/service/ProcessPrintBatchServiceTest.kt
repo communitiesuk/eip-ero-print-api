@@ -1,5 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -9,6 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.rds.entity.Certificate
 import uk.gov.dluhc.printapi.rds.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidInputStream
@@ -61,5 +64,20 @@ internal class ProcessPrintBatchServiceTest {
         verify(sftpZipInputStreamProvider).createSftpInputStream(fileDetails)
         verify(filenameFactory).createZipFilename(batchId, certificates.size)
         verify(sftpService).sendFile(sftpInputStream, zipFilename)
+    }
+
+    @Test
+    fun `should raise exception when no certificates found for provided batchId`() {
+        // Given
+        val batchId = "4143d442a2424740afa3ce5eae630aad"
+        val certificates = emptyList<Certificate>()
+        given(certificateRepository.findByStatusAndPrintRequestsBatchId(any(), any())).willReturn(certificates)
+
+        // When
+        val error = catchThrowable { processPrintBatchService.processBatch(batchId) }
+
+        // Then
+        verify(certificateRepository).findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
+        assertThat(error).hasMessage("No certificates found for batchId = 4143d442a2424740afa3ce5eae630aad and status = ASSIGNED_TO_BATCH")
     }
 }
