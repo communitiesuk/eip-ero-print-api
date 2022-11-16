@@ -12,7 +12,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
-import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.given
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
@@ -34,7 +33,7 @@ import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.rds.certificateBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.rds.printRequestBuilder
@@ -78,11 +77,8 @@ class PrintResponseProcessingServiceTest {
         @Test
         fun `should process batch responses and queue print responses`() {
             // Given
-            val responses = buildPrintResponses()
-            val batchResponses = responses.batchResponses
-            val printResponses = responses.printResponses
+            val printResponses = listOf(buildPrintResponse())
             val processingService = spy(service)
-            doNothing().`when`(processingService).processBatchResponses(any())
             val messages = printResponses.map {
                 val message = buildProcessPrintResponseMessage(
                     requestId = it.requestId,
@@ -94,11 +90,10 @@ class PrintResponseProcessingServiceTest {
             }
 
             // When
-            processingService.processBatchAndPrintResponses(responses)
+            processingService.processPrintResponses(printResponses)
 
             // Then
             val inOrder = inOrder(processingService, processPrintResponseQueue)
-            inOrder.verify(processingService).processBatchResponses(batchResponses)
             inOrder.verify(processPrintResponseQueue).submit(capture(processPrintResponseMessageCaptor))
             val values = processPrintResponseMessageCaptor.allValues
             assertThat(values).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(messages)

@@ -51,7 +51,8 @@ internal class PrintResponseFileServiceTest {
         val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService)
         inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
         inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
-        inOrder.verify(printResponseProcessingService).processBatchAndPrintResponses(expectedPrintResponses)
+        inOrder.verify(printResponseProcessingService).processBatchResponses(expectedPrintResponses.batchResponses)
+        inOrder.verify(printResponseProcessingService).processPrintResponses(expectedPrintResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
     }
 
@@ -81,7 +82,8 @@ internal class PrintResponseFileServiceTest {
         val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService)
         inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
         inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
-        inOrder.verify(printResponseProcessingService).processBatchAndPrintResponses(expectedPrintResponses)
+        inOrder.verify(printResponseProcessingService).processBatchResponses(expectedPrintResponses.batchResponses)
+        inOrder.verify(printResponseProcessingService).processPrintResponses(expectedPrintResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
         assertThat(
             TestLogAppender.hasLog(
@@ -114,7 +116,8 @@ internal class PrintResponseFileServiceTest {
         val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService)
         inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
         inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
-        inOrder.verify(printResponseProcessingService).processBatchAndPrintResponses(expectedPrintResponses)
+        inOrder.verify(printResponseProcessingService).processBatchResponses(expectedPrintResponses.batchResponses)
+        inOrder.verify(printResponseProcessingService).processPrintResponses(expectedPrintResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
         assertThat(
             TestLogAppender.hasLogMatchingRegex(
