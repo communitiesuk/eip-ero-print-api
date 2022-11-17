@@ -51,7 +51,7 @@ properties:
     example: Smith
   cardVersion:
     type: string
-    example: 1
+    example: A
     description: Supplier version of certificate
   cardNumber:
     type: string
