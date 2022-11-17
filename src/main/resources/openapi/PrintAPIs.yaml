@@ -44,7 +44,164 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: GET
 
+  #
+  # Single Certificate
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/applications/{applicationId}':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: applicationId
+        description: The identifier of the Voter Card Application to retrieve.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Single Certificate
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Returns a single certificate
+      description: Returns a single certificate
+      tags:
+        - Single Certificate
+      responses:
+        '200':
+          $ref: '#/components/responses/Certificate'
+        '404':
+          description: Not Found
+      operationId: get-certificate-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/applications/{applicationId}'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.applicationId: method.request.path.applicationId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
 components:
+  #
+  # Schema and Enum Definitions
+  # --------------------------------------------------------------------------------
+  schemas:
+    CertificateResponse:
+      title: CertificateResponse
+      type: object
+      description: A response containing a single Certificate
+      properties:
+        vacNumber:
+          type: string
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          description: The unique identifier of the Certificate. A 20 character alphanumeric string.
+          example: DEV1W0XDH1368LWE1J40
+        printRequests:
+          type: array
+          description: List of print requests for the certificate.
+          items:
+            $ref: '#/components/schemas/PrintRequest'
+      required:
+        - vacNumber
+        - printRequests
+    PrintRequest:
+      title: PrintRequest
+      type: object
+      description: An object containing print request details
+      properties:
+        status:
+          $ref: '#/components/schemas/Status'
+        userId:
+          type: string
+          format: email
+          example: fred.blogs@some-domain.co.uk
+          description: User making the print request
+        dateTime:
+          type: string
+          format: date-time
+          description: The timestamp in ISO-8601 UTC that the print request status update is received
+          example: '2022-11-17T10:53:25Z'
+        message:
+          type: string
+          description: Message received for the print request status update
+      required:
+        - status
+        - userId
+        - dateTime
+    Status:
+      title: Status
+      type: string
+      enum:
+        - print-processing
+        - print-failed
+        - dispatched
+        - not-delivered
+
+  #
+  # Response Body Definitions
+  # --------------------------------------------------------------------------------
+  responses:
+    Certificate:
+      description: Response containing a single Certificate
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CertificateResponse'
+
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:
       type: apiKey
