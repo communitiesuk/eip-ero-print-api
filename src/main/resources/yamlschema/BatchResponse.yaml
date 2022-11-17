@@ -1,4 +1,4 @@
-#version: 0.0.4
+#version: 0.0.5
 title: BatchResponse
 type: object
 description: Represents the response from the print provider in response to recieving a batch file from EROP

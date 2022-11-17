@@ -23,7 +23,7 @@ abstract class PrintRequestMapper {
     protected lateinit var clock: Clock
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "vacVersion", constant = "1")
+    @Mapping(target = "vacVersion", constant = "A")
     @Mapping(target = "certificateFormat", constant = "STANDARD")
     @Mapping(target = "requestId", expression = "java( idFactory.requestId() )")
     @Mapping(source = "message.photoLocation", target = "photoLocationArn")

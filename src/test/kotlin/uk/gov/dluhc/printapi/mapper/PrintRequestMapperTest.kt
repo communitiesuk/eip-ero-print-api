@@ -98,7 +98,7 @@ class PrintRequestMapperTest {
             PrintRequest(
                 requestDateTime = expectedRequestDateTime,
                 requestId = requestId,
-                vacVersion = "1",
+                vacVersion = "A",
                 firstName = firstName,
                 middleNames = middleNames,
                 surname = surname,

@@ -1,4 +1,4 @@
-#version: 0.0.4
+#version: 0.0.5
 title: PrintResponse
 type: object
 description: 'Represents a print response, status update for a single print request'
