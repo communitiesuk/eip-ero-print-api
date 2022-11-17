@@ -1,4 +1,4 @@
-#version: 0.0.4
+#version: 0.0.5
 title: PrintRequest
 type: object
 description: Represents a single print request
@@ -51,9 +51,7 @@ properties:
     example: Smith
   cardVersion:
     type: string
-    maxLength: 20
-    minLength: 20
-    example: TBC
+    example: 1
     description: Supplier version of certificate
   cardNumber:
     type: string
@@ -84,7 +82,6 @@ properties:
     description: Future proof in case of fast track
   photo:
     type: string
-    format: binary
     description: Path to image in zip file
   deliveryName:
     type: string

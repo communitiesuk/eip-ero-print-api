@@ -69,7 +69,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             )
             val printRequest = PrintRequest(
                 requestId = aValidRequestId(),
-                vacVersion = "1",
+                vacVersion = "A",
                 requestDateTime = requestDateTime.toInstant(),
                 firstName = firstName,
                 middleNames = middleNames,
