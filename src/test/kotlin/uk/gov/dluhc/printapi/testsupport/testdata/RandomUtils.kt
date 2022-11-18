@@ -15,6 +15,8 @@ fun aValidLocalAuthorityName(): String = faker.address().city()
 
 fun getRandomGssCode() = "E${randomNumeric(8)}"
 
+fun getRandomGssCodeList() = listOf(getRandomGssCode())
+
 /**
  * Returns a string that represents a mongodb id ([ObjectId](https://www.mongodb.com/docs/manual/reference/method/ObjectId/))
  * which are 24 character wide hex strings.

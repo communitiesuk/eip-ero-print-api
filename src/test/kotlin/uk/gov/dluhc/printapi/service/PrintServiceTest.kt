@@ -36,14 +36,14 @@ class PrintServiceTest {
         val localAuthority = ero.localAuthorities[1]
         val message = buildSendApplicationToPrintMessage(gssCode = localAuthority.gssCode)
         val certificate = buildCertificate()
-        given(eroClient.getElectoralRegistrationOffice(any())).willReturn(ero)
+        given(eroClient.getElectoralRegistrationOffices(any())).willReturn(ero)
         given(certificateMapper.toCertificate(any(), any(), any())).willReturn(certificate)
 
         // When
         printService.savePrintMessage(message)
 
         // Then
-        verify(eroClient).getElectoralRegistrationOffice(message.gssCode!!)
+        verify(eroClient).getElectoralRegistrationOffices(message.gssCode!!)
         verify(certificateRepository).save(certificate)
     }
 }

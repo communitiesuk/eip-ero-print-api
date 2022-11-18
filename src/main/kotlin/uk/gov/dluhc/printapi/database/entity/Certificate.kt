@@ -121,8 +121,7 @@ class Certificate(
 
     private fun assignStatus() {
         val currentPrintRequest = getCurrentPrintRequest()
-        currentPrintRequest.statusHistory.sortByDescending { it.eventDateTime }
-        val currentStatus = currentPrintRequest.statusHistory.first()
+        val currentStatus = currentPrintRequest.getCurrentStatus()
         status = currentStatus.status
     }
 

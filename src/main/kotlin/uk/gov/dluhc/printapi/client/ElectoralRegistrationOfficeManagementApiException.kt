@@ -9,8 +9,8 @@ package uk.gov.dluhc.printapi.client
 
 abstract class ElectoralRegistrationOfficeManagementApiException(message: String) : RuntimeException(message)
 
-class ElectoralRegistrationOfficeNotFoundException(gssCode: String) :
-    ElectoralRegistrationOfficeManagementApiException("ERO for gssCode $gssCode not found")
+class ElectoralRegistrationOfficeNotFoundException(message: String) :
+    ElectoralRegistrationOfficeManagementApiException(message)
 
 class ElectoralRegistrationOfficeGeneralException(message: String) :
     ElectoralRegistrationOfficeManagementApiException(message)

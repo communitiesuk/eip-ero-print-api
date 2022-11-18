@@ -109,6 +109,11 @@ class PrintRequest(
         return this
     }
 
+    fun getCurrentStatus(): PrintRequestStatus {
+        statusHistory.sortByDescending { it.eventDateTime }
+        return statusHistory.first()
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
