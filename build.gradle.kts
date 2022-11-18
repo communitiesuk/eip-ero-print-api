@@ -159,6 +159,12 @@ tasks.withType<GenerateTask> {
     )
 }
 
+tasks.create("generate-models-from-openapi-document-PrintAPIs.yaml", GenerateTask::class) {
+    enabled = true
+    inputSpec.set("$projectDir/src/main/resources/openapi/PrintAPIs.yaml")
+    packageName.set("uk.gov.dluhc.printapi")
+}
+
 tasks.create("generate-models-from-openapi-document-print-api-sqs-messaging.yaml", GenerateTask::class) {
     enabled = true
     inputSpec.set("$projectDir/src/main/resources/openapi/sqs/print-api-sqs-messaging.yaml")
