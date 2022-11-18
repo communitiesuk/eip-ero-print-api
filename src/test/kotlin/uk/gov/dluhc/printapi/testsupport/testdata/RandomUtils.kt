@@ -10,6 +10,17 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.SECONDS
 
+fun aValidEroId() = "${faker.address().city().lowercase()}-city-council"
+fun anotherValidEroId(refEroId: String): String {
+    while (true) {
+        val eroId = aValidEroId()
+
+        if (eroId != refEroId) {
+            return eroId
+        }
+    }
+}
+
 fun aValidEroName(): String = faker.address().city()
 fun aValidLocalAuthorityName(): String = faker.address().city()
 
