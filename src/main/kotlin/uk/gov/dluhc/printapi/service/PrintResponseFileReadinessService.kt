@@ -37,7 +37,7 @@ class PrintResponseFileReadinessService(
                         printMessagingService.submitPrintResponseFileForProcessing(messagePayload)
                     }
                 } catch (e: IOException) {
-                    logger.warn { "Error renaming [$unprocessedFileName] due to error: [${e.message}]. Processing will continue for rest of the files" }
+                    logger.warn { "Error renaming [$unprocessedFileName] due to error: [${e.cause?.message ?: e.cause}]. Processing will continue for rest of the files" }
                 }
             }
         }

@@ -54,11 +54,15 @@ class SftpService(
     fun markFileForProcessing(directory: String, originalFileName: String): String {
         val newFileName = "$originalFileName$PROCESSING_SUFFIX"
         logger.info { "Renaming [$originalFileName] to [$newFileName] in directory:[$directory]" }
-        sftpOutboundTemplate.rename(
-            createFileNamePath(directory, originalFileName),
-            createFileNamePath(directory, newFileName)
-        )
-        return newFileName
+        try {
+            sftpOutboundTemplate.rename(
+                createFileNamePath(directory, originalFileName),
+                createFileNamePath(directory, newFileName)
+            )
+            return newFileName
+        } catch (ex: MessagingException) {
+            throw IOException(ex)
+        }
     }
 
     /**
