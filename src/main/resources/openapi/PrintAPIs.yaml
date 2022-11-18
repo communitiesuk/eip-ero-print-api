@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.0'
+  version: '1.1.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -45,9 +45,9 @@ paths:
         httpMethod: GET
 
   #
-  # Single Certificate
+  # Single Certificate Summary
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/applications/{applicationId}':
+  '/certificates/eros/{eroId}/applications/{applicationId}':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the application.
@@ -66,7 +66,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Single Certificate
+        - Single Certificate Summary
       responses:
         200:
           description: Default response for CORS method
@@ -99,21 +99,21 @@ paths:
               application/json: |
                 {}
     get:
-      summary: Returns a single certificate
-      description: Returns a single certificate
+      summary: Returns a single certificate summary
+      description: Returns a single certificate summary
       tags:
-        - Single Certificate
+        - Single Certificate Summary
       responses:
         '200':
-          $ref: '#/components/responses/Certificate'
+          $ref: '#/components/responses/CertificateSummary'
         '404':
           description: Not Found
-      operationId: get-certificate-by-application-id
+      operationId: get-certificate-summary-by-application-id
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/applications/{applicationId}'
+        uri: '${base_uri}/certificates/eros/{eroId}/applications/{applicationId}'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.applicationId: method.request.path.applicationId
@@ -130,40 +130,40 @@ components:
   # Schema and Enum Definitions
   # --------------------------------------------------------------------------------
   schemas:
-    CertificateResponse:
-      title: CertificateResponse
+    CertificateSummaryResponse:
+      title: CertificateSummaryResponse
       type: object
-      description: A response containing a single Certificate
+      description: A response containing a single Certificate summary
       properties:
         vacNumber:
           type: string
           pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
           description: The unique identifier of the Certificate. A 20 character alphanumeric string.
           example: DEV1W0XDH1368LWE1J40
-        printRequests:
+        printRequestSummaries:
           type: array
-          description: List of print requests for the certificate.
+          description: List of print request summaries for the certificate.
           items:
-            $ref: '#/components/schemas/PrintRequest'
+            $ref: '#/components/schemas/PrintRequestSummary'
       required:
         - vacNumber
-        - printRequests
-    PrintRequest:
-      title: PrintRequest
+        - printRequestSummaries
+    PrintRequestSummary:
+      title: PrintRequestSummary
       type: object
-      description: An object containing print request details
+      description: An object containing print request summary
       properties:
         status:
-          $ref: '#/components/schemas/Status'
+          $ref: '#/components/schemas/PrintRequestStatus'
         userId:
           type: string
           format: email
           example: fred.blogs@some-domain.co.uk
-          description: User making the print request
+          description: UserId of the user who made the print request
         dateTime:
           type: string
           format: date-time
-          description: The timestamp in ISO-8601 UTC that the print request status update is received
+          description: The timestamp in ISO-8601 UTC that the print request status update was received
           example: '2022-11-17T10:53:25Z'
         message:
           type: string
@@ -172,8 +172,8 @@ components:
         - status
         - userId
         - dateTime
-    Status:
-      title: Status
+    PrintRequestStatus:
+      title: PrintRequestStatus
       type: string
       enum:
         - print-processing
@@ -185,8 +185,8 @@ components:
   # Response Body Definitions
   # --------------------------------------------------------------------------------
   responses:
-    Certificate:
-      description: Response containing a single Certificate
+    CertificateSummary:
+      description: Response containing a single Certificate summary
       headers:
         Access-Control-Allow-Origin:
           schema:
@@ -200,7 +200,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/CertificateResponse'
+            $ref: '#/components/schemas/CertificateSummaryResponse'
 
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:
