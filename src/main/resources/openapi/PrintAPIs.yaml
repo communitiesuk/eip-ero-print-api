@@ -47,7 +47,7 @@ paths:
   #
   # Single Certificate Summary
   # --------------------------------------------------------------------------------
-  '/certificates/eros/{eroId}/applications/{applicationId}':
+  '/eros/{eroId}/certificates/applications/{applicationId}':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the application.
@@ -113,7 +113,7 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/certificates/eros/{eroId}/applications/{applicationId}'
+        uri: '${base_uri}/eros/{eroId}/certificates/applications/{applicationId}'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.applicationId: method.request.path.applicationId
