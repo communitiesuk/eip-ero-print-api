@@ -9,7 +9,7 @@ import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 
 @RestController
 @CrossOrigin
-class CertificateController {
+class CertificateSummaryController {
     companion object {
         const val ERO_VC_ADMIN_GROUP_PREFIX = "ero-vc-admin-"
     }
@@ -18,7 +18,7 @@ class CertificateController {
     @PreAuthorize(
         """
         hasAnyAuthority(
-            T(uk.gov.dluhc.printapi.rest.CertificateController).ERO_VC_ADMIN_GROUP_PREFIX.concat(#eroId)
+            T(uk.gov.dluhc.printapi.rest.CertificateSummaryController).ERO_VC_ADMIN_GROUP_PREFIX.concat(#eroId)
         )
         """
     )
@@ -26,6 +26,7 @@ class CertificateController {
         @PathVariable eroId: String,
         @PathVariable applicationId: String,
     ): CertificateSummaryResponse {
-        TODO("Will be implemented as part of EIP1-2597")
+        // TODO: Will be implemented as part of EIP1-2597
+        return CertificateSummaryResponse("", listOf())
     }
 }

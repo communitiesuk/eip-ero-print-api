@@ -67,4 +67,22 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
             .expectStatus()
             .isForbidden
     }
+
+    @Test
+    fun `should return certificate summary given existing application and user with valid bearer token belonging to same ero and valid group`() {
+        wireMockService.stubCognitoJwtIssuerResponse()
+
+        webTestClient.get()
+            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
+            .bearerToken(
+                getBearerToken(
+                    eroId = ERO_ID,
+                    groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")
+                )
+            )
+            .contentType(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+    }
 }
