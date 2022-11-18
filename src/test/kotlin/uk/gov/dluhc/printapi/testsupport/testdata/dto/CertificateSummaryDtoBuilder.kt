@@ -9,7 +9,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import java.time.Instant
 
-fun buildCertificatePrintRequestSummaryDto(
+fun buildCertificateSummaryDto(
     vacNumber: String = aValidVacNumber(),
     printRequests: List<PrintRequestSummaryDto> = mutableListOf(buildPrintRequestSummaryDto())
 ) = CertificateSummaryDto(

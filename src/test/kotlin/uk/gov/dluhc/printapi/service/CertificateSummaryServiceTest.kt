@@ -13,7 +13,7 @@ import uk.gov.dluhc.printapi.database.mapper.CertificateSummaryDtoMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceType
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificatePrintRequestSummaryDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificateSummaryDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 
 @ExtendWith(MockitoExtension::class)
@@ -36,7 +36,7 @@ internal class CertificateSummaryServiceTest {
         val sourceReference = aValidSourceReference()
         val certificate = buildCertificate()
         given(certificateFinderService.getCertificate(any(), any(), any())).willReturn(certificate)
-        val certificateSummaryDto = buildCertificatePrintRequestSummaryDto()
+        val certificateSummaryDto = buildCertificateSummaryDto()
         given(mapper.certificateToCertificatePrintRequestSummaryDto(any())).willReturn(certificateSummaryDto)
 
         // When
