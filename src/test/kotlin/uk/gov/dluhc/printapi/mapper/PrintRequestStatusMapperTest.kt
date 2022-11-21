@@ -3,7 +3,6 @@ package uk.gov.dluhc.printapi.mapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import uk.gov.dluhc.printapi.database.mapper.PrintRequestStatusMapperImpl
 import uk.gov.dluhc.printapi.dto.StatusDto
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
 
@@ -22,8 +21,8 @@ class PrintRequestStatusMapperTest {
             "DISPATCHED, DISPATCHED",
             "NOT_DELIVERED, NOT_MINUS_DELIVERED",
             "PRINT_PROVIDER_VALIDATION_FAILED, PRINT_MINUS_FAILED",
-            "PRINT_PROVIDER_PRODUCTION_FAILED, PRINT_MINUS_FAILED",
-            "PRINT_PROVIDER_DISPATCH_FAILED, PRINT_MINUS_FAILED"
+            "PRINT_PROVIDER_PRODUCTION_FAILED, PRINT_MINUS_PROCESSING",
+            "PRINT_PROVIDER_DISPATCH_FAILED, PRINT_MINUS_PROCESSING"
         ]
     )
     fun `should map status dto enum to print request status`(status: StatusDto, expected: PrintRequestStatus) {

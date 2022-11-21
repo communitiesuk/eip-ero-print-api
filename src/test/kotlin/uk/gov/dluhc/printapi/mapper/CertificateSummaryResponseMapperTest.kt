@@ -9,8 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import uk.gov.dluhc.printapi.database.mapper.CertificateSummaryResponseMapperImpl
-import uk.gov.dluhc.printapi.database.mapper.PrintRequestStatusMapper
 import uk.gov.dluhc.printapi.dto.StatusDto
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus

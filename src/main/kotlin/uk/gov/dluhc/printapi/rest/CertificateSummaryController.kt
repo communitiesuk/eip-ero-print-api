@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
-import uk.gov.dluhc.printapi.database.mapper.CertificateSummaryResponseMapper
+import uk.gov.dluhc.printapi.mapper.CertificateSummaryResponseMapper
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.service.CertificateSummaryService
 
