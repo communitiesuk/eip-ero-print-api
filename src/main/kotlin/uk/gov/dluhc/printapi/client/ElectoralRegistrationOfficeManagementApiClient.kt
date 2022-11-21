@@ -35,7 +35,7 @@ class ElectoralRegistrationOfficeManagementApiClient(
             .uri("/eros/{eroId}", eroId)
             .retrieve()
             .bodyToMono(ElectoralRegistrationOfficeResponse::class.java)
-            .onErrorResume { ex -> handleException(ex, "eroId = $eroId") }
+            .onErrorResume { ex -> handleException(ex, mapOf("eroId" to eroId)) }
             .block()!!
 
     /**
@@ -51,27 +51,27 @@ class ElectoralRegistrationOfficeManagementApiClient(
             .uri("/eros?gssCode=$gssCode")
             .retrieve()
             .bodyToMono(ElectoralRegistrationOfficesResponse::class.java)
-            .onErrorResume { ex -> handleException(ex, "gssCode = $gssCode") }
+            .onErrorResume { ex -> handleException(ex, mapOf("gssCode" to gssCode)) }
             .block()!!
 
         if (response.eros.isEmpty()) {
-            throw ElectoralRegistrationOfficeNotFoundException("ERO not found for gssCode = $gssCode")
+            throw ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
         }
 
         return eroMapper.toEroManagementApiEroDto(response.eros[0])
     }
 
-    private fun <T> handleException(ex: Throwable, searchCriteria: String): Mono<T> =
+    private fun <T> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =
         if (ex is WebClientResponseException) {
             handleWebClientResponseException(ex, searchCriteria)
         } else {
             logger.error(ex) { "Unhandled exception thrown by WebClient" }
-            Mono.error(ElectoralRegistrationOfficeGeneralException("Unhandled error getting ERO for $searchCriteria"))
+            Mono.error(ElectoralRegistrationOfficeGeneralException(ex.message, searchCriteria))
         }
 
-    private fun <T> handleWebClientResponseException(ex: WebClientResponseException, searchCriteria: String): Mono<T> =
+    private fun <T> handleWebClientResponseException(ex: WebClientResponseException, searchCriteria: Map<String, String>): Mono<T> =
         if (ex.statusCode == NOT_FOUND)
-            Mono.error(ElectoralRegistrationOfficeNotFoundException("ERO not found for $searchCriteria"))
+            Mono.error(ElectoralRegistrationOfficeNotFoundException(searchCriteria))
         else
-            Mono.error(ElectoralRegistrationOfficeGeneralException("Error ${ex.message} getting ERO for $searchCriteria"))
+            Mono.error(ElectoralRegistrationOfficeGeneralException(ex.message, searchCriteria))
 }

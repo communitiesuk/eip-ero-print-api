@@ -100,7 +100,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
                 Mono.error(http404Error)
             )
 
-            val expectedException = ElectoralRegistrationOfficeNotFoundException("ERO not found for eroId = $eroId")
+            val expectedException = ElectoralRegistrationOfficeNotFoundException(mapOf("eroId" to eroId))
 
             // When
             val ex = catchThrowableOfType(
@@ -124,7 +124,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             )
 
             val expectedException =
-                ElectoralRegistrationOfficeGeneralException("Error 500 INTERNAL_SERVER_ERROR getting ERO for eroId = $eroId")
+                ElectoralRegistrationOfficeGeneralException("500 INTERNAL_SERVER_ERROR", mapOf("eroId" to eroId))
 
             // When
             val ex = catchThrowableOfType(
@@ -192,7 +192,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             given(clientResponse.bodyToMono(ElectoralRegistrationOfficesResponse::class.java)).willReturn(
                 Mono.just(emptyResponse)
             )
-            val expectedException = ElectoralRegistrationOfficeNotFoundException("ERO not found for gssCode = $gssCode")
+            val expectedException = ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
 
             // When
             val ex = catchThrowableOfType(
@@ -216,7 +216,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
                 Mono.error(http404Error)
             )
 
-            val expectedException = ElectoralRegistrationOfficeNotFoundException("ERO not found for gssCode = $gssCode")
+            val expectedException = ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
 
             // When
             val ex = catchThrowableOfType(
@@ -241,7 +241,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             )
 
             val expectedException =
-                ElectoralRegistrationOfficeGeneralException("Error 500 INTERNAL_SERVER_ERROR getting ERO for gssCode = $gssCode")
+                ElectoralRegistrationOfficeGeneralException("500 INTERNAL_SERVER_ERROR", mapOf("gssCode" to gssCode))
 
             // When
             val ex = catchThrowableOfType(
@@ -266,7 +266,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             )
 
             val expectedException =
-                ElectoralRegistrationOfficeGeneralException("Unhandled error getting ERO for gssCode = $gssCode")
+                ElectoralRegistrationOfficeGeneralException("general exception", mapOf("gssCode" to gssCode))
 
             // When
             val ex = catchThrowableOfType(

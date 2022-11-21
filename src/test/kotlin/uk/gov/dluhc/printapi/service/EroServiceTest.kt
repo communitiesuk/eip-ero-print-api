@@ -63,7 +63,7 @@ internal class EroServiceTest {
         // Given
         val eroId = aValidRandomEroId()
 
-        val expected = ElectoralRegistrationOfficeNotFoundException(eroId)
+        val expected = ElectoralRegistrationOfficeNotFoundException(mapOf("eroId" to eroId))
         given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOffice(any())).willThrow(expected)
 
         // When
@@ -81,7 +81,7 @@ internal class EroServiceTest {
         // Given
         val eroId = aValidRandomEroId()
 
-        val expected = ElectoralRegistrationOfficeGeneralException("Some error getting ERO $eroId")
+        val expected = ElectoralRegistrationOfficeGeneralException("error", mapOf("eroId" to eroId))
         given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOffice(any())).willThrow(expected)
 
         // When

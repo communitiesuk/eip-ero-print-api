@@ -17,7 +17,7 @@ class CertificateSummaryDtoMapper {
     }
 
     private fun toPrintRequests(printRequests: MutableList<PrintRequest>): List<PrintRequestSummaryDto> =
-        printRequests.map { printRequest -> toPrintRequestSummaryDto(printRequest) }.toList()
+        printRequests.map { printRequest -> toPrintRequestSummaryDto(printRequest) }
 
     private fun toPrintRequestSummaryDto(printRequest: PrintRequest): PrintRequestSummaryDto {
         val currentStatus = printRequest.getCurrentStatus()
