@@ -11,6 +11,8 @@ fun aValidSourceType() = SourceType.VOTER_CARD
 
 fun aValidCertificateStatus() = Status.PENDING_ASSIGNMENT_TO_BATCH
 
+fun aDifferentValidCertificateStatus() = Status.DISPATCHED
+
 fun aValidCertificateLanguage() = CertificateLanguage.EN
 
 fun aValidCertificateFormat() = CertificateFormat.STANDARD

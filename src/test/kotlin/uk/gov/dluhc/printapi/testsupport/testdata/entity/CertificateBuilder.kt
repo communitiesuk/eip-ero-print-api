@@ -7,6 +7,7 @@ import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
@@ -41,20 +42,24 @@ import java.util.UUID
 
 fun buildCertificate(
     id: UUID? = UUID.randomUUID(),
+    vacNumber: String = aValidVacNumber(),
     status: Status = aValidCertificateStatus(),
     printRequests: List<PrintRequest> = listOf(buildPrintRequest()),
+    gssCode: String = aGssCode(),
+    sourceType: SourceType = aValidSourceType(),
+    sourceReference: String = aValidSourceReference(),
 ): Certificate {
     val certificate = Certificate(
         id = id,
-        vacNumber = aValidVacNumber(),
-        sourceType = aValidSourceType(),
-        sourceReference = aValidSourceReference(),
+        vacNumber = vacNumber,
+        sourceType = sourceType,
+        sourceReference = sourceReference,
         applicationReference = aValidApplicationReference(),
         applicationReceivedDateTime = aValidApplicationReceivedDateTime(),
         issuingAuthority = aValidIssuingAuthority(),
         issueDate = aValidIssueDate(),
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
-        gssCode = aGssCode(),
+        gssCode = gssCode,
         status = status
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
@@ -70,6 +75,7 @@ fun buildPrintRequest(
     delivery: Delivery = buildDelivery(),
     batchId: String? = null,
     photoLocationArn: String? = aPhotoArn(),
+    userId: String = aValidUserId(),
 ): PrintRequest {
     val printRequest = PrintRequest(
         requestId = requestId,
@@ -83,7 +89,7 @@ fun buildPrintRequest(
         delivery = delivery,
         eroEnglish = eroEnglish,
         eroWelsh = eroWelsh,
-        userId = aValidUserId(),
+        userId = userId,
         batchId = batchId
     )
     printRequestStatuses.forEach { printRequestStatus -> printRequest.addPrintRequestStatus(printRequestStatus) }

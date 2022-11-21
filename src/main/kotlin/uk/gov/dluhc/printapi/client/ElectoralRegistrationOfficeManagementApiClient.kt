@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
+import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
 import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
 import uk.gov.dluhc.printapi.mapper.EroManagementApiEroDtoMapper
@@ -22,42 +23,58 @@ class ElectoralRegistrationOfficeManagementApiClient(
 ) {
 
     /**
+     * Calls the `ero-management-api` to return a [EroManagementApiEroDto] for the specified eroId.
+     *
+     * @param eroId the ID of the ERO to return
+     * @return a [EroManagementApiEroDto] for the ERO
+     * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
+     */
+    fun getElectoralRegistrationOffice(eroId: String): EroManagementApiEroDto {
+        val response = eroManagementWebClient
+            .get()
+            .uri("/eros/{eroId}", eroId)
+            .retrieve()
+            .bodyToMono(ElectoralRegistrationOfficeResponse::class.java)
+            .onErrorResume { ex -> handleException(ex, mapOf("eroId" to eroId)) }
+            .block()!!
+
+        return eroMapper.toEroManagementApiEroDto(response)
+    }
+
+    /**
      * Calls the `ero-management-api` to return a [EroManagementApiEroDto] for the specified gssCode.
      *
      * @param gssCode the gssCode of the localAuthority for the ERO to be returned
      * @return an [EroManagementApiEroDto] for the ERO
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
-    fun getElectoralRegistrationOffice(gssCode: String): EroManagementApiEroDto {
+    fun getElectoralRegistrationOffices(gssCode: String): EroManagementApiEroDto {
         val response = eroManagementWebClient
             .get()
             .uri("/eros?gssCode=$gssCode")
             .retrieve()
             .bodyToMono(ElectoralRegistrationOfficesResponse::class.java)
-            .onErrorResume { ex -> handleException(ex, gssCode) }
+            .onErrorResume { ex -> handleException(ex, mapOf("gssCode" to gssCode)) }
             .block()!!
 
         if (response.eros.isEmpty()) {
-            throw ElectoralRegistrationOfficeNotFoundException(gssCode)
+            throw ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
         }
 
         return eroMapper.toEroManagementApiEroDto(response.eros[0])
     }
 
-    private fun handleException(ex: Throwable, gssCode: String): Mono<ElectoralRegistrationOfficesResponse> =
+    private fun <T> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =
         if (ex is WebClientResponseException) {
-            handleWebClientResponseException(ex, gssCode)
+            handleWebClientResponseException(ex, searchCriteria)
         } else {
             logger.error(ex) { "Unhandled exception thrown by WebClient" }
-            Mono.error(ElectoralRegistrationOfficeGeneralException("Unhandled error getting ERO for gssCode $gssCode"))
+            Mono.error(ElectoralRegistrationOfficeGeneralException(ex.message, searchCriteria))
         }
 
-    private fun handleWebClientResponseException(
-        ex: WebClientResponseException,
-        gssCode: String
-    ): Mono<ElectoralRegistrationOfficesResponse> =
+    private fun <T> handleWebClientResponseException(ex: WebClientResponseException, searchCriteria: Map<String, String>): Mono<T> =
         if (ex.statusCode == NOT_FOUND)
-            Mono.error(ElectoralRegistrationOfficeNotFoundException(gssCode))
+            Mono.error(ElectoralRegistrationOfficeNotFoundException(searchCriteria))
         else
-            Mono.error(ElectoralRegistrationOfficeGeneralException("Error ${ex.message} getting ERO for gssCode $gssCode"))
+            Mono.error(ElectoralRegistrationOfficeGeneralException(ex.message, searchCriteria))
 }

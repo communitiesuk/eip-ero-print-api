@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.database.repository
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
@@ -40,6 +41,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCodeList
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -177,6 +179,44 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
         assertThat(actual).hasSize(1)
         assertThat(actual[0].status).isEqualTo(status)
         assertCertificateRecursiveEqual(actual[0], expected)
+    }
+
+    @Nested
+    inner class FindByGssCodeInAndSourceTypeAndSourceReference {
+        @Test
+        fun `should find certificate given one exists for provided details`() {
+            // Given
+            val gssCodes = getRandomGssCodeList()
+            val sourceType = aValidSourceType()
+            val sourceReference = aValidSourceReference()
+            var certificate = buildCertificate(
+                gssCode = gssCodes[0],
+                sourceType = sourceType,
+                sourceReference = sourceReference
+            )
+            certificate = certificateRepository.save(certificate)
+
+            // When
+            val actual = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, sourceType, sourceReference)
+
+            // Then
+            assertThat(actual).isNotNull
+            assertCertificateRecursiveEqual(actual!!, certificate)
+        }
+
+        @Test
+        fun `should fail to find certificate given none exists for provided details`() {
+            // Given
+            val gssCodes = getRandomGssCodeList()
+            val sourceType = aValidSourceType()
+            val sourceReference = aValidSourceReference()
+
+            // When
+            val actual = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, sourceType, sourceReference)
+
+            // Then
+            assertThat(actual).isNull()
+        }
     }
 
     private fun assertCertificateRecursiveEqual(actual: Certificate, expected: Certificate) {
