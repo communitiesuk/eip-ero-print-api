@@ -34,7 +34,7 @@ import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
@@ -114,7 +114,7 @@ class PrintResponseProcessingServiceTest {
                     buildPrintRequest(
                         batchId = batchId1,
                         printRequestStatuses = listOf(
-                            buildPrintStatus(
+                            buildPrintRequestStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
                                 eventDateTime = batchResponse1.timestamp.toInstant().minusSeconds(10)
                             )
@@ -127,7 +127,7 @@ class PrintResponseProcessingServiceTest {
                     buildPrintRequest(
                         batchId = batchId2,
                         printRequestStatuses = listOf(
-                            buildPrintStatus(
+                            buildPrintRequestStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
                                 eventDateTime = batchResponse2.timestamp.toInstant().minusSeconds(10)
                             )
@@ -191,7 +191,7 @@ class PrintResponseProcessingServiceTest {
                     buildPrintRequest(
                         requestId = requestId,
                         printRequestStatuses = listOf(
-                            buildPrintStatus(
+                            buildPrintRequestStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
                                 eventDateTime = response.timestamp.toInstant().minusSeconds(10)
                             )

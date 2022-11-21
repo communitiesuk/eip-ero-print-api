@@ -5,7 +5,7 @@ import org.assertj.core.api.Assertions.catchException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -29,7 +29,7 @@ internal class PrintRequestTest {
         @Test
         fun `should get current status for Print Request with one Print Request Status`() {
             // Given
-            val currentPrintRequestStatus = buildPrintStatus()
+            val currentPrintRequestStatus = buildPrintRequestStatus()
             val printRequest = buildPrintRequest(printRequestStatuses = listOf(currentPrintRequestStatus))
 
             // When
@@ -42,8 +42,8 @@ internal class PrintRequestTest {
         @Test
         fun `should determine latest status for Print Request with multiple statuses`() {
             // Given
-            val previousPrintRequest = buildPrintStatus(eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS))
-            val currentPrintRequestStatus = buildPrintStatus(eventDateTime = Instant.now().minus(3, ChronoUnit.DAYS))
+            val previousPrintRequest = buildPrintRequestStatus(eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS))
+            val currentPrintRequestStatus = buildPrintRequestStatus(eventDateTime = Instant.now().minus(3, ChronoUnit.DAYS))
             val printRequest = buildPrintRequest(printRequestStatuses = listOf(previousPrintRequest, currentPrintRequestStatus))
 
             // When

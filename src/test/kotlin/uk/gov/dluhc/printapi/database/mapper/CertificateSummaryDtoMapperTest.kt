@@ -20,7 +20,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import java.time.Instant
 import java.time.Instant.now
 
@@ -41,7 +41,7 @@ internal class CertificateSummaryDtoMapperTest {
                 buildPrintRequest(
                     userId = expectedUserId,
                     printRequestStatuses = listOf(
-                        buildPrintStatus(status = expectedStatus, eventDateTime = expectedDateTime, message = null)
+                        buildPrintRequestStatus(status = expectedStatus, eventDateTime = expectedDateTime, message = null)
                     )
                 )
             )
@@ -164,5 +164,5 @@ internal class CertificateSummaryDtoMapperTest {
     }
 
     private fun printRequestStatus(status: Status, eventDateTime: Instant, message: String?) =
-        buildPrintStatus(status = status, eventDateTime = eventDateTime, message = message)
+        buildPrintRequestStatus(status = status, eventDateTime = eventDateTime, message = message)
 }

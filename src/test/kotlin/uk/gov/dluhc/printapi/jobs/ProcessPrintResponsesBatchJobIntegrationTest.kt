@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.testsupport.deepCopy
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
@@ -66,7 +66,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
                 buildPrintRequest(
                     batchId = batchId1,
                     printRequestStatuses = listOf(
-                        buildPrintStatus(
+                        buildPrintRequestStatus(
                             status = Status.SENT_TO_PRINT_PROVIDER,
                             eventDateTime = Instant.now().minusSeconds(2).truncatedTo(ChronoUnit.SECONDS)
                         )
@@ -79,7 +79,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
                 buildPrintRequest(
                     batchId = batchId2,
                     printRequestStatuses = listOf(
-                        buildPrintStatus(
+                        buildPrintRequestStatus(
                             status = Status.SENT_TO_PRINT_PROVIDER,
                             eventDateTime = Instant.now().minusSeconds(2).truncatedTo(ChronoUnit.SECONDS)
                         )
@@ -98,22 +98,22 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
         val expectedStatuses1 = certificate1.printRequests.first().statusHistory.toMutableList()
         expectedStatuses1.addAll(
             listOf(
-                buildPrintStatus(
+                buildPrintRequestStatus(
                     status = Status.RECEIVED_BY_PRINT_PROVIDER,
                     eventDateTime = printResponses.batchResponses[0].timestamp.toInstant(),
                     message = null
                 ),
-                buildPrintStatus(
+                buildPrintRequestStatus(
                     status = Status.VALIDATED_BY_PRINT_PROVIDER,
                     eventDateTime = printResponses.printResponses[0].timestamp.toInstant(),
                     message = null
                 ),
-                buildPrintStatus(
+                buildPrintRequestStatus(
                     status = Status.IN_PRODUCTION,
                     eventDateTime = printResponses.printResponses[1].timestamp.toInstant(),
                     message = null
                 ),
-                buildPrintStatus(
+                buildPrintRequestStatus(
                     status = Status.PRINT_PROVIDER_DISPATCH_FAILED,
                     eventDateTime = printResponses.printResponses[2].timestamp.toInstant(),
                     message = printResponses.printResponses[2].message
@@ -122,7 +122,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
         )
         val expectedStatuses2 = certificate2.printRequests.first().statusHistory.toMutableList()
         expectedStatuses2.add(
-            buildPrintStatus(
+            buildPrintRequestStatus(
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 eventDateTime = printResponses.batchResponses[0].timestamp.toInstant(),
                 message = printResponses.batchResponses[1].message
