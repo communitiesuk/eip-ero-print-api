@@ -31,11 +31,11 @@ jobs:
   lock-at-most-for: "PT10M"
   batch-print-requests:
     name: "BatchPrintRequests"
-    cron: "0 0 */1 * * *" # every hour by default
-    batch-size: 100
+    cron: "0 0/15 * * * *" # every 15 minutes, starting on the hour - see analysis and recommendations in EIP1-2515
+    batch-size: 50
   process-print-responses:
     name: "ProcessPrintResponses"
-    cron: "0 0 */1 * * *" # every hour by default
+    cron: "0 15/30 * * * *" # every 30 minutes starting at 15 minutes past the hour - see analysis and recommendations in EIP1-2515
 
 thread-pool:
   zip:

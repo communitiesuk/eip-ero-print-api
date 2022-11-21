@@ -50,7 +50,7 @@ private val logger = KotlinLogging.logger {}
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = [IntegrationTest.IntegrationTestConfiguration::class],
 )
-@ActiveProfiles("test")
+@ActiveProfiles("integration-test")
 @AutoConfigureWebTestClient(timeout = "PT5M")
 internal abstract class IntegrationTest {
 
