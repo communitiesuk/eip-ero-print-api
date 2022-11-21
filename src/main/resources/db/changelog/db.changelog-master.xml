@@ -10,4 +10,5 @@
     <include relativeToChangelogFile="true" file="ddl/0002_persist_delivery_enum_names.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0003_create_shedlock_table.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0004_change_shedlock_table_name.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0005_add_index_gss_code_source_type_source_reference.xml"/>
 </databaseChangeLog>
