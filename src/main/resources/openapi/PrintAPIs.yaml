@@ -17,34 +17,6 @@ paths:
   #
 
   #
-  # TEMP - Health Check
-  # --------------------------------------------------------------------------------
-  '/health':
-    get:
-      summary: Temporary health endpoint
-      description: Temporarily exposed endpoint for verifying new app deploys successfully
-      tags:
-        - Print
-      responses:
-        '200':
-          description: Healthy
-        '503':
-          description: Service unavailable
-      operationId: health-check
-      security:
-        - eroUserCognitoUserPoolAuthorizer: [ ]
-      x-amazon-apigateway-integration:
-        type: HTTP_PROXY
-        uri: '${base_uri}/actuator/health'
-        responseParameters:
-          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
-          method.response.header.Access-Control-Allow-Methods: '''*'''
-          method.response.header.Access-Control-Allow-Origin: '''*'''
-        connectionType: VPC_LINK
-        connectionId: '${vpc_connection_id}'
-        httpMethod: GET
-
-  #
   # Single Certificate Summary
   # --------------------------------------------------------------------------------
   '/eros/{eroId}/certificates/applications/{applicationId}':
