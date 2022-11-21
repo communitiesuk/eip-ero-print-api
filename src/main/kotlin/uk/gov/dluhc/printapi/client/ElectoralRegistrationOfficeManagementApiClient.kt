@@ -23,20 +23,23 @@ class ElectoralRegistrationOfficeManagementApiClient(
 ) {
 
     /**
-     * Calls the `ero-management-api` to return a [ElectoralRegistrationOfficeResponse] for the specified eroId.
+     * Calls the `ero-management-api` to return a [EroManagementApiEroDto] for the specified eroId.
      *
      * @param eroId the ID of the ERO to return
-     * @return a [ElectoralRegistrationOfficeResponse] for the ERO
+     * @return a [EroManagementApiEroDto] for the ERO
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
-    fun getElectoralRegistrationOffice(eroId: String): ElectoralRegistrationOfficeResponse =
-        eroManagementWebClient
+    fun getElectoralRegistrationOffice(eroId: String): EroManagementApiEroDto {
+        val response = eroManagementWebClient
             .get()
             .uri("/eros/{eroId}", eroId)
             .retrieve()
             .bodyToMono(ElectoralRegistrationOfficeResponse::class.java)
             .onErrorResume { ex -> handleException(ex, mapOf("eroId" to eroId)) }
             .block()!!
+
+        return eroMapper.toEroManagementApiEroDto(response)
+    }
 
     /**
      * Calls the `ero-management-api` to return a [EroManagementApiEroDto] for the specified gssCode.

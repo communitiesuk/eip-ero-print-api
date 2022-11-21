@@ -24,13 +24,13 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
-import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
 import uk.gov.dluhc.printapi.dto.EroManagementApiLocalAuthorityDto
 import uk.gov.dluhc.printapi.mapper.EroManagementApiEroDtoMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aWelshEroContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -64,29 +64,19 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             // Given
             val eroId = aValidRandomEroId()
 
-            val expectedEro = ElectoralRegistrationOfficeResponse(
-                eroId,
-                "Test ERO",
-                listOf(
-                    LocalAuthorityResponse(
-                        gssCode = "E123456789",
-                        name = "Local Authority 1"
-                    ),
-                    LocalAuthorityResponse(
-                        gssCode = "E987654321",
-                        name = "Local Authority 2"
-                    ),
-                )
-            )
+            val eroResponse = buildElectoralRegistrationOfficeResponse()
             given(clientResponse.bodyToMono(ElectoralRegistrationOfficeResponse::class.java)).willReturn(
-                Mono.just(expectedEro)
+                Mono.just(eroResponse)
             )
+            val expected = buildEroManagementApiEroDto()
+            given(eroMapper.toEroManagementApiEroDto(any())).willReturn(expected)
 
             // When
             val ero = apiClient.getElectoralRegistrationOffice(eroId)
 
             // Then
-            assertThat(ero).isEqualTo(expectedEro)
+            verify(eroMapper).toEroManagementApiEroDto(eroResponse)
+            assertThat(ero).isEqualTo(expected)
             assertThat(clientRequest.value.url()).hasHost("ero-management-api").hasPath("/eros/$eroId")
         }
 

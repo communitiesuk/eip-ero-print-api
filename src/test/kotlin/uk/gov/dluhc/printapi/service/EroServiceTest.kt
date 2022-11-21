@@ -10,12 +10,13 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
-import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeGeneralException
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
+import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
+import uk.gov.dluhc.printapi.dto.EroManagementApiLocalAuthorityDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
 
 @ExtendWith(MockitoExtension::class)
 internal class EroServiceTest {
@@ -32,19 +33,20 @@ internal class EroServiceTest {
         val eroId = aValidRandomEroId()
 
         given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOffice(any())).willReturn(
-            ElectoralRegistrationOfficeResponse(
+            EroManagementApiEroDto(
                 id = eroId,
                 name = "Test ERO",
                 localAuthorities = listOf(
-                    LocalAuthorityResponse(
+                    EroManagementApiLocalAuthorityDto(
                         gssCode = "E123456789",
                         name = "Local Authority 1"
                     ),
-                    LocalAuthorityResponse(
+                    EroManagementApiLocalAuthorityDto(
                         gssCode = "E987654321",
                         name = "Local Authority 2"
                     ),
-                )
+                ),
+                englishContactDetails = anEnglishEroContactDetails()
             )
         )
 
