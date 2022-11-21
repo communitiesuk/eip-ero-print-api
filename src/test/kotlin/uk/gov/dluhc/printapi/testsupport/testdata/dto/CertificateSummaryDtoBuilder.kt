@@ -1,8 +1,8 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.dto
 
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.dto.CertificateSummaryDto
 import uk.gov.dluhc.printapi.dto.PrintRequestSummaryDto
+import uk.gov.dluhc.printapi.dto.StatusDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestStatusEventDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
@@ -19,7 +19,7 @@ fun buildCertificateSummaryDto(
 
 fun buildPrintRequestSummaryDto(
     userId: String = aValidUserId(),
-    status: Status = aValidCertificateStatus(),
+    status: StatusDto = StatusDto.valueOf(aValidCertificateStatus().name),
     eventDateTime: Instant = aValidPrintRequestStatusEventDateTime(),
     message: String? = null
 ) = PrintRequestSummaryDto(

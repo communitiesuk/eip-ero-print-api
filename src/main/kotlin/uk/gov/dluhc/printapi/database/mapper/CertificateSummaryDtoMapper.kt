@@ -9,6 +9,8 @@ import uk.gov.dluhc.printapi.dto.PrintRequestSummaryDto
 @Component
 class CertificateSummaryDtoMapper {
 
+    val statusMapper: DtoStatusMapper = DtoStatusMapper()
+
     fun certificateToCertificatePrintRequestSummaryDto(certificate: Certificate): CertificateSummaryDto {
         return CertificateSummaryDto(
             vacNumber = certificate.vacNumber!!,
@@ -23,7 +25,7 @@ class CertificateSummaryDtoMapper {
         val currentStatus = printRequest.getCurrentStatus()
         return PrintRequestSummaryDto(
             userId = printRequest.userId!!,
-            status = currentStatus.status!!,
+            status = statusMapper.toDtoStatus(currentStatus.status!!),
             dateTime = currentStatus.eventDateTime!!,
             message = currentStatus.message
         )

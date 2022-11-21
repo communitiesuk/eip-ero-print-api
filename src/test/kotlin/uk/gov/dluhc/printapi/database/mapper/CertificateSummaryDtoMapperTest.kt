@@ -12,6 +12,7 @@ import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.VALIDATED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.dto.CertificateSummaryDto
 import uk.gov.dluhc.printapi.dto.PrintRequestSummaryDto
+import uk.gov.dluhc.printapi.dto.StatusDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aDifferentValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestDateTime
@@ -49,7 +50,7 @@ internal class CertificateSummaryDtoMapperTest {
             vacNumber = vacNumber,
             printRequests = listOf(
                 PrintRequestSummaryDto(
-                    status = expectedStatus,
+                    status = StatusDto.valueOf(expectedStatus.name),
                     dateTime = expectedDateTime,
                     userId = expectedUserId,
                     message = null
@@ -93,7 +94,7 @@ internal class CertificateSummaryDtoMapperTest {
             vacNumber = vacNumber,
             printRequests = listOf(
                 PrintRequestSummaryDto(
-                    status = expectedStatus,
+                    status = StatusDto.valueOf(expectedStatus.name),
                     dateTime = expectedDateTime,
                     userId = expectedUserId,
                     message = expectedMessage
@@ -141,13 +142,13 @@ internal class CertificateSummaryDtoMapperTest {
             vacNumber = vacNumber,
             printRequests = listOf(
                 PrintRequestSummaryDto(
-                    status = expectedStatus1,
+                    status = StatusDto.valueOf(expectedStatus1.name),
                     dateTime = expectedDateTime1,
                     userId = expectedUserId1,
                     message = expectedMessage1
                 ),
                 PrintRequestSummaryDto(
-                    status = expectedStatus2,
+                    status = StatusDto.valueOf(expectedStatus2.name),
                     dateTime = expectedDateTime2,
                     userId = expectedUserId2,
                     message = expectedMessage2
