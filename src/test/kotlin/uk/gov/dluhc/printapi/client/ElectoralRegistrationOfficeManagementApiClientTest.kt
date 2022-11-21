@@ -58,7 +58,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
     }
 
     @Nested
-    inner class Get {
+    inner class GetElectoralRegistrationOffice {
         @Test
         fun `should get Electoral Registration Office`() {
             // Given
@@ -125,6 +125,31 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertThat(clientRequest.value.url()).hasHost("ero-management-api").hasPath("/eros/$eroId")
+        }
+
+        @Test
+        fun `should throw exception given API returns a non WebClientResponseException`() {
+            // Given
+            val eroId = aValidRandomEroId()
+
+            val exception = object : WebClientException("general exception") {}
+            given(clientResponse.bodyToMono(ElectoralRegistrationOfficeResponse::class.java)).willReturn(
+                Mono.error(exception)
+            )
+
+            val expectedException =
+                ElectoralRegistrationOfficeGeneralException("general exception", mapOf("eroId" to eroId))
+
+            // When
+            val ex = catchThrowableOfType(
+                { apiClient.getElectoralRegistrationOffice(eroId) },
+                ElectoralRegistrationOfficeGeneralException::class.java
+            )
+
+            // Then
+            assertThat(ex.message).isEqualTo(expectedException.message)
+            assertRequestByEroIdUri(eroId)
+            verifyNoInteractions(eroMapper)
         }
     }
 
@@ -274,6 +299,10 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
     private fun assertRequestUri(gssCode: String) {
         assertThat(clientRequest.value.url()).hasHost("ero-management-api").hasPath("/eros")
             .hasQuery("gssCode=$gssCode")
+    }
+
+    private fun assertRequestByEroIdUri(eroId: String) {
+        assertThat(clientRequest.value.url()).hasHost("ero-management-api").hasPath("/eros/$eroId")
     }
 }
 
