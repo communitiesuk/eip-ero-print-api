@@ -7,6 +7,7 @@ import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.dto.StatusDto
 
 internal class DtoStatusMapperTest {
+
     private val dtoStatusMapper = DtoStatusMapper()
 
     @ParameterizedTest
