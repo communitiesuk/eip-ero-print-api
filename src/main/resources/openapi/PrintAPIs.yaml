@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.1.0'
+  version: '1.1.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -102,6 +102,33 @@ components:
   # Schema and Enum Definitions
   # --------------------------------------------------------------------------------
   schemas:
+    ErrorResponse:
+      title: ErrorResponse
+      description: Response describing errors in a web request
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: '2022-09-28T18:01:42.105Z'
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: 'Bad Request'
+        message:
+          type: string
+          example: 'Validation failed for object=paperVoterCardApplicationRequest. Error count: 14'
+        validationErrors:
+          type: array
+          items:
+            type: string
+          example: 'Error on field applicant.nino: rejected value [aaaaaaaaaaa], must match ^.{1,10}$'
+      required:
+        - timestamp
+        - status
+        - error
+        - message
     CertificateSummaryResponse:
       title: CertificateSummaryResponse
       type: object

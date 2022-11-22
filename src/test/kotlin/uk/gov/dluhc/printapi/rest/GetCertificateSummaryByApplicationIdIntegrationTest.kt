@@ -82,6 +82,26 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
     }
 
     @Test
+    fun `should return not found given application does not exist`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID)
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        // When
+        val response = webTestClient.get()
+            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
+            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .exchange()
+
+        // Then
+        response.expectStatus().isNotFound
+        val actual = response.returnResult(String::class.java).responseBody.blockFirst()
+        assertThat(actual).isEqualTo("Certificate for eroId = $ERO_ID and application id = $APPLICATION_ID not found")
+    }
+
+    @Test
     fun `should return certificate summary given existing application and user with valid bearer token belonging to same ero and valid group`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID)
