@@ -97,6 +97,8 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
 
         // Then
         response.expectStatus().isNotFound
+        val actual = response.returnResult(String::class.java).responseBody.blockFirst()
+        assertThat(actual).isEqualTo("Certificate for eroId = $ERO_ID and application id = $APPLICATION_ID not found")
     }
 
     @Test
