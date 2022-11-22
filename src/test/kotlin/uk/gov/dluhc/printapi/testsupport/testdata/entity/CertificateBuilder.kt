@@ -44,7 +44,9 @@ fun buildCertificate(
     id: UUID? = UUID.randomUUID(),
     vacNumber: String = aValidVacNumber(),
     status: Status = aValidCertificateStatus(),
-    printRequests: List<PrintRequest> = listOf(buildPrintRequest()),
+    printRequests: List<PrintRequest> = listOf(
+        buildPrintRequest(printRequestStatuses = listOf(buildPrintRequestStatus(status = status)))
+    ),
     gssCode: String = aGssCode(),
     sourceType: SourceType = aValidSourceType(),
     sourceReference: String = aValidSourceReference(),
@@ -68,7 +70,7 @@ fun buildCertificate(
 
 fun buildPrintRequest(
     requestId: String = aValidRequestId(),
-    printRequestStatuses: List<PrintRequestStatus> = listOf(buildPrintStatus()),
+    printRequestStatuses: List<PrintRequestStatus> = listOf(buildPrintRequestStatus()),
     requestDateTime: Instant? = aValidRequestDateTime(),
     eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(),
     eroWelsh: ElectoralRegistrationOffice? = null,
@@ -96,7 +98,7 @@ fun buildPrintRequest(
     return printRequest
 }
 
-fun buildPrintStatus(
+fun buildPrintRequestStatus(
     status: Status = aValidCertificateStatus(),
     eventDateTime: Instant = aValidPrintRequestStatusEventDateTime(),
     message: String? = null

@@ -11,7 +11,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -30,7 +30,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
                     batchId = batchId,
                     requestId = requestId,
                     printRequestStatuses = listOf(
-                        buildPrintStatus(
+                        buildPrintRequestStatus(
                             status = Status.ASSIGNED_TO_BATCH,
                             eventDateTime = Instant.now().minusSeconds(10)
                         )

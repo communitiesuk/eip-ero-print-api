@@ -18,7 +18,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintRequestBatchMessage
 import java.io.ByteArrayInputStream
 import java.time.Instant
@@ -59,7 +59,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
                     requestId = requestId,
                     photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
                     printRequestStatuses = listOf(
-                        buildPrintStatus(
+                        buildPrintRequestStatus(
                             status = ASSIGNED_TO_BATCH,
                             eventDateTime = Instant.now().minusSeconds(10)
                         )

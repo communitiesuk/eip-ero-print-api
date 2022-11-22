@@ -19,7 +19,7 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 
 @ExtendWith(MockitoExtension::class)
 internal class CertificateBatchingServiceTest {
@@ -66,7 +66,7 @@ internal class CertificateBatchingServiceTest {
 
         val printRequests = listOf(
             buildPrintRequest(
-                printRequestStatuses = listOf(buildPrintStatus(status = Status.PENDING_ASSIGNMENT_TO_BATCH)),
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.PENDING_ASSIGNMENT_TO_BATCH)),
                 batchId = null
             )
         )

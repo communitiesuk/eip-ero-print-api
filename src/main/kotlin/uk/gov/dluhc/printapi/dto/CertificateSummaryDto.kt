@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.dto
 
 data class CertificateSummaryDto(
-    private val vacNumber: String,
-    private val printRequests: List<PrintRequestSummaryDto>
+    val vacNumber: String,
+    val printRequests: List<PrintRequestSummaryDto>
 )

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -77,7 +77,7 @@ internal class CertificateTest {
             // Given
             val printRequest = buildPrintRequest(
                 printRequestStatuses = listOf(
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minusSeconds(1)
                     )
@@ -99,15 +99,15 @@ internal class CertificateTest {
             // Given
             val printRequest = buildPrintRequest(
                 printRequestStatuses = listOf(
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(10, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minus(9, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS)
                     ),
@@ -130,19 +130,19 @@ internal class CertificateTest {
             val firstPrintRequest = buildPrintRequest(
                 requestDateTime = Instant.now().minus(30, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.PRINT_PROVIDER_DISPATCH_FAILED,
                         eventDateTime = Instant.now().minus(20, ChronoUnit.DAYS)
                     ),
@@ -152,19 +152,19 @@ internal class CertificateTest {
             val secondPrintRequest = buildPrintRequest(
                 requestDateTime = Instant.now().minus(10, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(10, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.ASSIGNED_TO_BATCH,
                         eventDateTime = Instant.now().minus(9, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS)
                     ),
-                    buildPrintStatus(
+                    buildPrintRequestStatus(
                         status = Status.DISPATCHED,
                         eventDateTime = Instant.now().minus(3, ChronoUnit.DAYS)
                     ),

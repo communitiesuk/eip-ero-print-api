@@ -38,7 +38,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val gssCode = localAuthority.gssCode!!
         val payload = buildSendApplicationToPrintMessage(gssCode = gssCode)
 
-        wireMockService.stubEroManagementGetEro(ero, gssCode)
+        wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
         // TODO - when ERO Management returns contact data wiremock will return relevant contact details and the expected ERO can reflect this
         val expectedEnglishEro = ElectoralRegistrationOffice(
             name = "Gwynedd Council Elections",
