@@ -36,7 +36,7 @@ fun getAMongoDbId(): String = ObjectId().toHexString()
 
 fun aValidRequestId(): String = getAMongoDbId()
 
-fun aValidRequestDateTime(): Instant = Instant.now()
+fun aValidRequestDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
 fun aValidVacNumber(): String = randomAlphanumeric(20)
 
@@ -46,7 +46,7 @@ fun aValidSourceReference(): String = getAMongoDbId()
 
 fun aValidApplicationReference(): String = "V${RandomStringUtils.randomAlphabetic(9).uppercase()}"
 
-fun aValidApplicationReceivedDateTime(): Instant = Instant.now()
+fun aValidApplicationReceivedDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
 fun aValidIssuingAuthority(): String = aValidLocalAuthorityName()
 

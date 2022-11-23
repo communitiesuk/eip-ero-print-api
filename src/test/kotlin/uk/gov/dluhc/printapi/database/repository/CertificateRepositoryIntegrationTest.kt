@@ -10,6 +10,7 @@ import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressPostcode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressStreet
@@ -41,144 +42,160 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCodeList
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.function.BiPredicate
 
 internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
-    @Test
-    fun `should return Certificate given persisted Certificate with all required properties`() {
-        // Given
-        val certificate = Certificate(
-            vacNumber = aValidVacNumber(),
-            sourceType = aValidSourceType(),
-            sourceReference = aValidSourceReference(),
-            applicationReference = aValidApplicationReference(),
-            applicationReceivedDateTime = aValidApplicationReceivedDateTime(),
-            issuingAuthority = aValidIssuingAuthority(),
-            issueDate = aValidIssueDate(),
-            suggestedExpiryDate = aValidSuggestedExpiryDate(),
-            gssCode = aGssCode(),
-            status = null
-        )
-        val deliveryAddress = Address(
-            street = aValidAddressStreet(),
-            postcode = aValidAddressPostcode()
-        )
-        val delivery = Delivery(
-            addressee = aValidDeliveryName(),
-            address = deliveryAddress,
-            deliveryClass = aValidDeliveryClass(),
-            deliveryMethod = aValidDeliveryMethod()
-        )
-        val eroEnglish = ElectoralRegistrationOffice(
-            address = Address(
+    @Nested
+    inner class FindById {
+        @Test
+        fun `should return Certificate given persisted Certificate with all required properties`() {
+            // Given
+            val certificate = Certificate(
+                vacNumber = aValidVacNumber(),
+                sourceType = aValidSourceType(),
+                sourceReference = aValidSourceReference(),
+                applicationReference = aValidApplicationReference(),
+                applicationReceivedDateTime = aValidApplicationReceivedDateTime(),
+                issuingAuthority = aValidIssuingAuthority(),
+                issueDate = aValidIssueDate(),
+                suggestedExpiryDate = aValidSuggestedExpiryDate(),
+                gssCode = aGssCode(),
+                status = null
+            )
+            val deliveryAddress = Address(
                 street = aValidAddressStreet(),
                 postcode = aValidAddressPostcode()
-            ),
-            name = aValidEroName(),
-            phoneNumber = aValidPhoneNumber(),
-            emailAddress = aValidEmailAddress(),
-            website = aValidWebsite()
-        )
-        val printRequest = PrintRequest(
-            requestId = aValidRequestId(),
-            vacVersion = aValidVacVersion(),
-            requestDateTime = aValidRequestDateTime(),
-            firstName = aValidFirstName(),
-            surname = aValidSurname(),
-            certificateLanguage = aValidCertificateLanguage(),
-            certificateFormat = aValidCertificateFormat(),
-            photoLocationArn = aPhotoArn(),
-            delivery = delivery,
-            eroEnglish = eroEnglish,
-            eroWelsh = null,
-            userId = aValidUserId()
-        )
-        val printRequestStatus = PrintRequestStatus(
-            status = aValidCertificateStatus(),
-            eventDateTime = aValidPrintRequestStatusEventDateTime(),
-        )
-        printRequest.addPrintRequestStatus(printRequestStatus)
-        certificate.addPrintRequest(printRequest)
-        val expected = certificateRepository.save(certificate)
+            )
+            val delivery = Delivery(
+                addressee = aValidDeliveryName(),
+                address = deliveryAddress,
+                deliveryClass = aValidDeliveryClass(),
+                deliveryMethod = aValidDeliveryMethod()
+            )
+            val eroEnglish = ElectoralRegistrationOffice(
+                address = Address(
+                    street = aValidAddressStreet(),
+                    postcode = aValidAddressPostcode()
+                ),
+                name = aValidEroName(),
+                phoneNumber = aValidPhoneNumber(),
+                emailAddress = aValidEmailAddress(),
+                website = aValidWebsite()
+            )
+            val printRequest = PrintRequest(
+                requestId = aValidRequestId(),
+                vacVersion = aValidVacVersion(),
+                requestDateTime = aValidRequestDateTime(),
+                firstName = aValidFirstName(),
+                surname = aValidSurname(),
+                certificateLanguage = aValidCertificateLanguage(),
+                certificateFormat = aValidCertificateFormat(),
+                photoLocationArn = aPhotoArn(),
+                delivery = delivery,
+                eroEnglish = eroEnglish,
+                eroWelsh = null,
+                userId = aValidUserId()
+            )
+            val printRequestStatus = PrintRequestStatus(
+                status = aValidCertificateStatus(),
+                eventDateTime = aValidPrintRequestStatusEventDateTime(),
+            )
+            printRequest.addPrintRequestStatus(printRequestStatus)
+            certificate.addPrintRequest(printRequest)
+            val expected = certificateRepository.save(certificate)
 
-        // When
-        val actual = certificateRepository.findById(expected.id!!)
+            // When
+            val actual = certificateRepository.findById(expected.id!!)
 
-        // Then
-        assertThat(actual).isPresent
-        assertCertificateRecursiveEqual(actual.get(), expected)
-        assertThat(actual.get().status).isEqualTo(printRequestStatus.status)
+            // Then
+            assertThat(actual).isPresent
+            assertCertificateRecursiveEqual(actual.get(), expected)
+            assertThat(actual.get().status).isEqualTo(printRequestStatus.status)
+        }
     }
 
-    @Test
-    fun `should get by requestId given one exists`() {
-        // Given
-        val requestId = aValidRequestId()
-        val certificate = buildCertificate(printRequests = listOf(buildPrintRequest(requestId = requestId)))
-        val expected = certificateRepository.save(certificate)
+    @Nested
+    inner class GetByPrintRequestsRequestId {
+        @Test
+        fun `should get by requestId given one exists`() {
+            // Given
+            val requestId = aValidRequestId()
+            val certificate = buildCertificate(printRequests = listOf(buildPrintRequest(requestId = requestId)))
+            val expected = certificateRepository.save(certificate)
 
-        // When
-        val actual = certificateRepository.getByPrintRequestsRequestId(requestId)
+            // When
+            val actual = certificateRepository.getByPrintRequestsRequestId(requestId)
 
-        // Given
-        assertCertificateRecursiveEqual(actual!!, expected)
+            // Given
+            assertCertificateRecursiveEqual(actual!!, expected)
+        }
+
+        @Test
+        fun `should return null given no certificate by the requestId`() {
+            // Given
+            val certificate = buildCertificate(printRequests = listOf(buildPrintRequest()))
+            certificateRepository.save(certificate)
+
+            // When
+            val actual = certificateRepository.getByPrintRequestsRequestId("non-existing-request-id")
+
+            // Given
+            assertThat(actual).isNull()
+        }
     }
 
-    @Test
-    fun `should return null given no certificate by the requestId`() {
-        // Given
-        val certificate = buildCertificate(printRequests = listOf(buildPrintRequest()))
-        certificateRepository.save(certificate)
+    @Nested
+    inner class Save {
+        @Test
+        fun `should get by status and batchId`() {
+            // Given
+            val batchId = aValidBatchId()
+            val status = aValidCertificateStatus()
+            val certificate = buildCertificate(
+                status = status,
+                printRequests = listOf(buildPrintRequest(batchId = batchId))
+            )
+            val expected = certificateRepository.save(certificate)
 
-        // When
-        val actual = certificateRepository.getByPrintRequestsRequestId("non-existing-request-id")
+            // When
+            val actual = certificateRepository.findByStatusAndPrintRequestsBatchId(status, batchId)
 
-        // Given
-        assertThat(actual).isNull()
+            // Given
+            assertThat(actual).hasSize(1)
+            assertThat(actual[0].status).isEqualTo(status)
+            assertThat(actual[0].printRequests[0].batchId).isEqualTo(batchId)
+            assertCertificateRecursiveEqual(actual[0], expected)
+        }
     }
 
-    @Test
-    fun `should get by status and batchId`() {
-        // Given
-        val batchId = aValidBatchId()
-        val status = aValidCertificateStatus()
-        val certificate = buildCertificate(
-            status = status,
-            printRequests = listOf(buildPrintRequest(batchId = batchId))
-        )
-        val expected = certificateRepository.save(certificate)
+    @Nested
+    inner class FindByStatus {
+        @Test
+        fun `should get by status`() {
+            // Given
+            val status = aValidCertificateStatus()
+            val certificate = buildCertificate(
+                status = status,
+            )
+            val expected = certificateRepository.save(certificate)
 
-        // When
-        val actual = certificateRepository.findByStatusAndPrintRequestsBatchId(status, batchId)
+            // When
+            val actual = certificateRepository.findByStatus(status)
 
-        // Given
-        assertThat(actual).hasSize(1)
-        assertThat(actual[0].status).isEqualTo(status)
-        assertThat(actual[0].printRequests[0].batchId).isEqualTo(batchId)
-        assertCertificateRecursiveEqual(actual[0], expected)
-    }
-
-    @Test
-    fun `should get by status`() {
-        // Given
-        val status = aValidCertificateStatus()
-        val certificate = buildCertificate(
-            status = status,
-        )
-        val expected = certificateRepository.save(certificate)
-
-        // When
-        val actual = certificateRepository.findByStatus(status)
-
-        // Given
-        assertThat(actual).hasSize(1)
-        assertThat(actual[0].status).isEqualTo(status)
-        assertCertificateRecursiveEqual(actual[0], expected)
+            // Given
+            assertThat(actual).hasSize(1)
+            assertThat(actual[0].status).isEqualTo(status)
+            assertCertificateRecursiveEqual(actual[0], expected)
+        }
     }
 
     @Nested
@@ -197,7 +214,11 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             certificate = certificateRepository.save(certificate)
 
             // When
-            val actual = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, sourceType, sourceReference)
+            val actual = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                gssCodes,
+                sourceType,
+                sourceReference
+            )
 
             // Then
             assertThat(actual).isNotNull
@@ -212,10 +233,114 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val sourceReference = aValidSourceReference()
 
             // When
-            val actual = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, sourceType, sourceReference)
+            val actual = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                gssCodes,
+                sourceType,
+                sourceReference
+            )
 
             // Then
             assertThat(actual).isNull()
+        }
+    }
+
+    @Nested
+    inner class FindByPrintRequestsStatusHistoryEventDateTimeBetweenAndPrintRequestsStatusHistoryStatus {
+        @Test
+        fun `should find certificates for the given range and status`() {
+            // Given
+            val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+            val expectedDate = LocalDate.ofInstant(now, ZoneOffset.UTC)
+            val startOfDay = expectedDate.atStartOfDay().toInstant(ZoneOffset.UTC)
+            val endOfDay = expectedDate.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).minusSeconds(1)
+            val expected1 = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                eventDateTime = startOfDay
+                            ),
+                            buildPrintRequestStatus(
+                                status = Status.ASSIGNED_TO_BATCH,
+                                eventDateTime = endOfDay
+                            )
+                        )
+                    )
+                )
+            )
+
+            val expected2 = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                eventDateTime = startOfDay.minusSeconds(10)
+                            )
+                        )
+                    ),
+                    buildPrintRequest(
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = Status.ASSIGNED_TO_BATCH,
+                                eventDateTime = startOfDay
+                            )
+                        )
+                    )
+                )
+            )
+
+            val other1 = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                eventDateTime = now.plusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+
+            val other2 = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = Status.ASSIGNED_TO_BATCH,
+                                eventDateTime = startOfDay.minusSeconds(1)
+                            ),
+                            buildPrintRequestStatus(
+                                status = Status.ASSIGNED_TO_BATCH,
+                                eventDateTime = endOfDay.plusSeconds(1)
+                            )
+                        )
+                    )
+                )
+            )
+
+            certificateRepository.saveAll(listOf(other1, expected1, other2, expected2))
+
+            // When
+            val actual =
+                certificateRepository.findByPrintRequestsStatusHistoryEventDateTimeBetweenAndPrintRequestsStatusHistoryStatus(
+                    startOfDay, endOfDay,
+                    Status.ASSIGNED_TO_BATCH
+                )
+
+            // Then
+
+            assertThat(actual).isNotEmpty.hasSize(2)
+            assertThat(actual[0]).satisfiesAnyOf(
+                { assertCertificateRecursiveEqual(it, expected1) },
+                { assertCertificateRecursiveEqual(it, expected2) }
+            )
+            assertThat(actual[1]).satisfiesAnyOf(
+                { assertCertificateRecursiveEqual(it, expected1) },
+                { assertCertificateRecursiveEqual(it, expected2) }
+            )
         }
     }
 
@@ -227,6 +352,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
         assertThat(actual).usingRecursiveComparison()
             .withEqualsForType(offsetEqualToRoundedSeconds, OffsetDateTime::class.java)
             .withEqualsForType(instantEqualToRoundedSeconds, Instant::class.java)
+            .ignoringCollectionOrder()
             .isEqualTo(expected)
     }
 
