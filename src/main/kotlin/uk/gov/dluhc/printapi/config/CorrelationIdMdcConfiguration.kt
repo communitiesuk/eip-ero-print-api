@@ -1,10 +1,8 @@
 package uk.gov.dluhc.printapi.config
 
-import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.aspectj.lang.annotation.Before
 import org.slf4j.MDC
 import org.springframework.messaging.Message
 import org.springframework.messaging.support.GenericMessage
@@ -54,14 +52,17 @@ class CorrelationIdMdcInterceptor : HandlerInterceptor {
 class CorrelationIdMdcMessageListenerAspect {
 
     /**
-     * Before Advice for inbound [Message]s (ie. SQS Message's being directed to a listener class) that sets the correlation ID
+     * Around Advice for inbound [Message]s (ie. SQS Message's being directed to a listener class) that sets the correlation ID
      * MDC variable to the value found in the Message header `x-correlation-id` if set, or a new value.
      * This allows for passing and logging a consistent correlation ID between disparate systems or processes.
      */
-    @Before("execution(* org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler.handleMessage(..))")
-    fun beforeHandleMessage(joinPoint: JoinPoint) {
-        val message = joinPoint.args[0] as Message<*>?
+    @Around("execution(* org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler.handleMessage(..))")
+    fun aroundHandleMessage(proceedingJoinPoint: ProceedingJoinPoint): Any? {
+        val message = proceedingJoinPoint.args[0] as Message<*>?
         MDC.put(CORRELATION_ID, message?.headers?.get(CORRELATION_ID_HEADER)?.toString() ?: generateCorrelationId())
+        return proceedingJoinPoint.proceed(proceedingJoinPoint.args).also {
+            MDC.remove(CORRELATION_ID)
+        }
     }
 
     /**
@@ -93,13 +94,16 @@ class CorrelationIdMdcMessageListenerAspect {
 class CorrelationIdMdcScheduledAspect {
 
     /**
-     * Before Advice for Scheduled tasks (ie. cron tasks) that sets the correlation ID MDC variable to a new value.
+     * Around Advice for Scheduled tasks (ie. cron tasks) that sets the correlation ID MDC variable to a new value.
      * Due to the invocation semantics of a Scheduled task it does not make sense to pass a correlation ID from another
      * system or process into it.
      */
-    @Before("@annotation(org.springframework.scheduling.annotation.Scheduled)")
-    fun before(joinPoint: JoinPoint) {
+    @Around("@annotation(org.springframework.scheduling.annotation.Scheduled)")
+    fun aroundScheduledTask(proceedingJoinPoint: ProceedingJoinPoint): Any? {
         MDC.put(CORRELATION_ID, generateCorrelationId())
+        return proceedingJoinPoint.proceed(proceedingJoinPoint.args).also {
+            MDC.remove(CORRELATION_ID)
+        }
     }
 }
 
