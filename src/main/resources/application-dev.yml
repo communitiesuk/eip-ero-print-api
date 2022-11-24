@@ -5,3 +5,4 @@ jobs:
   batch-print-requests:
     name: "BatchPrintRequests"
     cron: "0 */10 * ? * *" # every 10 minutes
+    daily-limit: 20
