@@ -142,14 +142,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
 
         // Then
         await.atMost(3, TimeUnit.SECONDS).untilAsserted {
-            val generatedFields = arrayOf(
-                "applicationReceivedDateTime",
-                "printRequests.requestDateTime",
-                ".*dateCreated",
-                ".*createdBy",
-                ".*version",
-                ".*id"
-            )
+            val generatedFields = arrayOf(".*dateCreated", ".*createdBy", ".*version", ".*id")
 
             val actualCertificate1 = certificateRepository.findById(certificate1.id!!).get()
             assertThat(actualCertificate1).usingRecursiveComparison()
