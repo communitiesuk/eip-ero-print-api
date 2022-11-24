@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.SourceType
@@ -19,9 +20,6 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
 
     fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): Certificate?
 
-    fun findByPrintRequestsStatusHistoryEventDateTimeBetweenAndPrintRequestsStatusHistoryStatus(
-        startInstant: Instant,
-        endInstant: Instant,
-        status: Status
-    ): List<Certificate>
+    @Query("SELECT COUNT(*) FROM PrintRequestStatus s WHERE s.eventDateTime >= :startInstant AND s.eventDateTime <= :endInstant AND s.status = :status")
+    fun getPrintRequestStatusCount(startInstant: Instant, endInstant: Instant, status: Status): Int
 }

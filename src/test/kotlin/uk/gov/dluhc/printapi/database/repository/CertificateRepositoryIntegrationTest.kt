@@ -245,7 +245,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     }
 
     @Nested
-    inner class FindByPrintRequestsStatusHistoryEventDateTimeBetweenAndPrintRequestsStatusHistoryStatus {
+    inner class GetPrintRequestStatusCount {
         @Test
         fun `should find certificates for the given range and status`() {
             // Given
@@ -325,22 +325,10 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
             // When
             val actual =
-                certificateRepository.findByPrintRequestsStatusHistoryEventDateTimeBetweenAndPrintRequestsStatusHistoryStatus(
-                    startOfDay, endOfDay,
-                    Status.ASSIGNED_TO_BATCH
-                )
+                certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, Status.ASSIGNED_TO_BATCH)
 
             // Then
-
-            assertThat(actual).isNotEmpty.hasSize(2)
-            assertThat(actual[0]).satisfiesAnyOf(
-                { assertCertificateRecursiveEqual(it, expected1) },
-                { assertCertificateRecursiveEqual(it, expected2) }
-            )
-            assertThat(actual[1]).satisfiesAnyOf(
-                { assertCertificateRecursiveEqual(it, expected1) },
-                { assertCertificateRecursiveEqual(it, expected2) }
-            )
+            assertThat(actual).isEqualTo(2)
         }
     }
 
