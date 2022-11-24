@@ -2,13 +2,16 @@ package uk.gov.dluhc.printapi.rest
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.MediaType
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
+import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
 import uk.gov.dluhc.printapi.models.PrintRequestSummary
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
@@ -66,11 +69,16 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
             .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
+            .expectStatus()
+            .isEqualTo(NOT_FOUND)
+            .returnResult(ErrorResponse::class.java)
 
         // Then
-        response.expectStatus().isNotFound
-        val actual = response.returnResult(String::class.java).responseBody.blockFirst()
-        assertThat(actual).isEqualTo("Certificate for eroId = $ERO_ID with sourceType = ${SourceType.VOTER_CARD} and sourceReference = $APPLICATION_ID not found")
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual)
+            .hasStatus(NOT_FOUND.value())
+            .hasError("Not Found")
+            .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ${SourceType.VOTER_CARD} and sourceReference = $APPLICATION_ID not found")
     }
 
     @Test
