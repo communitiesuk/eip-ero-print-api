@@ -1,11 +1,11 @@
 package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -20,11 +20,13 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 @ExtendWith(MockitoExtension::class)
 internal class CertificateBatchingServiceTest {
 
-    @InjectMocks
     private lateinit var certificateBatchingService: CertificateBatchingService
 
     @Mock
@@ -36,27 +38,48 @@ internal class CertificateBatchingServiceTest {
     @Captor
     private lateinit var savedCertificateArgumentCaptor: ArgumentCaptor<Certificate>
 
+    private val dailyLimit: Int = 10
+
+    private val fixedClock = Clock.fixed(Instant.parse("2022-11-25T23:59:59.999Z"), ZoneId.of("UTC"))
+
+    @BeforeEach
+    fun setup() {
+        certificateBatchingService = CertificateBatchingService(
+            idFactory = idFactory,
+            certificateRepository = certificateRepository,
+            dailyLimit = dailyLimit,
+            clock = fixedClock
+        )
+    }
+
     @Test
     fun `should batch multiple print requests and save each`() {
         // Given
-        val batchSize = 5
-        val numOfRequests = 12
-        val certificates = (1..numOfRequests).map { buildCertificate(status = Status.PENDING_ASSIGNMENT_TO_BATCH) }
+        val startOfDay = Instant.parse("2022-11-25T00:00:00.000Z")
+        val endOfDay = Instant.parse("2022-11-25T23:59:59.000Z")
 
+        val batchSize = 4
+        val numberOfRequestsPendingAssignmentToBatch = 12
+        val numberOfRequestsAlreadyAssignedToBatch = 3
+        val certificates = (1..numberOfRequestsPendingAssignmentToBatch)
+            .map { buildCertificate(status = Status.PENDING_ASSIGNMENT_TO_BATCH) }
         val batchId1 = aValidBatchId()
         val batchId2 = aValidBatchId()
-        val batchId3 = aValidBatchId()
+
         given(certificateRepository.findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
-        given(idFactory.batchId()).willReturn(batchId1, batchId2, batchId3)
+        given(certificateRepository.getPrintRequestStatusCount(any(), any(), any()))
+            .willReturn(numberOfRequestsAlreadyAssignedToBatch)
+        given(idFactory.batchId()).willReturn(batchId1, batchId2)
 
         // When
         val batchIds = certificateBatchingService.batchPendingCertificates(batchSize)
 
         // Then
         verify(certificateRepository).findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
-        verify(idFactory, times(3)).batchId()
-        verify(certificateRepository, times(12)).save(any())
-        assertThat(batchIds).containsExactly(batchId1, batchId2, batchId3)
+        verify(certificateRepository).getPrintRequestStatusCount(startOfDay, endOfDay, Status.ASSIGNED_TO_BATCH)
+        verify(idFactory, times(2)).batchId()
+        verify(certificateRepository, times(7)).save(any())
+        assertThat(batchIds).containsExactly(batchId1, batchId2)
     }
 
     @Test
@@ -97,8 +120,8 @@ internal class CertificateBatchingServiceTest {
     @Test
     fun `should correctly batch print requests`() {
         // Given
-        val batchSize = 10
-        val numOfRequests = 23
+        val batchSize = 3
+        val numOfRequests = 8
         val certificates = (1..numOfRequests).map { buildCertificate() }
         given(certificateRepository.findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)).willReturn(certificates)
         given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId())

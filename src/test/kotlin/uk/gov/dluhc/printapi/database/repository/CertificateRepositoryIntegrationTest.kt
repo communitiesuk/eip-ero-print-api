@@ -46,10 +46,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCodeList
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
-import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.DAYS
+import java.time.temporal.ChronoUnit.SECONDS
 import java.util.function.BiPredicate
 
 internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
@@ -249,10 +248,9 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
         @Test
         fun `should find certificates for the given range and status`() {
             // Given
-            val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
-            val expectedDate = LocalDate.ofInstant(now, ZoneOffset.UTC)
-            val startOfDay = expectedDate.atStartOfDay().toInstant(ZoneOffset.UTC)
-            val endOfDay = expectedDate.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).minusSeconds(1)
+            val now = Instant.now().truncatedTo(SECONDS)
+            val startOfDay = now.truncatedTo(DAYS)
+            val endOfDay = startOfDay.plus(1, DAYS).minusSeconds(1)
             val expected1 = buildCertificate(
                 printRequests = listOf(
                     buildPrintRequest(
