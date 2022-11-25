@@ -8,5 +8,5 @@ logging:
         jsch: DEBUG
 jobs:
   batch-print-requests:
-    daily-limit: 20
+    daily-limit: 1000
 

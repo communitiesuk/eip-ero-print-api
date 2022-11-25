@@ -51,8 +51,8 @@ class CertificateBatchingService(
         val countOfRequestsSentToPrintProvider =
             certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, Status.ASSIGNED_TO_BATCH)
 
-        if (certificatesPendingAssignment.size + countOfRequestsSentToPrintProvider > dailyLimit) {
-            logDailyLimit(certificatesPendingAssignment, countOfRequestsSentToPrintProvider)
+        if ((certificatesPendingAssignment.size + countOfRequestsSentToPrintProvider) > dailyLimit) {
+            logDailyLimit(certificatesPendingAssignment, countOfRequestsSentToPrintProvider, endOfDay)
             return certificatesPendingAssignment.subList(0, dailyLimit - countOfRequestsSentToPrintProvider)
         }
 
@@ -61,14 +61,16 @@ class CertificateBatchingService(
 
     private fun logDailyLimit(
         certificatesPendingAssignment: List<Certificate>,
-        countOfRequestsSentToPrintProvider: Int
+        countOfRequestsSentToPrintProvider: Int,
+        endOfDay: Instant
     ) {
+        val nextDay = endOfDay.plusSeconds(1)
         logger.warn {
             """Identified ${certificatesPendingAssignment.size} certificates to assign to a batch. 
             Daily print limit is $dailyLimit. 
             $countOfRequestsSentToPrintProvider certificates already sent to print provider today.
             Remaining capacity is ${dailyLimit - countOfRequestsSentToPrintProvider}.
-            ${certificatesPendingAssignment.size + countOfRequestsSentToPrintProvider - dailyLimit} certificates won't be assigned to a batch."""
+            ${certificatesPendingAssignment.size + countOfRequestsSentToPrintProvider - dailyLimit} certificates won't be assigned to a batch until $nextDay at the earliest."""
         }
     }
 }
