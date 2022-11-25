@@ -111,4 +111,4 @@ private fun generateCorrelationId(): String =
     UUID.randomUUID().toString().replace("-", "")
 
 private fun getCurrentCorrelationId(): String =
-    MDC.get(CORRELATION_ID_HEADER) ?: generateCorrelationId()
+    MDC.get(CORRELATION_ID) ?: generateCorrelationId()
