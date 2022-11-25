@@ -30,6 +30,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
@@ -76,6 +77,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var processPrintResponsesBatchJob: ProcessPrintResponsesBatchJob
+
+    @Autowired
+    protected lateinit var batchPrintRequestsJob: BatchPrintRequestsJob
 
     @Autowired
     protected lateinit var s3Client: S3Client
