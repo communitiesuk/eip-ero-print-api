@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
@@ -17,6 +16,7 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasLog
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
@@ -75,7 +75,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 middleNames = middleNames,
                 surname = surname,
                 certificateLanguage = CertificateLanguage.EN,
-                certificateFormat = CertificateFormat.STANDARD,
+                supportingInformationFormat = SupportingInformationFormat.STANDARD,
                 photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(

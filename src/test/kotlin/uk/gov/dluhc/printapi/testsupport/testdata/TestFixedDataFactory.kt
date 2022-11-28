@@ -1,11 +1,11 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
-import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 
 fun aValidSourceType() = SourceType.VOTER_CARD
 
@@ -15,7 +15,7 @@ fun aDifferentValidCertificateStatus() = Status.DISPATCHED
 
 fun aValidCertificateLanguage() = CertificateLanguage.EN
 
-fun aValidCertificateFormat() = CertificateFormat.STANDARD
+fun aValidSupportingInformationFormat() = SupportingInformationFormat.STANDARD
 
 fun aValidDeliveryClass(): DeliveryClass = DeliveryClass.STANDARD
 
