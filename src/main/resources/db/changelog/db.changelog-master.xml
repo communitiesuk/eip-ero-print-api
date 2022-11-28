@@ -12,4 +12,5 @@
     <include relativeToChangelogFile="true" file="ddl/0004_change_shedlock_table_name.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0005_add_index_gss_code_source_type_source_reference.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0006_add_index_event_date_time_status_to_print_request_status.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0007_EIP1-2781_alter_print_request.xml"/>
 </databaseChangeLog>

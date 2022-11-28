@@ -24,7 +24,7 @@ abstract class PrintRequestMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "vacVersion", constant = "A")
-    @Mapping(target = "certificateFormat", constant = "STANDARD")
+    @Mapping(target = "supportingInformationFormat", constant = "STANDARD")
     @Mapping(target = "requestId", expression = "java( idFactory.requestId() )")
     @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     @Mapping(target = "statusHistory", expression = "java( initialStatus() )")

@@ -7,13 +7,13 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
@@ -66,7 +66,7 @@ class CertificateToPrintRequestMapperTest {
         val middleNames = "Anthony Barry"
         val surname = "Doe"
         val certificateLanguage = CertificateLanguage.EN
-        val certificateFormat = CertificateFormat.STANDARD
+        val supportingInformationFormat = SupportingInformationFormat.STANDARD
         val delivery = buildDelivery()
         val gssCode: String = getRandomGssCode()
         val issuingAuthority: String = aValidLocalAuthorityName()
@@ -89,7 +89,7 @@ class CertificateToPrintRequestMapperTest {
             middleNames = middleNames,
             surname = surname,
             certificateLanguage = certificateLanguage,
-            certificateFormat = certificateFormat,
+            supportingInformationFormat = supportingInformationFormat,
             photoLocationArn = photoLocation,
             delivery = delivery,
             eroEnglish = eroEnglish,

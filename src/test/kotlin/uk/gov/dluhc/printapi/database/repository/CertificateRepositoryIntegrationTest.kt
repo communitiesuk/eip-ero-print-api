@@ -97,7 +97,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 firstName = aValidFirstName(),
                 surname = aValidSurname(),
                 certificateLanguage = aValidCertificateLanguage(),
-                certificateFormat = aValidCertificateFormat(),
+                supportingInformationFormat = aValidCertificateFormat(),
                 photoLocationArn = aPhotoArn(),
                 delivery = delivery,
                 eroEnglish = eroEnglish,

@@ -65,7 +65,7 @@ class PrintRequest(
 
     @field:NotNull
     @Enumerated(EnumType.STRING)
-    var certificateFormat: CertificateFormat? = null,
+    var supportingInformationFormat: SupportingInformationFormat? = null,
 
     @field:NotNull
     @field:Size(max = 255)

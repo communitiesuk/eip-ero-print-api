@@ -1,5 +1,5 @@
 package uk.gov.dluhc.printapi.database.entity
 
-enum class CertificateFormat {
+enum class SupportingInformationFormat {
     STANDARD
 }

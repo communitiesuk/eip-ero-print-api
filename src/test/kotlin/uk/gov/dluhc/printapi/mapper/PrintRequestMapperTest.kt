@@ -12,7 +12,6 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.dluhc.printapi.database.entity.Address
-import uk.gov.dluhc.printapi.database.entity.CertificateFormat
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
@@ -20,6 +19,7 @@ import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
@@ -103,7 +103,7 @@ class PrintRequestMapperTest {
                 middleNames = middleNames,
                 surname = surname,
                 certificateLanguage = certificateLanguageEntity,
-                certificateFormat = CertificateFormat.STANDARD,
+                supportingInformationFormat = SupportingInformationFormat.STANDARD,
                 photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(

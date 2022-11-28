@@ -86,7 +86,7 @@ fun buildPrintRequest(
         firstName = aValidFirstName(),
         surname = aValidSurname(),
         certificateLanguage = aValidCertificateLanguage(),
-        certificateFormat = aValidCertificateFormat(),
+        supportingInformationFormat = aValidCertificateFormat(),
         photoLocationArn = photoLocationArn,
         delivery = delivery,
         eroEnglish = eroEnglish,
