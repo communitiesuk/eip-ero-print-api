@@ -13,7 +13,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateFormat
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryClass
@@ -86,7 +86,7 @@ fun buildPrintRequest(
         firstName = aValidFirstName(),
         surname = aValidSurname(),
         certificateLanguage = aValidCertificateLanguage(),
-        supportingInformationFormat = aValidCertificateFormat(),
+        supportingInformationFormat = aValidSupportingInformationFormat(),
         photoLocationArn = photoLocationArn,
         delivery = delivery,
         eroEnglish = eroEnglish,

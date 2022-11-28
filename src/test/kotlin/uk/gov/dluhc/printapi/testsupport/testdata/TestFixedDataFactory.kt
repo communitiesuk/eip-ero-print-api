@@ -15,7 +15,7 @@ fun aDifferentValidCertificateStatus() = Status.DISPATCHED
 
 fun aValidCertificateLanguage() = CertificateLanguage.EN
 
-fun aValidCertificateFormat() = SupportingInformationFormat.STANDARD
+fun aValidSupportingInformationFormat() = SupportingInformationFormat.STANDARD
 
 fun aValidDeliveryClass(): DeliveryClass = DeliveryClass.STANDARD
 
