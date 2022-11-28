@@ -17,7 +17,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressStreet
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidSupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryClass
@@ -35,6 +34,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSuggestedExpiryDate
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
