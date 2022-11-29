@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.8.0'
+  version: '1.7.0'
   description: |-
     Print API SQS Message Types
     
@@ -109,8 +109,6 @@ components:
           example: Smith
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
-        supportingInformationFormat:
-          $ref: '#/components/schemas/SupportingInformationFormat'
         photoLocation:
           type: string
           description: The location of the Elector's photo. Typically an S3 ARN
@@ -151,15 +149,6 @@ components:
         - cy
         - en
       default: en
-
-    SupportingInformationFormat:
-      type: string
-      description: The format of the supporting information sent with the Voter Authority Certificate.
-      enum:
-        - standard
-        - braille
-        - large-print
-        - easy-read
 
     CertificateDelivery:
       title: CertificateDelivery
