@@ -21,6 +21,7 @@ class JacksonConfiguration {
             .addModule(KotlinModule.Builder().build())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .serializationInclusion(Include.NON_NULL)
             .build()
 
