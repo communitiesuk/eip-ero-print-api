@@ -2,9 +2,15 @@ package uk.gov.dluhc.printapi.mapper
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.given
+import org.mockito.kotlin.verify
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
@@ -30,15 +36,26 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 import java.util.stream.Stream
+import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateFormat as PrintRequestCertificateFormat
+import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateLanguage as PrintRequestCertificateLanguage
 
+@ExtendWith(MockitoExtension::class)
 class CertificateToPrintRequestMapperTest {
 
     private lateinit var mapper: CertificateToPrintRequestMapperImpl
+
+    @Mock
+    private lateinit var supportingInformationFormatMapper: SupportingInformationFormatMapper
+
+    @Mock
+    private lateinit var certificateLanguageMapper: CertificateLanguageMapper
 
     @BeforeEach
     fun setup() {
         mapper = CertificateToPrintRequestMapperImpl()
         ReflectionTestUtils.setField(mapper, "instantMapper", InstantMapper())
+        ReflectionTestUtils.setField(mapper, "supportingInformationFormatMapper", supportingInformationFormatMapper)
+        ReflectionTestUtils.setField(mapper, "certificateLanguageMapper", certificateLanguageMapper)
     }
 
     companion object {
@@ -55,6 +72,9 @@ class CertificateToPrintRequestMapperTest {
     @MethodSource("welshEro")
     fun `should map ERO response to dto with optional Welsh ERO translation`(eroWelsh: ElectoralRegistrationOffice?) {
         // Given
+        given(supportingInformationFormatMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateFormat.STANDARD)
+        given(certificateLanguageMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateLanguage.EN)
+
         val requestId: String = aValidRequestId()
         val sourceReference: String = aValidSourceReference()
         val applicationReference: String = aValidApplicationReference()
@@ -163,5 +183,7 @@ class CertificateToPrintRequestMapperTest {
 
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
+        verify(supportingInformationFormatMapper).toPrintRequestApiEnum(supportingInformationFormat)
+        verify(certificateLanguageMapper).toPrintRequestApiEnum(certificateLanguage)
     }
 }
