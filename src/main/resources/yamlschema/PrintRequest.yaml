@@ -1,4 +1,4 @@
-#version: 0.0.5
+#version: 1.0.0
 title: PrintRequest
 type: object
 description: Represents a single print request
@@ -64,17 +64,15 @@ properties:
     enum:
       - cy
       - en
-    default: en
     description: The Voter Authority Certificate language
   certificateFormat:
     type: string
-    default: standard
-    description: The Voter Authority Certificate format
+    description: The format of the supporting information sent with the Voter Authority Certificate. This is a misleading field name and is **not** the format of the Certificate itself.
     enum:
       - standard
       - braille
-      - largeprint
-      - audio
+      - large-print
+      - easy-read
   deliveryOption:
     type: string
     enum:
