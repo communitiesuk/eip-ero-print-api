@@ -21,7 +21,7 @@ import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildIssuerDto
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
 import java.time.LocalDate
@@ -55,8 +55,7 @@ class CertificateMapperTest {
     @Test
     fun `should map send application to print message to print details`() {
         // Given
-        val ero = buildEroManagementApiEroDto()
-        val localAuthority = ero.localAuthorities[0]
+        val issuer = buildIssuerDto()
         val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.EN)
         val requestId = aValidRequestId()
         val vacNumber = aValidVacNumber()
@@ -128,7 +127,7 @@ class CertificateMapperTest {
                 vacNumber = vacNumber,
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = localAuthority.name,
+                issuingAuthority = issuer.englishContactDetails.name,
                 issueDate = LocalDate.now(),
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
@@ -136,13 +135,13 @@ class CertificateMapperTest {
         }
 
         // When
-        val actual = mapper.toCertificate(message, ero, localAuthority.name)
+        val actual = mapper.toCertificate(message, issuer)
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).vacNumber()
-        verify(printRequestMapper).toPrintRequest(message, ero)
+        verify(printRequestMapper).toPrintRequest(message, issuer)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)
     }
 }

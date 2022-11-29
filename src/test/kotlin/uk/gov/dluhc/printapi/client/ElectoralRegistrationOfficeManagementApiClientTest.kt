@@ -24,13 +24,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
-import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
-import uk.gov.dluhc.printapi.dto.EroManagementApiLocalAuthorityDto
-import uk.gov.dluhc.printapi.mapper.EroManagementApiEroDtoMapper
+import uk.gov.dluhc.printapi.mapper.IssuerDtoMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.aWelshEroContactDetails
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildIssuerDto
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -43,14 +39,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
     private val clientRequest = ArgumentCaptor.forClass(ClientRequest::class.java)
 
-    private val eroMapper: EroManagementApiEroDtoMapper = mock()
+    private val issuerMapper: IssuerDtoMapper = mock()
 
     private val webClient = WebClient.builder()
         .baseUrl("http://ero-management-api")
         .exchangeFunction(exchangeFunction)
         .build()
 
-    private val apiClient = ElectoralRegistrationOfficeManagementApiClient(webClient, eroMapper)
+    private val apiClient = ElectoralRegistrationOfficeManagementApiClient(webClient, issuerMapper)
 
     @BeforeEach
     fun setupWebClientRequestCapture() {
@@ -63,19 +59,23 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
         fun `should get Electoral Registration Office`() {
             // Given
             val eroId = aValidRandomEroId()
-
-            val eroResponse = buildElectoralRegistrationOfficeResponse()
+            val gssCode1 = getRandomGssCode()
+            val gssCode2 = getRandomGssCode()
+            val eroResponse = buildElectoralRegistrationOfficeResponse(
+                localAuthorities = mutableListOf(
+                    buildLocalAuthorityResponse(gssCode = gssCode1),
+                    buildLocalAuthorityResponse(gssCode = gssCode2),
+                )
+            )
             given(clientResponse.bodyToMono(ElectoralRegistrationOfficeResponse::class.java)).willReturn(
                 Mono.just(eroResponse)
             )
-            val expected = buildEroManagementApiEroDto()
-            given(eroMapper.toEroManagementApiEroDto(any())).willReturn(expected)
+            val expected = mutableListOf(gssCode1, gssCode2)
 
             // When
-            val ero = apiClient.getElectoralRegistrationOffice(eroId)
+            val ero = apiClient.getElectoralRegistrationOfficeGssCodes(eroId)
 
             // Then
-            verify(eroMapper).toEroManagementApiEroDto(eroResponse)
             assertThat(ero).isEqualTo(expected)
             assertThat(clientRequest.value.url()).hasHost("ero-management-api").hasPath("/eros/$eroId")
         }
@@ -94,7 +94,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getElectoralRegistrationOffice(eroId) },
+                { apiClient.getElectoralRegistrationOfficeGssCodes(eroId) },
                 ElectoralRegistrationOfficeNotFoundException::class.java
             )
 
@@ -118,7 +118,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getElectoralRegistrationOffice(eroId) },
+                { apiClient.getElectoralRegistrationOfficeGssCodes(eroId) },
                 ElectoralRegistrationOfficeGeneralException::class.java
             )
 
@@ -142,19 +142,18 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getElectoralRegistrationOffice(eroId) },
+                { apiClient.getElectoralRegistrationOfficeGssCodes(eroId) },
                 ElectoralRegistrationOfficeGeneralException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestByEroIdUri(eroId)
-            verifyNoInteractions(eroMapper)
         }
     }
 
     @Nested
-    inner class GetElectoralRegistrationOffices {
+    inner class GetIssuer {
         @Test
         fun `should get Electoral Registration Office given ero exists for the gssCode`() {
             // Given
@@ -170,33 +169,16 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             given(clientResponse.bodyToMono(ElectoralRegistrationOfficesResponse::class.java)).willReturn(
                 Mono.just(erosResponse)
             )
-            val expected = with(eroResponse) {
-                EroManagementApiEroDto(
-                    id = id,
-                    name = name,
-                    listOf(
-                        EroManagementApiLocalAuthorityDto(
-                            gssCode = localAuthorities[0].gssCode!!,
-                            name = localAuthorities[0].name!!
-                        ),
-                        EroManagementApiLocalAuthorityDto(
-                            gssCode = localAuthorities[1].gssCode!!,
-                            name = localAuthorities[1].name!!
-                        ),
-                    ),
-                    englishContactDetails = anEnglishEroContactDetails(),
-                    welshContactDetails = aWelshEroContactDetails(),
-                )
-            }
-            given(eroMapper.toEroManagementApiEroDto(any())).willReturn(expected)
+            val expected = buildIssuerDto()
+            given(issuerMapper.toIssuerDto(any())).willReturn(expected)
 
             // When
-            val ero = apiClient.getElectoralRegistrationOffices(gssCode)
+            val ero = apiClient.getIssuer(gssCode)
 
             // Then
             assertThat(ero).isSameAs(expected)
             assertRequestUri(gssCode)
-            verify(eroMapper).toEroManagementApiEroDto(eroResponse)
+            verify(issuerMapper).toIssuerDto(eroResponse.localAuthorities[0])
         }
 
         @Test
@@ -211,14 +193,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getElectoralRegistrationOffices(gssCode) },
+                { apiClient.getIssuer(gssCode) },
                 ElectoralRegistrationOfficeNotFoundException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(eroMapper)
+            verifyNoInteractions(issuerMapper)
         }
 
         @Test
@@ -235,14 +217,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getElectoralRegistrationOffices(gssCode) },
+                { apiClient.getIssuer(gssCode) },
                 ElectoralRegistrationOfficeNotFoundException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(eroMapper)
+            verifyNoInteractions(issuerMapper)
         }
 
         @Test
@@ -260,14 +242,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getElectoralRegistrationOffices(gssCode) },
+                { apiClient.getIssuer(gssCode) },
                 ElectoralRegistrationOfficeGeneralException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(eroMapper)
+            verifyNoInteractions(issuerMapper)
         }
 
         @Test
@@ -285,14 +267,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getElectoralRegistrationOffices(gssCode) },
+                { apiClient.getIssuer(gssCode) },
                 ElectoralRegistrationOfficeGeneralException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(eroMapper)
+            verifyNoInteractions(issuerMapper)
         }
     }
 

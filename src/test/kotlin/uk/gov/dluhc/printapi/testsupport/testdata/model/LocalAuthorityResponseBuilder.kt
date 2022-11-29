@@ -12,12 +12,14 @@ import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 
 fun buildLocalAuthorityResponse(
     gssCode: String = getRandomGssCode(),
-    name: String = aValidLocalAuthorityName()
+    name: String = aValidLocalAuthorityName(),
+    contactDetailsEnglish: ContactDetails = buildContactDetails(),
+    contactDetailsWelsh: ContactDetails? = null,
 ) = LocalAuthorityResponse(
     gssCode = gssCode,
     name = name,
-    contactDetailsEnglish = buildContactDetails(),
-    contactDetailsWelsh = null,
+    contactDetailsEnglish = contactDetailsEnglish,
+    contactDetailsWelsh = contactDetailsWelsh,
 )
 
 fun buildContactDetails(

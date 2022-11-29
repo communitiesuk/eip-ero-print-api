@@ -129,7 +129,7 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
         val request1 = buildPrintRequest(printRequestStatuses = listOf(status1, status2, status3))
         val request2 = buildPrintRequest(printRequestStatuses = listOf(status4))
         val certificate = buildCertificate(
-            gssCode = eroResponse.localAuthorities[0].gssCode!!,
+            gssCode = eroResponse.localAuthorities[0].gssCode,
             sourceType = SourceType.VOTER_CARD,
             sourceReference = APPLICATION_ID,
             printRequests = listOf(request1, request2)

@@ -11,7 +11,7 @@ import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.CertificateMapper
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroManagementApiEroDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildIssuerDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 
@@ -32,18 +32,17 @@ class PrintServiceTest {
     @Test
     fun `should save send application to certificate`() {
         // Given
-        val ero = buildEroManagementApiEroDto()
-        val localAuthority = ero.localAuthorities[1]
-        val message = buildSendApplicationToPrintMessage(gssCode = localAuthority.gssCode)
+        val issuer = buildIssuerDto()
+        val message = buildSendApplicationToPrintMessage()
         val certificate = buildCertificate()
-        given(eroClient.getElectoralRegistrationOffices(any())).willReturn(ero)
-        given(certificateMapper.toCertificate(any(), any(), any())).willReturn(certificate)
+        given(eroClient.getIssuer(any())).willReturn(issuer)
+        given(certificateMapper.toCertificate(any(), any())).willReturn(certificate)
 
         // When
         printService.savePrintMessage(message)
 
         // Then
-        verify(eroClient).getElectoralRegistrationOffices(message.gssCode!!)
+        verify(eroClient).getIssuer(message.gssCode!!)
         verify(certificateRepository).save(certificate)
     }
 }

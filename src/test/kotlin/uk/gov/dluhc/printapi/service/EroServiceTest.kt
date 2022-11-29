@@ -13,10 +13,7 @@ import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeGeneralException
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
-import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
-import uk.gov.dluhc.printapi.dto.EroManagementApiLocalAuthorityDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
 
 @ExtendWith(MockitoExtension::class)
 internal class EroServiceTest {
@@ -32,32 +29,16 @@ internal class EroServiceTest {
         // Given
         val eroId = aValidRandomEroId()
 
-        given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOffice(any())).willReturn(
-            EroManagementApiEroDto(
-                id = eroId,
-                name = "Test ERO",
-                localAuthorities = listOf(
-                    EroManagementApiLocalAuthorityDto(
-                        gssCode = "E123456789",
-                        name = "Local Authority 1"
-                    ),
-                    EroManagementApiLocalAuthorityDto(
-                        gssCode = "E987654321",
-                        name = "Local Authority 2"
-                    ),
-                ),
-                englishContactDetails = anEnglishEroContactDetails()
-            )
-        )
-
         val expectedGssCodes = listOf("E123456789", "E987654321")
+        given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOfficeGssCodes(any()))
+            .willReturn(expectedGssCodes)
 
         // When
         val gssCodes = eroService.lookupGssCodesForEro(eroId)
 
         // Then
         assertThat(gssCodes).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expectedGssCodes)
-        verify(electoralRegistrationOfficeManagementApiClient).getElectoralRegistrationOffice(eroId)
+        verify(electoralRegistrationOfficeManagementApiClient).getElectoralRegistrationOfficeGssCodes(eroId)
     }
 
     @Test
@@ -66,7 +47,7 @@ internal class EroServiceTest {
         val eroId = aValidRandomEroId()
 
         val expected = ElectoralRegistrationOfficeNotFoundException(mapOf("eroId" to eroId))
-        given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOffice(any())).willThrow(expected)
+        given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOfficeGssCodes(any())).willThrow(expected)
 
         // When
         val ex = Assertions.catchThrowableOfType(
@@ -84,7 +65,7 @@ internal class EroServiceTest {
         val eroId = aValidRandomEroId()
 
         val expected = ElectoralRegistrationOfficeGeneralException("error", mapOf("eroId" to eroId))
-        given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOffice(any())).willThrow(expected)
+        given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOfficeGssCodes(any())).willThrow(expected)
 
         // When
         val ex = Assertions.catchThrowableOfType(

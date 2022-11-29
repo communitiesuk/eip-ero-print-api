@@ -1,10 +1,10 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.dto
 
 import uk.gov.dluhc.printapi.dto.AddressDto
-import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
+import uk.gov.dluhc.printapi.dto.IssuerContactDetailsDto
 
-fun anEnglishEroContactDetails(): EroContactDetailsDto =
-    EroContactDetailsDto(
+fun anEnglishIssuerContactDetails(): IssuerContactDetailsDto =
+    IssuerContactDetailsDto(
         name = "Gwynedd Council Elections",
         phoneNumber = "01766 771000",
         website = "https://www.gwynedd.llyw.cymru/en/Council/Contact-us/Contact-us.aspx",
@@ -18,8 +18,8 @@ fun anEnglishEroContactDetails(): EroContactDetailsDto =
         )
     )
 
-fun aWelshEroContactDetails(): EroContactDetailsDto =
-    EroContactDetailsDto(
+fun aWelshIssuerContactDetails(): IssuerContactDetailsDto =
+    IssuerContactDetailsDto(
         name = "Etholiadau Cyngor Gwynedd",
         phoneNumber = "01766 771000",
         website = "https://www.gwynedd.llyw.cymru/cy/Cyngor/Cysylltu-%c3%a2-ni/Cysylltu-%c3%a2-ni.aspx",

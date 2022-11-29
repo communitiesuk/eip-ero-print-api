@@ -15,9 +15,8 @@ class PrintService(
 ) {
     @Transactional
     fun savePrintMessage(message: SendApplicationToPrintMessage) {
-        val ero = eroClient.getElectoralRegistrationOffices(message.gssCode!!)
-        val localAuthority = ero.localAuthorities.first { it.gssCode == message.gssCode }
-        val certificate = certificateMapper.toCertificate(message, ero, localAuthority.name)
+        val issuer = eroClient.getIssuer(message.gssCode!!)
+        val certificate = certificateMapper.toCertificate(message, issuer)
         certificateRepository.save(certificate)
     }
 }

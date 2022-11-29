@@ -35,24 +35,9 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Given
         val ero = buildElectoralRegistrationOfficeResponse()
         val localAuthority = ero.localAuthorities[1]
-        val gssCode = localAuthority.gssCode!!
+        val gssCode = localAuthority.gssCode
         val payload = buildSendApplicationToPrintMessage(gssCode = gssCode)
-
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
-        // TODO - when ERO Management returns contact data wiremock will return relevant contact details and the expected ERO can reflect this
-        val expectedEnglishEro = ElectoralRegistrationOffice(
-            name = "Gwynedd Council Elections",
-            phoneNumber = "01766 771000",
-            website = "https://www.gwynedd.llyw.cymru/en/Council/Contact-us/Contact-us.aspx",
-            emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
-            address = Address(
-                property = "Gwynedd Council Headquarters",
-                street = "Shirehall Street",
-                town = "Caernarfon",
-                area = "Gwynedd",
-                postcode = "LL55 1SH",
-            )
-        )
 
         val expected = with(payload) {
             val certificate = Certificate(
@@ -65,7 +50,6 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.name,
                 issueDate = LocalDate.now(),
-
             )
             val printRequest = PrintRequest(
                 requestId = aValidRequestId(),
@@ -95,7 +79,25 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                         deliveryMethod = DeliveryMethod.DELIVERY,
                     )
                 },
-                eroEnglish = expectedEnglishEro,
+                eroEnglish = with(localAuthority) {
+                    ElectoralRegistrationOffice(
+                        name = name,
+                        phoneNumber = contactDetailsEnglish.phone,
+                        emailAddress = contactDetailsEnglish.email,
+                        website = contactDetailsEnglish.website,
+                        address = with(contactDetailsEnglish.address) {
+                            Address(
+                                street = street,
+                                postcode = postcode,
+                                property = property,
+                                locality = locality,
+                                town = town,
+                                area = area,
+                                uprn = uprn
+                            )
+                        }
+                    )
+                },
                 eroWelsh = null,
                 statusHistory = mutableListOf(
                     PrintRequestStatus(
