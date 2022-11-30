@@ -20,7 +20,9 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasLog
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
 import java.time.LocalDate
@@ -33,7 +35,12 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
     @Test
     fun `should process message received on queue`() {
         // Given
-        val ero = buildElectoralRegistrationOfficeResponse()
+        val ero = buildElectoralRegistrationOfficeResponse(
+            localAuthorities = mutableListOf(
+                buildLocalAuthorityResponse(),
+                buildLocalAuthorityResponse(contactDetailsWelsh = buildContactDetails())
+            )
+        )
         val localAuthority = ero.localAuthorities[1]
         val gssCode = localAuthority.gssCode
         val payload = buildSendApplicationToPrintMessage(gssCode = gssCode)
@@ -98,7 +105,25 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                         }
                     )
                 },
-                eroWelsh = null,
+                eroWelsh = with(localAuthority) {
+                    ElectoralRegistrationOffice(
+                        name = name,
+                        phoneNumber = contactDetailsWelsh!!.phone,
+                        emailAddress = contactDetailsWelsh!!.email,
+                        website = contactDetailsWelsh!!.website,
+                        address = with(contactDetailsWelsh!!.address) {
+                            Address(
+                                street = street,
+                                postcode = postcode,
+                                property = property,
+                                locality = locality,
+                                town = town,
+                                area = area,
+                                uprn = uprn
+                            )
+                        }
+                    )
+                },
                 statusHistory = mutableListOf(
                     PrintRequestStatus(
                         status = Status.PENDING_ASSIGNMENT_TO_BATCH,

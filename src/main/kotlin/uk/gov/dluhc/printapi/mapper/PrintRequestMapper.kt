@@ -7,7 +7,6 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.dto.EroDto
-import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.Clock
@@ -29,15 +28,11 @@ abstract class PrintRequestMapper {
     @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     @Mapping(target = "statusHistory", expression = "java( initialStatus() )")
     @Mapping(source = "ero.englishContactDetails", target = "eroEnglish")
-    @Mapping(source = "ero.welshContactDetails", target = "eroWelsh", conditionExpression = "java( isWelsh(message) )")
+    @Mapping(source = "ero.welshContactDetails", target = "eroWelsh")
     abstract fun toPrintRequest(
         message: SendApplicationToPrintMessage,
         ero: EroDto
     ): PrintRequest
-
-    protected fun isWelsh(message: SendApplicationToPrintMessage): Boolean {
-        return message.certificateLanguage == CertificateLanguage.CY
-    }
 
     protected fun initialStatus(): List<PrintRequestStatus> {
         val now = Instant.now(clock)
