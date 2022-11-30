@@ -1,17 +1,16 @@
 package uk.gov.dluhc.printapi.mapper
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
@@ -34,6 +33,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
 import java.util.stream.Stream
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateFormat as PrintRequestCertificateFormat
@@ -42,21 +42,17 @@ import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateLangua
 @ExtendWith(MockitoExtension::class)
 class CertificateToPrintRequestMapperTest {
 
+    @InjectMocks
     private lateinit var mapper: CertificateToPrintRequestMapperImpl
+
+    @Mock
+    private lateinit var instantMapper: InstantMapper
 
     @Mock
     private lateinit var supportingInformationFormatMapper: SupportingInformationFormatMapper
 
     @Mock
     private lateinit var certificateLanguageMapper: CertificateLanguageMapper
-
-    @BeforeEach
-    fun setup() {
-        mapper = CertificateToPrintRequestMapperImpl()
-        ReflectionTestUtils.setField(mapper, "instantMapper", InstantMapper())
-        ReflectionTestUtils.setField(mapper, "supportingInformationFormatMapper", supportingInformationFormatMapper)
-        ReflectionTestUtils.setField(mapper, "certificateLanguageMapper", certificateLanguageMapper)
-    }
 
     companion object {
         @JvmStatic
@@ -74,6 +70,7 @@ class CertificateToPrintRequestMapperTest {
         // Given
         given(supportingInformationFormatMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateFormat.STANDARD)
         given(certificateLanguageMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateLanguage.EN)
+        given(instantMapper.toOffsetDateTime(any())).willReturn(OffsetDateTime.ofInstant(Instant.ofEpochMilli(0), UTC))
 
         val requestId: String = aValidRequestId()
         val sourceReference: String = aValidSourceReference()
