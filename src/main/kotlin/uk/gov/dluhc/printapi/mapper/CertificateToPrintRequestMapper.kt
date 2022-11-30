@@ -5,7 +5,13 @@ import org.mapstruct.Mapping
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 
-@Mapper(uses = [InstantMapper::class])
+@Mapper(
+    uses = [
+        InstantMapper::class,
+        SupportingInformationFormatMapper::class,
+        CertificateLanguageMapper::class
+    ]
+)
 abstract class CertificateToPrintRequestMapper {
 
     @Mapping(source = "certificate.vacNumber", target = "cardNumber")
@@ -23,8 +29,8 @@ abstract class CertificateToPrintRequestMapper {
     @Mapping(source = "printRequest.delivery.address.locality", target = "deliveryLocality")
     @Mapping(source = "printRequest.delivery.address.area", target = "deliveryArea")
     @Mapping(source = "printRequest.delivery.address.postcode", target = "deliveryPostcode")
-    @Mapping(expression = "java( uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateLanguage.EN )", target = "certificateLanguage")
-    @Mapping(expression = "java( uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateFormat.STANDARD )", target = "certificateFormat")
+    @Mapping(source = "printRequest.certificateLanguage", target = "certificateLanguage")
+    @Mapping(source = "printRequest.supportingInformationFormat", target = "certificateFormat")
     @Mapping(source = "printRequest.delivery.deliveryClass", target = "deliveryOption")
     @Mapping(source = "printRequest.eroEnglish.name", target = "eroNameEn")
     @Mapping(source = "printRequest.eroEnglish.phoneNumber", target = "eroPhoneNumberEn")
