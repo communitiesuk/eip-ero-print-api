@@ -21,7 +21,7 @@ import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildIssuerDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
 import java.time.LocalDate
@@ -55,7 +55,7 @@ class CertificateMapperTest {
     @Test
     fun `should map send application to print message to print details`() {
         // Given
-        val issuer = buildIssuerDto()
+        val issuer = buildEroDto()
         val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.EN)
         val requestId = aValidRequestId()
         val vacNumber = aValidVacNumber()

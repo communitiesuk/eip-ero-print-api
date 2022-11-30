@@ -6,7 +6,7 @@ import org.mapstruct.Mapping
 import org.mapstruct.MappingTarget
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.dto.IssuerDto
+import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.service.IdFactory
 
@@ -23,13 +23,13 @@ abstract class CertificateMapper {
     @Mapping(source = "issuer.englishContactDetails.name", target = "issuingAuthority")
     abstract fun toCertificate(
         message: SendApplicationToPrintMessage,
-        issuer: IssuerDto
+        issuer: EroDto
     ): Certificate
 
     @AfterMapping
     protected fun addPrintRequestToCertificate(
         message: SendApplicationToPrintMessage,
-        issuer: IssuerDto,
+        issuer: EroDto,
         @MappingTarget certificate: Certificate
     ) {
         certificate.addPrintRequest(printRequestMapper.toPrintRequest(message, issuer))

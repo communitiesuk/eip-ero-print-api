@@ -8,8 +8,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
-import uk.gov.dluhc.printapi.dto.IssuerDto
-import uk.gov.dluhc.printapi.mapper.IssuerDtoMapper
+import uk.gov.dluhc.printapi.dto.EroDto
+import uk.gov.dluhc.printapi.mapper.EroDtoMapper
 
 private val logger = KotlinLogging.logger {}
 
@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class ElectoralRegistrationOfficeManagementApiClient(
     private val eroManagementWebClient: WebClient,
-    private val issuerMapper: IssuerDtoMapper
+    private val issuerMapper: EroDtoMapper
 ) {
 
     /**
@@ -45,10 +45,10 @@ class ElectoralRegistrationOfficeManagementApiClient(
      * Calls the `ero-management-api` for the specified gssCode and maps to an IssuerDto.
      *
      * @param gssCode the gssCode of the localAuthority for the ERO to be returned
-     * @return an [IssuerDto] for the ERO and Local Authority
+     * @return an [EroDto] for the ERO and Local Authority
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
-    fun getIssuer(gssCode: String): IssuerDto {
+    fun getIssuer(gssCode: String): EroDto {
         val response = eroManagementWebClient
             .get()
             .uri("/eros?gssCode=$gssCode")

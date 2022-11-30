@@ -23,7 +23,7 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildIssuerDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Clock
 import java.time.Instant
@@ -62,7 +62,7 @@ class PrintRequestMapperTest {
         certificateLanguageEntity: CertificateLanguageEntity
     ) {
         // Given
-        val issuer = buildIssuerDto()
+        val issuer = buildEroDto()
         val message = buildSendApplicationToPrintMessage(certificateLanguage = certificateLanguageModel)
         val requestId = aValidRequestId()
         given(idFactory.requestId()).willReturn(requestId)

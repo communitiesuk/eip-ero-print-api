@@ -24,9 +24,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
-import uk.gov.dluhc.printapi.mapper.IssuerDtoMapper
+import uk.gov.dluhc.printapi.mapper.EroDtoMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildIssuerDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -39,7 +39,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
     private val clientRequest = ArgumentCaptor.forClass(ClientRequest::class.java)
 
-    private val issuerMapper: IssuerDtoMapper = mock()
+    private val issuerMapper: EroDtoMapper = mock()
 
     private val webClient = WebClient.builder()
         .baseUrl("http://ero-management-api")
@@ -169,7 +169,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             given(clientResponse.bodyToMono(ElectoralRegistrationOfficesResponse::class.java)).willReturn(
                 Mono.just(erosResponse)
             )
-            val expected = buildIssuerDto()
+            val expected = buildEroDto()
             given(issuerMapper.toIssuerDto(any())).willReturn(expected)
 
             // When

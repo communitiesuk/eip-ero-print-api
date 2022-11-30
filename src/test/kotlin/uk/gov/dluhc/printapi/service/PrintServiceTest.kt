@@ -11,7 +11,7 @@ import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.CertificateMapper
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildIssuerDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 
@@ -32,7 +32,7 @@ class PrintServiceTest {
     @Test
     fun `should save send application to certificate`() {
         // Given
-        val issuer = buildIssuerDto()
+        val issuer = buildEroDto()
         val message = buildSendApplicationToPrintMessage()
         val certificate = buildCertificate()
         given(eroClient.getIssuer(any())).willReturn(issuer)

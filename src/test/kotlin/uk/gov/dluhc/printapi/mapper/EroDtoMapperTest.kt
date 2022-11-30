@@ -3,22 +3,22 @@ package uk.gov.dluhc.printapi.mapper
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.dto.AddressDto
-import uk.gov.dluhc.printapi.dto.IssuerContactDetailsDto
-import uk.gov.dluhc.printapi.dto.IssuerDto
+import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
+import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 
-class IssuerDtoMapperTest {
-    private val mapper = IssuerDtoMapperImpl()
+class EroDtoMapperTest {
+    private val mapper = EroDtoMapperImpl()
 
     @Test
     fun `should map ERO response to Issuer dto`() {
         // Given
         val localAuthority = buildLocalAuthorityResponse(contactDetailsWelsh = null)
         val expected = with(localAuthority) {
-            IssuerDto(
+            EroDto(
                 englishContactDetails = with(localAuthority.contactDetailsEnglish) {
-                    IssuerContactDetailsDto(
+                    EroContactDetailsDto(
                         name = name,
                         emailAddress = email,
                         phoneNumber = phone,
@@ -54,9 +54,9 @@ class IssuerDtoMapperTest {
             contactDetailsWelsh = buildContactDetails()
         )
         val expected = with(localAuthority) {
-            IssuerDto(
+            EroDto(
                 englishContactDetails = with(localAuthority.contactDetailsEnglish) {
-                    IssuerContactDetailsDto(
+                    EroContactDetailsDto(
                         name = name,
                         emailAddress = email,
                         phoneNumber = phone,
@@ -75,7 +75,7 @@ class IssuerDtoMapperTest {
                     )
                 },
                 welshContactDetails = with(localAuthority.contactDetailsWelsh!!) {
-                    IssuerContactDetailsDto(
+                    EroContactDetailsDto(
                         name = name,
                         emailAddress = email,
                         phoneNumber = phone,
