@@ -4,6 +4,7 @@ import uk.gov.dluhc.printapi.messaging.models.CertificateDelivery
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.messaging.models.SourceType
+import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
@@ -23,6 +24,7 @@ fun buildSendApplicationToPrintMessage(
     middleNames: String? = faker.name().firstName(),
     surname: String = faker.name().lastName(),
     certificateLanguage: CertificateLanguage = CertificateLanguage.EN,
+    supportingInformationFormat: SupportingInformationFormat = SupportingInformationFormat.STANDARD,
     delivery: CertificateDelivery = buildCertificateDelivery(),
     gssCode: String = getRandomGssCode(),
     photoLocation: String = "arn:aws:s3:::source-document-storage/$gssCode/$sourceReference/${UUID.randomUUID()}/" +
@@ -38,6 +40,7 @@ fun buildSendApplicationToPrintMessage(
     middleNames = middleNames,
     surname = surname,
     certificateLanguage = certificateLanguage,
+    supportingInformationFormat = supportingInformationFormat,
     photoLocation = photoLocation,
     delivery = delivery,
     gssCode = gssCode,
