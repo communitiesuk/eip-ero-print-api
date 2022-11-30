@@ -8,8 +8,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
-import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
-import uk.gov.dluhc.printapi.mapper.EroManagementApiEroDtoMapper
+import uk.gov.dluhc.printapi.dto.EroDto
+import uk.gov.dluhc.printapi.mapper.EroDtoMapper
 
 private val logger = KotlinLogging.logger {}
 
@@ -19,17 +19,17 @@ private val logger = KotlinLogging.logger {}
 @Component
 class ElectoralRegistrationOfficeManagementApiClient(
     private val eroManagementWebClient: WebClient,
-    private val eroMapper: EroManagementApiEroDtoMapper
+    private val eroMapper: EroDtoMapper
 ) {
 
     /**
-     * Calls the `ero-management-api` to return a [EroManagementApiEroDto] for the specified eroId.
+     * Calls the `ero-management-api` to return a [List] of GSS Codes for the specified eroId.
      *
      * @param eroId the ID of the ERO to return
-     * @return a [EroManagementApiEroDto] for the ERO
+     * @return a [List]<String> containing the GSS Codes associated with the ERO
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
-    fun getElectoralRegistrationOffice(eroId: String): EroManagementApiEroDto {
+    fun getElectoralRegistrationOfficeGssCodes(eroId: String): List<String> {
         val response = eroManagementWebClient
             .get()
             .uri("/eros/{eroId}", eroId)
@@ -38,17 +38,17 @@ class ElectoralRegistrationOfficeManagementApiClient(
             .onErrorResume { ex -> handleException(ex, mapOf("eroId" to eroId)) }
             .block()!!
 
-        return eroMapper.toEroManagementApiEroDto(response)
+        return response.localAuthorities.map { it.gssCode }
     }
 
     /**
-     * Calls the `ero-management-api` to return a [EroManagementApiEroDto] for the specified gssCode.
+     * Calls the `ero-management-api` for the specified gssCode and maps to an EroDto.
      *
      * @param gssCode the gssCode of the localAuthority for the ERO to be returned
-     * @return an [EroManagementApiEroDto] for the ERO
+     * @return an [EroDto] for the ERO and Local Authority
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
-    fun getElectoralRegistrationOffices(gssCode: String): EroManagementApiEroDto {
+    fun getEro(gssCode: String): EroDto {
         val response = eroManagementWebClient
             .get()
             .uri("/eros?gssCode=$gssCode")
@@ -57,11 +57,13 @@ class ElectoralRegistrationOfficeManagementApiClient(
             .onErrorResume { ex -> handleException(ex, mapOf("gssCode" to gssCode)) }
             .block()!!
 
-        if (response.eros.isEmpty()) {
+        if (response.eros.size != 1 ||
+            response.eros[0].localAuthorities.filter { it.gssCode == gssCode }.size != 1
+        ) {
             throw ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
         }
 
-        return eroMapper.toEroManagementApiEroDto(response.eros[0])
+        return eroMapper.toEroDto(response.eros[0].localAuthorities.filter { it.gssCode == gssCode }[0])
     }
 
     private fun <T> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =
@@ -72,7 +74,10 @@ class ElectoralRegistrationOfficeManagementApiClient(
             Mono.error(ElectoralRegistrationOfficeGeneralException(ex.message, searchCriteria))
         }
 
-    private fun <T> handleWebClientResponseException(ex: WebClientResponseException, searchCriteria: Map<String, String>): Mono<T> =
+    private fun <T> handleWebClientResponseException(
+        ex: WebClientResponseException,
+        searchCriteria: Map<String, String>
+    ): Mono<T> =
         if (ex.statusCode == NOT_FOUND)
             Mono.error(ElectoralRegistrationOfficeNotFoundException(searchCriteria))
         else

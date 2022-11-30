@@ -12,9 +12,7 @@ class EroService(private val electoralRegistrationOfficeManagementApiClient: Ele
 
     fun lookupGssCodesForEro(eroId: String): List<String> =
         try {
-            electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOffice(eroId).let {
-                it.localAuthorities.map { localAuthority -> localAuthority.gssCode }
-            }
+            electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOfficeGssCodes(eroId)
         } catch (ex: ElectoralRegistrationOfficeManagementApiException) {
             logger.info { "Error ${ex.message} returned whilst looking up the gssCodes for ERO $eroId" }
             throw ex

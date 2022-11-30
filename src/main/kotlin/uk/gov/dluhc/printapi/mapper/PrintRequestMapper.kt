@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.dto.EroManagementApiEroDto
+import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.service.IdFactory
@@ -32,7 +32,7 @@ abstract class PrintRequestMapper {
     @Mapping(source = "ero.welshContactDetails", target = "eroWelsh", conditionExpression = "java( isWelsh(message) )")
     abstract fun toPrintRequest(
         message: SendApplicationToPrintMessage,
-        ero: EroManagementApiEroDto
+        ero: EroDto
     ): PrintRequest
 
     protected fun isWelsh(message: SendApplicationToPrintMessage): Boolean {

@@ -1,10 +1,6 @@
 package uk.gov.dluhc.printapi.dto
 
-data class EroManagementApiEroDto(
-    val id: String,
-    val name: String,
-    val localAuthorities: List<EroManagementApiLocalAuthorityDto>,
-
+data class EroDto(
     val englishContactDetails: EroContactDetailsDto,
     val welshContactDetails: EroContactDetailsDto? = null
 )
