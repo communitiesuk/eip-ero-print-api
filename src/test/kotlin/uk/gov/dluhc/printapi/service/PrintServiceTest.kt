@@ -43,6 +43,7 @@ class PrintServiceTest {
 
         // Then
         verify(eroClient).getIssuer(message.gssCode!!)
+        verify(certificateMapper).toCertificate(message, issuer)
         verify(certificateRepository).save(certificate)
     }
 }
