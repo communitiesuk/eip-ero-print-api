@@ -19,9 +19,7 @@ abstract class CertificateMapper {
     @Autowired
     protected lateinit var printRequestMapper: PrintRequestMapper
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "vacNumber", expression = "java( idFactory.vacNumber() )")
-    @Mapping(source = "message.gssCode", target = "gssCode")
     @Mapping(source = "issuer.englishContactDetails.name", target = "issuingAuthority")
     abstract fun toCertificate(
         message: SendApplicationToPrintMessage,
