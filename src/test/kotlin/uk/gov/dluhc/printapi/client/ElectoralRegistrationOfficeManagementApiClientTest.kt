@@ -39,14 +39,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
     private val clientRequest = ArgumentCaptor.forClass(ClientRequest::class.java)
 
-    private val issuerMapper: EroDtoMapper = mock()
+    private val eroMapper: EroDtoMapper = mock()
 
     private val webClient = WebClient.builder()
         .baseUrl("http://ero-management-api")
         .exchangeFunction(exchangeFunction)
         .build()
 
-    private val apiClient = ElectoralRegistrationOfficeManagementApiClient(webClient, issuerMapper)
+    private val apiClient = ElectoralRegistrationOfficeManagementApiClient(webClient, eroMapper)
 
     @BeforeEach
     fun setupWebClientRequestCapture() {
@@ -153,7 +153,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
     }
 
     @Nested
-    inner class GetIssuer {
+    inner class GetEro {
         @Test
         fun `should get Electoral Registration Office given ero exists for the gssCode`() {
             // Given
@@ -170,15 +170,15 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
                 Mono.just(erosResponse)
             )
             val expected = buildEroDto()
-            given(issuerMapper.toIssuerDto(any())).willReturn(expected)
+            given(eroMapper.toEroDto(any())).willReturn(expected)
 
             // When
-            val ero = apiClient.getIssuer(gssCode)
+            val ero = apiClient.getEro(gssCode)
 
             // Then
             assertThat(ero).isSameAs(expected)
             assertRequestUri(gssCode)
-            verify(issuerMapper).toIssuerDto(eroResponse.localAuthorities[0])
+            verify(eroMapper).toEroDto(eroResponse.localAuthorities[0])
         }
 
         @Test
@@ -193,14 +193,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getIssuer(gssCode) },
+                { apiClient.getEro(gssCode) },
                 ElectoralRegistrationOfficeNotFoundException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(issuerMapper)
+            verifyNoInteractions(eroMapper)
         }
 
         @Test
@@ -217,14 +217,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getIssuer(gssCode) },
+                { apiClient.getEro(gssCode) },
                 ElectoralRegistrationOfficeNotFoundException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(issuerMapper)
+            verifyNoInteractions(eroMapper)
         }
 
         @Test
@@ -242,14 +242,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getIssuer(gssCode) },
+                { apiClient.getEro(gssCode) },
                 ElectoralRegistrationOfficeGeneralException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(issuerMapper)
+            verifyNoInteractions(eroMapper)
         }
 
         @Test
@@ -267,14 +267,14 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
 
             // When
             val ex = catchThrowableOfType(
-                { apiClient.getIssuer(gssCode) },
+                { apiClient.getEro(gssCode) },
                 ElectoralRegistrationOfficeGeneralException::class.java
             )
 
             // Then
             assertThat(ex.message).isEqualTo(expectedException.message)
             assertRequestUri(gssCode)
-            verifyNoInteractions(issuerMapper)
+            verifyNoInteractions(eroMapper)
         }
     }
 

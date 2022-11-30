@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class ElectoralRegistrationOfficeManagementApiClient(
     private val eroManagementWebClient: WebClient,
-    private val issuerMapper: EroDtoMapper
+    private val eroMapper: EroDtoMapper
 ) {
 
     /**
@@ -42,13 +42,13 @@ class ElectoralRegistrationOfficeManagementApiClient(
     }
 
     /**
-     * Calls the `ero-management-api` for the specified gssCode and maps to an IssuerDto.
+     * Calls the `ero-management-api` for the specified gssCode and maps to an EroDto.
      *
      * @param gssCode the gssCode of the localAuthority for the ERO to be returned
      * @return an [EroDto] for the ERO and Local Authority
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
-    fun getIssuer(gssCode: String): EroDto {
+    fun getEro(gssCode: String): EroDto {
         val response = eroManagementWebClient
             .get()
             .uri("/eros?gssCode=$gssCode")
@@ -63,7 +63,7 @@ class ElectoralRegistrationOfficeManagementApiClient(
             throw ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
         }
 
-        return issuerMapper.toIssuerDto(response.eros[0].localAuthorities.filter { it.gssCode == gssCode }[0])
+        return eroMapper.toEroDto(response.eros[0].localAuthorities.filter { it.gssCode == gssCode }[0])
     }
 
     private fun <T> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =

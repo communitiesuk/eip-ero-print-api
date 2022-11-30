@@ -55,7 +55,7 @@ class CertificateMapperTest {
     @Test
     fun `should map send application to print message to print details`() {
         // Given
-        val issuer = buildEroDto()
+        val ero = buildEroDto()
         val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.EN)
         val requestId = aValidRequestId()
         val vacNumber = aValidVacNumber()
@@ -127,7 +127,7 @@ class CertificateMapperTest {
                 vacNumber = vacNumber,
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = issuer.englishContactDetails.name,
+                issuingAuthority = ero.englishContactDetails.name,
                 issueDate = LocalDate.now(),
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
@@ -135,13 +135,13 @@ class CertificateMapperTest {
         }
 
         // When
-        val actual = mapper.toCertificate(message, issuer)
+        val actual = mapper.toCertificate(message, ero)
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
         verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).vacNumber()
-        verify(printRequestMapper).toPrintRequest(message, issuer)
+        verify(printRequestMapper).toPrintRequest(message, ero)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)
     }
 }

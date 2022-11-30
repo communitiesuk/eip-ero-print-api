@@ -15,8 +15,8 @@ class PrintService(
 ) {
     @Transactional
     fun savePrintMessage(message: SendApplicationToPrintMessage) {
-        val issuer = eroClient.getIssuer(message.gssCode!!)
-        val certificate = certificateMapper.toCertificate(message, issuer)
+        val ero = eroClient.getEro(message.gssCode!!)
+        val certificate = certificateMapper.toCertificate(message, ero)
         certificateRepository.save(certificate)
     }
 }

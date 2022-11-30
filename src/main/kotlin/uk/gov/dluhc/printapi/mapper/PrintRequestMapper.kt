@@ -28,11 +28,11 @@ abstract class PrintRequestMapper {
     @Mapping(target = "requestId", expression = "java( idFactory.requestId() )")
     @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     @Mapping(target = "statusHistory", expression = "java( initialStatus() )")
-    @Mapping(source = "issuer.englishContactDetails", target = "eroEnglish")
-    @Mapping(source = "issuer.welshContactDetails", target = "eroWelsh", conditionExpression = "java( isWelsh(message) )")
+    @Mapping(source = "ero.englishContactDetails", target = "eroEnglish")
+    @Mapping(source = "ero.welshContactDetails", target = "eroWelsh", conditionExpression = "java( isWelsh(message) )")
     abstract fun toPrintRequest(
         message: SendApplicationToPrintMessage,
-        issuer: EroDto
+        ero: EroDto
     ): PrintRequest
 
     protected fun isWelsh(message: SendApplicationToPrintMessage): Boolean {

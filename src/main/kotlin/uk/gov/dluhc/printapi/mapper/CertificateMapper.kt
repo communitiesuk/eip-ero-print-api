@@ -20,18 +20,18 @@ abstract class CertificateMapper {
     protected lateinit var printRequestMapper: PrintRequestMapper
 
     @Mapping(target = "vacNumber", expression = "java( idFactory.vacNumber() )")
-    @Mapping(source = "issuer.englishContactDetails.name", target = "issuingAuthority")
+    @Mapping(source = "ero.englishContactDetails.name", target = "issuingAuthority")
     abstract fun toCertificate(
         message: SendApplicationToPrintMessage,
-        issuer: EroDto
+        ero: EroDto
     ): Certificate
 
     @AfterMapping
     protected fun addPrintRequestToCertificate(
         message: SendApplicationToPrintMessage,
-        issuer: EroDto,
+        ero: EroDto,
         @MappingTarget certificate: Certificate
     ) {
-        certificate.addPrintRequest(printRequestMapper.toPrintRequest(message, issuer))
+        certificate.addPrintRequest(printRequestMapper.toPrintRequest(message, ero))
     }
 }

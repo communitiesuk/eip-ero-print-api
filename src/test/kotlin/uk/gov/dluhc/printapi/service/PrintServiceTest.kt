@@ -32,18 +32,18 @@ class PrintServiceTest {
     @Test
     fun `should save send application to certificate`() {
         // Given
-        val issuer = buildEroDto()
+        val ero = buildEroDto()
         val message = buildSendApplicationToPrintMessage()
         val certificate = buildCertificate()
-        given(eroClient.getIssuer(any())).willReturn(issuer)
+        given(eroClient.getEro(any())).willReturn(ero)
         given(certificateMapper.toCertificate(any(), any())).willReturn(certificate)
 
         // When
         printService.savePrintMessage(message)
 
         // Then
-        verify(eroClient).getIssuer(message.gssCode!!)
-        verify(certificateMapper).toCertificate(message, issuer)
+        verify(eroClient).getEro(message.gssCode!!)
+        verify(certificateMapper).toCertificate(message, ero)
         verify(certificateRepository).save(certificate)
     }
 }

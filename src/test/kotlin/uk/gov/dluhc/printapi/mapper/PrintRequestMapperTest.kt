@@ -62,7 +62,7 @@ class PrintRequestMapperTest {
         certificateLanguageEntity: CertificateLanguageEntity
     ) {
         // Given
-        val issuer = buildEroDto()
+        val ero = buildEroDto()
         val message = buildSendApplicationToPrintMessage(certificateLanguage = certificateLanguageModel)
         val requestId = aValidRequestId()
         given(idFactory.requestId()).willReturn(requestId)
@@ -137,7 +137,7 @@ class PrintRequestMapperTest {
         }
 
         // When
-        val actual = mapper.toPrintRequest(message, issuer)
+        val actual = mapper.toPrintRequest(message, ero)
 
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)

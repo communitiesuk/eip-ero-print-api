@@ -12,7 +12,7 @@ class EroDtoMapperTest {
     private val mapper = EroDtoMapperImpl()
 
     @Test
-    fun `should map ERO response to Issuer dto`() {
+    fun `should map ERO response to ERO dto`() {
         // Given
         val localAuthority = buildLocalAuthorityResponse(contactDetailsWelsh = null)
         val expected = with(localAuthority) {
@@ -41,14 +41,14 @@ class EroDtoMapperTest {
         }
 
         // When
-        val actual = mapper.toIssuerDto(localAuthority)
+        val actual = mapper.toEroDto(localAuthority)
 
         // Then
         Assertions.assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
     }
 
     @Test
-    fun `should map ERO response with Welsh to Issuer dto`() {
+    fun `should map ERO response with Welsh to ERO dto`() {
         // Given
         val localAuthority = buildLocalAuthorityResponse(
             contactDetailsWelsh = buildContactDetails()
@@ -97,7 +97,7 @@ class EroDtoMapperTest {
         }
 
         // When
-        val actual = mapper.toIssuerDto(localAuthority)
+        val actual = mapper.toEroDto(localAuthority)
 
         // Then
         Assertions.assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
