@@ -1,8 +1,10 @@
 package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.Mapper
-import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import org.mapstruct.ValueMapping
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntityEnum
+import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat as SupportingInformationFormatModelEnum
 
 @Mapper
 interface SupportingInformationFormatMapper {
@@ -16,5 +18,9 @@ interface SupportingInformationFormatMapper {
      * but this can only be done with agreement and coordination with the Print Provider as they will need to refactor
      * their code at the same time.
      */
-    fun toPrintRequestApiEnum(supportingInformationFormat: SupportingInformationFormat): PrintRequest.CertificateFormat
+    fun toPrintRequestApiEnum(supportingInformationFormat: SupportingInformationFormatEntityEnum): PrintRequest.CertificateFormat
+
+    @ValueMapping(source = "LARGE_MINUS_PRINT", target = "LARGE_PRINT")
+    @ValueMapping(source = "EASY_MINUS_READ", target = "EASY_READ")
+    fun toPrintRequestEntityEnum(supportingInformationFormat: SupportingInformationFormatModelEnum): SupportingInformationFormatEntityEnum
 }

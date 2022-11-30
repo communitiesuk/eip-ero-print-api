@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.Clock
 import java.time.Instant
 
-@Mapper(uses = [InstantMapper::class])
+@Mapper(uses = [InstantMapper::class, SupportingInformationFormatMapper::class])
 abstract class PrintRequestMapper {
 
     @Autowired
@@ -23,7 +23,6 @@ abstract class PrintRequestMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "vacVersion", constant = "A")
-    @Mapping(target = "supportingInformationFormat", constant = "STANDARD")
     @Mapping(target = "requestId", expression = "java( idFactory.requestId() )")
     @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     @Mapping(target = "statusHistory", expression = "java( initialStatus() )")
