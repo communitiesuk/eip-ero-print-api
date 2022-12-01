@@ -15,16 +15,15 @@ import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
-import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat.EASY_READ
-import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.toElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Clock
 import java.time.Instant
@@ -73,8 +72,8 @@ class PrintRequestMapperTest {
         given(idFactory.requestId()).willReturn(requestId)
         given(supportingInformationFormatMapper.toPrintRequestEntityEnum(any()))
             .willReturn(supportingInformationFormatEntityEnum)
-        val expectedEnglishEroContactDetails = toEroContactDetails(ero.englishContactDetails)
-        val expectedWelshEroContactDetails = toEroContactDetails(ero.welshContactDetails!!)
+        val expectedEnglishEroContactDetails = ero.englishContactDetails.toElectoralRegistrationOffice()
+        val expectedWelshEroContactDetails = ero.welshContactDetails!!.toElectoralRegistrationOffice()
         val expectedRequestDateTime = message.requestDateTime.toInstant()
         given(instantMapper.toInstant(any())).willReturn(expectedRequestDateTime)
         val expected = with(message) {
@@ -127,23 +126,4 @@ class PrintRequestMapperTest {
         verify(idFactory).requestId()
         verify(supportingInformationFormatMapper).toPrintRequestEntityEnum(supportingInformationFormatModelEnum)
     }
-
-    private fun toEroContactDetails(eroContactDetails: EroContactDetailsDto): ElectoralRegistrationOffice =
-        with(eroContactDetails) {
-            ElectoralRegistrationOffice(
-                name = name,
-                phoneNumber = phoneNumber,
-                website = website,
-                emailAddress = emailAddress,
-                address = with(address) {
-                    Address(
-                        property = property,
-                        street = street,
-                        town = town,
-                        area = area,
-                        postcode = postcode,
-                    )
-                }
-            )
-        }
 }
