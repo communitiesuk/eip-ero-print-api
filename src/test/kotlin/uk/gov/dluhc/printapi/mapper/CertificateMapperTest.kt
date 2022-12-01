@@ -14,7 +14,6 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
-import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
@@ -22,6 +21,7 @@ import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.toElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
 import java.time.LocalDate
@@ -63,19 +63,7 @@ class CertificateMapperTest {
         given(idFactory.vacNumber()).willReturn(vacNumber)
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
-        val englishEro = ElectoralRegistrationOffice(
-            name = "Gwynedd Council Elections",
-            phoneNumber = "01766 771000",
-            website = "https://www.gwynedd.llyw.cymru/en/Council/Contact-us/Contact-us.aspx",
-            emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
-            address = Address(
-                property = "Gwynedd Council Headquarters",
-                street = "Shirehall Street",
-                town = "Caernarfon",
-                area = "Gwynedd",
-                postcode = "LL55 1SH",
-            )
-        )
+        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice()
 
         val printRequest = with(message) {
             PrintRequest(

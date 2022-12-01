@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasLog
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
@@ -43,7 +44,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         )
         val localAuthority = ero.localAuthorities[1]
         val gssCode = localAuthority.gssCode
-        val payload = buildSendApplicationToPrintMessage(gssCode = gssCode)
+        val payload = buildSendApplicationToPrintMessage(gssCode = gssCode, supportingInformationFormat = EASY_MINUS_READ)
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
 
         val expected = with(payload) {
@@ -66,7 +67,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 middleNames = middleNames,
                 surname = surname,
                 certificateLanguage = CertificateLanguage.EN,
-                supportingInformationFormat = SupportingInformationFormat.STANDARD,
+                supportingInformationFormat = SupportingInformationFormat.EASY_READ,
                 photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(
