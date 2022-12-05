@@ -1,11 +1,3 @@
-logging:
-  level:
-    org:
-      springframework:
-        integration: DEBUG
-    com:
-      jcraft:
-        jsch: DEBUG
 jobs:
   batch-print-requests:
     daily-limit: 1000
