@@ -140,7 +140,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
 
                 assertThat(
                     TestLogAppender.getLogEventMatchingRegex(
-                        "Certificate with id \\[$certificateId\\] assigned to batch \\[.{32}\\]",
+                        "Certificate ids \\[$certificateId\\] assigned to batch \\[.{32}\\]",
                         Level.INFO
                     )
                 ).hasCorrelationId(expectedCorrelationId)

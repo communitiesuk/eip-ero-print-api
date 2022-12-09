@@ -25,10 +25,8 @@ class CertificateBatchingService(
     fun batchPendingCertificates(batchSize: Int): Set<String> {
         val batches = batchCertificates(batchSize)
         batches.forEach { (batchId, batchOfCertificates) ->
-            batchOfCertificates.forEach { certificate ->
-                certificateRepository.save(certificate)
-                logger.info { "Certificate with id [${certificate.id}] assigned to batch [$batchId]" }
-            }
+            certificateRepository.saveAll(batchOfCertificates)
+            logger.info { "Certificate ids ${batchOfCertificates.map { it.id }} assigned to batch [$batchId]" }
         }
         return batches.keys
     }

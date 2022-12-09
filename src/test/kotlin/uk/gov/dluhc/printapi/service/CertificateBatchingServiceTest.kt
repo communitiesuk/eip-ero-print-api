@@ -10,7 +10,9 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.firstValue
 import org.mockito.kotlin.given
+import org.mockito.kotlin.secondValue
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -36,7 +38,7 @@ internal class CertificateBatchingServiceTest {
     private lateinit var certificateRepository: CertificateRepository
 
     @Captor
-    private lateinit var savedCertificateArgumentCaptor: ArgumentCaptor<Certificate>
+    private lateinit var savedCertificatesArgumentCaptor: ArgumentCaptor<List<Certificate>>
 
     private val dailyLimit: Int = 10
 
@@ -78,7 +80,11 @@ internal class CertificateBatchingServiceTest {
         verify(certificateRepository).findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
         verify(certificateRepository).getPrintRequestStatusCount(startOfDay, endOfDay, Status.ASSIGNED_TO_BATCH)
         verify(idFactory, times(2)).batchId()
-        verify(certificateRepository, times(7)).save(any())
+        verify(certificateRepository, times(2)).saveAll(capture(savedCertificatesArgumentCaptor))
+        val firstBatchOfCertificates = savedCertificatesArgumentCaptor.firstValue
+        assertThat(firstBatchOfCertificates.size).isEqualTo(4)
+        val secondBatchOfCertificates = savedCertificatesArgumentCaptor.secondValue
+        assertThat(secondBatchOfCertificates.size).isEqualTo(3)
         assertThat(batchIds).containsExactly(batchId1, batchId2)
     }
 
@@ -105,16 +111,17 @@ internal class CertificateBatchingServiceTest {
         // Then
         verify(certificateRepository).findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
         verify(idFactory).batchId()
-        verify(certificateRepository).save(capture(savedCertificateArgumentCaptor))
+        verify(certificateRepository).saveAll(capture(savedCertificatesArgumentCaptor))
         assertThat(batchIds).containsExactly(batchId)
-        val savedCertificates = savedCertificateArgumentCaptor.value!!
+        val savedCertificates = savedCertificatesArgumentCaptor.value!!
+        assertThat(savedCertificates.size).isEqualTo(1)
         assertThat(
-            savedCertificates.getCurrentPrintRequest().statusHistory.sortedBy { it.eventDateTime }
+            savedCertificates[0].getCurrentPrintRequest().statusHistory.sortedBy { it.eventDateTime }
                 .map { it.status }
         )
             .containsExactly(Status.PENDING_ASSIGNMENT_TO_BATCH, Status.ASSIGNED_TO_BATCH)
 
-        assertThat(savedCertificates.status).isEqualTo(Status.ASSIGNED_TO_BATCH)
+        assertThat(savedCertificates[0].status).isEqualTo(Status.ASSIGNED_TO_BATCH)
     }
 
     @Test
