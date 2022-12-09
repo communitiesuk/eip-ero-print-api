@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.database.repository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Pageable
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -177,23 +178,44 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     }
 
     @Nested
-    inner class FindByStatus {
+    inner class FindTopByStatusOrderByApplicationReceivedDateTimeAsc {
         @Test
-        fun `should get by status`() {
+        fun `should get by status ordered by application received timestamp`() {
             // Given
+            val maxUnBatchedRecordsToReturn = 10
+
             val status = aValidCertificateStatus()
-            val certificate = buildCertificate(
-                status = status,
-            )
-            val expected = certificateRepository.save(certificate)
+            val certificates = (1..15).map {
+                buildCertificate(
+                    status = status,
+                    applicationReference = "V${it.toString().padStart(9, '0')}", // V000000001 ... V0000000015
+                    applicationReceivedDateTime = Instant.now().minusSeconds(it.toLong()).truncatedTo(SECONDS)
+                )
+            }.let {
+                certificateRepository.saveAll(it)
+            }
+
+            val expected = certificates.sortedBy { it.applicationReceivedDateTime }.take(10)
 
             // When
-            val actual = certificateRepository.findByStatus(status)
+            val actual = certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(
+                status,
+                Pageable.ofSize(maxUnBatchedRecordsToReturn)
+            )
 
             // Given
-            assertThat(actual).hasSize(1)
-            assertThat(actual[0].status).isEqualTo(status)
-            assertCertificateRecursiveEqual(actual[0], expected)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields(
+                    "dateCreated",
+                    "printRequests.dateCreated",
+                    "printRequests.delivery.dateCreated",
+                    "printRequests.delivery.address.dateCreated",
+                    "printRequests.eroEnglish.dateCreated",
+                    "printRequests.eroEnglish.address.dateCreated",
+                    "printRequests.statusHistory.dateCreated",
+                )
+                .isEqualTo(expected)
         }
     }
 
@@ -342,7 +364,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             .isEqualTo(expected)
     }
 
-    fun withinSecond(actual: Long, epochSeconds: Long): Boolean {
+    private fun withinSecond(actual: Long, epochSeconds: Long): Boolean {
         val variance = 1
         val lowerBound: Long = epochSeconds - variance
         val upperBound: Long = epochSeconds + variance
