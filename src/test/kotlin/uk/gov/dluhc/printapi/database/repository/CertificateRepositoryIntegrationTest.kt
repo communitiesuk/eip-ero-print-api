@@ -47,12 +47,14 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCodeList
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
-import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.ChronoUnit.SECONDS
-import java.util.function.BiPredicate
 
 internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
+
+    companion object {
+        private val IGNORED_FIELDS = arrayOf(".*dateCreated")
+    }
 
     @Nested
     inner class FindById {
@@ -117,9 +119,10 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val actual = certificateRepository.findById(expected.id!!)
 
             // Then
-            assertThat(actual).isPresent
-            assertCertificateRecursiveEqual(actual.get(), expected)
-            assertThat(actual.get().status).isEqualTo(printRequestStatus.status)
+            assertThat(actual).get()
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(expected)
         }
     }
 
@@ -136,7 +139,10 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val actual = certificateRepository.getByPrintRequestsRequestId(requestId)
 
             // Given
-            assertCertificateRecursiveEqual(actual!!, expected)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(expected)
         }
 
         @Test
@@ -164,21 +170,21 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 status = status,
                 printRequests = listOf(buildPrintRequest(batchId = batchId))
             )
-            val expected = certificateRepository.save(certificate)
+            val expected = listOf(certificateRepository.save(certificate))
 
             // When
             val actual = certificateRepository.findByStatusAndPrintRequestsBatchId(status, batchId)
 
             // Given
-            assertThat(actual).hasSize(1)
-            assertThat(actual[0].status).isEqualTo(status)
-            assertThat(actual[0].printRequests[0].batchId).isEqualTo(batchId)
-            assertCertificateRecursiveEqual(actual[0], expected)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(expected)
         }
     }
 
     @Nested
-    inner class FindTopByStatusOrderByApplicationReceivedDateTimeAsc {
+    inner class FindByStatusOrderByApplicationReceivedDateTimeAsc {
         @Test
         fun `should get by status ordered by application received timestamp`() {
             // Given
@@ -206,15 +212,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             // Given
             assertThat(actual)
                 .usingRecursiveComparison()
-                .ignoringFields(
-                    "dateCreated",
-                    "printRequests.dateCreated",
-                    "printRequests.delivery.dateCreated",
-                    "printRequests.delivery.address.dateCreated",
-                    "printRequests.eroEnglish.dateCreated",
-                    "printRequests.eroEnglish.address.dateCreated",
-                    "printRequests.statusHistory.dateCreated",
-                )
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
                 .isEqualTo(expected)
         }
     }
@@ -242,8 +240,10 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             )
 
             // Then
-            assertThat(actual).isNotNull
-            assertCertificateRecursiveEqual(actual!!, certificate)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(certificate)
         }
 
         @Test
@@ -350,24 +350,5 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             // Then
             assertThat(actual).isEqualTo(2)
         }
-    }
-
-    private fun assertCertificateRecursiveEqual(actual: Certificate, expected: Certificate) {
-        val offsetEqualToRoundedSeconds: BiPredicate<OffsetDateTime, OffsetDateTime> =
-            BiPredicate<OffsetDateTime, OffsetDateTime> { a, b -> withinSecond(a.toEpochSecond(), b.toEpochSecond()) }
-        val instantEqualToRoundedSeconds: BiPredicate<Instant, Instant> =
-            BiPredicate<Instant, Instant> { a, b -> withinSecond(a.epochSecond, b.epochSecond) }
-        assertThat(actual).usingRecursiveComparison()
-            .withEqualsForType(offsetEqualToRoundedSeconds, OffsetDateTime::class.java)
-            .withEqualsForType(instantEqualToRoundedSeconds, Instant::class.java)
-            .ignoringCollectionOrder()
-            .isEqualTo(expected)
-    }
-
-    private fun withinSecond(actual: Long, epochSeconds: Long): Boolean {
-        val variance = 1
-        val lowerBound: Long = epochSeconds - variance
-        val upperBound: Long = epochSeconds + variance
-        return actual in lowerBound..upperBound
     }
 }
