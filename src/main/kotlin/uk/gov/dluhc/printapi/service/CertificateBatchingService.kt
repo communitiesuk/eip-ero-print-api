@@ -26,7 +26,7 @@ class CertificateBatchingService(
         val batches = batchCertificates(batchSize)
         batches.forEach { (batchId, batchOfCertificates) ->
             certificateRepository.saveAll(batchOfCertificates)
-            logger.info { "Certificates with id ${batchOfCertificates.map { it.id }} assigned to batch [$batchId]" }
+            logger.info { "Certificate ids ${batchOfCertificates.map { it.id }} assigned to batch [$batchId]" }
         }
         return batches.keys
     }
