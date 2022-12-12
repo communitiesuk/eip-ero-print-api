@@ -180,8 +180,8 @@ components:
         addressFormat:
           $ref: '#/components/schemas/AddressFormat'
       required:
-        - deliveryOption
-        - deliveryMethod
+        - deliveryClass
+        - addressType
         - addressee
         - address
         - addressFormat
