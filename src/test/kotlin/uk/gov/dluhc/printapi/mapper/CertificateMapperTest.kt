@@ -13,8 +13,8 @@ import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
-import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
@@ -90,7 +90,7 @@ class CertificateMapperTest {
                             )
                         },
                         deliveryClass = DeliveryClass.STANDARD,
-                        deliveryMethod = DeliveryMethod.DELIVERY,
+                        addressType = DeliveryAddressType.REGISTERED,
                         addressFormat = AddressFormat.UK,
                     )
                 },

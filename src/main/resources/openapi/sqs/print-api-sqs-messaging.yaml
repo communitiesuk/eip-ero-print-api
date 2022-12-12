@@ -169,8 +169,8 @@ components:
       properties:
         deliveryClass:
           $ref: '#/components/schemas/DeliveryClass'
-        deliveryMethod:
-          $ref: '#/components/schemas/DeliveryMethod'
+        addressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
         addressee:
           type: string
           maxLength: 255
@@ -193,13 +193,14 @@ components:
       enum:
         - standard
 
-    DeliveryMethod:
-      title: DeliveryMethod
-      description: The delivery method for the Voter Authority Certificate
+    DeliveryAddressType:
+      title: DeliveryAddressType
+      description: The delivery address type for the Voter Authority Certificate
       type: string
       enum:
-        - delivery
-        - collection
+        - registered
+        - ero-collection
+        - alternative
 
     Address:
       title: Address

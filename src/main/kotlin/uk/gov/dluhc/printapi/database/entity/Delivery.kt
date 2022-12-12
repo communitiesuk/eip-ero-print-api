@@ -46,7 +46,7 @@ class Delivery(
     var deliveryClass: DeliveryClass,
 
     @Enumerated(EnumType.STRING)
-    var deliveryMethod: DeliveryMethod,
+    var addressType: DeliveryAddressType,
 
     @CreationTimestamp
     var dateCreated: Instant? = null,

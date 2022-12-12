@@ -10,8 +10,8 @@ import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
-import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
@@ -85,7 +85,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                             )
                         },
                         deliveryClass = DeliveryClass.STANDARD,
-                        deliveryMethod = DeliveryMethod.DELIVERY,
+                        addressType = DeliveryAddressType.REGISTERED,
                         addressFormat = AddressFormat.UK,
                     )
                 },

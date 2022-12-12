@@ -5,8 +5,8 @@ import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
-import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
@@ -19,8 +19,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateT
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryClass
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryMethod
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroName
@@ -151,12 +151,12 @@ fun buildDelivery(
     addressee: String = aValidDeliveryName(),
     address: Address = buildAddress(),
     deliveryClass: DeliveryClass = aValidDeliveryClass(),
-    deliveryMethod: DeliveryMethod = aValidDeliveryMethod(),
+    addressType: DeliveryAddressType = aValidDeliveryAddressType(),
     addressFormat: AddressFormat = aValidAddressFormat(),
 ): Delivery = Delivery(
     addressee = addressee,
     address = address,
     deliveryClass = deliveryClass,
-    deliveryMethod = deliveryMethod,
+    addressType = addressType,
     addressFormat = addressFormat,
 )

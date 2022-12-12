@@ -20,4 +20,29 @@
             />
         </rollback>
     </changeSet>
+
+    <changeSet author="nathan.russell@valtech.com" id="0008_EIP1-2833_alter_delivery - rename addressFormat column" context="ddl">
+        <update tableName="delivery">
+            <column name="delivery_method" value="REGISTERED" />
+        </update>
+
+        <renameColumn
+            tableName="delivery"
+            oldColumnName="delivery_method"
+            newColumnName="address_type"
+            columnDataType="varchar(20)"
+        />
+
+        <rollback>
+            <renameColumn
+                tableName="delivery"
+                oldColumnName="address_type"
+                newColumnName="delivery_method"
+                columnDataType="varchar(20)"
+            />
+            <update tableName="delivery">
+                <column name="delivery_method" value="DELIVERY" />
+            </update>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

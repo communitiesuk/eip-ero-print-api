@@ -21,8 +21,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryClass
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryMethod
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroName
@@ -82,7 +82,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 addressee = aValidDeliveryName(),
                 address = deliveryAddress,
                 deliveryClass = aValidDeliveryClass(),
-                deliveryMethod = aValidDeliveryMethod(),
+                addressType = aValidDeliveryAddressType(),
                 addressFormat = aValidAddressFormat(),
             )
             val eroEnglish = ElectoralRegistrationOffice(
