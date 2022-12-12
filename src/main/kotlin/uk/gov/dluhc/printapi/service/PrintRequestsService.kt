@@ -13,11 +13,11 @@ class PrintRequestsService(
     private val certificateBatchingService: CertificateBatchingService
 ) {
 
-    fun processPrintRequests(batchSize: Int) {
+    fun processPrintRequests() {
         logger.info { "Looking for certificate Print Requests to assign to a new batch" }
 
         // split into batches and save to database before sending messages to SQS
-        certificateBatchingService.batchPendingCertificates(batchSize)
+        certificateBatchingService.batchPendingCertificates()
             .onEach { batchId ->
                 processPrintRequestQueue.submit(ProcessPrintRequestBatchMessage(batchId))
                 logger.info { "Batch [$batchId] submitted to queue" }

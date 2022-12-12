@@ -40,6 +40,7 @@ jobs:
     name: "BatchPrintRequests"
     cron: "0 0/15 * * * *" # every 15 minutes, starting on the hour - see analysis and recommendations in EIP1-2515
     batch-size: 50
+    max-un-batched-records: 5000 # see analysis and recommendations in EIP1-2885
     daily-limit: 150_000
   process-print-responses:
     name: "ProcessPrintResponses"

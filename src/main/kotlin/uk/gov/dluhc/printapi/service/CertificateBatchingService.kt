@@ -2,9 +2,11 @@ package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import java.time.Clock
 import java.time.Instant
@@ -17,13 +19,14 @@ private val logger = KotlinLogging.logger { }
 class CertificateBatchingService(
     private val idFactory: IdFactory,
     private val certificateRepository: CertificateRepository,
-    @Value("\${jobs.batch-print-requests.daily-limit}")
-    private val dailyLimit: Int,
+    @Value("\${jobs.batch-print-requests.daily-limit}") private val dailyLimit: Int,
+    @Value("\${jobs.batch-print-requests.batch-size}") private val batchSize: Int,
+    @Value("\${jobs.batch-print-requests.max-un-batched-records}") private val maxUnBatchedRecords: Int,
     private val clock: Clock
 ) {
     @Transactional
-    fun batchPendingCertificates(batchSize: Int): Set<String> {
-        val batches = batchCertificates(batchSize)
+    fun batchPendingCertificates(): Set<String> {
+        val batches = batchCertificates()
         batches.forEach { (batchId, batchOfCertificates) ->
             certificateRepository.saveAll(batchOfCertificates)
             logger.info { "Certificate ids ${batchOfCertificates.map { it.id }} assigned to batch [$batchId]" }
@@ -31,14 +34,17 @@ class CertificateBatchingService(
         return batches.keys
     }
 
-    fun batchCertificates(batchSize: Int): Map<String, List<Certificate>> {
-        val certificatesPendingAssignment = certificateRepository.findByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH)
+    fun batchCertificates(): Map<String, List<Certificate>> {
+        val certificatesPendingAssignment = certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(
+            PENDING_ASSIGNMENT_TO_BATCH,
+            Pageable.ofSize(maxUnBatchedRecords)
+        )
 
         return limitCertificates(certificatesPendingAssignment).chunked(batchSize).associate { batchOfCertificates ->
             val batchId = idFactory.batchId()
             batchId to batchOfCertificates.onEach {
                 it.getCurrentPrintRequest().batchId = batchId
-                it.addStatus(Status.ASSIGNED_TO_BATCH)
+                it.addStatus(ASSIGNED_TO_BATCH)
             }
         }
     }
@@ -47,7 +53,7 @@ class CertificateBatchingService(
         val startOfDay = Instant.now(clock).truncatedTo(DAYS)
         val endOfDay = startOfDay.plus(1, DAYS).minusSeconds(1)
         val countOfRequestsSentToPrintProvider =
-            certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, Status.ASSIGNED_TO_BATCH)
+            certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, ASSIGNED_TO_BATCH)
 
         if ((certificatesPendingAssignment.size + countOfRequestsSentToPrintProvider) > dailyLimit) {
             logDailyLimit(certificatesPendingAssignment, countOfRequestsSentToPrintProvider, endOfDay)

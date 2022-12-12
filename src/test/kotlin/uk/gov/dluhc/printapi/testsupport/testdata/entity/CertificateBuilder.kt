@@ -50,14 +50,16 @@ fun buildCertificate(
     gssCode: String = aGssCode(),
     sourceType: SourceType = aValidSourceType(),
     sourceReference: String = aValidSourceReference(),
+    applicationReceivedDateTime: Instant = aValidApplicationReceivedDateTime(),
+    applicationReference: String = aValidApplicationReference()
 ): Certificate {
     val certificate = Certificate(
         id = id,
         vacNumber = vacNumber,
         sourceType = sourceType,
         sourceReference = sourceReference,
-        applicationReference = aValidApplicationReference(),
-        applicationReceivedDateTime = aValidApplicationReceivedDateTime(),
+        applicationReference = applicationReference,
+        applicationReceivedDateTime = applicationReceivedDateTime,
         issuingAuthority = aValidIssuingAuthority(),
         issueDate = aValidIssueDate(),
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
