@@ -10,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
@@ -89,7 +90,8 @@ class CertificateMapperTest {
                             )
                         },
                         deliveryClass = DeliveryClass.STANDARD,
-                        deliveryMethod = DeliveryMethod.DELIVERY
+                        deliveryMethod = DeliveryMethod.DELIVERY,
+                        addressFormat = AddressFormat.UK,
                     )
                 },
                 eroEnglish = englishEro,

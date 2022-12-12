@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.model
 
 import uk.gov.dluhc.printapi.messaging.models.Address
+import uk.gov.dluhc.printapi.messaging.models.AddressFormat
 import uk.gov.dluhc.printapi.messaging.models.CertificateDelivery
 import uk.gov.dluhc.printapi.messaging.models.DeliveryClass
 import uk.gov.dluhc.printapi.messaging.models.DeliveryMethod
@@ -10,6 +11,12 @@ fun buildCertificateDelivery(
     addressee: String = faker.name().fullName(),
     address: Address = buildAddress(),
     deliveryClass: DeliveryClass = DeliveryClass.STANDARD,
-    deliveryMethod: DeliveryMethod = DeliveryMethod.DELIVERY
-) =
-    CertificateDelivery(addressee = addressee, address = address, deliveryClass = deliveryClass, deliveryMethod = deliveryMethod)
+    deliveryMethod: DeliveryMethod = DeliveryMethod.DELIVERY,
+    addressFormat: AddressFormat = AddressFormat.UK,
+): CertificateDelivery = CertificateDelivery(
+    addressee = addressee,
+    address = address,
+    deliveryClass = deliveryClass,
+    deliveryMethod = deliveryMethod,
+    addressFormat = addressFormat,
+)

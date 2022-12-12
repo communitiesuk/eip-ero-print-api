@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
+import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
@@ -20,3 +21,5 @@ fun aValidSupportingInformationFormat() = SupportingInformationFormat.STANDARD
 fun aValidDeliveryClass(): DeliveryClass = DeliveryClass.STANDARD
 
 fun aValidDeliveryMethod(): DeliveryMethod = DeliveryMethod.DELIVERY
+
+fun aValidAddressFormat(): AddressFormat = AddressFormat.UK

@@ -2,8 +2,11 @@ package uk.gov.dluhc.printapi.testsupport.testdata.entity
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.DeliveryClass
+import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
@@ -11,6 +14,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
@@ -143,11 +147,16 @@ fun buildAddress(
     uprn = uprn,
 )
 
-fun buildDelivery(): Delivery {
-    return Delivery(
-        addressee = aValidDeliveryName(),
-        address = buildAddress(),
-        deliveryClass = aValidDeliveryClass(),
-        deliveryMethod = aValidDeliveryMethod()
-    )
-}
+fun buildDelivery(
+    addressee: String = aValidDeliveryName(),
+    address: Address = buildAddress(),
+    deliveryClass: DeliveryClass = aValidDeliveryClass(),
+    deliveryMethod: DeliveryMethod = aValidDeliveryMethod(),
+    addressFormat: AddressFormat = aValidAddressFormat(),
+): Delivery = Delivery(
+    addressee = addressee,
+    address = address,
+    deliveryClass = deliveryClass,
+    deliveryMethod = deliveryMethod,
+    addressFormat = addressFormat,
+)

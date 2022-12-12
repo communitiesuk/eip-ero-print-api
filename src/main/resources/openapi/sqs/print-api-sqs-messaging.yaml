@@ -177,11 +177,14 @@ components:
           description: The addressee to be printed in addition to the delivery address
         address:
           $ref: '#/components/schemas/Address'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
       required:
         - deliveryOption
         - deliveryMethod
         - addressee
         - address
+        - addressFormat
 
     DeliveryClass:
       title: DeliveryClass
@@ -240,6 +243,15 @@ components:
       required:
         - street
         - postcode
+
+    AddressFormat:
+      title: AddressFormat
+      description: Enumeration of address formats
+      type: string
+      enum:
+        - uk
+        - overseas
+        - bfpo
 
     ProcessPrintRequestBatchMessage:
       description: The SQS message for processing a batch of print requests
