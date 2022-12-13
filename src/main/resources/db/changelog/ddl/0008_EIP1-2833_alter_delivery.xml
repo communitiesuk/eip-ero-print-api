@@ -8,7 +8,7 @@
     <changeSet author="nathan.russell@valtech.com" id="0008_EIP1-2833_alter_delivery - add address_format column" context="ddl">
 
         <addColumn tableName="delivery">
-            <column name="address_format" type="varchar(20)" value="UK">
+            <column name="address_format" type="varchar(50)" value="UK">
                 <constraints nullable="false" />
             </column>
         </addColumn>
@@ -30,7 +30,7 @@
             tableName="delivery"
             oldColumnName="delivery_method"
             newColumnName="address_type"
-            columnDataType="varchar(20)"
+            columnDataType="varchar(50)"
         />
 
         <rollback>
