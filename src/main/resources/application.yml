@@ -3,6 +3,9 @@ spring:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/print_application
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 20 # max pool size and min-idle deliberately sized to cater for extreme volume and load
+      minimum-idle: 10
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
