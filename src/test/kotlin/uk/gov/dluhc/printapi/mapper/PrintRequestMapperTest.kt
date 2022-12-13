@@ -12,18 +12,21 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
-import uk.gov.dluhc.printapi.database.entity.DeliveryMethod
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat.EASY_READ
+import uk.gov.dluhc.printapi.messaging.models.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.toElectoralRegistrationOffice
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Clock
 import java.time.Instant
@@ -51,6 +54,9 @@ class PrintRequestMapperTest {
     @Mock
     private lateinit var supportingInformationFormatMapper: SupportingInformationFormatMapper
 
+    @Mock
+    private lateinit var deliveryAddressTypeMapper: DeliveryAddressTypeMapper
+
     @Spy
     private val clock: Clock = FIXED_CLOCK
 
@@ -64,9 +70,13 @@ class PrintRequestMapperTest {
         val ero = buildEroDto()
         val supportingInformationFormatModelEnum = EASY_MINUS_READ
         val supportingInformationFormatEntityEnum = EASY_READ
+        val deliveryAddressTypeModelEnum = REGISTERED
         val message = buildSendApplicationToPrintMessage(
             certificateLanguage = certificateLanguageModel,
-            supportingInformationFormat = supportingInformationFormatModelEnum
+            supportingInformationFormat = supportingInformationFormatModelEnum,
+            delivery = buildCertificateDelivery(
+                deliveryAddressType = deliveryAddressTypeModelEnum
+            )
         )
         val requestId = aValidRequestId()
         given(idFactory.requestId()).willReturn(requestId)
@@ -102,7 +112,8 @@ class PrintRequestMapperTest {
                             )
                         },
                         deliveryClass = DeliveryClass.STANDARD,
-                        deliveryMethod = DeliveryMethod.DELIVERY
+                        deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        addressFormat = AddressFormat.UK,
                     )
                 },
                 eroEnglish = expectedEnglishEroContactDetails,
@@ -117,6 +128,7 @@ class PrintRequestMapperTest {
                 userId = userId
             )
         }
+        given(deliveryAddressTypeMapper.toDeliveryAddressTypeEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
 
         // When
         val actual = mapper.toPrintRequest(message, ero)
@@ -125,5 +137,6 @@ class PrintRequestMapperTest {
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
         verify(idFactory).requestId()
         verify(supportingInformationFormatMapper).toPrintRequestEntityEnum(supportingInformationFormatModelEnum)
+        verify(deliveryAddressTypeMapper).toDeliveryAddressTypeEntity(deliveryAddressTypeModelEnum)
     }
 }

@@ -12,7 +12,13 @@ import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.Clock
 import java.time.Instant
 
-@Mapper(uses = [InstantMapper::class, SupportingInformationFormatMapper::class])
+@Mapper(
+    uses = [
+        InstantMapper::class,
+        SupportingInformationFormatMapper::class,
+        DeliveryAddressTypeMapper::class,
+    ]
+)
 abstract class PrintRequestMapper {
 
     @Autowired
@@ -30,7 +36,7 @@ abstract class PrintRequestMapper {
     @Mapping(source = "ero.welshContactDetails", target = "eroWelsh")
     abstract fun toPrintRequest(
         message: SendApplicationToPrintMessage,
-        ero: EroDto
+        ero: EroDto,
     ): PrintRequest
 
     protected fun initialStatus(): List<PrintRequestStatus> {

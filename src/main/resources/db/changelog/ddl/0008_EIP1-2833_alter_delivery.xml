@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="nathan.russell@valtech.com" id="0008_EIP1-2833_alter_delivery - add address_format column" context="ddl">
+
+        <addColumn tableName="delivery">
+            <column name="address_format" type="varchar(50)" value="UK">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn
+                tableName="delivery"
+                columnName="address_format"
+            />
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathan.russell@valtech.com" id="0008_EIP1-2833_alter_delivery - rename delivery_method column" context="ddl">
+        <update tableName="delivery">
+            <column name="delivery_method" value="REGISTERED" />
+        </update>
+
+        <renameColumn
+            tableName="delivery"
+            oldColumnName="delivery_method"
+            newColumnName="delivery_address_type"
+            columnDataType="varchar(50)"
+        />
+
+        <rollback>
+            <renameColumn
+                tableName="delivery"
+                oldColumnName="delivery_address_type"
+                newColumnName="delivery_method"
+                columnDataType="varchar(20)"
+            />
+            <update tableName="delivery">
+                <column name="delivery_method" value="DELIVERY" />
+            </update>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

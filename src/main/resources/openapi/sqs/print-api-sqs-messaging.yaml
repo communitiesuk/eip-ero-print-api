@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.8.0'
+  version: '1.9.0'
   description: |-
     Print API SQS Message Types
     
@@ -169,19 +169,22 @@ components:
       properties:
         deliveryClass:
           $ref: '#/components/schemas/DeliveryClass'
-        deliveryMethod:
-          $ref: '#/components/schemas/DeliveryMethod'
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
         addressee:
           type: string
           maxLength: 255
           description: The addressee to be printed in addition to the delivery address
         address:
           $ref: '#/components/schemas/Address'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
       required:
-        - deliveryOption
-        - deliveryMethod
+        - deliveryClass
+        - deliveryAddressType
         - addressee
         - address
+        - addressFormat
 
     DeliveryClass:
       title: DeliveryClass
@@ -190,13 +193,14 @@ components:
       enum:
         - standard
 
-    DeliveryMethod:
-      title: DeliveryMethod
-      description: The delivery method for the Voter Authority Certificate
+    DeliveryAddressType:
+      title: DeliveryAddressType
+      description: The delivery address type for the Voter Authority Certificate
       type: string
       enum:
-        - delivery
-        - collection
+        - registered
+        - ero-collection
+        - alternative
 
     Address:
       title: Address
@@ -240,6 +244,15 @@ components:
       required:
         - street
         - postcode
+
+    AddressFormat:
+      title: AddressFormat
+      description: Enumeration of address formats
+      type: string
+      enum:
+        - uk
+        - overseas
+        - bfpo
 
     ProcessPrintRequestBatchMessage:
       description: The SQS message for processing a batch of print requests

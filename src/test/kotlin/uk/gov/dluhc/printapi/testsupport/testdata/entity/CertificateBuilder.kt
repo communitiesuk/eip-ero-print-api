@@ -2,8 +2,11 @@ package uk.gov.dluhc.printapi.testsupport.testdata.entity
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
+import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
@@ -11,12 +14,13 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryClass
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryMethod
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroName
@@ -143,11 +147,16 @@ fun buildAddress(
     uprn = uprn,
 )
 
-fun buildDelivery(): Delivery {
-    return Delivery(
-        addressee = aValidDeliveryName(),
-        address = buildAddress(),
-        deliveryClass = aValidDeliveryClass(),
-        deliveryMethod = aValidDeliveryMethod()
-    )
-}
+fun buildDelivery(
+    addressee: String = aValidDeliveryName(),
+    address: Address = buildAddress(),
+    deliveryClass: DeliveryClass = aValidDeliveryClass(),
+    addressType: DeliveryAddressType = aValidDeliveryAddressType(),
+    addressFormat: AddressFormat = aValidAddressFormat(),
+): Delivery = Delivery(
+    addressee = addressee,
+    address = address,
+    deliveryClass = deliveryClass,
+    deliveryAddressType = addressType,
+    addressFormat = addressFormat,
+)
