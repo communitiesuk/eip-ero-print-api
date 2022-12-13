@@ -82,7 +82,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 addressee = aValidDeliveryName(),
                 address = deliveryAddress,
                 deliveryClass = aValidDeliveryClass(),
-                addressType = aValidDeliveryAddressType(),
+                deliveryAddressType = aValidDeliveryAddressType(),
                 addressFormat = aValidAddressFormat(),
             )
             val eroEnglish = ElectoralRegistrationOffice(

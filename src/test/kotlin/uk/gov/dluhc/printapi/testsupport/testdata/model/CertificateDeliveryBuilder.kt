@@ -11,12 +11,12 @@ fun buildCertificateDelivery(
     addressee: String = faker.name().fullName(),
     address: Address = buildAddress(),
     deliveryClass: DeliveryClass = DeliveryClass.STANDARD,
-    addressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
+    deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
     addressFormat: AddressFormat = AddressFormat.UK,
 ): CertificateDelivery = CertificateDelivery(
     addressee = addressee,
     address = address,
     deliveryClass = deliveryClass,
-    addressType = addressType,
+    deliveryAddressType = deliveryAddressType,
     addressFormat = addressFormat,
 )

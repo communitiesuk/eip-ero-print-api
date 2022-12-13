@@ -157,6 +157,6 @@ fun buildDelivery(
     addressee = addressee,
     address = address,
     deliveryClass = deliveryClass,
-    addressType = addressType,
+    deliveryAddressType = addressType,
     addressFormat = addressFormat,
 )

@@ -29,14 +29,14 @@
         <renameColumn
             tableName="delivery"
             oldColumnName="delivery_method"
-            newColumnName="address_type"
+            newColumnName="delivery_address_type"
             columnDataType="varchar(50)"
         />
 
         <rollback>
             <renameColumn
                 tableName="delivery"
-                oldColumnName="address_type"
+                oldColumnName="delivery_address_type"
                 newColumnName="delivery_method"
                 columnDataType="varchar(20)"
             />

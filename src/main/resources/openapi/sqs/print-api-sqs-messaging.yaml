@@ -169,7 +169,7 @@ components:
       properties:
         deliveryClass:
           $ref: '#/components/schemas/DeliveryClass'
-        addressType:
+        deliveryAddressType:
           $ref: '#/components/schemas/DeliveryAddressType'
         addressee:
           type: string
@@ -181,7 +181,7 @@ components:
           $ref: '#/components/schemas/AddressFormat'
       required:
         - deliveryClass
-        - addressType
+        - deliveryAddressType
         - addressee
         - address
         - addressFormat

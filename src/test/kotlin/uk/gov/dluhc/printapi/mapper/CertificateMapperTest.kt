@@ -90,7 +90,7 @@ class CertificateMapperTest {
                             )
                         },
                         deliveryClass = DeliveryClass.STANDARD,
-                        addressType = DeliveryAddressType.REGISTERED,
+                        deliveryAddressType = DeliveryAddressType.REGISTERED,
                         addressFormat = AddressFormat.UK,
                     )
                 },

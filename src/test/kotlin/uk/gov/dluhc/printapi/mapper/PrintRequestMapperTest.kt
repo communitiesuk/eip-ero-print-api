@@ -75,7 +75,7 @@ class PrintRequestMapperTest {
             certificateLanguage = certificateLanguageModel,
             supportingInformationFormat = supportingInformationFormatModelEnum,
             delivery = buildCertificateDelivery(
-                addressType = deliveryAddressTypeModelEnum
+                deliveryAddressType = deliveryAddressTypeModelEnum
             )
         )
         val requestId = aValidRequestId()
@@ -112,7 +112,7 @@ class PrintRequestMapperTest {
                             )
                         },
                         deliveryClass = DeliveryClass.STANDARD,
-                        addressType = DeliveryAddressType.REGISTERED,
+                        deliveryAddressType = DeliveryAddressType.REGISTERED,
                         addressFormat = AddressFormat.UK,
                     )
                 },
