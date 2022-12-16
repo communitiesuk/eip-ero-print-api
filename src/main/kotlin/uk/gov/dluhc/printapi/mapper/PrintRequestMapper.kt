@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.mapper
 
-import org.mapstruct.AfterMapping
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.springframework.beans.factory.annotation.Autowired

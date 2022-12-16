@@ -91,7 +91,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 },
                 eroEnglish = with(localAuthority) {
                     ElectoralRegistrationOffice(
-                        name = name,
+                        name = "Electoral Registration Officer",
                         phoneNumber = contactDetailsEnglish.phone,
                         emailAddress = contactDetailsEnglish.email,
                         website = contactDetailsEnglish.website,
@@ -110,7 +110,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 },
                 eroWelsh = with(localAuthority) {
                     ElectoralRegistrationOffice(
-                        name = name,
+                        name = "Swyddog Cofrestru Etholiadol",
                         phoneNumber = contactDetailsWelsh!!.phone,
                         emailAddress = contactDetailsWelsh!!.email,
                         website = contactDetailsWelsh!!.website,
