@@ -33,7 +33,9 @@ abstract class PrintRequestMapper {
     @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     @Mapping(target = "statusHistory", expression = "java( initialStatus() )")
     @Mapping(source = "ero.englishContactDetails", target = "eroEnglish")
+    @Mapping(constant = "Electoral Registration Officer", target = "eroEnglish.name")
     @Mapping(source = "ero.welshContactDetails", target = "eroWelsh")
+    @Mapping(constant = "Swyddog Cofrestru Etholiadol", target = "eroWelsh.name")
     abstract fun toPrintRequest(
         message: SendApplicationToPrintMessage,
         ero: EroDto,
