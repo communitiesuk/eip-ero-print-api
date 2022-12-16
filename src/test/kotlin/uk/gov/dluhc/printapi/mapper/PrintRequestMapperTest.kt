@@ -83,7 +83,9 @@ class PrintRequestMapperTest {
         given(supportingInformationFormatMapper.toPrintRequestEntityEnum(any()))
             .willReturn(supportingInformationFormatEntityEnum)
         val expectedEnglishEroContactDetails = ero.englishContactDetails.toElectoralRegistrationOffice()
+        expectedEnglishEroContactDetails.name = "Electoral Registration Officer"
         val expectedWelshEroContactDetails = ero.welshContactDetails!!.toElectoralRegistrationOffice()
+        expectedWelshEroContactDetails.name = "Swyddog Cofrestru Etholiadol"
         val expectedRequestDateTime = message.requestDateTime.toInstant()
         given(instantMapper.toInstant(any())).willReturn(expectedRequestDateTime)
         val expected = with(message) {
