@@ -81,7 +81,7 @@ class PrintRequestsFileProducer {
             arrayOf(
                 requestId,
                 issuingAuthorityEn,
-                issuingAuthorityCy ?: "",
+                getWelshValue(issuingAuthorityCy, issuingAuthorityEn),
                 issueDate.format(DATE_FORMATTER),
                 suggestedExpiryDate.format(DATE_FORMATTER),
                 requestDateTime.format(DATE_TIMESTAMP_FORMATTER),
@@ -111,18 +111,29 @@ class PrintRequestsFileProducer {
                 eroDeliveryTownEn ?: "",
                 eroDeliveryAreaEn ?: "",
                 eroDeliveryPostcodeEn,
-                eroNameCy ?: "",
-                eroPhoneNumberCy ?: "",
-                eroEmailAddressCy ?: "",
-                eroWebsiteCy ?: "",
-                eroDeliveryStreetCy ?: "",
-                eroDeliveryPropertyCy ?: "",
-                eroDeliveryLocalityCy ?: "",
-                eroDeliveryTownCy ?: "",
-                eroDeliveryAreaCy ?: "",
-                eroDeliveryPostcodeCy ?: "",
+                getWelshValue(eroNameCy, eroNameEn),
+                getWelshValue(eroPhoneNumberCy, eroPhoneNumberEn),
+                getWelshValue(eroEmailAddressCy, eroEmailAddressEn),
+                getWelshValue(eroWebsiteCy, eroWebsiteEn),
+                getWelshValue(eroDeliveryStreetCy, eroDeliveryStreetEn),
+                getWelshValue(eroDeliveryPropertyCy, eroDeliveryPropertyEn),
+                getWelshValue(eroDeliveryLocalityCy, eroDeliveryLocalityEn),
+                getWelshValue(eroDeliveryTownCy, eroDeliveryTownEn),
+                getWelshValue(eroDeliveryAreaCy, eroDeliveryAreaEn),
+                getWelshValue(eroDeliveryPostcodeCy, eroDeliveryPostcodeEn)
             )
         }
+
+    private fun PrintRequest.getWelshValue(welshValue: String?, englishValue: String?): String {
+        val isWelshAndWelshPropertiesMissing =
+            certificateLanguage == PrintRequest.CertificateLanguage.CY && eroNameCy == null
+
+        if (isWelshAndWelshPropertiesMissing) {
+            return englishValue ?: ""
+        }
+
+        return welshValue ?: ""
+    }
 
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
