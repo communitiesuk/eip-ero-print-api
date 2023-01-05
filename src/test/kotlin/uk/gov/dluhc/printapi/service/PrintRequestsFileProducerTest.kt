@@ -2,8 +2,6 @@ package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintRequest
 import java.io.ByteArrayOutputStream
@@ -14,9 +12,8 @@ internal class PrintRequestsFileProducerTest {
 
     private val printRequestsFileProducer = PrintRequestsFileProducer()
 
-    @ParameterizedTest
-    @EnumSource(PrintRequest.CertificateLanguage::class)
-    fun `should write file to stream given print request with full details`(certificateLanguage: PrintRequest.CertificateLanguage) {
+    @Test
+    fun `should write file to stream given print request with full details`() {
         // Given
         val outputStream = ByteArrayOutputStream()
         val printRequests = listOf(
@@ -32,7 +29,7 @@ internal class PrintRequestsFileProducerTest {
                 cardSurname = "Ziemann",
                 cardVersion = "1",
                 cardNumber = "3987",
-                certificateLanguage = certificateLanguage,
+                certificateLanguage = PrintRequest.CertificateLanguage.EN,
                 certificateFormat = PrintRequest.CertificateFormat.STANDARD,
                 deliveryOption = PrintRequest.DeliveryOption.STANDARD,
                 photo = "8a53a30ac9bae2ebb9b1239b.png",
@@ -74,79 +71,14 @@ internal class PrintRequestsFileProducerTest {
         assertThat(fileContents).isEqualTo(
             """
   "requestId"|"issuingAuthorityEn"|"issuingAuthorityCy"|"issueDate"|"suggestedExpiryDate"|"requestDateTime"|"cardFirstname"|"cardMiddleNames"|"cardSurname"|"cardVersion"|"cardNumber"|"certificateLanguage"|"certificateFormat"|"deliveryOption"|"photo"|"deliveryName"|"deliveryStreet"|"deliveryProperty"|"deliveryLocality"|"deliveryTown"|"deliveryArea"|"deliveryPostcode"|"eroNameEn"|"eroPhoneNumberEn"|"eroEmailAddressEn"|"eroWebsiteEn"|"eroDeliveryStreetEn"|"eroDeliveryPropertyEn"|"eroDeliveryLocalityEn"|"eroDeliveryTownEn"|"eroDeliveryAreaEn"|"eroDeliveryPostcodeEn"|"eroNameCy"|"eroPhoneNumberCy"|"eroEmailAddressCy"|"eroWebsiteCy"|"eroDeliveryStreetCy"|"eroDeliveryPropertyCy"|"eroDeliveryLocalityCy"|"eroDeliveryTownCy"|"eroDeliveryAreaCy"|"eroDeliveryPostcodeCy"
-  "627ab400-5ae2-4cc5-9e91-5c050e43e4c1"|"Lake Deedra"|"Bradtketon"|"2022-06-01"|"2032-06-01"|"2022-06-01T12:23:03.000Z"|"Otelia"|"Shamika"|"Ziemann"|"1"|"3987"|"${certificateLanguage.value()}"|"standard"|"standard"|"8a53a30ac9bae2ebb9b1239b.png"|"Len Hessel DDS"|"Shon Flat"|"586"|"Velva Square"|"East Eileneside"|"Mississippi"|"WR9 8JN"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|"44181"|"David Orchard"|"East Roberto"|"Nebraska"|"SS8Y 5RY"|"North Brittport"|"07902 544470"|"contact@North-Brittport.gov.uk"|"https://North-Brittport.gov.uk"|"Alexander Harbor"|"3587"|"Maggio Ways"|"South Addieburgh"|"Oregon"|"WE7B 7FJ"
+  "627ab400-5ae2-4cc5-9e91-5c050e43e4c1"|"Lake Deedra"|"Bradtketon"|"2022-06-01"|"2032-06-01"|"2022-06-01T12:23:03.000Z"|"Otelia"|"Shamika"|"Ziemann"|"1"|"3987"|"en"|"standard"|"standard"|"8a53a30ac9bae2ebb9b1239b.png"|"Len Hessel DDS"|"Shon Flat"|"586"|"Velva Square"|"East Eileneside"|"Mississippi"|"WR9 8JN"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|"44181"|"David Orchard"|"East Roberto"|"Nebraska"|"SS8Y 5RY"|"North Brittport"|"07902 544470"|"contact@North-Brittport.gov.uk"|"https://North-Brittport.gov.uk"|"Alexander Harbor"|"3587"|"Maggio Ways"|"South Addieburgh"|"Oregon"|"WE7B 7FJ"
 
             """.trimIndent()
         )
     }
 
     @Test
-    fun `should write file to stream given print request with full details except Welsh fields and certificate language is Welsh`() {
-        // Given
-        val outputStream = ByteArrayOutputStream()
-        val printRequests = listOf(
-            buildPrintRequest(
-                requestId = "627ab400-5ae2-4cc5-9e91-5c050e43e4c1",
-                issuingAuthorityEn = "Lake Deedra",
-                issuingAuthorityCy = null,
-                issueDate = LocalDate.parse("2022-06-01"),
-                suggestedExpiryDate = LocalDate.parse("2032-06-01"),
-                requestDateTime = OffsetDateTime.parse("2022-06-01T12:23:03.000Z"),
-                cardFirstname = "Otelia",
-                cardMiddleNames = "Shamika",
-                cardSurname = "Ziemann",
-                cardVersion = "1",
-                cardNumber = "3987",
-                certificateLanguage = PrintRequest.CertificateLanguage.CY,
-                certificateFormat = PrintRequest.CertificateFormat.STANDARD,
-                deliveryOption = PrintRequest.DeliveryOption.STANDARD,
-                photo = "8a53a30ac9bae2ebb9b1239b.png",
-                deliveryName = "Len Hessel DDS",
-                deliveryProperty = "586",
-                deliveryLocality = "Velva Square",
-                deliveryTown = "East Eileneside",
-                deliveryArea = "Mississippi",
-                deliveryStreet = "Shon Flat",
-                deliveryPostcode = "WR9 8JN",
-                eroNameEn = "Lake Deedra",
-                eroPhoneNumberEn = "07323 256949",
-                eroEmailAddressEn = "contact@Lake-Deedra.gov.uk",
-                eroWebsiteEn = "https://Lake-Deedra.gov.uk",
-                eroDeliveryStreetEn = "Fidela Road",
-                eroDeliveryPropertyEn = "44181",
-                eroDeliveryLocalityEn = "David Orchard",
-                eroDeliveryTownEn = "East Roberto",
-                eroDeliveryAreaEn = "Nebraska",
-                eroDeliveryPostcodeEn = "SS8Y 5RY",
-                eroNameCy = null,
-                eroPhoneNumberCy = null,
-                eroEmailAddressCy = null,
-                eroWebsiteCy = null,
-                eroDeliveryStreetCy = null,
-                eroDeliveryPropertyCy = null,
-                eroDeliveryLocalityCy = null,
-                eroDeliveryTownCy = null,
-                eroDeliveryAreaCy = null,
-                eroDeliveryPostcodeCy = null
-            )
-        )
-
-        // When
-        printRequestsFileProducer.writeFileToStream(outputStream, printRequests)
-
-        // Then
-        val fileContents = String(outputStream.toByteArray())
-        assertThat(fileContents).isEqualTo(
-            """
-  "requestId"|"issuingAuthorityEn"|"issuingAuthorityCy"|"issueDate"|"suggestedExpiryDate"|"requestDateTime"|"cardFirstname"|"cardMiddleNames"|"cardSurname"|"cardVersion"|"cardNumber"|"certificateLanguage"|"certificateFormat"|"deliveryOption"|"photo"|"deliveryName"|"deliveryStreet"|"deliveryProperty"|"deliveryLocality"|"deliveryTown"|"deliveryArea"|"deliveryPostcode"|"eroNameEn"|"eroPhoneNumberEn"|"eroEmailAddressEn"|"eroWebsiteEn"|"eroDeliveryStreetEn"|"eroDeliveryPropertyEn"|"eroDeliveryLocalityEn"|"eroDeliveryTownEn"|"eroDeliveryAreaEn"|"eroDeliveryPostcodeEn"|"eroNameCy"|"eroPhoneNumberCy"|"eroEmailAddressCy"|"eroWebsiteCy"|"eroDeliveryStreetCy"|"eroDeliveryPropertyCy"|"eroDeliveryLocalityCy"|"eroDeliveryTownCy"|"eroDeliveryAreaCy"|"eroDeliveryPostcodeCy"
-  "627ab400-5ae2-4cc5-9e91-5c050e43e4c1"|"Lake Deedra"|"Lake Deedra"|"2022-06-01"|"2032-06-01"|"2022-06-01T12:23:03.000Z"|"Otelia"|"Shamika"|"Ziemann"|"1"|"3987"|"cy"|"standard"|"standard"|"8a53a30ac9bae2ebb9b1239b.png"|"Len Hessel DDS"|"Shon Flat"|"586"|"Velva Square"|"East Eileneside"|"Mississippi"|"WR9 8JN"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|"44181"|"David Orchard"|"East Roberto"|"Nebraska"|"SS8Y 5RY"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|"44181"|"David Orchard"|"East Roberto"|"Nebraska"|"SS8Y 5RY"
-
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun `should write file to stream given print request with optional properties missing given certificate language is English`() {
+    fun `should write file to stream given print request with optional properties missing`() {
         // Given
         val outputStream = ByteArrayOutputStream()
         val printRequests = listOf(
@@ -205,136 +137,6 @@ internal class PrintRequestsFileProducerTest {
             """
   "requestId"|"issuingAuthorityEn"|"issuingAuthorityCy"|"issueDate"|"suggestedExpiryDate"|"requestDateTime"|"cardFirstname"|"cardMiddleNames"|"cardSurname"|"cardVersion"|"cardNumber"|"certificateLanguage"|"certificateFormat"|"deliveryOption"|"photo"|"deliveryName"|"deliveryStreet"|"deliveryProperty"|"deliveryLocality"|"deliveryTown"|"deliveryArea"|"deliveryPostcode"|"eroNameEn"|"eroPhoneNumberEn"|"eroEmailAddressEn"|"eroWebsiteEn"|"eroDeliveryStreetEn"|"eroDeliveryPropertyEn"|"eroDeliveryLocalityEn"|"eroDeliveryTownEn"|"eroDeliveryAreaEn"|"eroDeliveryPostcodeEn"|"eroNameCy"|"eroPhoneNumberCy"|"eroEmailAddressCy"|"eroWebsiteCy"|"eroDeliveryStreetCy"|"eroDeliveryPropertyCy"|"eroDeliveryLocalityCy"|"eroDeliveryTownCy"|"eroDeliveryAreaCy"|"eroDeliveryPostcodeCy"
   "627ab400-5ae2-4cc5-9e91-5c050e43e4c1"|"Lake Deedra"|""|"2022-06-01"|"2032-06-01"|"2022-06-01T12:23:03.000Z"|"Otelia"|""|"Ziemann"|"1"|"3987"|"en"|"standard"|"standard"|"8a53a30ac9bae2ebb9b1239b.png"|"Len Hessel DDS"|"Shon Flat"|""|""|""|""|"WR9 8JN"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|""|""|""|""|"SS8Y 5RY"|""|""|""|""|""|""|""|""|""|""
-  
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun `should write file to stream given print request with optional properties missing given certificate language is Welsh`() {
-        // Given
-        val outputStream = ByteArrayOutputStream()
-        val printRequests = listOf(
-            buildPrintRequest(
-                requestId = "627ab400-5ae2-4cc5-9e91-5c050e43e4c1",
-                issuingAuthorityEn = "Lake Deedra",
-                issuingAuthorityCy = null,
-                issueDate = LocalDate.parse("2022-06-01"),
-                suggestedExpiryDate = LocalDate.parse("2032-06-01"),
-                requestDateTime = OffsetDateTime.parse("2022-06-01T12:23:03.000Z"),
-                cardFirstname = "Otelia",
-                cardMiddleNames = null,
-                cardSurname = "Ziemann",
-                cardVersion = "1",
-                cardNumber = "3987",
-                certificateLanguage = PrintRequest.CertificateLanguage.CY,
-                certificateFormat = PrintRequest.CertificateFormat.STANDARD,
-                deliveryOption = PrintRequest.DeliveryOption.STANDARD,
-                photo = "8a53a30ac9bae2ebb9b1239b.png",
-                deliveryName = "Len Hessel DDS",
-                deliveryProperty = null,
-                deliveryLocality = null,
-                deliveryTown = null,
-                deliveryArea = null,
-                deliveryStreet = "Shon Flat",
-                deliveryPostcode = "WR9 8JN",
-                eroNameEn = "Lake Deedra",
-                eroPhoneNumberEn = "07323 256949",
-                eroEmailAddressEn = "contact@Lake-Deedra.gov.uk",
-                eroWebsiteEn = "https://Lake-Deedra.gov.uk",
-                eroDeliveryStreetEn = "Fidela Road",
-                eroDeliveryPropertyEn = null,
-                eroDeliveryLocalityEn = null,
-                eroDeliveryTownEn = null,
-                eroDeliveryAreaEn = null,
-                eroDeliveryPostcodeEn = "SS8Y 5RY",
-                eroNameCy = null,
-                eroPhoneNumberCy = null,
-                eroEmailAddressCy = null,
-                eroWebsiteCy = null,
-                eroDeliveryStreetCy = null,
-                eroDeliveryPropertyCy = null,
-                eroDeliveryLocalityCy = null,
-                eroDeliveryTownCy = null,
-                eroDeliveryAreaCy = null,
-                eroDeliveryPostcodeCy = null
-            )
-        )
-
-        // When
-        printRequestsFileProducer.writeFileToStream(outputStream, printRequests)
-
-        // Then
-        val fileContents = String(outputStream.toByteArray())
-        assertThat(fileContents).isEqualTo(
-            """
-  "requestId"|"issuingAuthorityEn"|"issuingAuthorityCy"|"issueDate"|"suggestedExpiryDate"|"requestDateTime"|"cardFirstname"|"cardMiddleNames"|"cardSurname"|"cardVersion"|"cardNumber"|"certificateLanguage"|"certificateFormat"|"deliveryOption"|"photo"|"deliveryName"|"deliveryStreet"|"deliveryProperty"|"deliveryLocality"|"deliveryTown"|"deliveryArea"|"deliveryPostcode"|"eroNameEn"|"eroPhoneNumberEn"|"eroEmailAddressEn"|"eroWebsiteEn"|"eroDeliveryStreetEn"|"eroDeliveryPropertyEn"|"eroDeliveryLocalityEn"|"eroDeliveryTownEn"|"eroDeliveryAreaEn"|"eroDeliveryPostcodeEn"|"eroNameCy"|"eroPhoneNumberCy"|"eroEmailAddressCy"|"eroWebsiteCy"|"eroDeliveryStreetCy"|"eroDeliveryPropertyCy"|"eroDeliveryLocalityCy"|"eroDeliveryTownCy"|"eroDeliveryAreaCy"|"eroDeliveryPostcodeCy"
-  "627ab400-5ae2-4cc5-9e91-5c050e43e4c1"|"Lake Deedra"|"Lake Deedra"|"2022-06-01"|"2032-06-01"|"2022-06-01T12:23:03.000Z"|"Otelia"|""|"Ziemann"|"1"|"3987"|"cy"|"standard"|"standard"|"8a53a30ac9bae2ebb9b1239b.png"|"Len Hessel DDS"|"Shon Flat"|""|""|""|""|"WR9 8JN"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|""|""|""|""|"SS8Y 5RY"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|""|""|""|""|"SS8Y 5RY"
-  
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun `should write file to stream given print request given full English properties and partially missing Welsh properties and certificate language is Welsh`() {
-        // Given
-        val outputStream = ByteArrayOutputStream()
-        val printRequests = listOf(
-            buildPrintRequest(
-                requestId = "627ab400-5ae2-4cc5-9e91-5c050e43e4c1",
-                issuingAuthorityEn = "Lake Deedra",
-                issuingAuthorityCy = "Bradtketon",
-                issueDate = LocalDate.parse("2022-06-01"),
-                suggestedExpiryDate = LocalDate.parse("2032-06-01"),
-                requestDateTime = OffsetDateTime.parse("2022-06-01T12:23:03.000Z"),
-                cardFirstname = "Otelia",
-                cardMiddleNames = null,
-                cardSurname = "Ziemann",
-                cardVersion = "1",
-                cardNumber = "3987",
-                certificateLanguage = PrintRequest.CertificateLanguage.CY,
-                certificateFormat = PrintRequest.CertificateFormat.STANDARD,
-                deliveryOption = PrintRequest.DeliveryOption.STANDARD,
-                photo = "8a53a30ac9bae2ebb9b1239b.png",
-                deliveryName = "Len Hessel DDS",
-                deliveryProperty = null,
-                deliveryLocality = null,
-                deliveryTown = null,
-                deliveryArea = null,
-                deliveryStreet = "Shon Flat",
-                deliveryPostcode = "WR9 8JN",
-                eroNameEn = "Lake Deedra",
-                eroPhoneNumberEn = "07323 256949",
-                eroEmailAddressEn = "contact@Lake-Deedra.gov.uk",
-                eroWebsiteEn = "https://Lake-Deedra.gov.uk",
-                eroDeliveryStreetEn = "Fidela Road",
-                eroDeliveryPropertyEn = "44181",
-                eroDeliveryLocalityEn = "David Orchard",
-                eroDeliveryTownEn = "East Roberto",
-                eroDeliveryAreaEn = "Nebraska",
-                eroDeliveryPostcodeEn = "SS8Y 5RY",
-                eroNameCy = "North Brittport",
-                eroPhoneNumberCy = "07902 544470",
-                eroEmailAddressCy = "contact@North-Brittport.gov.uk",
-                eroWebsiteCy = "https://North-Brittport.gov.uk",
-                eroDeliveryStreetCy = "Alexander Harbor",
-                eroDeliveryPropertyCy = null,
-                eroDeliveryLocalityCy = null,
-                eroDeliveryTownCy = null,
-                eroDeliveryAreaCy = null,
-                eroDeliveryPostcodeCy = "WE7B 7FJ"
-            )
-        )
-
-        // When
-        printRequestsFileProducer.writeFileToStream(outputStream, printRequests)
-
-        // Then
-        val fileContents = String(outputStream.toByteArray())
-        assertThat(fileContents).isEqualTo(
-            """
-  "requestId"|"issuingAuthorityEn"|"issuingAuthorityCy"|"issueDate"|"suggestedExpiryDate"|"requestDateTime"|"cardFirstname"|"cardMiddleNames"|"cardSurname"|"cardVersion"|"cardNumber"|"certificateLanguage"|"certificateFormat"|"deliveryOption"|"photo"|"deliveryName"|"deliveryStreet"|"deliveryProperty"|"deliveryLocality"|"deliveryTown"|"deliveryArea"|"deliveryPostcode"|"eroNameEn"|"eroPhoneNumberEn"|"eroEmailAddressEn"|"eroWebsiteEn"|"eroDeliveryStreetEn"|"eroDeliveryPropertyEn"|"eroDeliveryLocalityEn"|"eroDeliveryTownEn"|"eroDeliveryAreaEn"|"eroDeliveryPostcodeEn"|"eroNameCy"|"eroPhoneNumberCy"|"eroEmailAddressCy"|"eroWebsiteCy"|"eroDeliveryStreetCy"|"eroDeliveryPropertyCy"|"eroDeliveryLocalityCy"|"eroDeliveryTownCy"|"eroDeliveryAreaCy"|"eroDeliveryPostcodeCy"
-  "627ab400-5ae2-4cc5-9e91-5c050e43e4c1"|"Lake Deedra"|"Bradtketon"|"2022-06-01"|"2032-06-01"|"2022-06-01T12:23:03.000Z"|"Otelia"|""|"Ziemann"|"1"|"3987"|"cy"|"standard"|"standard"|"8a53a30ac9bae2ebb9b1239b.png"|"Len Hessel DDS"|"Shon Flat"|""|""|""|""|"WR9 8JN"|"Lake Deedra"|"07323 256949"|"contact@Lake-Deedra.gov.uk"|"https://Lake-Deedra.gov.uk"|"Fidela Road"|"44181"|"David Orchard"|"East Roberto"|"Nebraska"|"SS8Y 5RY"|"North Brittport"|"07902 544470"|"contact@North-Brittport.gov.uk"|"https://North-Brittport.gov.uk"|"Alexander Harbor"|""|""|""|""|"WE7B 7FJ"
   
             """.trimIndent()
         )
