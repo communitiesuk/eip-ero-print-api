@@ -64,7 +64,7 @@ class CertificateMapperTest {
         given(idFactory.vacNumber()).willReturn(vacNumber)
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
-        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice()
+        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.name)
 
         val printRequest = with(message) {
             PrintRequest(
