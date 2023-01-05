@@ -4,7 +4,7 @@ import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
 
-fun EroContactDetailsDto.toElectoralRegistrationOffice() =
+fun EroContactDetailsDto.toElectoralRegistrationOffice(name: String) =
     ElectoralRegistrationOffice(
         name = name,
         phoneNumber = phoneNumber,
