@@ -19,11 +19,14 @@ activate "EROP Print Service"
 deactivate "EROP Print Service"
 
 loop Cron Batch Process (Every x Mins)
-    "EROP Print Service"<-"EROP Print Service Database": Retrieve Current Approved Request Batch
+    "EROP Print Service"<-"EROP Print Service Database": Retrieve Count of Print Requests in last 24 hours
     activate "EROP Print Service"
-    "EROP Print Service"->"EROP Print Service": Zip/Format Batch - Array[PrintRequest]
-    "EROP Print Service"->"Print SFTP Server": Send Batch - Array[PrintRequest]
-    deactivate "EROP Print Service"
+    opt Last 24 Hour Print Requests Count < Daily Limit
+        "EROP Print Service"<-"EROP Print Service Database": Retrieve Current Approved Request Batch
+        "EROP Print Service"->"EROP Print Service": Zip/Format Batch - Array[PrintRequest]
+        "EROP Print Service"->"Print SFTP Server": Send Batch - Array[PrintRequest]
+        deactivate "EROP Print Service"
+    end
 end loop
 
 loop Cron Batch Process (Every x Mins)
