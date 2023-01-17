@@ -2,8 +2,10 @@ package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.mapper.CertificateToPrintRequestMapper
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.PrintRequest as EntityPrintRequest
 
 @Component
 class PrintFileDetailsFactory(
@@ -33,10 +35,20 @@ class PrintFileDetailsFactory(
         requests: MutableList<PrintRequest>,
         photos: MutableList<PhotoLocation>
     ) {
-        val latestRequest = certificate.getCurrentPrintRequest()
-        val photoArn = latestRequest.photoLocationArn!!
-        val photoLocation = photoLocationFactory.create(latestRequest.batchId!!, latestRequest.requestId!!, photoArn)
-        val printRequest = certificateToPrintRequestMapper.map(certificate, latestRequest, photoLocation.zipPath)
+        certificate.getPrintRequestsByStatus(Status.ASSIGNED_TO_BATCH)
+            .forEach { requestInBatch -> processPrintRequest(requestInBatch, certificate, requests, photos) }
+    }
+
+    private fun processPrintRequest(
+        pendingPrintRequest: EntityPrintRequest,
+        certificate: Certificate,
+        requests: MutableList<PrintRequest>,
+        photos: MutableList<PhotoLocation>
+    ) {
+        val photoArn = pendingPrintRequest.photoLocationArn!!
+        val photoLocation =
+            photoLocationFactory.create(pendingPrintRequest.batchId!!, pendingPrintRequest.requestId!!, photoArn)
+        val printRequest = certificateToPrintRequestMapper.map(certificate, pendingPrintRequest, photoLocation.zipPath)
         requests.add(printRequest)
         photos.add(photoLocation)
     }

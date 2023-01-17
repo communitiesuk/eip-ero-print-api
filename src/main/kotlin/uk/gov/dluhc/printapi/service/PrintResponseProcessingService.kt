@@ -4,8 +4,6 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
-import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
@@ -60,20 +58,20 @@ class PrintResponseProcessingService(
 
     private fun processBatchCertificates(batchResponse: BatchResponse, certificates: List<Certificate>) {
         with(batchResponse) {
-            val newStatus =
-                if (status == SUCCESS) RECEIVED_BY_PRINT_PROVIDER else PENDING_ASSIGNMENT_TO_BATCH
-
             certificates.forEach {
-                it.addStatus(
-                    status = newStatus,
-                    eventDateTime = timestamp.toInstant(),
-                    message = message
-                )
-
-                if (status != SUCCESS) {
-                    val currentPrintRequest = it.getCurrentPrintRequest()
-                    currentPrintRequest.requestId = idFactory.requestId()
-                    currentPrintRequest.batchId = null
+                if (status == SUCCESS) {
+                    it.addReceivedByPrintProviderEventForBatch(
+                        batchId = batchId,
+                        eventDateTime = timestamp.toInstant(),
+                        message = message
+                    )
+                } else {
+                    it.requeuePrintRequestForBatch(
+                        batchId = batchId,
+                        eventDateTime = timestamp.toInstant(),
+                        message = message,
+                        newRequestId = idFactory.requestId()
+                    )
                 }
             }
         }
@@ -98,7 +96,8 @@ class PrintResponseProcessingService(
         }
 
         with(printResponse) {
-            certificate.addStatus(
+            certificate.addPrintRequestEvent(
+                requestId = requestId,
                 status = newStatus,
                 eventDateTime = timestamp.toInstant(),
                 message = message

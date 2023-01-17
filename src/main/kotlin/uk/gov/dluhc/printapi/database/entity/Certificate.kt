@@ -66,6 +66,11 @@ class Certificate(
     @field:NotNull
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
 
+    /**
+     * Certificate status corresponds to the current status of the most recent
+     * [PrintRequest], based on the requestDateTime that is included in the
+     * [uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage].
+     */
     @field:NotNull
     @Enumerated(EnumType.STRING)
     var status: Status? = null,
@@ -99,25 +104,95 @@ class Certificate(
         printRequests.sortByDescending { it.requestDateTime }
         return printRequests.first()
     }
+    fun getPrintRequestsByStatus(printRequestStatus: Status) =
+        printRequests.filter { status == printRequestStatus }
 
-    /**
-     * Adds the new status to the current PrintRequest and updates the current Certificate status.
-     */
-    fun addStatus(
-        status: Status,
-        eventDateTime: Instant = Instant.now(),
-        message: String? = null
-    ) {
-        val currentPrintRequest = getCurrentPrintRequest()
-        currentPrintRequest.addPrintRequestStatus(
-            PrintRequestStatus(
-                status = status,
-                eventDateTime = eventDateTime,
-                message = message
+    fun addPrintRequestToBatch(batchId: String) {
+        getPrintRequestsByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH).forEach {
+            it.addPrintRequestStatus(
+                PrintRequestStatus(
+                    status = Status.ASSIGNED_TO_BATCH,
+                    eventDateTime = Instant.now(),
+                    message = null
+                )
             )
-        )
+            it.batchId = batchId
+        }
         assignStatus()
     }
+
+    fun addSentToPrintProviderEventForBatch(batchId: String) {
+        getPrintRequestsByBatchId(batchId).forEach {
+            it.addPrintRequestStatus(
+                PrintRequestStatus(
+                    status = Status.SENT_TO_PRINT_PROVIDER,
+                    eventDateTime = Instant.now(),
+                    message = null
+                )
+            )
+            it.batchId = batchId
+        }
+        assignStatus()
+    }
+
+    fun addReceivedByPrintProviderEventForBatch(
+        batchId: String,
+        eventDateTime: Instant,
+        message: String?
+    ) {
+        getPrintRequestsByBatchId(batchId).forEach {
+            it.addPrintRequestStatus(
+                PrintRequestStatus(
+                    status = Status.RECEIVED_BY_PRINT_PROVIDER,
+                    eventDateTime = eventDateTime,
+                    message = message
+                )
+            )
+        }
+        assignStatus()
+    }
+
+    fun requeuePrintRequestForBatch(
+        batchId: String,
+        eventDateTime: Instant,
+        message: String?,
+        newRequestId: String
+    ) {
+        getPrintRequestsByBatchId(batchId).forEach {
+            it.addPrintRequestStatus(
+                PrintRequestStatus(
+                    status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                    eventDateTime = eventDateTime,
+                    message = message
+                )
+            )
+            it.batchId = null
+            it.requestId = newRequestId
+        }
+        assignStatus()
+    }
+
+    fun addPrintRequestEvent(
+        requestId: String,
+        status: Status,
+        eventDateTime: Instant,
+        message: String?
+    ) {
+        getPrintRequestsByRequestId(requestId).forEach {
+            it.addPrintRequestStatus(
+                PrintRequestStatus(
+                    status = status,
+                    eventDateTime = eventDateTime,
+                    message = message
+                )
+            )
+        }
+        assignStatus()
+    }
+
+    private fun getPrintRequestsByRequestId(requestId: String) = printRequests.filter { it.requestId == requestId }
+
+    private fun getPrintRequestsByBatchId(batchId: String) = printRequests.filter { it.batchId == batchId }
 
     private fun assignStatus() {
         val currentPrintRequest = getCurrentPrintRequest()

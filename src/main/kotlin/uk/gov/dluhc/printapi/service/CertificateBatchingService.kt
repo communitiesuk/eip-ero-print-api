@@ -42,10 +42,7 @@ class CertificateBatchingService(
 
         return limitCertificates(certificatesPendingAssignment).chunked(batchSize).associate { batchOfCertificates ->
             val batchId = idFactory.batchId()
-            batchId to batchOfCertificates.onEach {
-                it.getCurrentPrintRequest().batchId = batchId
-                it.addStatus(ASSIGNED_TO_BATCH)
-            }
+            batchId to batchOfCertificates.onEach { it.addPrintRequestToBatch(batchId) }
         }
     }
 

@@ -73,3 +73,5 @@ fun aValidEmailAddress(): String = "contact@${aValidEroName().replaceSpacesWith(
 fun aValidWebsite(): String = "https://${aValidEroName().replaceSpacesWith("-")}.gov.uk"
 
 fun aValidPrintRequestStatusEventDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
+
+fun aValidEventMessage(): String = faker.harryPotter().spell()
