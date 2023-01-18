@@ -145,16 +145,20 @@ class PrintResponseProcessingServiceTest {
             service.processBatchResponses(listOf(batchResponse1, batchResponse2))
 
             // Then
-            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(SENT_TO_PRINT_PROVIDER, batchResponse1.batchId)
-            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(SENT_TO_PRINT_PROVIDER, batchResponse2.batchId)
+            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(
+                SENT_TO_PRINT_PROVIDER,
+                batchResponse1.batchId
+            )
+            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(
+                SENT_TO_PRINT_PROVIDER,
+                batchResponse2.batchId
+            )
             verify(certificateRepository).saveAll(listOf(certificate1))
             verify(certificateRepository).saveAll(listOf(certificate2))
-            assertThat(certificate1.getCurrentPrintRequest().requestId).isEqualTo(newRequestId)
-            assertThat(certificate1.getCurrentPrintRequest().batchId).isNull()
-            assertThat(
-                certificate1.getCurrentPrintRequest().statusHistory.sortedByDescending { it.eventDateTime }
-                    .first()
-            )
+            val printRequest1 = certificate1.printRequests[0]
+            assertThat(printRequest1.requestId).isEqualTo(newRequestId)
+            assertThat(printRequest1.batchId).isNull()
+            assertThat(printRequest1.statusHistory.sortedByDescending { it.eventDateTime }.first())
                 .usingRecursiveComparison().isEqualTo(
                     PrintRequestStatus(
                         status = PENDING_ASSIGNMENT_TO_BATCH,
@@ -162,10 +166,7 @@ class PrintResponseProcessingServiceTest {
                         message = batchResponse1.message
                     )
                 )
-            assertThat(
-                certificate2.getCurrentPrintRequest().statusHistory.sortedByDescending { it.eventDateTime }
-                    .first()
-            )
+            assertThat(certificate2.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
                 .usingRecursiveComparison().isEqualTo(
                     PrintRequestStatus(
                         status = RECEIVED_BY_PRINT_PROVIDER,
@@ -209,10 +210,7 @@ class PrintResponseProcessingServiceTest {
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
             assertThat(certificate.status).isEqualTo(expectedStatus)
-            assertThat(
-                certificate.getCurrentPrintRequest().statusHistory.sortedByDescending { it.eventDateTime }
-                    .first()
-            )
+            assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
                 .usingRecursiveComparison().isEqualTo(
                     PrintRequestStatus(
                         status = expectedStatus,

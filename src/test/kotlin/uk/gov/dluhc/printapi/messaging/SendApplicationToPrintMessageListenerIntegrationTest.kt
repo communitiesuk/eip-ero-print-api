@@ -164,7 +164,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 )
                 .isEqualTo(expected)
             assertThat(saved.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
-            assertThat(saved.getCurrentPrintRequest().requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
+            assertThat(saved.printRequests[0].requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
             assertThat(saved.vacNumber).containsPattern(Regex("^[A-Za-z\\d]{20}$").pattern)
         }
     }

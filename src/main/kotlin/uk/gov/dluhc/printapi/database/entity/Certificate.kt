@@ -100,12 +100,8 @@ class Certificate(
         return this
     }
 
-    fun getCurrentPrintRequest(): PrintRequest {
-        printRequests.sortByDescending { it.requestDateTime }
-        return printRequests.first()
-    }
     fun getPrintRequestsByStatus(printRequestStatus: Status) =
-        printRequests.filter { status == printRequestStatus }
+        printRequests.filter { it.getCurrentStatus().status == printRequestStatus }
 
     fun addPrintRequestToBatch(batchId: String) {
         getPrintRequestsByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH).forEach {
@@ -189,6 +185,8 @@ class Certificate(
         }
         assignStatus()
     }
+
+    private fun getCurrentPrintRequest(): PrintRequest = printRequests.sortedByDescending { it.requestDateTime }.first()
 
     private fun getPrintRequestsByRequestId(requestId: String) = printRequests.filter { it.requestId == requestId }
 

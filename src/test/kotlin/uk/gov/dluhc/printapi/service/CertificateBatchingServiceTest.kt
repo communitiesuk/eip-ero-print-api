@@ -70,7 +70,9 @@ internal class CertificateBatchingServiceTest {
         val batchId1 = aValidBatchId()
         val batchId2 = aValidBatchId()
 
-        given(certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(any(), any())).willReturn(certificates)
+        given(certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(any(), any())).willReturn(
+            certificates
+        )
         given(certificateRepository.getPrintRequestStatusCount(any(), any(), any()))
             .willReturn(numberOfRequestsAlreadyAssignedToBatch)
         given(idFactory.batchId()).willReturn(batchId1, batchId2)
@@ -113,7 +115,8 @@ internal class CertificateBatchingServiceTest {
             )
         )
         val certificates = listOf(buildCertificate(printRequests = printRequests))
-        given(certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(any(), any())).willReturn(certificates)
+        given(certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(any(), any()))
+            .willReturn(certificates)
 
         val batchId = aValidBatchId()
         given(idFactory.batchId()).willReturn(batchId)
@@ -132,11 +135,9 @@ internal class CertificateBatchingServiceTest {
         val savedCertificates = savedCertificatesArgumentCaptor.value!!
         assertThat(savedCertificates.size).isEqualTo(1)
         assertThat(
-            savedCertificates[0].getCurrentPrintRequest().statusHistory.sortedBy { it.eventDateTime }
+            savedCertificates[0].printRequests[0].statusHistory.sortedBy { it.eventDateTime }
                 .map { it.status }
-        )
-            .containsExactly(PENDING_ASSIGNMENT_TO_BATCH, ASSIGNED_TO_BATCH)
-
+        ).containsExactly(PENDING_ASSIGNMENT_TO_BATCH, ASSIGNED_TO_BATCH)
         assertThat(savedCertificates[0].status).isEqualTo(ASSIGNED_TO_BATCH)
     }
 
@@ -154,8 +155,9 @@ internal class CertificateBatchingServiceTest {
         )
 
         val numOfRequests = 8
-        val certificates = (1..numOfRequests).map { buildCertificate() }
-        given(certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(any(), any())).willReturn(certificates)
+        val certificates = (1..numOfRequests).map { buildCertificate(status = PENDING_ASSIGNMENT_TO_BATCH) }
+        given(certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(any(), any()))
+            .willReturn(certificates)
         given(idFactory.batchId()).willReturn(aValidBatchId(), aValidBatchId(), aValidBatchId())
 
         // When
@@ -165,7 +167,7 @@ internal class CertificateBatchingServiceTest {
         assertThat(batches).hasSize(3)
         batches.map { (id, items) ->
             assert(items.all { it.status == ASSIGNED_TO_BATCH })
-            assert(items.all { it.getCurrentPrintRequest().batchId == id })
+            assert(items.all { it.printRequests[0].batchId == id })
         }
         verify(certificateRepository).findByStatusOrderByApplicationReceivedDateTimeAsc(
             PENDING_ASSIGNMENT_TO_BATCH,

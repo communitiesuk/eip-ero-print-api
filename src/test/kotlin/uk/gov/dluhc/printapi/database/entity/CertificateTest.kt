@@ -1,9 +1,10 @@
 package uk.gov.dluhc.printapi.database.entity
 
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
@@ -15,45 +16,68 @@ import java.time.temporal.ChronoUnit
 internal class CertificateTest {
 
     @Nested
-    inner class GetCurrentPrintRequest {
+    inner class GetPrintRequestsByStatus {
 
         @Test
-        fun `should fail to get latest print request for Certificate with no Print Requests`() {
+        fun `should getPrintRequestsByStatus for Certificate with no Print Requests`() {
             // Given
             val certificate = buildCertificate(printRequests = emptyList())
 
             // When
-            val actual = catchException { certificate.getCurrentPrintRequest() }
+            val actual = certificate.getPrintRequestsByStatus(SENT_TO_PRINT_PROVIDER)
 
             // Then
-            assertThat(actual).isInstanceOf(NoSuchElementException::class.java)
+            assertThat(actual).isEmpty()
         }
 
         @Test
-        fun `should get latest status for Certificate with one Print Request`() {
+        fun `should getPrintRequestsByStatus for Certificate with no matching Print Requests`() {
             // Given
-            val currentPrintRequest = buildPrintRequest()
+            val printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
+            val currentPrintRequest = buildPrintRequest(printRequestStatuses = printRequestStatuses)
             val certificate = buildCertificate(printRequests = listOf(currentPrintRequest))
 
             // When
-            val actual = certificate.getCurrentPrintRequest()
+            val actual = certificate.getPrintRequestsByStatus(SENT_TO_PRINT_PROVIDER)
 
             // Then
-            assertThat(actual).isSameAs(currentPrintRequest)
+            assertThat(actual).isEmpty()
         }
 
         @Test
-        fun `should determine latest status for Certificate with one Print Request with multiple statuses`() {
+        fun `should getPrintRequestsByStatus for Certificate with one matching Print Request`() {
             // Given
-            val previousPrintRequest = buildPrintRequest(requestDateTime = Instant.now().minus(8, ChronoUnit.DAYS))
-            val currentPrintRequest = buildPrintRequest(requestDateTime = Instant.now().minus(3, ChronoUnit.DAYS))
-            val certificate = buildCertificate(printRequests = listOf(currentPrintRequest, previousPrintRequest))
+            val request = buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
+            )
+            val certificate = buildCertificate(printRequests = listOf(request))
 
             // When
-            val actual = certificate.getCurrentPrintRequest()
+            val actual = certificate.getPrintRequestsByStatus(PENDING_ASSIGNMENT_TO_BATCH)
 
             // Then
-            assertThat(actual).isSameAs(currentPrintRequest)
+            assertThat(actual).containsExactly(request)
+        }
+
+        @Test
+        fun `should getPrintRequestsByStatus for Certificate with several matching Print Requests`() {
+            // Given
+            val request1 = buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER))
+            )
+            val request2 = buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
+            )
+            val request3 = buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
+            )
+            val certificate = buildCertificate(printRequests = listOf(request1, request2, request3))
+
+            // When
+            val actual = certificate.getPrintRequestsByStatus(PENDING_ASSIGNMENT_TO_BATCH)
+
+            // Then
+            assertThat(actual).containsExactly(request2, request3)
         }
     }
 
@@ -66,7 +90,7 @@ internal class CertificateTest {
             val pendingAssignmentPrintRequest = buildPrintRequest(
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minusSeconds(1)
                     )
                 )
@@ -91,7 +115,7 @@ internal class CertificateTest {
                 requestDateTime = Instant.now().minus(30, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -99,7 +123,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -112,7 +136,7 @@ internal class CertificateTest {
                 requestDateTime = Instant.now().minus(1, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(1, ChronoUnit.DAYS)
                     )
                 )
@@ -146,7 +170,7 @@ internal class CertificateTest {
                 )
             )
             val certificate = buildCertificate(printRequests = listOf(assignedToBatchPrintRequest))
-            val expectedStatus = Status.SENT_TO_PRINT_PROVIDER
+            val expectedStatus = SENT_TO_PRINT_PROVIDER
 
             // When
             certificate.addSentToPrintProviderEventForBatch(batchId)
@@ -167,7 +191,7 @@ internal class CertificateTest {
                 batchId = oldBatchId,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -175,7 +199,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -189,7 +213,7 @@ internal class CertificateTest {
                 batchId = batchIdBeingProcessed,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(10, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -199,7 +223,7 @@ internal class CertificateTest {
                 )
             )
             val certificate = buildCertificate(printRequests = listOf(oldPrintRequest, printRequestAssignedToBatch))
-            val expectedStatus = Status.SENT_TO_PRINT_PROVIDER
+            val expectedStatus = SENT_TO_PRINT_PROVIDER
 
             // When
             certificate.addSentToPrintProviderEventForBatch(batchIdBeingProcessed)
@@ -221,7 +245,7 @@ internal class CertificateTest {
                 batchId = batchId,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minusSeconds(1)
                     )
                 )
@@ -249,7 +273,7 @@ internal class CertificateTest {
                 batchId = failedBatchId,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -257,7 +281,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -271,11 +295,11 @@ internal class CertificateTest {
                 batchId = resendBatchId,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(1, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                 )
@@ -305,13 +329,13 @@ internal class CertificateTest {
                 batchId = batchId,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minusSeconds(1)
                     )
                 )
             )
             val certificate = buildCertificate(printRequests = listOf(pendingAssignmentPrintRequest))
-            val expectedStatus = Status.PENDING_ASSIGNMENT_TO_BATCH
+            val expectedStatus = PENDING_ASSIGNMENT_TO_BATCH
             val expectedEvent = buildPrintRequestStatus(status = expectedStatus)
 
             // When
@@ -335,7 +359,7 @@ internal class CertificateTest {
                 batchId = oldBatchId,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -343,7 +367,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -357,17 +381,17 @@ internal class CertificateTest {
                 batchId = batchIdBeingProcessed,
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(1, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                 )
             )
             val certificate = buildCertificate(printRequests = listOf(oldPrintRequest, printRequestBeingProcessed))
-            val expectedStatus = Status.PENDING_ASSIGNMENT_TO_BATCH
+            val expectedStatus = PENDING_ASSIGNMENT_TO_BATCH
             val expectedEvent = buildPrintRequestStatus(status = expectedStatus)
 
             // When
@@ -413,7 +437,7 @@ internal class CertificateTest {
             val printRequest = buildPrintRequest(
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(10, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -421,7 +445,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(9, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS)
                     ),
                 )
@@ -445,7 +469,7 @@ internal class CertificateTest {
                 requestDateTime = Instant.now().minus(30, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -453,7 +477,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -467,7 +491,7 @@ internal class CertificateTest {
                 requestDateTime = Instant.now().minus(10, ChronoUnit.DAYS),
                 printRequestStatuses = listOf(
                     buildPrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = Instant.now().minus(10, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
@@ -475,7 +499,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(9, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now().minus(8, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
