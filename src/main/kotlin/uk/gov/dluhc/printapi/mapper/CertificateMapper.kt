@@ -27,7 +27,7 @@ abstract class CertificateMapper {
     ): Certificate
 
     @AfterMapping
-    protected fun addPrintRequestToCertificate(
+    fun addPrintRequestToCertificate(
         message: SendApplicationToPrintMessage,
         ero: EroDto,
         @MappingTarget certificate: Certificate
