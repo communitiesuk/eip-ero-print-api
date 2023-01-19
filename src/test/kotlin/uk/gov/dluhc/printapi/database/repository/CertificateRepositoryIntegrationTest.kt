@@ -12,6 +12,9 @@ import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.Status.DISPATCHED
+import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findByPrintRequestStatusAndBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressPostcode
@@ -162,9 +165,9 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     }
 
     @Nested
-    inner class Save {
+    inner class FindByPrintRequestStatusAndBatchId {
         @Test
-        fun `should get by status and batchId`() {
+        fun `should get the certificate with matching print request`() {
             // Given
             val batchId = aValidBatchId()
             val status = aValidCertificateStatus()
@@ -175,13 +178,30 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val expected = listOf(certificateRepository.save(certificate))
 
             // When
-            val actual = certificateRepository.findByStatusAndPrintRequestsBatchId(status, batchId)
+            val actual = certificateRepository.findByPrintRequestStatusAndBatchId(status, batchId)
 
             // Given
             assertThat(actual)
                 .usingRecursiveComparison()
                 .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
                 .isEqualTo(expected)
+        }
+
+        @Test
+        fun `should get an empty list as no matching Certificates`() {
+            // Given
+            val batchId = aValidBatchId()
+            val certificate = buildCertificate(
+                status = PENDING_ASSIGNMENT_TO_BATCH,
+                printRequests = listOf(buildPrintRequest(batchId = batchId))
+            )
+            certificateRepository.save(certificate)
+
+            // When
+            val actual = certificateRepository.findByPrintRequestStatusAndBatchId(DISPATCHED, batchId)
+
+            // Given
+            assertThat(actual).isEmpty()
         }
     }
 
@@ -280,7 +300,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                status = PENDING_ASSIGNMENT_TO_BATCH,
                                 eventDateTime = startOfDay
                             ),
                             buildPrintRequestStatus(
@@ -297,7 +317,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                status = PENDING_ASSIGNMENT_TO_BATCH,
                                 eventDateTime = startOfDay.minusSeconds(10)
                             )
                         )
@@ -318,7 +338,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                status = PENDING_ASSIGNMENT_TO_BATCH,
                                 eventDateTime = now.plusSeconds(10)
                             )
                         )

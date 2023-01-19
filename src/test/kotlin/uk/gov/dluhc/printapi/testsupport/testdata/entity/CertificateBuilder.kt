@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryAddressType
@@ -48,14 +49,18 @@ fun buildCertificate(
     id: UUID? = UUID.randomUUID(),
     vacNumber: String = aValidVacNumber(),
     status: Status = aValidCertificateStatus(),
+    batchId: String = aValidBatchId(),
     printRequests: List<PrintRequest> = listOf(
-        buildPrintRequest(printRequestStatuses = listOf(buildPrintRequestStatus(status = status)))
+        buildPrintRequest(
+            batchId = batchId,
+            printRequestStatuses = listOf(buildPrintRequestStatus(status = status))
+        )
     ),
     gssCode: String = aGssCode(),
     sourceType: SourceType = aValidSourceType(),
     sourceReference: String = aValidSourceReference(),
     applicationReceivedDateTime: Instant = aValidApplicationReceivedDateTime(),
-    applicationReference: String = aValidApplicationReference()
+    applicationReference: String = aValidApplicationReference(),
 ): Certificate {
     val certificate = Certificate(
         id = id,

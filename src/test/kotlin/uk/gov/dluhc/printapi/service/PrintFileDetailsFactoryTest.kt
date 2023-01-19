@@ -9,12 +9,14 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.mapper.CertificateToPrintRequestMapper
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestsFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.model.aPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoZipPath
@@ -41,7 +43,12 @@ internal class PrintFileDetailsFactoryTest {
         val batchId = aValidBatchId()
         val requestId = aValidRequestId()
         val photoArn = aPhotoArn()
-        val currentPrintRequest = buildPrintRequest(batchId = batchId, requestId = requestId, photoLocationArn = photoArn)
+        val currentPrintRequest = buildPrintRequest(
+            batchId = batchId,
+            printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.ASSIGNED_TO_BATCH)),
+            requestId = requestId,
+            photoLocationArn = photoArn
+        )
         val certificate = buildCertificate(
             printRequests = mutableListOf(currentPrintRequest)
         )
@@ -58,7 +65,7 @@ internal class PrintFileDetailsFactoryTest {
         val fileDetails = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
 
         // Then
-        verify(filenameFactory).createPrintRequestsFilename(batchId, 1)
+        verify(filenameFactory).createPrintRequestsFilename(batchId, certificates)
         verify(photoLocationFactory).create(batchId, requestId, photoArn)
         verify(certificateToPrintRequestMapper).map(certificate, currentPrintRequest, zipPath)
         assertThat(fileDetails.printRequestsFilename).isEqualTo(psvFilename)

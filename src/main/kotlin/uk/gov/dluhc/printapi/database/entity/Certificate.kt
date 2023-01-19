@@ -66,6 +66,11 @@ class Certificate(
     @field:NotNull
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
 
+    /**
+     * Certificate status corresponds to the current status of the most recent
+     * [PrintRequest], based on the requestDateTime that is included in the
+     * [uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage].
+     */
     @field:NotNull
     @Enumerated(EnumType.STRING)
     var status: Status? = null,
@@ -95,29 +100,104 @@ class Certificate(
         return this
     }
 
-    fun getCurrentPrintRequest(): PrintRequest {
-        printRequests.sortByDescending { it.requestDateTime }
-        return printRequests.first()
+    fun getPrintRequestsByStatus(printRequestStatus: Status) =
+        printRequests.filter { it.getCurrentStatus().status == printRequestStatus }
+
+    fun addPrintRequestToBatch(printRequest: PrintRequest, batchId: String) {
+        processPrintRequestUpdate {
+            printRequest.addPrintRequestStatus(
+                PrintRequestStatus(
+                    status = Status.ASSIGNED_TO_BATCH,
+                    eventDateTime = Instant.now(),
+                    message = null
+                )
+            )
+            printRequest.batchId = batchId
+        }
     }
 
-    /**
-     * Adds the new status to the current PrintRequest and updates the current Certificate status.
-     */
-    fun addStatus(
-        status: Status,
-        eventDateTime: Instant = Instant.now(),
-        message: String? = null
+    fun addSentToPrintProviderEventForBatch(batchId: String) {
+        processPrintRequestUpdate {
+            getPrintRequestsByBatchId(batchId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        eventDateTime = Instant.now(),
+                        message = null
+                    )
+                )
+            }
+        }
+    }
+
+    fun addReceivedByPrintProviderEventForBatch(
+        batchId: String,
+        eventDateTime: Instant,
+        message: String?
     ) {
-        val currentPrintRequest = getCurrentPrintRequest()
-        currentPrintRequest.addPrintRequestStatus(
-            PrintRequestStatus(
-                status = status,
-                eventDateTime = eventDateTime,
-                message = message
-            )
-        )
+        processPrintRequestUpdate {
+            getPrintRequestsByBatchId(batchId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = Status.RECEIVED_BY_PRINT_PROVIDER,
+                        eventDateTime = eventDateTime,
+                        message = message
+                    )
+                )
+            }
+        }
+    }
+
+    fun requeuePrintRequestForBatch(
+        batchId: String,
+        eventDateTime: Instant,
+        message: String?,
+        newRequestId: String
+    ) {
+        processPrintRequestUpdate {
+            getPrintRequestsByBatchId(batchId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        eventDateTime = eventDateTime,
+                        message = message
+                    )
+                )
+                it.batchId = null
+                it.requestId = newRequestId
+            }
+        }
+    }
+
+    fun addPrintRequestEvent(
+        requestId: String,
+        status: Status,
+        eventDateTime: Instant,
+        message: String?
+    ) {
+        processPrintRequestUpdate {
+            getPrintRequestsByRequestId(requestId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = status,
+                        eventDateTime = eventDateTime,
+                        message = message
+                    )
+                )
+            }
+        }
+    }
+
+    private fun processPrintRequestUpdate(update: () -> Unit) {
+        update.invoke()
         assignStatus()
     }
+
+    private fun getCurrentPrintRequest(): PrintRequest = printRequests.sortedByDescending { it.requestDateTime }.first()
+
+    private fun getPrintRequestsByRequestId(requestId: String) = printRequests.filter { it.requestId == requestId }
+
+    private fun getPrintRequestsByBatchId(batchId: String) = printRequests.filter { it.batchId == batchId }
 
     private fun assignStatus() {
         val currentPrintRequest = getCurrentPrintRequest()

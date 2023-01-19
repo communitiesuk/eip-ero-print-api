@@ -15,7 +15,7 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
 
     fun getByPrintRequestsRequestId(requestId: String): Certificate?
 
-    fun findByStatusAndPrintRequestsBatchId(certificateStatus: Status, batchId: String): List<Certificate>
+    fun findByPrintRequestsBatchId(batchId: String): List<Certificate>
 
     fun findByStatusOrderByApplicationReceivedDateTimeAsc(certificateStatus: Status, pageable: Pageable): List<Certificate>
 
@@ -30,4 +30,11 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
         """
     )
     fun getPrintRequestStatusCount(startInstant: Instant, endInstant: Instant, status: Status): Int
+}
+
+object CertificateRepositoryExtensions {
+    fun CertificateRepository.findByPrintRequestStatusAndBatchId(status: Status, batchId: String): List<Certificate> {
+        return findByPrintRequestsBatchId(batchId)
+            .filter { it.printRequests.any { printRequest -> printRequest.getCurrentStatus().status == status } }
+    }
 }
