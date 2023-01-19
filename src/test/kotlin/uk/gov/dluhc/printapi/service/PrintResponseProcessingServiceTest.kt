@@ -137,7 +137,7 @@ class PrintResponseProcessingServiceTest {
             )
 
             val newRequestId = aValidRequestId()
-            given(certificateRepository.findByStatusAndPrintRequestsBatchId(any(), any()))
+            given(certificateRepository.findByPrintRequestsBatchId(any()))
                 .willReturn(listOf(certificate1), listOf(certificate2))
             given(idFactory.requestId()).willReturn(newRequestId)
 
@@ -145,14 +145,8 @@ class PrintResponseProcessingServiceTest {
             service.processBatchResponses(listOf(batchResponse1, batchResponse2))
 
             // Then
-            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(
-                SENT_TO_PRINT_PROVIDER,
-                batchResponse1.batchId
-            )
-            verify(certificateRepository).findByStatusAndPrintRequestsBatchId(
-                SENT_TO_PRINT_PROVIDER,
-                batchResponse2.batchId
-            )
+            verify(certificateRepository).findByPrintRequestsBatchId(batchResponse1.batchId)
+            verify(certificateRepository).findByPrintRequestsBatchId(batchResponse2.batchId)
             verify(certificateRepository).saveAll(listOf(certificate1))
             verify(certificateRepository).saveAll(listOf(certificate2))
             val printRequest1 = certificate1.printRequests[0]

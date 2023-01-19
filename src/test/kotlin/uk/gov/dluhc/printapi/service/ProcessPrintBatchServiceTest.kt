@@ -11,7 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidInputStream
@@ -44,12 +44,12 @@ internal class ProcessPrintBatchServiceTest {
     fun `should send file to SFTP`() {
         // Given
         val batchId = aValidBatchId()
-        val certificates = listOf(buildCertificate())
+        val certificates = listOf(buildCertificate(status = Status.ASSIGNED_TO_BATCH))
         val fileDetails = aFileDetails()
         val sftpInputStream = aValidInputStream()
         val zipFilename = aValidZipFilename()
         val sftpPath = aValidSftpPath()
-        given(certificateRepository.findByStatusAndPrintRequestsBatchId(any(), any())).willReturn(certificates)
+        given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
         given(printFileDetailsFactory.createFileDetailsFromCertificates(any(), any())).willReturn(fileDetails)
         given(sftpZipInputStreamProvider.createSftpInputStream(any())).willReturn(sftpInputStream)
         given(filenameFactory.createZipFilename(any(), any())).willReturn(zipFilename)
@@ -59,7 +59,7 @@ internal class ProcessPrintBatchServiceTest {
         processPrintBatchService.processBatch(batchId)
 
         // Then
-        verify(certificateRepository).findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
+        verify(certificateRepository).findByPrintRequestsBatchId(batchId)
         verify(printFileDetailsFactory).createFileDetailsFromCertificates(batchId, certificates)
         verify(sftpZipInputStreamProvider).createSftpInputStream(fileDetails)
         verify(filenameFactory).createZipFilename(batchId, certificates.size)
@@ -71,13 +71,13 @@ internal class ProcessPrintBatchServiceTest {
         // Given
         val batchId = "4143d442a2424740afa3ce5eae630aad"
         val certificates = emptyList<Certificate>()
-        given(certificateRepository.findByStatusAndPrintRequestsBatchId(any(), any())).willReturn(certificates)
+        given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
 
         // When
         val error = catchThrowable { processPrintBatchService.processBatch(batchId) }
 
         // Then
-        verify(certificateRepository).findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
+        verify(certificateRepository).findByPrintRequestsBatchId(batchId)
         assertThat(error).hasMessage("No certificates found for batchId = 4143d442a2424740afa3ce5eae630aad and status = ASSIGNED_TO_BATCH")
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findByPrintRequestStatusAndBatchId
 import uk.gov.dluhc.printapi.exception.EmptyBatchException
 import javax.transaction.Transactional
 
@@ -38,7 +39,7 @@ class ProcessPrintBatchService(
      */
     @Transactional
     fun processBatch(batchId: String) {
-        val certificates = certificateRepository.findByStatusAndPrintRequestsBatchId(ASSIGNED_TO_BATCH, batchId)
+        val certificates = certificateRepository.findByPrintRequestStatusAndBatchId(ASSIGNED_TO_BATCH, batchId)
         if (certificates.isEmpty()) {
             throw EmptyBatchException(batchId, ASSIGNED_TO_BATCH)
         }
