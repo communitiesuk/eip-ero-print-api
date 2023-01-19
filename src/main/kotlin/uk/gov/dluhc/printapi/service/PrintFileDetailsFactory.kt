@@ -17,7 +17,7 @@ class PrintFileDetailsFactory(
     fun createFileDetailsFromCertificates(batchId: String, certificates: List<Certificate>): FileDetails {
         val fileContents = createFromCertificates(certificates)
         return FileDetails(
-            printRequestsFilename = filenameFactory.createPrintRequestsFilename(batchId, certificates.size),
+            printRequestsFilename = filenameFactory.createPrintRequestsFilename(batchId, certificates),
             printRequests = fileContents.printRequests,
             photoLocations = fileContents.photoLocations
         )

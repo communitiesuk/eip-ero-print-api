@@ -62,7 +62,7 @@ internal class ProcessPrintBatchServiceTest {
         verify(certificateRepository).findByPrintRequestsBatchId(batchId)
         verify(printFileDetailsFactory).createFileDetailsFromCertificates(batchId, certificates)
         verify(sftpZipInputStreamProvider).createSftpInputStream(fileDetails)
-        verify(filenameFactory).createZipFilename(batchId, certificates.size)
+        verify(filenameFactory).createZipFilename(batchId, certificates)
         verify(sftpService).sendFile(sftpInputStream, zipFilename)
     }
 

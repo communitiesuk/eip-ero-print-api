@@ -65,7 +65,7 @@ internal class PrintFileDetailsFactoryTest {
         val fileDetails = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
 
         // Then
-        verify(filenameFactory).createPrintRequestsFilename(batchId, 1)
+        verify(filenameFactory).createPrintRequestsFilename(batchId, certificates)
         verify(photoLocationFactory).create(batchId, requestId, photoArn)
         verify(certificateToPrintRequestMapper).map(certificate, currentPrintRequest, zipPath)
         assertThat(fileDetails.printRequestsFilename).isEqualTo(psvFilename)

@@ -45,7 +45,7 @@ class ProcessPrintBatchService(
         }
         val fileContents = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
         val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(fileContents)
-        val sftpFilename = filenameFactory.createZipFilename(batchId, certificates.size)
+        val sftpFilename = filenameFactory.createZipFilename(batchId, certificates)
         sftpService.sendFile(sftpInputStream, sftpFilename)
         updateCertificates(batchId, certificates)
     }
