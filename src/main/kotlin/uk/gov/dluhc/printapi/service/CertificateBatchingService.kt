@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -40,38 +41,45 @@ class CertificateBatchingService(
             Pageable.ofSize(maxUnBatchedRecords)
         )
 
-        return limitCertificates(certificatesPendingAssignment).chunked(batchSize).associate { batchOfCertificates ->
+        val printRequestsPendingAssignment = certificatesPendingAssignment.flatMap { it.printRequests }
+            .filter { it.getCurrentStatus().status == PENDING_ASSIGNMENT_TO_BATCH }
+
+        return limitPrintRequests(printRequestsPendingAssignment).chunked(batchSize).associate { batchOfPrintRequests ->
             val batchId = idFactory.batchId()
-            batchId to batchOfCertificates.onEach { it.addPrintRequestToBatch(batchId) }
+            batchId to batchOfPrintRequests.map { printRequest ->
+                val certificate = certificatesPendingAssignment.first { it.printRequests.contains(printRequest) }
+                certificate.addPrintRequestToBatch(printRequest, batchId)
+                certificate
+            }
         }
     }
 
-    private fun limitCertificates(certificatesPendingAssignment: List<Certificate>): List<Certificate> {
+    private fun limitPrintRequests(printRequestsPendingAssignmentToBatch: List<PrintRequest>): List<PrintRequest> {
         val startOfDay = Instant.now(clock).truncatedTo(DAYS)
         val endOfDay = startOfDay.plus(1, DAYS).minusSeconds(1)
         val countOfRequestsSentToPrintProvider =
             certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, ASSIGNED_TO_BATCH)
 
-        if ((certificatesPendingAssignment.size + countOfRequestsSentToPrintProvider) > dailyLimit) {
-            logDailyLimit(certificatesPendingAssignment, countOfRequestsSentToPrintProvider, endOfDay)
-            return certificatesPendingAssignment.subList(0, dailyLimit - countOfRequestsSentToPrintProvider)
+        if ((printRequestsPendingAssignmentToBatch.size + countOfRequestsSentToPrintProvider) > dailyLimit) {
+            logDailyLimit(printRequestsPendingAssignmentToBatch, countOfRequestsSentToPrintProvider, endOfDay)
+            return printRequestsPendingAssignmentToBatch.subList(0, dailyLimit - countOfRequestsSentToPrintProvider)
         }
 
-        return certificatesPendingAssignment
+        return printRequestsPendingAssignmentToBatch
     }
 
     private fun logDailyLimit(
-        certificatesPendingAssignment: List<Certificate>,
+        printRequestsPendingAssignmentToBatch: List<PrintRequest>,
         countOfRequestsSentToPrintProvider: Int,
         endOfDay: Instant
     ) {
         val nextDay = endOfDay.plusSeconds(1)
         logger.warn {
-            """Identified ${certificatesPendingAssignment.size} certificates to assign to a batch. 
+            """Identified ${printRequestsPendingAssignmentToBatch.size} print requests to assign to a batch. 
             Daily print limit is $dailyLimit. 
-            $countOfRequestsSentToPrintProvider certificates already sent to print provider today.
+            $countOfRequestsSentToPrintProvider print requests already sent to print provider today.
             Remaining capacity is ${dailyLimit - countOfRequestsSentToPrintProvider}.
-            ${certificatesPendingAssignment.size + countOfRequestsSentToPrintProvider - dailyLimit} certificates won't be assigned to a batch until $nextDay at the earliest."""
+            ${printRequestsPendingAssignmentToBatch.size + countOfRequestsSentToPrintProvider - dailyLimit} print requests won't be assigned to a batch until $nextDay at the earliest."""
         }
     }
 }

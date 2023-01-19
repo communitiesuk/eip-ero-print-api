@@ -103,18 +103,16 @@ class Certificate(
     fun getPrintRequestsByStatus(printRequestStatus: Status) =
         printRequests.filter { it.getCurrentStatus().status == printRequestStatus }
 
-    fun addPrintRequestToBatch(batchId: String) {
+    fun addPrintRequestToBatch(printRequest: PrintRequest, batchId: String) {
         processPrintRequestUpdate {
-            getPrintRequestsByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH).forEach {
-                it.addPrintRequestStatus(
-                    PrintRequestStatus(
-                        status = Status.ASSIGNED_TO_BATCH,
-                        eventDateTime = Instant.now(),
-                        message = null
-                    )
+            printRequest.addPrintRequestStatus(
+                PrintRequestStatus(
+                    status = Status.ASSIGNED_TO_BATCH,
+                    eventDateTime = Instant.now(),
+                    message = null
                 )
-                it.batchId = batchId
-            }
+            )
+            printRequest.batchId = batchId
         }
     }
 

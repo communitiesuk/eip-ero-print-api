@@ -99,58 +99,12 @@ internal class CertificateTest {
             val expectedStatus = Status.ASSIGNED_TO_BATCH
 
             // When
-            certificate.addPrintRequestToBatch(batchId)
+            certificate.addPrintRequestToBatch(pendingAssignmentPrintRequest, batchId)
 
             // Then
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(pendingAssignmentPrintRequest.getCurrentStatus().status).isEqualTo(expectedStatus)
             assertThat(pendingAssignmentPrintRequest.batchId).isEqualTo(batchId)
-        }
-
-        @Test
-        fun `should addPrintRequestToBatch for Certificate with multiple Print Requests including one PENDING_ASSIGNMENT_TO_BATCH`() {
-            // Given
-            val batchId = aValidBatchId()
-            val failedPrintRequest = buildPrintRequest(
-                requestDateTime = Instant.now().minus(30, ChronoUnit.DAYS),
-                printRequestStatuses = listOf(
-                    buildPrintRequestStatus(
-                        status = PENDING_ASSIGNMENT_TO_BATCH,
-                        eventDateTime = Instant.now().minus(30, ChronoUnit.DAYS)
-                    ),
-                    buildPrintRequestStatus(
-                        status = Status.ASSIGNED_TO_BATCH,
-                        eventDateTime = Instant.now().minus(29, ChronoUnit.DAYS)
-                    ),
-                    buildPrintRequestStatus(
-                        status = SENT_TO_PRINT_PROVIDER,
-                        eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
-                    ),
-                    buildPrintRequestStatus(
-                        status = Status.PRINT_PROVIDER_DISPATCH_FAILED,
-                        eventDateTime = Instant.now().minus(20, ChronoUnit.DAYS)
-                    ),
-                )
-            )
-            val printRequestToIncludeInBatch = buildPrintRequest(
-                requestDateTime = Instant.now().minus(1, ChronoUnit.DAYS),
-                printRequestStatuses = listOf(
-                    buildPrintRequestStatus(
-                        status = PENDING_ASSIGNMENT_TO_BATCH,
-                        eventDateTime = Instant.now().minus(1, ChronoUnit.DAYS)
-                    )
-                )
-            )
-            val certificate = buildCertificate(printRequests = listOf(failedPrintRequest, printRequestToIncludeInBatch))
-            val expectedStatus = Status.ASSIGNED_TO_BATCH
-
-            // When
-            certificate.addPrintRequestToBatch(batchId)
-
-            // Then
-            assertThat(certificate.status).isEqualTo(expectedStatus)
-            assertThat(printRequestToIncludeInBatch.getCurrentStatus().status).isEqualTo(expectedStatus)
-            assertThat(printRequestToIncludeInBatch.batchId).isEqualTo(batchId)
         }
     }
 
