@@ -126,7 +126,6 @@ class Certificate(
                     message = null
                 )
             )
-            it.batchId = batchId
         }
         assignStatus()
     }
