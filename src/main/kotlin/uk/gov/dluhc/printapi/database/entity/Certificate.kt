@@ -104,30 +104,32 @@ class Certificate(
         printRequests.filter { it.getCurrentStatus().status == printRequestStatus }
 
     fun addPrintRequestToBatch(batchId: String) {
-        getPrintRequestsByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH).forEach {
-            it.addPrintRequestStatus(
-                PrintRequestStatus(
-                    status = Status.ASSIGNED_TO_BATCH,
-                    eventDateTime = Instant.now(),
-                    message = null
+        processPrintRequestUpdate {
+            getPrintRequestsByStatus(Status.PENDING_ASSIGNMENT_TO_BATCH).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = Status.ASSIGNED_TO_BATCH,
+                        eventDateTime = Instant.now(),
+                        message = null
+                    )
                 )
-            )
-            it.batchId = batchId
+                it.batchId = batchId
+            }
         }
-        assignStatus()
     }
 
     fun addSentToPrintProviderEventForBatch(batchId: String) {
-        getPrintRequestsByBatchId(batchId).forEach {
-            it.addPrintRequestStatus(
-                PrintRequestStatus(
-                    status = Status.SENT_TO_PRINT_PROVIDER,
-                    eventDateTime = Instant.now(),
-                    message = null
+        processPrintRequestUpdate {
+            getPrintRequestsByBatchId(batchId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        eventDateTime = Instant.now(),
+                        message = null
+                    )
                 )
-            )
+            }
         }
-        assignStatus()
     }
 
     fun addReceivedByPrintProviderEventForBatch(
@@ -135,16 +137,17 @@ class Certificate(
         eventDateTime: Instant,
         message: String?
     ) {
-        getPrintRequestsByBatchId(batchId).forEach {
-            it.addPrintRequestStatus(
-                PrintRequestStatus(
-                    status = Status.RECEIVED_BY_PRINT_PROVIDER,
-                    eventDateTime = eventDateTime,
-                    message = message
+        processPrintRequestUpdate {
+            getPrintRequestsByBatchId(batchId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = Status.RECEIVED_BY_PRINT_PROVIDER,
+                        eventDateTime = eventDateTime,
+                        message = message
+                    )
                 )
-            )
+            }
         }
-        assignStatus()
     }
 
     fun requeuePrintRequestForBatch(
@@ -153,18 +156,19 @@ class Certificate(
         message: String?,
         newRequestId: String
     ) {
-        getPrintRequestsByBatchId(batchId).forEach {
-            it.addPrintRequestStatus(
-                PrintRequestStatus(
-                    status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-                    eventDateTime = eventDateTime,
-                    message = message
+        processPrintRequestUpdate {
+            getPrintRequestsByBatchId(batchId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        eventDateTime = eventDateTime,
+                        message = message
+                    )
                 )
-            )
-            it.batchId = null
-            it.requestId = newRequestId
+                it.batchId = null
+                it.requestId = newRequestId
+            }
         }
-        assignStatus()
     }
 
     fun addPrintRequestEvent(
@@ -173,15 +177,21 @@ class Certificate(
         eventDateTime: Instant,
         message: String?
     ) {
-        getPrintRequestsByRequestId(requestId).forEach {
-            it.addPrintRequestStatus(
-                PrintRequestStatus(
-                    status = status,
-                    eventDateTime = eventDateTime,
-                    message = message
+        processPrintRequestUpdate {
+            getPrintRequestsByRequestId(requestId).forEach {
+                it.addPrintRequestStatus(
+                    PrintRequestStatus(
+                        status = status,
+                        eventDateTime = eventDateTime,
+                        message = message
+                    )
                 )
-            )
+            }
         }
+    }
+
+    private fun processPrintRequestUpdate(update: () -> Unit) {
+        update.invoke()
         assignStatus()
     }
 
