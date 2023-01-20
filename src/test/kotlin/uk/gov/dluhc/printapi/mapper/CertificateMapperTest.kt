@@ -23,8 +23,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.toElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
 import java.time.LocalDate
@@ -135,22 +133,5 @@ class CertificateMapperTest {
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)
-    }
-
-    @Test
-    fun `should addPrintRequestToCertificate that already has a print request`() {
-        // Given
-        val ero = buildEroDto()
-        val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.EN)
-        val printRequest = buildPrintRequest()
-        val certificate = buildCertificate(printRequests = listOf(printRequest))
-        val printRequest2 = buildPrintRequest()
-        given(printRequestMapper.toPrintRequest(any(), any())).willReturn(printRequest2)
-
-        // When
-        mapper.addPrintRequestToCertificate(message, ero, certificate)
-
-        // Then
-        assertThat(certificate.printRequests).usingRecursiveComparison().isEqualTo(listOf(printRequest, printRequest2))
     }
 }

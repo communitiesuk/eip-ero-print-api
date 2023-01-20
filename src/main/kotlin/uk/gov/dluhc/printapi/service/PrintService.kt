@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.service
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.CertificateMapper
+import uk.gov.dluhc.printapi.mapper.PrintRequestMapper
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import javax.transaction.Transactional
@@ -13,6 +14,7 @@ class PrintService(
     private val eroClient: EroClient,
     private val sourceTypeMapper: SourceTypeMapper,
     private val certificateMapper: CertificateMapper,
+    private val printRequestMapper: PrintRequestMapper,
     private val certificateRepository: CertificateRepository
 ) {
     @Transactional
@@ -24,7 +26,7 @@ class PrintService(
             sourceType = sourceTypeMapper.toSourceTypeEntity(message.sourceType),
             sourceReference = message.sourceReference
         )?.also {
-            certificateMapper.addPrintRequestToCertificate(message, ero, it)
+            it.addPrintRequest(printRequestMapper.toPrintRequest(message, ero))
         } ?: run { certificateMapper.toCertificate(message, ero) }
 
         certificateRepository.save(certificate)
