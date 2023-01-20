@@ -21,6 +21,7 @@ import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aWelshEroContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.toElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
@@ -54,9 +55,11 @@ class CertificateMapperTest {
     private lateinit var idFactory: IdFactory
 
     @Test
-    fun `should map send application to print message to print details`() {
+    fun `should map send application to print message for an English certificate to print details`() {
         // Given
-        val ero = buildEroDto()
+        val ero = buildEroDto(
+            welshContactDetails = null
+        )
         val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.EN)
         val requestId = aValidRequestId()
         val vacNumber = aValidVacNumber()
@@ -118,6 +121,93 @@ class CertificateMapperTest {
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
                 issuingAuthority = ero.englishContactDetails.name,
+                issuingAuthorityCy = null,
+                issueDate = LocalDate.now(),
+                printRequests = mutableListOf(printRequest),
+                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+            )
+        }
+
+        // When
+        val actual = mapper.toCertificate(message, ero)
+
+        // Then
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+        verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
+        verify(idFactory).vacNumber()
+        verify(printRequestMapper).toPrintRequest(message, ero)
+        verify(instantMapper).toInstant(message.applicationReceivedDateTime)
+    }
+
+    @Test
+    fun `should map send application to print message for a Welsh certificate to print details`() {
+        // Given
+        val ero = buildEroDto(
+            welshContactDetails = aWelshEroContactDetails()
+        )
+        val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.CY)
+        val requestId = aValidRequestId()
+        val vacNumber = aValidVacNumber()
+        given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
+        given(idFactory.vacNumber()).willReturn(vacNumber)
+        given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
+
+        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.name)
+        val welshEro = ero.welshContactDetails!!.toElectoralRegistrationOffice(ero.welshContactDetails!!.name)
+
+        val printRequest = with(message) {
+            PrintRequest(
+                requestDateTime = requestDateTime.toInstant(),
+                requestId = requestId,
+                firstName = firstName,
+                middleNames = middleNames,
+                surname = surname,
+                certificateLanguage = CertificateLanguageEntity.EN,
+                photoLocationArn = photoLocation,
+                delivery = with(delivery) {
+                    Delivery(
+                        addressee = addressee,
+                        address = with(address) {
+                            Address(
+                                street = street,
+                                postcode = postcode,
+                                property = property,
+                                locality = locality,
+                                town = town,
+                                area = area,
+                                uprn = uprn
+                            )
+                        },
+                        deliveryClass = DeliveryClass.STANDARD,
+                        deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        addressFormat = AddressFormat.UK,
+                    )
+                },
+                eroEnglish = englishEro,
+                eroWelsh = welshEro,
+                statusHistory = mutableListOf(
+                    PrintRequestStatus(
+                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        dateCreated = FIXED_TIME,
+                        eventDateTime = FIXED_TIME
+                    )
+                ),
+                userId = userId
+            )
+        }
+        given(printRequestMapper.toPrintRequest(any(), any())).willReturn(printRequest)
+
+        val expected = with(message) {
+            Certificate(
+                id = null,
+                sourceReference = sourceReference,
+                applicationReference = applicationReference,
+                sourceType = SourceTypeEntity.VOTER_CARD,
+                vacNumber = vacNumber,
+                applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
+                gssCode = gssCode,
+                issuingAuthority = ero.englishContactDetails.name,
+                issuingAuthorityCy = ero.welshContactDetails!!.name,
                 issueDate = LocalDate.now(),
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
