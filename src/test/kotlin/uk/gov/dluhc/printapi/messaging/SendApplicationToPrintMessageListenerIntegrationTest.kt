@@ -23,6 +23,7 @@ import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.LARGE_MINUS_PRINT
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasLog
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
@@ -32,9 +33,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityRespo
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset.UTC
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
-import java.util.function.BiPredicate
 import uk.gov.dluhc.printapi.messaging.models.SourceType as SqsSourceType
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
@@ -102,12 +103,20 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             gssCode = gssCode,
             sourceType = SqsSourceType.VOTER_MINUS_CARD,
             sourceReference = certificate.sourceReference!!,
-            supportingInformationFormat = LARGE_MINUS_PRINT
+            supportingInformationFormat = LARGE_MINUS_PRINT,
+            requestDateTime = expected.printRequests[0].requestDateTime!!.plusSeconds(5).atOffset(UTC)
         )
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
 
         // add resend print request from processing new send to print request to expected certificate
-        with(payload) { expected.addPrintRequest(toPrintRequest(localAuthority, SupportingInformationFormat.LARGE_PRINT)) }
+        with(payload) {
+            expected.addPrintRequest(
+                toPrintRequest(
+                    localAuthority,
+                    SupportingInformationFormat.LARGE_PRINT
+                )
+            )
+        }
 
         // When
         sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
@@ -137,7 +146,10 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         }
     }
 
-    private fun SendApplicationToPrintMessage.toPrintRequest(localAuthority: LocalAuthorityResponse, supportingInfoFormat: SupportingInformationFormat): PrintRequest {
+    private fun SendApplicationToPrintMessage.toPrintRequest(
+        localAuthority: LocalAuthorityResponse,
+        supportingInfoFormat: SupportingInformationFormat
+    ): PrintRequest {
         val printRequest = PrintRequest(
             requestId = aValidRequestId(),
             vacVersion = "A",
@@ -220,32 +232,21 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         saved: Certificate,
         expected: Certificate
     ) {
-        val instantEqualToRoundedSeconds: BiPredicate<Instant, Instant> =
-            BiPredicate<Instant, Instant> { a, b -> withinSecond(a.epochSecond, b.epochSecond) }
-        assertThat(saved).usingRecursiveComparison()
-            .withEqualsForType(instantEqualToRoundedSeconds, Instant::class.java)
-            .ignoringFields(
-                "vacNumber",
-                "printRequests.requestId",
-                "printRequests.statusHistory.eventDateTime"
-            )
-            .ignoringFieldsMatchingRegexes(
-                ".*id",
-                ".*version",
-                ".*createdBy",
-                ".*dateCreated",
-            )
-            .ignoringCollectionOrder()
-            .isEqualTo(expected)
-        assertThat(saved.status).isEqualTo(Status.PENDING_ASSIGNMENT_TO_BATCH)
-        assertThat(saved.printRequests[0].requestId).containsPattern(Regex("^[a-f\\d]{24}$").pattern)
-        assertThat(saved.vacNumber).containsPattern(Regex("^[A-Za-z\\d]{20}$").pattern)
-    }
-
-    private fun withinSecond(actual: Long, epochSeconds: Long): Boolean {
-        val variance = 1
-        val lowerBound: Long = epochSeconds - variance
-        val upperBound: Long = epochSeconds + variance
-        return actual in lowerBound..upperBound
+        assertThat(saved)
+            .hasId()
+            .hasVacNumber()
+            .hasSourceType(expected.sourceType)
+            .hasSourceReference(expected.sourceReference)
+            .hasApplicationReference(expected.applicationReference)
+            .hasApplicationReceivedDateTime(expected.applicationReceivedDateTime)
+            .hasIssuingAuthority(expected.issuingAuthority)
+            .hasIssueDate(expected.issueDate)
+            .hasSuggestedExpiryDate(expected.suggestedExpiryDate)
+            .hasStatus(expected.status)
+            .hasGssCode(expected.gssCode)
+            .hasPrintRequests(expected.printRequests)
+            .hasDateCreated()
+            .hasCreatedBy()
+            .hasVersion()
     }
 }
