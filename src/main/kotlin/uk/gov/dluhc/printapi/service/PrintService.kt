@@ -19,17 +19,13 @@ class PrintService(
     fun savePrintMessage(message: SendApplicationToPrintMessage) {
         val ero = eroClient.getEro(message.gssCode!!)
 
-        var certificate = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+        val certificate = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
             gssCodes = listOf(message.gssCode),
             sourceType = sourceTypeMapper.toSourceTypeEntity(message.sourceType),
             sourceReference = message.sourceReference
-        )
-
-        if (certificate != null) {
-            certificateMapper.addPrintRequestToCertificate(message, ero, certificate)
-        } else {
-            certificate = certificateMapper.toCertificate(message, ero)
-        }
+        )?.also {
+            certificateMapper.addPrintRequestToCertificate(message, ero, it)
+        } ?: run { certificateMapper.toCertificate(message, ero) }
 
         certificateRepository.save(certificate)
     }
