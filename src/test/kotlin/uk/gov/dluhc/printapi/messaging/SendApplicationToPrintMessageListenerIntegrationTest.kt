@@ -60,8 +60,11 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         )
         val localAuthority = ero.localAuthorities[1]
         val gssCode = localAuthority.gssCode
-        val payload =
-            buildSendApplicationToPrintMessage(gssCode = gssCode, supportingInformationFormat = EASY_MINUS_READ)
+        val payload = buildSendApplicationToPrintMessage(
+            gssCode = gssCode,
+            supportingInformationFormat = EASY_MINUS_READ,
+            certificateLanguage = uk.gov.dluhc.printapi.messaging.models.CertificateLanguage.CY
+        )
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
 
         val expected = with(payload) {
@@ -73,10 +76,11 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 vacNumber = aValidVacNumber(),
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = localAuthority.name,
+                issuingAuthority = localAuthority.contactDetailsEnglish.name,
+                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.name,
                 issueDate = LocalDate.now(),
             )
-            val printRequest = toPrintRequest(localAuthority, SupportingInformationFormat.EASY_READ)
+            val printRequest = toPrintRequest(localAuthority, SupportingInformationFormat.EASY_READ, CertificateLanguage.CY)
             certificate.addPrintRequest(printRequest)
         }
 
@@ -122,7 +126,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             expected.addPrintRequest(
                 toPrintRequest(
                     localAuthority,
-                    SupportingInformationFormat.LARGE_PRINT
+                    SupportingInformationFormat.LARGE_PRINT,
+                    CertificateLanguage.EN,
                 )
             )
         }
@@ -182,7 +187,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             expected.addPrintRequest(
                 toPrintRequest(
                     localAuthority,
-                    SupportingInformationFormat.LARGE_PRINT
+                    SupportingInformationFormat.LARGE_PRINT,
+                    CertificateLanguage.EN,
                 )
             )
         }
@@ -217,7 +223,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
 
     private fun SendApplicationToPrintMessage.toPrintRequest(
         localAuthority: LocalAuthorityResponse,
-        supportingInfoFormat: SupportingInformationFormat
+        supportingInfoFormat: SupportingInformationFormat,
+        certificateLanguage: CertificateLanguage,
     ): PrintRequest {
         val printRequest = PrintRequest(
             requestId = aValidRequestId(),
@@ -226,7 +233,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             firstName = firstName,
             middleNames = middleNames,
             surname = surname,
-            certificateLanguage = CertificateLanguage.EN,
+            certificateLanguage = certificateLanguage,
             supportingInformationFormat = supportingInfoFormat,
             photoLocationArn = photoLocation,
             delivery = with(delivery) {

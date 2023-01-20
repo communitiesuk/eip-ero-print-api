@@ -10,19 +10,19 @@ import uk.gov.dluhc.printapi.dto.EroDto
 @Mapper
 abstract class EroDtoMapper {
 
-    @Mapping(target = "englishContactDetails", expression = "java(toEroContactDetailsDto( localAuthority.getName(), localAuthority.getContactDetailsEnglish() ))")
-    @Mapping(target = "welshContactDetails", expression = "java(toNullEroContactDetailsDto( localAuthority.getName(), localAuthority.getContactDetailsWelsh() ))")
+    @Mapping(target = "englishContactDetails", expression = "java(toEroContactDetailsDto( localAuthority.getContactDetailsEnglish() ))")
+    @Mapping(target = "welshContactDetails", expression = "java(toNullEroContactDetailsDto( localAuthority.getContactDetailsWelsh() ))")
     abstract fun toEroDto(localAuthority: LocalAuthorityResponse): EroDto
 
-    fun toNullEroContactDetailsDto(name: String, contactDetails: ContactDetails?): EroContactDetailsDto? {
+    fun toNullEroContactDetailsDto(contactDetails: ContactDetails?): EroContactDetailsDto? {
         return if (contactDetails == null) {
             null
         } else {
-            toEroContactDetailsDto(name, contactDetails)
+            toEroContactDetailsDto(contactDetails)
         }
     }
 
     @Mapping(target = "emailAddress", source = "contactDetails.email")
     @Mapping(target = "phoneNumber", source = "contactDetails.phone")
-    abstract fun toEroContactDetailsDto(name: String, contactDetails: ContactDetails): EroContactDetailsDto
+    abstract fun toEroContactDetailsDto(contactDetails: ContactDetails): EroContactDetailsDto
 }
