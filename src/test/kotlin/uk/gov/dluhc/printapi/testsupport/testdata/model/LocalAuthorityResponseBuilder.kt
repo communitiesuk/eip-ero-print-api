@@ -23,12 +23,14 @@ fun buildLocalAuthorityResponse(
 )
 
 fun buildContactDetails(
+    name: String = aValidLocalAuthorityName(),
     websiteAddress: String = aValidWebsite(),
     phoneNumber: String = aValidPhoneNumber(),
     emailAddress: String = aValidEmailAddress(),
     address: Address = buildEroManagementAddress(),
 ): ContactDetails =
     ContactDetails(
+        name = name,
         website = websiteAddress,
         phone = phoneNumber,
         email = emailAddress,

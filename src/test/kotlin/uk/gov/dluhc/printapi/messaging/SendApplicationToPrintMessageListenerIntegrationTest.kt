@@ -61,8 +61,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 vacNumber = aValidVacNumber(),
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = localAuthority.name,
-                issuingAuthorityCy = localAuthority.name,
+                issuingAuthority = localAuthority.contactDetailsEnglish.name,
+                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.name,
                 issueDate = LocalDate.now(),
             )
             val printRequest = PrintRequest(
