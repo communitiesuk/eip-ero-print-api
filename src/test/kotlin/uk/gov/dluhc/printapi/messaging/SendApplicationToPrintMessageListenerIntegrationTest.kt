@@ -38,7 +38,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAddress as buildDeliveryAddress
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
@@ -46,6 +45,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 import uk.gov.dluhc.printapi.messaging.models.DeliveryAddressType as SqsDeliveryAddressType
 import uk.gov.dluhc.printapi.messaging.models.SourceType as SqsSourceType
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAddress as buildDeliveryAddress
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
@@ -153,10 +153,12 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val localAuthority = ero.localAuthorities[1]
         val gssCode = localAuthority.gssCode
         val eroAddress = buildAddress(property = "ERO Property", street = "ERO Street")
-        val printRequests = listOf(buildPrintRequest(
-            printRequestStatuses = listOf(buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER)),
-            delivery = buildDelivery(addressType = ERO_COLLECTION, addressee = "ERO OFFICER", address = eroAddress)
-        ))
+        val printRequests = listOf(
+            buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER)),
+                delivery = buildDelivery(addressType = ERO_COLLECTION, addressee = "ERO OFFICER", address = eroAddress)
+            )
+        )
 
         val certificate = buildCertificate(gssCode = gssCode, sourceType = VOTER_CARD, printRequests = printRequests)
         val expected = certificateRepository.save(certificate)
@@ -189,7 +191,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
 
         // Then
-        await.atMost(500, SECONDS).untilAsserted {
+        await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
