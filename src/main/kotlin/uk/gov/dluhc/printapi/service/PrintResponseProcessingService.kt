@@ -6,7 +6,7 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
-import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findByPrintRequestStatusAndBatchId
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -48,7 +48,7 @@ class PrintResponseProcessingService(
     fun processBatchResponses(batchResponses: List<BatchResponse>) {
         batchResponses.forEach { batchResponse ->
             val certificates =
-                certificateRepository.findByPrintRequestStatusAndBatchId(
+                certificateRepository.findDistinctByPrintRequestStatusAndBatchId(
                     SENT_TO_PRINT_PROVIDER,
                     batchResponse.batchId
                 )
