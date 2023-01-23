@@ -45,7 +45,11 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         )
         val localAuthority = ero.localAuthorities[1]
         val gssCode = localAuthority.gssCode
-        val payload = buildSendApplicationToPrintMessage(gssCode = gssCode, supportingInformationFormat = EASY_MINUS_READ)
+        val payload = buildSendApplicationToPrintMessage(
+            gssCode = gssCode,
+            supportingInformationFormat = EASY_MINUS_READ,
+            certificateLanguage = uk.gov.dluhc.printapi.messaging.models.CertificateLanguage.CY
+        )
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
 
         val expected = with(payload) {
@@ -58,6 +62,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.name,
+                issuingAuthorityCy = localAuthority.name,
                 issueDate = LocalDate.now(),
             )
             val printRequest = PrintRequest(
@@ -67,7 +72,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 firstName = firstName,
                 middleNames = middleNames,
                 surname = surname,
-                certificateLanguage = CertificateLanguage.EN,
+                certificateLanguage = CertificateLanguage.CY,
                 supportingInformationFormat = SupportingInformationFormat.EASY_READ,
                 photoLocationArn = photoLocation,
                 delivery = with(delivery) {

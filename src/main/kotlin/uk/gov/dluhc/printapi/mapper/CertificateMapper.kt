@@ -6,9 +6,7 @@ import org.mapstruct.Mapping
 import org.mapstruct.MappingTarget
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
 import uk.gov.dluhc.printapi.dto.EroDto
-import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.service.IdFactory
 
@@ -23,7 +21,7 @@ abstract class CertificateMapper {
 
     @Mapping(target = "vacNumber", expression = "java( idFactory.vacNumber() )")
     @Mapping(source = "ero.englishContactDetails.name", target = "issuingAuthority")
-    @Mapping(expression = "java( welshIssuingAuthorityName(message, ero.getWelshContactDetails()) )", target = "issuingAuthorityCy")
+    @Mapping(source = "ero.welshContactDetails.name", target = "issuingAuthorityCy")
     abstract fun toCertificate(
         message: SendApplicationToPrintMessage,
         ero: EroDto
@@ -36,13 +34,5 @@ abstract class CertificateMapper {
         @MappingTarget certificate: Certificate
     ) {
         certificate.addPrintRequest(printRequestMapper.toPrintRequest(message, ero))
-    }
-
-    protected fun welshIssuingAuthorityName(message: SendApplicationToPrintMessage, welshContactDetails: EroContactDetailsDto?): String? {
-        return if (message.certificateLanguage == CertificateLanguage.CY && welshContactDetails != null) {
-            welshContactDetails.name
-        } else {
-            null
-        }
     }
 }
