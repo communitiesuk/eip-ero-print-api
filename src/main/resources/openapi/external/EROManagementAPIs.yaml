@@ -3,7 +3,7 @@ security:
   - bearerAuth: []
 info:
   title: EROManagementAPIs
-  version: '1.2.0'
+  version: '1.2.1'
   description: API for viewing and managing ERO Users and ERO Details.
   contact:
     name: Krister Bone
@@ -712,7 +712,7 @@ components:
           format: email
         phoneNumber:
           type: string
-          pattern: ^\+\d+$
+          pattern: ^(\+\d+|)$
         firstName:
           type: string
           minLength: 2
@@ -723,7 +723,6 @@ components:
           maxLength: 255
       required:
         - email
-        - phoneNumber
         - firstName
         - surname
     EroGroup:
@@ -749,6 +748,7 @@ components:
         name: 'Isle of Anglesey County Council'
         contactDetailsEnglish:
           {
+            name: "Isle of Anglesey County Council",
             phoneNumber: "01248 752548",
             website: "http://www.anglesey.gov.uk/council-and-democracy/councillors-democracy-and-elections/electoral-register-elections-and-voting-/",
             email: "shxcs@ynysmon.gov.uk",
@@ -762,6 +762,7 @@ components:
           }
         contactDetailsWelsh:
           {
+            name: "Cyngor Sir Ynys Môn",
             phoneNumber: "(01248) 750057",
             website: "https://www.ynysmon.llyw.cymru/cy/Cyngor/Pleidleisio-ac-etholiadau/Cofrestru-etholiadol/Cofrestru-i-bleidleisio.aspx",
             email: "shxcs@ynysmon.gov.uk",
@@ -791,6 +792,9 @@ components:
       type: object
       description: Contact details for an ERO
       properties:
+        name:
+          type: string
+          example: Isle of Anglesey County Council
         website:
           type: string
           example: "https://ero-address.com"
@@ -803,6 +807,7 @@ components:
         address:
           $ref: '#/components/schemas/Address'
       required:
+        - name
         - website
         - phone
         - email
@@ -862,6 +867,7 @@ components:
             name: 'Isle of Anglesey County Council',
             contactDetailsEnglish:
               {
+                name: 'Isle of Anglesey County Council',
                 phoneNumber: "01248 752548",
                 website: "http://www.anglesey.gov.uk/council-and-democracy/councillors-democracy-and-elections/electoral-register-elections-and-voting-/",
                 email: "shxcs@ynysmon.gov.uk",
@@ -875,6 +881,7 @@ components:
               },
             contactDetailsWelsh:
               {
+                name: 'Cyngor Sir Ynys Môn',
                 phoneNumber: "(01248) 750057",
                 website: "https://www.ynysmon.llyw.cymru/cy/Cyngor/Pleidleisio-ac-etholiadau/Cofrestru-etholiadol/Cofrestru-i-bleidleisio.aspx",
                 email: "shxcs@ynysmon.gov.uk",
