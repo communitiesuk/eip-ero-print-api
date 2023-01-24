@@ -322,9 +322,7 @@ class CertificateAssert
         // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
-        val printRequest = actual!!.printRequests.find { pr ->
-            pr.requestDateTime!!.truncatedTo(SECONDS).equals(requestDateTime.truncatedTo(SECONDS))
-        }
+        val printRequest = actual!!.printRequests.find { pr -> pr.requestDateTime!! == requestDateTime }
 
         // check that given PrintRequest collection is not null.
         if (printRequest == null) {

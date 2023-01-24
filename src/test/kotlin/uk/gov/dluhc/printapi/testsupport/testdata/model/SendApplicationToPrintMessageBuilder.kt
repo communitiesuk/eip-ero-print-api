@@ -12,13 +12,14 @@ import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 fun buildSendApplicationToPrintMessage(
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     sourceType: SourceType = SourceType.VOTER_MINUS_CARD,
-    requestDateTime: OffsetDateTime = Instant.now().atOffset(UTC),
+    requestDateTime: OffsetDateTime = Instant.now().atOffset(UTC).truncatedTo(ChronoUnit.SECONDS),
     applicationReceivedDateTime: OffsetDateTime = Instant.now().atOffset(UTC),
     firstName: String = faker.name().firstName(),
     middleNames: String? = faker.name().firstName(),

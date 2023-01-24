@@ -33,8 +33,8 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
 }
 
 object CertificateRepositoryExtensions {
-    fun CertificateRepository.findByPrintRequestStatusAndBatchId(status: Status, batchId: String): List<Certificate> {
-        return findByPrintRequestsBatchId(batchId)
+    fun CertificateRepository.findDistinctByPrintRequestStatusAndBatchId(status: Status, batchId: String): List<Certificate> {
+        return findByPrintRequestsBatchId(batchId).toSet()
             .filter { it.printRequests.any { printRequest -> printRequest.getCurrentStatus().status == status } }
     }
 }
