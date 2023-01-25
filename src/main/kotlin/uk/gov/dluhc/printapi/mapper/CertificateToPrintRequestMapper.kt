@@ -52,7 +52,7 @@ abstract class CertificateToPrintRequestMapper {
     @Mapping(source = "printRequest.eroWelsh.address.area", target = "eroDeliveryAreaCy")
     @Mapping(source = "printRequest.eroWelsh.address.postcode", target = "eroDeliveryPostcodeCy")
     @Mapping(source = "printRequest.eroWelsh.emailAddress", target = "eroEmailAddressCy")
-    @Mapping(source = "printRequest.eroWelsh.name", target = "issuingAuthorityCy")
+    @Mapping(source = "certificate.issuingAuthorityCy", target = "issuingAuthorityCy")
     @Mapping(source = "printRequest.requestDateTime", target = "requestDateTime")
     @Mapping(source = "photoZipPath", target = "photo")
     abstract fun map(certificate: Certificate, printRequest: uk.gov.dluhc.printapi.database.entity.PrintRequest, photoZipPath: String): PrintRequest

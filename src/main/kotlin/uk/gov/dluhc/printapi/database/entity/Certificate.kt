@@ -60,6 +60,9 @@ class Certificate(
     @field:Size(max = 255)
     var issuingAuthority: String? = null,
 
+    @field:Size(max = 255)
+    var issuingAuthorityCy: String? = null,
+
     @field:NotNull
     var issueDate: LocalDate = LocalDate.now(),
 

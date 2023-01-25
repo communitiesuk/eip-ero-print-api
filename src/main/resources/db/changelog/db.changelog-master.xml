@@ -14,4 +14,6 @@
     <include relativeToChangelogFile="true" file="ddl/0006_add_index_event_date_time_status_to_print_request_status.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0007_EIP1-2781_alter_print_request.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0008_EIP1-2833_alter_delivery.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0009_EIP1-3454_alter_certificate.xml"/>
+    <include relativeToChangelogFile="true" file="migration/0001_EIP1-3454_update_certificate.xml"/>
 </databaseChangeLog>
