@@ -15,7 +15,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "10.3.0"
     id("org.openapi.generator") version "6.2.0"
-    id("org.owasp.dependencycheck") version "7.4.3"
+    id("org.owasp.dependencycheck") version "8.0.2"
     id("org.jsonschema2dataclass") version "4.5.0"
 }
 
@@ -24,7 +24,6 @@ version = "latest"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 ext["snakeyaml.version"] = "1.33"
-ext["spring-security.version"] = "5.7.5" // Fixed CVE-2022-31690 and CVE-2022-31692 - https://spring.io/blog/2022/10/31/cve-2022-31690-privilege-escalation-in-spring-security-oauth2-client
 extra["springCloudVersion"] = "2.4.2"
 extra["awsSdkVersion"] = "2.18.9"
 
