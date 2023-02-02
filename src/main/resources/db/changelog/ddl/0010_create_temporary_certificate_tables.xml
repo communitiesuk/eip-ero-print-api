@@ -52,9 +52,6 @@
             <column name="valid_on_date" type="date">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="varchar(50)">
-                <constraints nullable="false"/>
-            </column>
             <column name="user_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -74,8 +71,8 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-create-temporary-certificate-status-history" context="ddl">
-        <createTable tableName="temporary_certificate_status_history">
+    <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-create-temporary-certificate-status" context="ddl">
+        <createTable tableName="temporary_certificate_status">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
                              primaryKeyName="temporary_certificate_status_pkey"/>
@@ -103,7 +100,7 @@
         </createTable>
 
         <rollback>
-            <dropTable tableName="temporary_certificate_status_history" />
+            <dropTable tableName="temporary_certificate_status" />
         </rollback>
     </changeSet>
 
@@ -120,13 +117,13 @@
     </changeSet>
 
     <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-status-date-created-index" context="ddl">
-        <createIndex indexName="status_date_created_idx" tableName="temporary_certificate_status_history" unique="false">
+        <createIndex indexName="status_date_created_idx" tableName="temporary_certificate_status" unique="false">
             <column name="status"/>
             <column name="date_created"/>
         </createIndex>
 
         <rollback>
-            <dropIndex indexName="status_date_created_idx" tableName="temporary_certificate_status_history" />
+            <dropIndex indexName="status_date_created_idx" tableName="temporary_certificate_status" />
         </rollback>
     </changeSet>
 
