@@ -76,7 +76,7 @@ class Certificate(
      */
     @field:NotNull
     @Enumerated(EnumType.STRING)
-    var status: Status? = null,
+    var status: PrintRequestStatus.Status? = null,
 
     @field:NotNull
     @field:Size(max = 80)
@@ -103,14 +103,14 @@ class Certificate(
         return this
     }
 
-    fun getPrintRequestsByStatus(printRequestStatus: Status) =
+    fun getPrintRequestsByStatus(printRequestStatus: PrintRequestStatus.Status) =
         printRequests.filter { it.getCurrentStatus().status == printRequestStatus }
 
     fun addPrintRequestToBatch(printRequest: PrintRequest, batchId: String) {
         processPrintRequestUpdate {
             printRequest.addPrintRequestStatus(
                 PrintRequestStatus(
-                    status = Status.ASSIGNED_TO_BATCH,
+                    status = PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
                     eventDateTime = Instant.now(),
                     message = null
                 )
@@ -124,7 +124,7 @@ class Certificate(
             getPrintRequestsByBatchId(batchId).forEach {
                 it.addPrintRequestStatus(
                     PrintRequestStatus(
-                        status = Status.SENT_TO_PRINT_PROVIDER,
+                        status = PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER,
                         eventDateTime = Instant.now(),
                         message = null
                     )
@@ -142,7 +142,7 @@ class Certificate(
             getPrintRequestsByBatchId(batchId).forEach {
                 it.addPrintRequestStatus(
                     PrintRequestStatus(
-                        status = Status.RECEIVED_BY_PRINT_PROVIDER,
+                        status = PrintRequestStatus.Status.RECEIVED_BY_PRINT_PROVIDER,
                         eventDateTime = eventDateTime,
                         message = message
                     )
@@ -161,7 +161,7 @@ class Certificate(
             getPrintRequestsByBatchId(batchId).forEach {
                 it.addPrintRequestStatus(
                     PrintRequestStatus(
-                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        status = PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH,
                         eventDateTime = eventDateTime,
                         message = message
                     )
@@ -174,7 +174,7 @@ class Certificate(
 
     fun addPrintRequestEvent(
         requestId: String,
-        status: Status,
+        status: PrintRequestStatus.Status,
         eventDateTime: Instant,
         message: String?
     ) {

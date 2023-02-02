@@ -3,12 +3,12 @@ package uk.gov.dluhc.printapi.database.mapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.dto.StatusDto
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
+import uk.gov.dluhc.printapi.dto.PrintRequestStatusDto
 
-internal class DtoStatusMapperTest {
+internal class PrintRequestStatusDtoMapperTest {
 
-    private val dtoStatusMapper = DtoStatusMapper()
+    private val dtoStatusMapper = PrintRequestStatusDtoMapper()
 
     @ParameterizedTest
     @CsvSource(
@@ -26,11 +26,11 @@ internal class DtoStatusMapperTest {
             "PRINT_PROVIDER_DISPATCH_FAILED, PRINT_PROVIDER_DISPATCH_FAILED",
         ]
     )
-    fun `should map entity Status to DTO status`(status: Status, expected: StatusDto) {
+    fun `should map entity Status to DTO status`(status: Status, expected: PrintRequestStatusDto) {
         // Given
 
         // When
-        val actual = dtoStatusMapper.toDtoStatus(status)
+        val actual = dtoStatusMapper.toPrintRequestStatusDto(status)
 
         // Then
         assertThat(actual).isEqualTo(expected)

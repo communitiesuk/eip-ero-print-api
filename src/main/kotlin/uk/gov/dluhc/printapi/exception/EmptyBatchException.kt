@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.exception
 
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import java.lang.RuntimeException
 
 data class EmptyBatchException(

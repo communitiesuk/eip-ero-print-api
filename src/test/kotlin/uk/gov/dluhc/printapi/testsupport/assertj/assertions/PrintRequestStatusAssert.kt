@@ -5,7 +5,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.within
 import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Objects

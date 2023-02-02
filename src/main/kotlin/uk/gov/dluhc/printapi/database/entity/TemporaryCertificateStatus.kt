@@ -62,7 +62,7 @@ class TemporaryCertificateStatus(
 
     @Override
     override fun toString(): String {
-        return this::class.simpleName + "(id = $id , dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
+        return this::class.simpleName + "(id = $id , status = $status , dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
     }
 
     enum class Status {

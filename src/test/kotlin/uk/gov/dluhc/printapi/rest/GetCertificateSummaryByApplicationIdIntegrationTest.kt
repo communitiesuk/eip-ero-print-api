@@ -4,8 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
 import uk.gov.dluhc.printapi.models.PrintRequestSummary

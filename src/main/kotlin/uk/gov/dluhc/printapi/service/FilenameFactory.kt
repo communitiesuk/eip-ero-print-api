@@ -2,7 +2,7 @@ package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId

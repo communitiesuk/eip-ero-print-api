@@ -6,8 +6,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
-import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import java.time.Clock
 import java.time.Instant

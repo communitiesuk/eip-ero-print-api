@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import uk.gov.dluhc.printapi.dto.StatusDto
+import uk.gov.dluhc.printapi.dto.PrintRequestStatusDto
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
 import uk.gov.dluhc.printapi.models.PrintRequestSummary
@@ -33,10 +33,10 @@ class CertificateSummaryResponseMapperTest {
     fun `should map certificate summary dto to certificate summary response`() {
         // Given
         val request1 = buildPrintRequestSummaryDto(
-            status = StatusDto.IN_PRODUCTION,
+            status = PrintRequestStatusDto.IN_PRODUCTION,
             eventDateTime = Instant.now().minusSeconds(100)
         )
-        val request2 = buildPrintRequestSummaryDto(status = StatusDto.DISPATCHED, eventDateTime = Instant.now())
+        val request2 = buildPrintRequestSummaryDto(status = PrintRequestStatusDto.DISPATCHED, eventDateTime = Instant.now())
         val dto = buildCertificateSummaryDto(printRequests = listOf(request1, request2))
         given(printRequestStatusMapper.toPrintRequestStatus(any())).willReturn(
             PrintRequestStatus.PRINT_MINUS_PROCESSING,

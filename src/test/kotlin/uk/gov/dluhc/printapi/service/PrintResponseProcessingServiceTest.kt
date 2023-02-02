@@ -19,10 +19,10 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.Status.IN_PRODUCTION
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
-import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
-import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.RECEIVED_BY_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper

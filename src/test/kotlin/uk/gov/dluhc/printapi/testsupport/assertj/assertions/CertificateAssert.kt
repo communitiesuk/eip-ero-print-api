@@ -7,8 +7,8 @@ import org.assertj.core.internal.Iterables
 import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.SECONDS
