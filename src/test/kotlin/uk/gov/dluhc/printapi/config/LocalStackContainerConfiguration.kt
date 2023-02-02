@@ -45,12 +45,15 @@ class LocalStackContainerConfiguration {
                     DockerImageName.parse("localstack/localstack:1.2.0")
                 ).withEnv(
                     mapOf(
-                        "SERVICES" to "sqs, dynamodb",
+                        "SERVICES" to "sqs",
                         "AWS_DEFAULT_REGION" to DEFAULT_REGION,
                     )
                 )
                     .withReuse(true)
                     .withExposedPorts(DEFAULT_PORT)
+                    .withCreateContainerCmdModifier {
+                        it.withName("print-api-localstack")
+                    }
                     .apply {
                         start()
                     }

@@ -7,6 +7,7 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import uk.gov.dluhc.printapi.database.entity.TemporaryCertificateStatus
 
 fun aValidSourceType() = SourceType.VOTER_CARD
 
@@ -23,3 +24,7 @@ fun aValidDeliveryClass(): DeliveryClass = DeliveryClass.STANDARD
 fun aValidDeliveryAddressType(): DeliveryAddressType = DeliveryAddressType.REGISTERED
 
 fun aValidAddressFormat(): AddressFormat = AddressFormat.UK
+
+fun aValidTemporaryCertificateTemplateFilename(): String = "temporary-certificate-template-en.pdf"
+
+fun aValidTemporaryCertificateStatus() = TemporaryCertificateStatus.Status.GENERATED
