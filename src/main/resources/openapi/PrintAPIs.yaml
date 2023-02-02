@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.1.1'
+  version: '1.2.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -177,7 +177,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.path.applicationId: method.request.path.applicationId
+          integration.request.path.gssCode: method.request.path.gssCode
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
