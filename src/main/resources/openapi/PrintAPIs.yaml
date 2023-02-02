@@ -99,9 +99,9 @@ paths:
 
 
   #
-  # Temporary Card Explainer Document
+  # Temporary Certificate Explainer Document
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/temp-card/{gssCode}/explainer-document':
+  '/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the application.
@@ -154,8 +154,8 @@ paths:
               application/json: |
                 {}
     post:
-      summary: Returns the Local Authority's explainer document for a temporary card
-      description: Returns the Local Authority's explainer document for a temporary card
+      summary: Returns the Local Authority's explainer document for a temporary certificate
+      description: Returns the Local Authority's explainer document for a temporary certificate
       tags:
         - Temporary Card
       responses:
@@ -169,12 +169,12 @@ paths:
                 example: attachment; filename="explainer-document-E09000007.pdf"
         '404':
           description: Not Found
-      operationId: generate-temp-card-explainer-document
+      operationId: generate-temporary-certificate-explainer-document
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/temp-card/{gssCode}/explainer-document'
+        uri: '${base_uri}/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.applicationId: method.request.path.applicationId
