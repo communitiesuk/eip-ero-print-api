@@ -121,7 +121,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Temporary Card
+        - Temporary Certificate
       responses:
         200:
           description: Default response for CORS method
@@ -157,7 +157,7 @@ paths:
       summary: Returns the Local Authority's explainer document for a temporary certificate
       description: Returns the Local Authority's explainer document for a temporary certificate
       tags:
-        - Temporary Card
+        - Temporary Certificate
       responses:
         '201':
           description: created
@@ -166,7 +166,7 @@ paths:
               description: Content-Disposition header
               schema:
                 type: string
-                example: attachment; filename="explainer-document-E09000007.pdf"
+                example: attachment; filename="temporary-certificate-explainer-document-E09000007.pdf"
         '404':
           description: Not Found
       operationId: generate-temporary-certificate-explainer-document
