@@ -110,4 +110,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-source-details-index" context="ddl">
+        <createIndex indexName="source_details_inx" tableName="temporary_certificate" unique="true">
+            <column name="gss_code"/>
+            <column name="source_type"/>
+            <column name="source_reference"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
