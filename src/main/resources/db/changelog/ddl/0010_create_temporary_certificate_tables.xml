@@ -24,26 +24,15 @@
                 <constraints nullable="false"/>
             </column>
             <column name="application_reference" type="varchar(255)"/>
-            <column name="certificate_template_version" type="varchar(20)">
+            <column name="certificate_template_filename" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="issuing_authority" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="english_ero_id" type="uuid">
-                <constraints nullable="false"
-                             foreignKeyName="fk_temporary_certificate_english_ero_id"
-                             references="electoral_registration_office(id)"/>
-            </column>
             <column name="issuing_authority_cy" type="varchar(255)">
                 <constraints nullable="true"/>
             </column>
-            <column name="welsh_ero_id" type="uuid">
-                <constraints nullable="true"
-                             foreignKeyName="fk_temporary_certificate_welsh_ero_id"
-                             references="electoral_registration_office(id)"/>
-            </column>
-
             <column name="first_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -79,10 +68,14 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable tableName="temporary_certificate" />
+        </rollback>
     </changeSet>
 
-    <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-create-temporary-certificate-status" context="ddl">
-        <createTable tableName="temporary_certificate_status">
+    <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-create-temporary-certificate-status-history" context="ddl">
+        <createTable tableName="temporary_certificate_status_history">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
                              primaryKeyName="temporary_certificate_status_pkey"/>
@@ -95,7 +88,7 @@
             <column name="status" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="event_date_time" type="timestamp">
+            <column name="user_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="date_created" type="timestamp">
@@ -108,14 +101,33 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable tableName="temporary_certificate_status_history" />
+        </rollback>
     </changeSet>
 
     <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-source-details-index" context="ddl">
-        <createIndex indexName="source_details_inx" tableName="temporary_certificate" unique="true">
+        <createIndex indexName="source_details_inx" tableName="temporary_certificate" unique="false">
             <column name="gss_code"/>
             <column name="source_type"/>
             <column name="source_reference"/>
         </createIndex>
+
+        <rollback>
+            <dropIndex indexName="source_details_inx" tableName="temporary_certificate" />
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathan.russell@valtech.com" id="0010-EIP1-3610-status-date-created-index" context="ddl">
+        <createIndex indexName="status_date_created_idx" tableName="temporary_certificate_status_history" unique="false">
+            <column name="status"/>
+            <column name="date_created"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="status_date_created_idx" tableName="temporary_certificate_status_history" />
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
