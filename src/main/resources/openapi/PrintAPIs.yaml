@@ -99,7 +99,7 @@ paths:
 
 
   #
-  # Single Certificate Summary
+  # Temporary Card Explainer Document
   # --------------------------------------------------------------------------------
   '/eros/{eroId}/temp-card/{gssCode}/explainer-document':
     parameters:
