@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.1.1'
+  version: '1.2.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -96,6 +96,95 @@ paths:
         connectionType: VPC_LINK
         connectionId: '${vpc_connection_id}'
         httpMethod: GET
+
+
+  #
+  # Temporary Certificate Explainer Document
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: gssCode
+        description: The relevant GSS code for the local authority.
+        schema:
+          type: string
+          example: 'E09000007'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Temporary Certificate
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Returns the Local Authority's explainer document for a temporary certificate
+      description: Returns the Local Authority's explainer document for a temporary certificate
+      tags:
+        - Temporary Certificate
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="temporary-certificate-explainer-document-E09000007.pdf"
+        '404':
+          description: Not Found
+      operationId: generate-temporary-certificate-explainer-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.gssCode: method.request.path.gssCode
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
 
 components:
   #
