@@ -16,8 +16,8 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.data.domain.Pageable
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate

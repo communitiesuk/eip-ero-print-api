@@ -17,9 +17,9 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
-import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ

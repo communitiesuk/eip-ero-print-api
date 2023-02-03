@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
 import java.time.Instant
 import java.util.UUID
 

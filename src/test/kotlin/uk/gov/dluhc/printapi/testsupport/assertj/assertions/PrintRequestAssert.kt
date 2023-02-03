@@ -10,7 +10,7 @@ import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit

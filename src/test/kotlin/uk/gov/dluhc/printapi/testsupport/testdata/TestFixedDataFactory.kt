@@ -4,8 +4,8 @@ import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.database.entity.TemporaryCertificateStatus
 

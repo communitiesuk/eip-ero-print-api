@@ -11,9 +11,9 @@ import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.database.entity.Status.DISPATCHED
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.DISPATCHED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat

@@ -17,7 +17,7 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber

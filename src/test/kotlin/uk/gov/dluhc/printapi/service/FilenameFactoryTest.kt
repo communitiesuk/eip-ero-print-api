@@ -3,7 +3,7 @@ package uk.gov.dluhc.printapi.service
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import java.time.Clock
 import java.time.Instant

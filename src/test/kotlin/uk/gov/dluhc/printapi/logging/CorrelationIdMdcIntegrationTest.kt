@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.config.CORRELATION_ID
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ILoggingEventAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken

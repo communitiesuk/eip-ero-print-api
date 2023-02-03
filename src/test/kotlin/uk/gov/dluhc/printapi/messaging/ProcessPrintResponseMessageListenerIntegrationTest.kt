@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
