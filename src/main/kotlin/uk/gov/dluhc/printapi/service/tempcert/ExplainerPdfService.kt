@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.service.tempcert
 
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
+import uk.gov.dluhc.printapi.dto.PdfFile
 
 @Service
 class ExplainerPdfService(
@@ -15,8 +16,3 @@ class ExplainerPdfService(
         return PdfFile("temporary-certificate-explainer-document-$gssCode.pdf", contents)
     }
 }
-
-class PdfFile(
-    val filename: String,
-    val contents: ByteArray
-)
