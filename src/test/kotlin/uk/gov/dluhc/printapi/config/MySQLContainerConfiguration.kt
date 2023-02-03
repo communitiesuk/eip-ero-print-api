@@ -18,7 +18,7 @@ class MySQLContainerConfiguration : MySQLContainer<MySQLContainerConfiguration>(
                     .withPassword(PASSWORD)
                     .withReuse(true)
                     .withCreateContainerCmdModifier {
-                        it.withName("print-api-mysql")
+                        it.withName("print-api-integration-test-mysql")
                     }
                     .also {
                         it.start()
