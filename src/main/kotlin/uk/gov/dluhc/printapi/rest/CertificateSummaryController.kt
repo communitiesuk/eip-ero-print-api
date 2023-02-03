@@ -16,18 +16,8 @@ class CertificateSummaryController(
     private val certificateSummaryService: CertificateSummaryService,
     private val certificateSummaryResponseMapper: CertificateSummaryResponseMapper
 ) {
-    companion object {
-        const val ERO_VC_ADMIN_GROUP_PREFIX = "ero-vc-admin-"
-    }
-
     @GetMapping("/eros/{eroId}/certificates/applications/{applicationId}")
-    @PreAuthorize(
-        """
-        hasAnyAuthority(
-            T(uk.gov.dluhc.printapi.rest.CertificateSummaryController).ERO_VC_ADMIN_GROUP_PREFIX.concat(#eroId)
-        )
-        """
-    )
+    @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     fun getCertificateSummaryByApplicationId(
         @PathVariable eroId: String,
         @PathVariable applicationId: String,
