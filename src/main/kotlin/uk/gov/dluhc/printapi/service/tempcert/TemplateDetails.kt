@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.tempcard
+package uk.gov.dluhc.printapi.service.tempcert
 
 data class TemplateDetails(
     val path: String,

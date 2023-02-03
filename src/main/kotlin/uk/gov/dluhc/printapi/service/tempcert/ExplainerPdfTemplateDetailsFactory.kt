@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.tempcard
+package uk.gov.dluhc.printapi.service.tempcert
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component

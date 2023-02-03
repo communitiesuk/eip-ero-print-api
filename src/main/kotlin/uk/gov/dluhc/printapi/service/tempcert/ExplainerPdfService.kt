@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.tempcard
+package uk.gov.dluhc.printapi.service.tempcert
 
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
