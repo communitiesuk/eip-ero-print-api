@@ -52,7 +52,7 @@ class LocalStackContainerConfiguration {
                     .withReuse(true)
                     .withExposedPorts(DEFAULT_PORT)
                     .withCreateContainerCmdModifier {
-                        it.withName("print-api-localstack")
+                        it.withName("print-api-integration-test-localstack")
                     }
                     .apply {
                         start()

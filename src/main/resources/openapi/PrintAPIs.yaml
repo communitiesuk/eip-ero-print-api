@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.2.0'
+  version: '1.3.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -96,6 +96,90 @@ paths:
         connectionType: VPC_LINK
         connectionId: '${vpc_connection_id}'
         httpMethod: GET
+
+
+  #
+  # Temporary Certificate
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/temporary-certificate':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Temporary Certificate
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Generates and returns a temporary certificate
+      description: Generates and returns a temporary certificate
+      tags:
+        - Temporary Certificate
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateTemporaryCertificate'
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="temporary-certificate-V3JSZC4CRH.pdf"
+        '404':
+          description: Not Found
+      operationId: generate-temporary-certificate
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/temporary-certificate'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
 
 
   #
@@ -269,6 +353,80 @@ components:
         - dispatched
         - not-delivered
 
+    SourceType:
+      title: SourceType
+      description: An enumeration of sources
+      type: string
+      enum:
+        - voter-card
+
+    CertificateLanguage:
+      title: CertificateLanguage
+      description: An enumeration of Certificate languages
+      type: string
+      enum:
+        - cy
+        - en
+      default: en
+
+    GenerateTemporaryCertificateRequest:
+      title: GenerateTemporaryCertificateRequest
+      description: Request body to generate a Temporary Certificate
+      type: object
+      properties:
+        gssCode:
+          type: string
+          example: E12345678
+          minLength: 9
+          maxLength: 9
+          description: GSS code of the ERO responsible for the application
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Temporary Certificate is for.
+        applicationReference:
+          type: string
+          example: V3JSZC4CRH
+          description: The application reference as known by the citizen. Not guaranteed to be unique.
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        certificateLanguage:
+          $ref: '#/components/schemas/CertificateLanguage'
+        photoLocation:
+          type: string
+          description: The location of the Elector's photo. Typically an S3 ARN
+          maxLength: 1024
+        validOnDate:
+          type: string
+          format: date
+          description: The date that the Temporary Certificate is valid for.
+          example: '2023-07-27'
+      required:
+        - gssCode
+        - sourceType
+        - sourceReference
+        - applicationReference
+        - firstName
+        - surname
+        - certificateLanguage
+        - photoLocation
+        - validOnDate
+
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
@@ -289,6 +447,16 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CertificateSummaryResponse'
+  #
+  # Request Body Definitions
+  # --------------------------------------------------------------------------------
+  requestBodies:
+    GenerateTemporaryCertificate:
+      description: Request body to generate a Temporary Certificate
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerateTemporaryCertificateRequest'
 
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:
