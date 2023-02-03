@@ -49,6 +49,31 @@ jobs:
     name: "ProcessPrintResponses"
     cron: "0 15/30 * * * *" # every 30 minutes starting at 15 minutes past the hour - see analysis and recommendations in EIP1-2515
 
+temporary-certificate:
+  explainer-pdf:
+    english:
+      path: "templates/Explainer Document (English).pdf"
+      placeholder:
+        ero-name: "eroName"
+        ero-address-line1: "eroAddressLine1"
+        ero-address-line2: "eroAddressLine2"
+        ero-address-line3: "eroAddressLine3"
+        ero-address-line4: "eroAddressLine4"
+        ero-address-postcode: "eroPostcode"
+        ero-email: "eroEmailAddress"
+        ero-phone: "eroPhoneNumber"
+    welsh:
+      path: "Explainer Document (Dual Language).pdf"
+      placeholder:
+        ero-name: "eroName"
+        ero-address-line1: "eroAddressLine1"
+        ero-address-line2: "eroAddressLine2"
+        ero-address-line3: "eroAddressLine3"
+        ero-address-line4: "eroAddressLine4"
+        ero-address-postcode: "eroAddressPostcode"
+        ero-email: "eroEmailAddress"
+        ero-phone: "eroPhoneNumber"
+
 thread-pool:
   zip:
     core-size: 5

@@ -90,9 +90,12 @@ dependencies {
     // mongo core datatypes, so that we can generate a Mongo ObjectId (a 12 byte/24 char hex string ID)
     implementation("org.mongodb:bson:4.7.1")
 
-    // Schedulling
+    // Scheduling
     implementation("net.javacrumbs.shedlock:shedlock-spring:4.42.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.42.0")
+
+    // OpenPDF
+    implementation("com.github.librepdf:openpdf:1.3.30")
 
     // Test implementations
     testImplementation("org.springframework.boot:spring-boot-starter-test")
