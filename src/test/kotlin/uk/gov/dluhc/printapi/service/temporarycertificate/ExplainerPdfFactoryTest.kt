@@ -53,7 +53,6 @@ internal class ExplainerPdfFactoryTest {
 
         // Then
         verify(explainerPdfTemplateDetailsFactory).getTemplateDetails(gssCode, eroDetails)
-        // FileOutputStream(File("Example_English.pdf")).use { it.write(contents) }
         PdfReader(contents).use { reader ->
             verifyEnglishPlaceholders(reader.acroFields, placeholders)
         }
@@ -84,7 +83,6 @@ internal class ExplainerPdfFactoryTest {
 
         // Then
         verify(explainerPdfTemplateDetailsFactory).getTemplateDetails(gssCode, eroDetails)
-        // FileOutputStream(File("Example_Welsh.pdf")).use { it.write(contents) }
         PdfReader(contents).use { reader ->
             verifyWelshPlaceholders(reader.acroFields, placeholders)
         }
