@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.tempcert
+package uk.gov.dluhc.printapi.service.temporarycertificate
 
 import com.lowagie.text.pdf.AcroFields
 import com.lowagie.text.pdf.PdfReader

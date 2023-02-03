@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.tempcert
+package uk.gov.dluhc.printapi.service.temporarycertificate
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
