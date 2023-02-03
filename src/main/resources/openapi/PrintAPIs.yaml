@@ -161,7 +161,7 @@ paths:
               description: Content-Disposition header
               schema:
                 type: string
-                example: attachment; filename="temporary-certificate-V3JSZC4CRH.pdf"
+                example: attachment; filename="temporary-certificate-DGFF4E6420YHWPJYX560.pdf"
         '404':
           description: Not Found
       operationId: generate-temporary-certificate
@@ -409,7 +409,10 @@ components:
           $ref: '#/components/schemas/CertificateLanguage'
         photoLocation:
           type: string
-          description: The location of the Elector's photo. Typically an S3 ARN
+          description: |
+            The location of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the Certificate by the vc-admin, rather than the photo that the applicant uploaded as part of their original application. 
+            Typically an S3 ARN
           maxLength: 1024
         validOnDate:
           type: string
