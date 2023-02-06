@@ -63,7 +63,10 @@ class ElectoralRegistrationOfficeManagementApiClient(
             throw ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
         }
 
-        return eroMapper.toEroDto(response.eros[0].localAuthorities.filter { it.gssCode == gssCode }[0])
+        return eroMapper.toEroDto(
+            response.eros[0].id,
+            response.eros[0].localAuthorities.filter { it.gssCode == gssCode }[0]
+        )
     }
 
     private fun <T> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =
