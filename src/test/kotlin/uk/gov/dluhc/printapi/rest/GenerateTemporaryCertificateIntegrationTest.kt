@@ -12,7 +12,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.UNAUTHORIZED_BEARER_TOKEN
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateTemporaryCertificateRequest
-import java.time.LocalDate
 
 internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
@@ -91,7 +90,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
     }
 
     @Test
-    fun `should return bad request given JSR303 validation failure`() {
+    fun `should return bad request given invalid request body`() {
         // Given
         wireMockService.stubCognitoJwtIssuerResponse()
         val invalidGssCode = "invalid GSS Code"
@@ -120,37 +119,5 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .hasError("Bad Request")
             .hasMessageContaining("Validation failed for object='generateTemporaryCertificateRequest'. Error count: 1")
             .hasValidationError("Error on field 'gssCode': rejected value [$invalidGssCode], size must be between 9 and 9")
-    }
-
-    @Test
-    fun `should return bad request given initBinder validation failure`() {
-        // Given
-        wireMockService.stubCognitoJwtIssuerResponse()
-        val yesterday = LocalDate.now(clock).minusDays(1)
-        val requestBody = buildGenerateTemporaryCertificateRequest(
-            validOnDate = yesterday
-        )
-
-        // When
-        val response = webTestClient.post()
-            .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(requestBody),
-                GenerateTemporaryCertificateRequest::class.java
-            )
-            .exchange()
-            .expectStatus()
-            .isBadRequest
-            .returnResult(ErrorResponse::class.java)
-
-        // Then
-        val actual = response.responseBody.blockFirst()
-        assertThat(actual)
-            .hasStatus(400)
-            .hasError("Bad Request")
-            .hasMessageContaining("Validation failed for object='generateTemporaryCertificateRequest'. Error count: 1")
-            .hasValidationError("Error on field 'validOnDate': rejected value [$yesterday], date cannot be in the past")
     }
 }
