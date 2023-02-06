@@ -2,16 +2,15 @@ package uk.gov.dluhc.printapi.rest
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
-import reactor.core.publisher.Mono
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.models.ErrorResponse
-import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.UNAUTHORIZED_BEARER_TOKEN
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateTemporaryCertificateRequest
+import uk.gov.dluhc.printapi.testsupport.withBody
 
 internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
@@ -24,10 +23,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
     fun `should return forbidden given no bearer token`() {
         webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .body(
-                Mono.just(buildGenerateTemporaryCertificateRequest()),
-                GenerateTemporaryCertificateRequest::class.java
-            )
+            .withBody(buildGenerateTemporaryCertificateRequest())
             .exchange()
             .expectStatus()
             .isForbidden
@@ -40,10 +36,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .uri(URI_TEMPLATE, ERO_ID)
             .bearerToken(UNAUTHORIZED_BEARER_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(buildGenerateTemporaryCertificateRequest()),
-                GenerateTemporaryCertificateRequest::class.java
-            )
+            .withBody(buildGenerateTemporaryCertificateRequest())
             .exchange()
             .expectStatus()
             .isUnauthorized
@@ -57,10 +50,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .uri(URI_TEMPLATE, ERO_ID)
             .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-admin-$ERO_ID")))
             .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(buildGenerateTemporaryCertificateRequest()),
-                GenerateTemporaryCertificateRequest::class.java
-            )
+            .withBody(buildGenerateTemporaryCertificateRequest())
             .exchange()
             .expectStatus()
             .isForbidden
@@ -80,10 +70,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
                 )
             )
             .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(buildGenerateTemporaryCertificateRequest()),
-                GenerateTemporaryCertificateRequest::class.java
-            )
+            .withBody(buildGenerateTemporaryCertificateRequest())
             .exchange()
             .expectStatus()
             .isForbidden
@@ -103,10 +90,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .uri(URI_TEMPLATE, ERO_ID)
             .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
             .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(requestBody),
-                GenerateTemporaryCertificateRequest::class.java
-            )
+            .withBody(requestBody)
             .exchange()
             .expectStatus()
             .isBadRequest
