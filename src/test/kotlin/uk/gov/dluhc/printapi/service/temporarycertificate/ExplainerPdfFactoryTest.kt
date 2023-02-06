@@ -18,8 +18,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 internal class ExplainerPdfFactoryTest {
 
     companion object {
-        private const val PDF_TEMPLATE_ENGLISH = "classpath:temp-certs-templates/Explainer Document (English).pdf"
-        private const val PDF_TEMPLATE_WELSH = "classpath:temp-certs-templates/Explainer Document (Dual Language).pdf"
+        private const val PDF_TEMPLATE_ENGLISH = "classpath:temporary-certificate-template/Explainer Document (English).pdf"
+        private const val PDF_TEMPLATE_WELSH = "classpath:temporary-certificate-template/Explainer Document (Dual Language).pdf"
     }
 
     @Mock
