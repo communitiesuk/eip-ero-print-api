@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.exception
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -22,6 +23,11 @@ class GlobalExceptionHandler(
     @ExceptionHandler(value = [CertificateNotFoundException::class, TemporaryCertificateExplainerDocumentNotFoundException::class])
     fun handleResourceNotFound(e: RuntimeException, request: WebRequest): ResponseEntity<Any?>? {
         return handleExceptionInternal(e, e.message, HttpHeaders(), NOT_FOUND, request)
+    }
+
+    @ExceptionHandler(value = [GenerateTemporaryCertificateValidationException::class])
+    fun handleGenerateTemporaryCertificateValidationException(e: RuntimeException, request: WebRequest): ResponseEntity<Any> {
+        return populateErrorResponseAndHandleExceptionInternal(e, BAD_REQUEST, request)
     }
 
     override fun handleHttpMessageNotReadable(
