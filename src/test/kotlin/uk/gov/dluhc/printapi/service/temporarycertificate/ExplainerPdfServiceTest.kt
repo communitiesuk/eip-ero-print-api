@@ -14,6 +14,8 @@ import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.exception.TemporaryCertificateExplainerDocumentNotFoundException
+import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import kotlin.random.Random
 
@@ -30,14 +32,15 @@ internal class ExplainerPdfServiceTest {
     @Test
     fun `should generate explainer pdf`() {
         // Given
+        val eroId = aValidRandomEroId()
         val gssCode = "E99999999"
-        val eroDto = buildEroDto()
+        val eroDto = buildEroDto(eroId = eroId)
         given(eroClient.getEro(any())).willReturn(eroDto)
         val contents = Random.Default.nextBytes(10)
         given(explainerPdfFactory.createPdfContents(any(), any())).willReturn(contents)
 
         // When
-        val actual = explainerPdfService.generateExplainerPdf(gssCode)
+        val actual = explainerPdfService.generateExplainerPdf(eroId, gssCode)
 
         // Then
         verify(eroClient).getEro(gssCode)
@@ -47,14 +50,35 @@ internal class ExplainerPdfServiceTest {
     }
 
     @Test
-    fun `should raise not found exception given ERO raised not found`() {
+    fun `should raise not found exception given ERO in context is different to one found by GSS Code`() {
         // Given
-        val gssCode = "E99999999"
-        given(eroClient.getEro(any())).willThrow(ElectoralRegistrationOfficeNotFoundException::class.java)
-        val expected = TemporaryCertificateExplainerDocumentNotFoundException(gssCode)
+        val eroId = "greenwich-london-borough-council"
+        val gssCode = aGssCode()
+        val eroDto = buildEroDto(eroId = "newport-city-council")
+        given(eroClient.getEro(any())).willReturn(eroDto)
+        val expected = TemporaryCertificateExplainerDocumentNotFoundException(eroId, gssCode)
 
         // When
-        val error = catchException { explainerPdfService.generateExplainerPdf(gssCode) }
+        val error = catchException { explainerPdfService.generateExplainerPdf(eroId, gssCode) }
+
+        // Then
+        verify(eroClient).getEro(gssCode)
+        verifyNoInteractions(explainerPdfFactory)
+        assertThat(error)
+            .isInstanceOf(TemporaryCertificateExplainerDocumentNotFoundException::class.java)
+            .hasMessage(expected.message)
+    }
+
+    @Test
+    fun `should raise not found exception given ERO raised not found`() {
+        // Given
+        val eroId = aValidRandomEroId()
+        val gssCode = aGssCode()
+        given(eroClient.getEro(any())).willThrow(ElectoralRegistrationOfficeNotFoundException::class.java)
+        val expected = TemporaryCertificateExplainerDocumentNotFoundException(eroId, gssCode)
+
+        // When
+        val error = catchException { explainerPdfService.generateExplainerPdf(eroId, gssCode) }
 
         // Then
         verify(eroClient).getEro(gssCode)

@@ -19,6 +19,7 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/temporary-certificate/{GSS_CODE}/explainer-document"
         private const val ERO_ID = "some-city-council"
+        private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "E99999999"
     }
 
@@ -91,7 +92,31 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
         // Then
         response.expectStatus().isNotFound
         val actual = response.returnResult(String::class.java).responseBody.blockFirst()
-        assertThat(actual).isEqualTo("Temporary certificate explainer document not found for gssCode $GSS_CODE")
+        assertThat(actual).isEqualTo("Temporary certificate explainer document not found for eroId $ERO_ID and gssCode $GSS_CODE")
+    }
+
+    @Test
+    fun `should return not found given no local authority found for the provided ero and gss code`() {
+        // Given
+        val eroName = aValidLocalAuthorityName()
+        val localAuthorities: List<LocalAuthorityResponse> = listOf(
+            buildLocalAuthorityResponse(gssCode = GSS_CODE, contactDetailsEnglish = buildContactDetails(name = eroName))
+        )
+        val eroResponse = buildElectoralRegistrationOfficeResponse(id = OTHER_ERO_ID, localAuthorities = localAuthorities)
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByGssCode(eroResponse, GSS_CODE)
+
+        // When
+        val response = webTestClient.post()
+            .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
+            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .exchange()
+
+        // Then
+        response.expectStatus().isNotFound
+        val actual = response.returnResult(String::class.java).responseBody.blockFirst()
+        assertThat(actual).isEqualTo("Temporary certificate explainer document not found for eroId $ERO_ID and gssCode $GSS_CODE")
     }
 
     @Test

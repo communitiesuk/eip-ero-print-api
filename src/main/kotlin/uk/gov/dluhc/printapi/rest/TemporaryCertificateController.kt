@@ -54,7 +54,7 @@ class TemporaryCertificateController(
         @PathVariable eroId: String,
         @PathVariable gssCode: String,
     ): ResponseEntity<InputStreamResource> {
-        return explainerPdfService.generateExplainerPdf(gssCode).let { pdfFile ->
+        return explainerPdfService.generateExplainerPdf(eroId, gssCode).let { pdfFile ->
             ResponseEntity.status(HttpStatus.CREATED)
                 .headers(createPdfHttpHeaders(pdfFile))
                 .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))

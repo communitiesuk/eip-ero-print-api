@@ -13,17 +13,21 @@ class ExplainerPdfService(
     private val explainerPdfFactory: ExplainerPdfFactory
 ) {
 
-    fun generateExplainerPdf(gssCode: String): PdfFile {
-        val eroDto = getEroOrRaiseNotFoundException(gssCode)
+    fun generateExplainerPdf(eroId: String, gssCode: String): PdfFile {
+        val eroDto = getEroOrRaiseNotFoundException(eroId, gssCode)
         val contents = explainerPdfFactory.createPdfContents(eroDto, gssCode)
         return PdfFile("temporary-certificate-explainer-document-$gssCode.pdf", contents)
     }
 
-    private fun getEroOrRaiseNotFoundException(gssCode: String): EroDto {
+    private fun getEroOrRaiseNotFoundException(eroId: String, gssCode: String): EroDto {
         try {
-            return eroClient.getEro(gssCode)
+            return eroClient.getEro(gssCode).also {
+                if (it.eroId != eroId) {
+                    throw TemporaryCertificateExplainerDocumentNotFoundException(eroId, gssCode)
+                }
+            }
         } catch (error: ElectoralRegistrationOfficeNotFoundException) {
-            throw TemporaryCertificateExplainerDocumentNotFoundException(gssCode)
+            throw TemporaryCertificateExplainerDocumentNotFoundException(eroId, gssCode)
         }
     }
 }
