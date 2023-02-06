@@ -52,7 +52,7 @@ jobs:
 temporary-certificate:
   explainer-pdf:
     english:
-      path: "templates/Explainer Document (English).pdf"
+      path: "classpath:temp-certs-templates/Explainer Document (English).pdf"
       placeholder:
         ero-name: "eroName"
         ero-address-line1: "eroAddressLine1"
@@ -63,7 +63,7 @@ temporary-certificate:
         ero-email: "eroEmailAddress"
         ero-phone: "eroPhoneNumber"
     welsh:
-      path: "Explainer Document (Dual Language).pdf"
+      path: "classpath:temp-certs-templates/Explainer Document (Dual Language).pdf"
       placeholder:
         ero-name: "eroName"
         ero-address-line1: "eroAddressLine1"

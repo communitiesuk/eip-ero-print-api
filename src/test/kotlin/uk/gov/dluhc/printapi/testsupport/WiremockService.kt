@@ -51,7 +51,15 @@ class WiremockService(private val wireMockServer: WireMockServer) {
     }
 
     fun stubEroManagementGetEroByGssCode(ero: ElectoralRegistrationOfficeResponse, gssCode: String) {
-        val responseBody = objectMapper.writeValueAsString(ElectoralRegistrationOfficesResponse(listOf(ero)))
+        stubEroManagementGetEroByGssCode(gssCode, listOf(ero))
+    }
+
+    fun stubEroManagementGetEroByGssCodeNoMatch(gssCode: String) {
+        stubEroManagementGetEroByGssCode(gssCode, listOf())
+    }
+
+    private fun stubEroManagementGetEroByGssCode(gssCode: String, eros: List<ElectoralRegistrationOfficeResponse>) {
+        val responseBody = objectMapper.writeValueAsString(ElectoralRegistrationOfficesResponse(eros))
         wireMockServer.stubFor(
             get(urlEqualTo("/ero-management-api/eros?gssCode=$gssCode"))
                 .willReturn(

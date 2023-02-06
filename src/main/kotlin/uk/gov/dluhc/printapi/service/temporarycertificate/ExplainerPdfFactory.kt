@@ -4,6 +4,7 @@ import com.lowagie.text.pdf.AcroFields
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.PdfStamper
 import org.springframework.stereotype.Component
+import org.springframework.util.ResourceUtils
 import uk.gov.dluhc.printapi.dto.EroDto
 import java.io.ByteArrayOutputStream
 
@@ -15,7 +16,7 @@ class ExplainerPdfFactory(
     fun createPdfContents(eroDetails: EroDto, gssCode: String): ByteArray {
         val outputStream = ByteArrayOutputStream()
         val templateDetails = explainerPdfTemplateDetailsFactory.getTemplateDetails(gssCode, eroDetails)
-        PdfReader(templateDetails.path).use { reader ->
+        PdfReader(ResourceUtils.getFile(templateDetails.path).inputStream()).use { reader ->
             val stamper = PdfStamper(reader, outputStream)
             stamper.cleanMetadata()
             try {
