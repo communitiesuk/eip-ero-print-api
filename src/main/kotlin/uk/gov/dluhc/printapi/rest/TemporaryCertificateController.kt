@@ -13,15 +13,19 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
+import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
 import uk.gov.dluhc.printapi.service.temporarycertificate.ExplainerPdfService
+import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import java.io.ByteArrayInputStream
 import javax.validation.Valid
 
 @RestController
 @CrossOrigin
 class TemporaryCertificateController(
-    val explainerPdfService: ExplainerPdfService
+    private val explainerPdfService: ExplainerPdfService,
+    private val temporaryCertificateService: TemporaryCertificateService,
+    private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
 ) {
 
     @PostMapping("/eros/{eroId}/temporary-certificate")
@@ -32,6 +36,12 @@ class TemporaryCertificateController(
         authentication: Authentication
     ) {
         val userId = authentication.name
+        val dto = generateTemporaryCertificateMapper.toGenerateTemporaryCertificateDto(
+            generateTemporaryCertificateRequest,
+            userId
+        )
+        val pdfFile = temporaryCertificateService.generateTemporaryCertificate(dto)
+
         TODO("not yet implemented")
     }
 

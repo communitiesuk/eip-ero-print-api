@@ -3,8 +3,10 @@ package uk.gov.dluhc.printapi.mapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
+import uk.gov.dluhc.printapi.dto.CertificateLanguage as CertificateLanguageDto
+import uk.gov.dluhc.printapi.models.CertificateLanguage as CertificateLanguageApi
 
 class CertificateLanguageMapperTest {
 
@@ -17,14 +19,34 @@ class CertificateLanguageMapperTest {
             "CY, CY",
         ]
     )
-    fun `should map CertificateLanguage to print request api enum`(
-        source: CertificateLanguage,
+    fun `should map CertificateLanguage entity enum to print request api enum`(
+        source: CertificateLanguageEntity,
         expected: PrintRequest.CertificateLanguage
     ) {
         // Given
 
         // When
         val actual = mapper.toPrintRequestApiEnum(source)
+
+        // Then
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "EN, EN",
+            "CY, CY",
+        ]
+    )
+    fun `should map CertificateLanguage api enum to DTO enum`(
+        source: CertificateLanguageApi,
+        expected: CertificateLanguageDto
+    ) {
+        // Given
+
+        // When
+        val actual = mapper.toCertificateLanguageDto(source)
 
         // Then
         assertThat(actual).isEqualTo(expected)

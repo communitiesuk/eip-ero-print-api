@@ -25,6 +25,10 @@ sqs:
   process-print-response-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME}
 
 api:
+  print-api:
+    generate-temporary-certificate:
+      valid-on-date:
+        max-calendar-days-in-future: 30
   ero-management:
     url: ${API_ERO_MANAGEMENT_URL}
 
