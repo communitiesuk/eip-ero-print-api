@@ -31,7 +31,7 @@ class GenerateTemporaryCertificateValidator(
             throw GenerateTemporaryCertificateValidationException("Temporary Certificate validOnDate cannot be in the past")
         } else if (validOnDate.isAfter(latestValidOnDate)) {
             throw GenerateTemporaryCertificateValidationException(
-                "Temporary Certificate validOnDate cannot be greater than $maxCalendarDaysInFuture in the future (cannot be after $latestValidOnDate)"
+                "Temporary Certificate validOnDate cannot be greater than $maxCalendarDaysInFuture calendar days in the future (cannot be after $latestValidOnDate)"
             )
         }
     }
