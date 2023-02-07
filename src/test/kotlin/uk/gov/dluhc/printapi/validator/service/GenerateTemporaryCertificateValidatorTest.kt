@@ -67,6 +67,6 @@ class GenerateTemporaryCertificateValidatorTest {
 
         // Then
         assertThat(exception)
-            .hasMessage("Temporary Certificate validOnDate cannot be greater than 10 in the future (cannot be after 2023-02-14)")
+            .hasMessage("Temporary Certificate validOnDate cannot be greater than 10 calendar days in the future (cannot be after 2023-02-14)")
     }
 }
