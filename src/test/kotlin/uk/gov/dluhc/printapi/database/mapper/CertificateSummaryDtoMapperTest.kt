@@ -23,6 +23,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import java.time.Instant
 import java.time.Instant.now
+import java.time.temporal.ChronoUnit.MINUTES
 
 internal class CertificateSummaryDtoMapperTest {
 
@@ -114,11 +115,11 @@ internal class CertificateSummaryDtoMapperTest {
         // Given
         val vacNumber = aValidVacNumber()
         val expectedStatus1 = aValidCertificateStatus()
-        val expectedDateTime1 = aValidRequestDateTime()
+        val expectedDateTime1 = now().minus(1, MINUTES)
         val expectedUserId1 = aValidUserId()
         val expectedMessage1 = null
         val expectedStatus2 = aDifferentValidCertificateStatus()
-        val expectedDateTime2 = aValidRequestDateTime()
+        val expectedDateTime2 = now()
         val expectedUserId2 = aValidUserId()
         val expectedMessage2 = "Successfully dispatched by Royal Mail"
         val certificate = buildCertificate(
@@ -142,16 +143,16 @@ internal class CertificateSummaryDtoMapperTest {
             vacNumber = vacNumber,
             printRequests = listOf(
                 PrintRequestSummaryDto(
-                    status = PrintRequestStatusDto.valueOf(expectedStatus1.name),
-                    dateTime = expectedDateTime1,
-                    userId = expectedUserId1,
-                    message = expectedMessage1
-                ),
-                PrintRequestSummaryDto(
                     status = PrintRequestStatusDto.valueOf(expectedStatus2.name),
                     dateTime = expectedDateTime2,
                     userId = expectedUserId2,
                     message = expectedMessage2
+                ),
+                PrintRequestSummaryDto(
+                    status = PrintRequestStatusDto.valueOf(expectedStatus1.name),
+                    dateTime = expectedDateTime1,
+                    userId = expectedUserId1,
+                    message = expectedMessage1
                 ),
             )
         )
@@ -160,7 +161,7 @@ internal class CertificateSummaryDtoMapperTest {
         val actual = mapper.certificateToCertificatePrintRequestSummaryDto(certificate)
 
         // Then
-        assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
     }
 
     private fun printRequestStatus(status: Status, eventDateTime: Instant, message: String?) =
