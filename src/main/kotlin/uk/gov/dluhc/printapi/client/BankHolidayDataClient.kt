@@ -35,10 +35,10 @@ enum class BankHolidayDivision(val value: String) {
     companion object {
         @JvmStatic
         fun fromGssCode(gssCode: String): BankHolidayDivision {
-            return when (gssCode.substring(0, 1)) {
-                "E", "W" -> ENGLAND_AND_WALES
-                "S" -> SCOTLAND
-                "N" -> NORTHERN_IRELAND
+            return when (gssCode.first()) {
+                'E', 'W' -> ENGLAND_AND_WALES
+                'S' -> SCOTLAND
+                'N' -> NORTHERN_IRELAND
                 else -> {
                     logger.warn("Unknown country prefix for gssCode: [$gssCode], defaulting to $ENGLAND_AND_WALES")
                     ENGLAND_AND_WALES
