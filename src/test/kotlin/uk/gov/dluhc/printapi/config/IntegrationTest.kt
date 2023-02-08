@@ -27,6 +27,7 @@ import org.springframework.integration.support.MessageBuilder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.s3.S3Client
+import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -83,6 +84,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var s3Client: S3Client
+
+    @Autowired
+    protected lateinit var bankHolidayDataClient: BankHolidayDataClient
 
     @Autowired
     protected lateinit var clock: Clock
