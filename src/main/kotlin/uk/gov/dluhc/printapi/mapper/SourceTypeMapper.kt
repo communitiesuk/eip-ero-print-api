@@ -10,8 +10,10 @@ import uk.gov.dluhc.printapi.models.SourceType as SourceTypeApi
 @Mapper
 interface SourceTypeMapper {
     @ValueMapping(source = "VOTER_MINUS_CARD", target = "VOTER_CARD")
-    fun toSourceTypeEntity(sourceType: SourceTypeSqsModel): SourceTypeEntity
+    fun mapSqsToEntity(sourceType: SourceTypeSqsModel): SourceTypeEntity
 
     @ValueMapping(source = "VOTER_MINUS_CARD", target = "VOTER_CARD")
-    fun toSourceTypeDto(sourceType: SourceTypeApi): SourceTypeDto
+    fun mapApiToDto(sourceType: SourceTypeApi): SourceTypeDto
+
+    fun mapDtoToEntity(sourceType: SourceTypeDto): SourceTypeEntity
 }

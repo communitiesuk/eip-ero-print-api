@@ -38,8 +38,8 @@ class GenerateTemporaryCertificateMapperTest {
             certificateLanguage = CertificateLanguageApi.EN
         )
 
-        given(sourceTypeMapper.toSourceTypeDto(any())).willReturn(SourceTypeDto.VOTER_CARD)
-        given(certificateLanguageMapper.toCertificateLanguageDto(any())).willReturn(CertificateLanguageDto.EN)
+        given(sourceTypeMapper.mapApiToDto(any())).willReturn(SourceTypeDto.VOTER_CARD)
+        given(certificateLanguageMapper.mapApiToDto(any())).willReturn(CertificateLanguageDto.EN)
 
         val expected = buildGenerateTemporaryCertificateDto(
             gssCode = apiRequest.gssCode,
@@ -59,8 +59,8 @@ class GenerateTemporaryCertificateMapperTest {
         val actual = mapper.toGenerateTemporaryCertificateDto(apiRequest, userId)
 
         // Then
-        verify(sourceTypeMapper).toSourceTypeDto(SourceTypeApi.VOTER_MINUS_CARD)
-        verify(certificateLanguageMapper).toCertificateLanguageDto(CertificateLanguageApi.EN)
+        verify(sourceTypeMapper).mapApiToDto(SourceTypeApi.VOTER_MINUS_CARD)
+        verify(certificateLanguageMapper).mapApiToDto(CertificateLanguageApi.EN)
         assertThat(actual).isEqualTo(expected)
     }
 }

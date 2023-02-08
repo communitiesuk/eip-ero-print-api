@@ -4,17 +4,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_ENGLAND
+import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_NORTHERN_IRELAND
+import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_SCOTLAND
+import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_WALES
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 
 internal class ExplainerPdfTemplateDetailsFactoryTest {
 
     companion object {
-        // Example GSS Codes for different nations
-        private const val GSS_CODE_ENGLAND = "E09000006" // England ERO has GSS Code starting with 'E'
-        private const val GSS_CODE_WALES = "W06000023" // Wales ERO has GSS Code starting with 'W'
-        private const val GSS_CODE_SCOTLAND = "S12000011" // Scotland ERO has GSS Code starting with 'S'
-        private const val GSS_CODE_NORTHERN_IRELAND = "N07000001" // Northern Ireland ERO has GSS Code starting with 'N'
-
         // Template paths
         private const val ENGLISH_TEMPLATE_PATH = "/path/to/english-template.pdf"
         private const val WELSH_TEMPLATE_PATH = "/path/to/welsh-template.pdf"

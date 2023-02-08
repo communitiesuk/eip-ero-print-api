@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.service.temporarycertificate
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.dto.EroDto
+import uk.gov.dluhc.printapi.service.isWalesCode
 
 @Component
 class ExplainerPdfTemplateDetailsFactory(
@@ -26,12 +27,8 @@ class ExplainerPdfTemplateDetailsFactory(
     @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-phone}") private val eroPhoneNumberCyPlaceholder: String,
 ) {
 
-    companion object {
-        private const val WALES_GSS_CODE_NATION_LETTER = 'W'
-    }
-
     fun getTemplateDetails(gssCode: String, eroDto: EroDto): TemplateDetails {
-        return if (gssCode.first() == WALES_GSS_CODE_NATION_LETTER) {
+        return if (isWalesCode(gssCode)) {
             TemplateDetails(pdfTemplateWelsh, getWelshTemplatePlaceholders(eroDto))
         } else {
             TemplateDetails(pdfTemplateEnglish, getEnglishTemplatePlaceholders(eroDto))
