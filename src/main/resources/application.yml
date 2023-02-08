@@ -29,6 +29,8 @@ api:
     generate-temporary-certificate:
       valid-on-date:
         max-calendar-days-in-future: 30
+    retention.period:
+      certificate-delivery-info: "P28D" # 28 working days
   ero-management:
     url: ${API_ERO_MANAGEMENT_URL}
 
