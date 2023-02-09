@@ -13,6 +13,7 @@ import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
+import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ILoggingEventAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
@@ -64,7 +65,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
                 // We don't care that the log message is because the certificate was not found. We care that the log message has a correlation ID
                 assertThat(
                     TestLogAppender.getLogEventMatchingRegex(
-                        "Certificate for eroId = $ERO_ID and application id = $APPLICATION_ID not found",
+                        "Certificate for eroId = $ERO_ID with sourceType = $VOTER_CARD and sourceReference = $APPLICATION_ID not found",
                         Level.WARN
                     )
                 ).hasAnyCorrelationId()
@@ -89,7 +90,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
                 // We don't care that the log message is because the certificate was not found. We care that the log message has a correlation ID
                 assertThat(
                     TestLogAppender.getLogEventMatchingRegex(
-                        "Certificate for eroId = $ERO_ID and application id = $APPLICATION_ID not found",
+                        "Certificate for eroId = $ERO_ID with sourceType = $VOTER_CARD and sourceReference = $APPLICATION_ID not found",
                         Level.WARN
                     )
                 ).hasCorrelationId(expectedCorrelationId)
