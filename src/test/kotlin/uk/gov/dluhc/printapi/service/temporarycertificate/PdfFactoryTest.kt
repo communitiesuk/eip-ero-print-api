@@ -33,14 +33,14 @@ internal class PdfFactoryTest {
         val eroDetails = buildEroDto()
         val placeholders = with(eroDetails.englishContactDetails) {
             mapOf(
-                "eroName" to name,
-                "eroAddressLine1" to address.property.orEmpty(),
-                "eroAddressLine2" to address.street,
-                "eroAddressLine3" to address.town.orEmpty(),
-                "eroAddressLine4" to address.area.orEmpty(),
-                "eroPostcode" to address.postcode,
-                "eroEmailAddress" to emailAddress,
-                "eroPhoneNumber" to phoneNumber,
+                "ero-recipient" to name,
+                "ero-address-1-en" to address.property.orEmpty(),
+                "ero-address-2-en" to address.street,
+                "ero-address-3-en" to address.town.orEmpty(),
+                "ero-address-4-en" to address.area.orEmpty(),
+                "ero-postcode-en" to address.postcode,
+                "ero-email-en" to emailAddress,
+                "ero-phonenumber-en" to phoneNumber,
             )
         }
         val templateDetails = TemplateDetails(EXPLAINER_PDF_TEMPLATE_ENGLISH, placeholders)
@@ -58,14 +58,14 @@ internal class PdfFactoryTest {
         val eroDetails = buildEroDto()
         val placeholders = with(eroDetails.welshContactDetails!!) {
             mapOf(
-                "eroName" to name,
-                "eroAddressLine1" to address.property.orEmpty(),
-                "eroAddressLine2" to address.street,
-                "eroAddressLine3" to address.town.orEmpty(),
-                "eroAddressLine4" to address.area.orEmpty(),
-                "eroAddressPostcode" to address.postcode,
-                "eroEmailAddress" to emailAddress,
-                "eroPhoneNumber" to phoneNumber,
+                "ero-recipient" to name,
+                "ero-address-1-cy" to address.property.orEmpty(),
+                "ero-address-2-cy" to address.street,
+                "ero-address-3-cy" to address.town.orEmpty(),
+                "ero-address-4-cy" to address.area.orEmpty(),
+                "ero-postcode-cy" to address.postcode,
+                "ero-email-cy" to emailAddress,
+                "ero-phonenumber-cy" to phoneNumber,
             )
         }
         val templateDetails = TemplateDetails(EXPLAINER_PDF_TEMPLATE_WELSH, placeholders)
