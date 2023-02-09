@@ -29,6 +29,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             applicationReference = certificate.applicationReference!!,
             gssCode = certificate.gssCode!!
         )
+        val expectedInitialRemovalDate = LocalDate.of(2023, 5, 16)
 
         // When
         sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
@@ -38,7 +39,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
-            assertThat(saved.deliveryInfoRemovalDate).isEqualTo(expectedDeliveryRemovalDate)
+            assertThat(saved.initialRetentionRemovalDate).isEqualTo(expectedInitialRemovalDate)
         }
     }
 }
