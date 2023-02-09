@@ -144,9 +144,6 @@ components:
         sourceReference:
           type: string
           description: Reference in the source application.
-        applicationReference:
-          type: string
-          description: The application reference as known by the citizen. Not guaranteed to be unique.
         sourceType:
           $ref: '#/components/schemas/SourceType'
         gssCode:
