@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="matt.wills@valtech.com" id="0011_EIP1-3800_alter_certificate - add initial_retention_removal_date column" context="ddl">
+
+        <addColumn tableName="certificate">
+            <column name="initial_retention_removal_date" type="date" remarks="The date that certain data should be removed after the first retention period">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <createIndex tableName="certificate" indexName="certificate_initial_retention_removal_date_idx">
+            <column name="source_type"/>
+            <column name="initial_retention_removal_date"/>
+        </createIndex>
+
+        <rollback>
+            <dropColumn
+                tableName="certificate"
+                columnName="initial_retention_removal_date"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="matt.wills@valtech.com" id="0011_EIP1-3800_alter_print_request - make delivery nullable" context="ddl">
+
+        <dropNotNullConstraint tableName="print_request" columnName="delivery_id" columnDataType="uuid"/>
+
+        <rollback>
+            <addNotNullConstraint tableName="print_request" columnName="delivery_id" columnDataType="uuid"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>
