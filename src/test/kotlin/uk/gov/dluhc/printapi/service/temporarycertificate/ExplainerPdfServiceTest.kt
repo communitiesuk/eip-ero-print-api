@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.exception.TemporaryCertificateExplainerDocumentNotF
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
+import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.buildTemplateDetails
 import kotlin.random.Random
 
 @ExtendWith(MockitoExtension::class)
@@ -24,8 +25,13 @@ internal class ExplainerPdfServiceTest {
 
     @Mock
     private lateinit var eroClient: ElectoralRegistrationOfficeManagementApiClient
+
     @Mock
-    private lateinit var explainerPdfFactory: ExplainerPdfFactory
+    private lateinit var explainerPdfTemplateDetailsFactory: ExplainerPdfTemplateDetailsFactory
+
+    @Mock
+    private lateinit var pdfFactory: PdfFactory
+
     @InjectMocks
     private lateinit var explainerPdfService: ExplainerPdfService
 
@@ -36,15 +42,18 @@ internal class ExplainerPdfServiceTest {
         val gssCode = "E99999999"
         val eroDto = buildEroDto(eroId = eroId)
         given(eroClient.getEro(any())).willReturn(eroDto)
+        val templateDetails = buildTemplateDetails()
+        given(explainerPdfTemplateDetailsFactory.getTemplateDetails(any(), any())).willReturn(templateDetails)
         val contents = Random.Default.nextBytes(10)
-        given(explainerPdfFactory.createPdfContents(any(), any())).willReturn(contents)
+        given(pdfFactory.createPdfContents(any())).willReturn(contents)
 
         // When
         val actual = explainerPdfService.generateExplainerPdf(eroId, gssCode)
 
         // Then
         verify(eroClient).getEro(gssCode)
-        verify(explainerPdfFactory).createPdfContents(eroDto, gssCode)
+        verify(explainerPdfTemplateDetailsFactory).getTemplateDetails(gssCode, eroDto)
+        verify(pdfFactory).createPdfContents(templateDetails)
         assertThat(actual.filename).isEqualTo("temporary-certificate-explainer-document-E99999999.pdf")
         assertThat(actual.contents).isSameAs(contents)
     }
@@ -63,7 +72,7 @@ internal class ExplainerPdfServiceTest {
 
         // Then
         verify(eroClient).getEro(gssCode)
-        verifyNoInteractions(explainerPdfFactory)
+        verifyNoInteractions(pdfFactory, explainerPdfTemplateDetailsFactory)
         assertThat(error)
             .isInstanceOf(TemporaryCertificateExplainerDocumentNotFoundException::class.java)
             .hasMessage(expected.message)
@@ -82,7 +91,7 @@ internal class ExplainerPdfServiceTest {
 
         // Then
         verify(eroClient).getEro(gssCode)
-        verifyNoInteractions(explainerPdfFactory)
+        verifyNoInteractions(pdfFactory, explainerPdfTemplateDetailsFactory)
         assertThat(error)
             .isInstanceOf(TemporaryCertificateExplainerDocumentNotFoundException::class.java)
             .hasMessage(expected.message)

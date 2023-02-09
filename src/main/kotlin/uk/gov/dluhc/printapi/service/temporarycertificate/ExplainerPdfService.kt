@@ -10,12 +10,14 @@ import uk.gov.dluhc.printapi.exception.TemporaryCertificateExplainerDocumentNotF
 @Service
 class ExplainerPdfService(
     private val eroClient: ElectoralRegistrationOfficeManagementApiClient,
-    private val explainerPdfFactory: ExplainerPdfFactory
+    private val explainerPdfTemplateDetailsFactory: ExplainerPdfTemplateDetailsFactory,
+    private val pdfFactory: PdfFactory
 ) {
 
     fun generateExplainerPdf(eroId: String, gssCode: String): PdfFile {
-        val eroDto = getEroOrRaiseNotFoundException(eroId, gssCode)
-        val contents = explainerPdfFactory.createPdfContents(eroDto, gssCode)
+        val eroDetails = getEroOrRaiseNotFoundException(eroId, gssCode)
+        val templateDetails = explainerPdfTemplateDetailsFactory.getTemplateDetails(gssCode, eroDetails)
+        val contents = pdfFactory.createPdfContents(templateDetails)
         return PdfFile("temporary-certificate-explainer-document-$gssCode.pdf", contents)
     }
 

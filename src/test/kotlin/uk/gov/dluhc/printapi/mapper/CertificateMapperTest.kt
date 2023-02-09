@@ -63,7 +63,7 @@ class CertificateMapperTest {
         val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.EN)
         val requestId = aValidRequestId()
         val vacNumber = aValidVacNumber()
-        given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
+        given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
         given(idFactory.vacNumber()).willReturn(vacNumber)
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
@@ -133,7 +133,7 @@ class CertificateMapperTest {
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
-        verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
+        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)
@@ -148,7 +148,7 @@ class CertificateMapperTest {
         val message = buildSendApplicationToPrintMessage(certificateLanguage = CertificateLanguageModel.CY)
         val requestId = aValidRequestId()
         val vacNumber = aValidVacNumber()
-        given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
+        given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
         given(idFactory.vacNumber()).willReturn(vacNumber)
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
@@ -219,7 +219,7 @@ class CertificateMapperTest {
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
-        verify(sourceTypeMapper).toSourceTypeEntity(SourceTypeModel.VOTER_MINUS_CARD)
+        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_MINUS_CARD)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)

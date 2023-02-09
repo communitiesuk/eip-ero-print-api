@@ -23,7 +23,7 @@ class PrintService(
 
         val certificate = certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
             gssCodes = listOf(message.gssCode),
-            sourceType = sourceTypeMapper.toSourceTypeEntity(message.sourceType),
+            sourceType = sourceTypeMapper.mapSqsToEntity(message.sourceType),
             sourceReference = message.sourceReference
         )?.also {
             it.addPrintRequest(printRequestMapper.toPrintRequest(message, ero))

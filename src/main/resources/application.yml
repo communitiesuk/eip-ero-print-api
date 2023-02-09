@@ -56,6 +56,37 @@ jobs:
     cron: "0 15/30 * * * *" # every 30 minutes starting at 15 minutes past the hour - see analysis and recommendations in EIP1-2515
 
 temporary-certificate:
+  certificate-pdf:
+    english:
+      path: "classpath:temporary-certificate-template/Temporary Certificate (English).pdf"
+      placeholder:
+        elector-name: "name"
+        local-authority-name: "localAuthorityEn"
+        date-of-issue: "dateOfIssue"
+        valid-on-date: "validOn"
+        certificate-number: "certificateNumber"
+      images:
+        voter-photo:
+          page-number: 1
+          absolute-x: 62f
+          absolute-y: 568f
+          fit-width: 99f
+          fit-height: 127f
+    welsh:
+      path: "classpath:temporary-certificate-template/Temporary Certificate (Dual Language).pdf"
+      placeholder:
+        elector-name: "name"
+        local-authority-name: "localAuthorityCy"
+        date-of-issue: "dateOfIssue"
+        valid-on-date: "validOn"
+        certificate-number: "certificateNumber"
+      images:
+        voter-photo:
+          page-number: 1
+          absolute-x: 62f
+          absolute-y: 568f
+          fit-width: 99f
+          fit-height: 127f
   explainer-pdf:
     english:
       path: "classpath:temporary-certificate-template/Explainer Document (English).pdf"

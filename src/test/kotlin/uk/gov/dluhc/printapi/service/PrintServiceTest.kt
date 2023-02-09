@@ -56,7 +56,7 @@ class PrintServiceTest {
                 any()
             )
         ).willReturn(null)
-        given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(sourceType)
+        given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(sourceType)
         given(certificateMapper.toCertificate(any(), any())).willReturn(certificate)
 
         // When
@@ -69,7 +69,7 @@ class PrintServiceTest {
             sourceType,
             message.sourceReference
         )
-        verify(sourceTypeMapper).toSourceTypeEntity(message.sourceType)
+        verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
         verify(certificateMapper).toCertificate(message, ero)
         verify(certificateRepository).save(certificate)
         verifyNoInteractions(printRequestMapper)
@@ -88,7 +88,7 @@ class PrintServiceTest {
         given(certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(
             certificate
         )
-        given(sourceTypeMapper.toSourceTypeEntity(any())).willReturn(sourceType)
+        given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(sourceType)
         given(printRequestMapper.toPrintRequest(any(), any())).willReturn(newPrintRequest)
 
         // When
@@ -101,7 +101,7 @@ class PrintServiceTest {
             sourceType,
             message.sourceReference
         )
-        verify(sourceTypeMapper).toSourceTypeEntity(message.sourceType)
+        verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
         verify(printRequestMapper).toPrintRequest(message, ero)
         verify(certificateRepository).save(certificate)
         assertThat(certificate.printRequests).usingRecursiveComparison()

@@ -112,6 +112,19 @@ class TemporaryCertificate(
     var version: Long? = null
 ) {
 
+    fun getNameOnCertificate(): String {
+        return if (middleNames.isNullOrBlank()) {
+            "$firstName $surname"
+        } else {
+            "$firstName $middleNames $surname"
+        }
+    }
+
+    fun addTemporaryCertificateStatus(status: TemporaryCertificateStatus): TemporaryCertificate {
+        statusHistory += status
+        return this
+    }
+
     val status: TemporaryCertificateStatus.Status?
         get() = statusHistory.sortedByDescending { it.dateCreated }.first().status
 

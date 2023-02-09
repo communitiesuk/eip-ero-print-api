@@ -82,7 +82,7 @@ class CertificateToPrintRequestMapperTest {
     @Test
     fun `should map to print request with English ERO`() {
         // Given
-        given(certificateLanguageMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateLanguage.EN)
+        given(certificateLanguageMapper.mapEntityToPrintRequest(any())).willReturn(PrintRequestCertificateLanguage.EN)
 
         given(supportingInformationFormatMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateFormat.STANDARD)
         given(instantMapper.toOffsetDateTime(any())).willReturn(OffsetDateTime.ofInstant(Instant.ofEpochMilli(0), UTC))
@@ -174,13 +174,13 @@ class CertificateToPrintRequestMapperTest {
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
         verify(supportingInformationFormatMapper).toPrintRequestApiEnum(supportingInformationFormat)
-        verify(certificateLanguageMapper).toPrintRequestApiEnum(certificateLanguage)
+        verify(certificateLanguageMapper).mapEntityToPrintRequest(certificateLanguage)
     }
 
     @Test
     fun `should map to print request with Welsh ERO`() {
         // Given
-        given(certificateLanguageMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateLanguage.CY)
+        given(certificateLanguageMapper.mapEntityToPrintRequest(any())).willReturn(PrintRequestCertificateLanguage.CY)
 
         given(supportingInformationFormatMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateFormat.STANDARD)
         given(instantMapper.toOffsetDateTime(any())).willReturn(OffsetDateTime.ofInstant(Instant.ofEpochMilli(0), UTC))
@@ -275,6 +275,6 @@ class CertificateToPrintRequestMapperTest {
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
         verify(supportingInformationFormatMapper).toPrintRequestApiEnum(supportingInformationFormat)
-        verify(certificateLanguageMapper).toPrintRequestApiEnum(certificateLanguage)
+        verify(certificateLanguageMapper).mapEntityToPrintRequest(certificateLanguage)
     }
 }

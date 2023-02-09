@@ -16,7 +16,7 @@ class SourceTypeMapperTest {
     fun `should map sqs model source type to entity`(sourceTypeModel: SourceTypeSqsModel, sourceTypeEntity: SourceTypeEntity) {
         // Given
         // When
-        val actual = mapper.toSourceTypeEntity(sourceTypeModel)
+        val actual = mapper.mapSqsToEntity(sourceTypeModel)
 
         // Then
         assertThat(actual).isEqualTo(sourceTypeEntity)
@@ -24,12 +24,23 @@ class SourceTypeMapperTest {
 
     @ParameterizedTest
     @CsvSource(value = ["VOTER_MINUS_CARD, VOTER_CARD"])
-    fun `should map api source type to entity`(sourceTypeApi: SourceTypeApi, sourceTypeDto: SourceTypeDto) {
+    fun `should map api source type to dto`(sourceTypeApi: SourceTypeApi, sourceTypeDto: SourceTypeDto) {
         // Given
         // When
-        val actual = mapper.toSourceTypeDto(sourceTypeApi)
+        val actual = mapper.mapApiToDto(sourceTypeApi)
 
         // Then
         assertThat(actual).isEqualTo(sourceTypeDto)
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["VOTER_CARD, VOTER_CARD"])
+    fun `should map dto source type to entity`(sourceTypeDto: SourceTypeDto, sourceTypeEntity: SourceTypeEntity) {
+        // Given
+        // When
+        val actual = mapper.mapDtoToEntity(sourceTypeDto)
+
+        // Then
+        assertThat(actual).isEqualTo(sourceTypeEntity)
     }
 }
