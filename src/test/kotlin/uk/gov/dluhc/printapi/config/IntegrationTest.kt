@@ -109,6 +109,9 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.process-print-response-file-queue-name}")
     protected lateinit var processPrintResponseFileQueueName: String
 
+    @Value("\${sqs.application-removed-queue-name}")
+    protected lateinit var applicationRemovedQueueName: String
+
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository
 

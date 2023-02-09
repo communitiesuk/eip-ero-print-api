@@ -110,12 +110,14 @@ class LocalStackContainerConfiguration {
         @Value("\${sqs.send-application-to-print-queue-name}") sendApplicationToPrintQueueName: String,
         @Value("\${sqs.process-print-request-batch-queue-name}") processPrintRequestBatchQueueName: String,
         @Value("\${sqs.process-print-response-file-queue-name}") processPrintResponseFileQueueName: String,
-        @Value("\${sqs.process-print-response-queue-name}") processPrintResponsesQueueName: String
+        @Value("\${sqs.process-print-response-queue-name}") processPrintResponsesQueueName: String,
+        @Value("\${sqs.application-removed-queue-name}") applicationRemovedQueueName: String
     ): LocalStackContainerSettings {
         val queueUrlSendApplicationToPrint = localStackContainer.createSqsQueue(sendApplicationToPrintQueueName)
         val queueUrlProcessPrintBatchRequest = localStackContainer.createSqsQueue(processPrintRequestBatchQueueName)
         val queueUrlProcessPrintResponseFile = localStackContainer.createSqsQueue(processPrintResponseFileQueueName)
         val queueUrlProcessPrintResponses = localStackContainer.createSqsQueue(processPrintResponsesQueueName)
+        val queueUrlApplicationRemoved = localStackContainer.createSqsQueue(applicationRemovedQueueName)
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
 
         TestPropertyValues.of(
@@ -127,7 +129,8 @@ class LocalStackContainerConfiguration {
             queueUrlSendApplicationToPrint = queueUrlSendApplicationToPrint,
             queueUrlProcessPrintBatchRequest = queueUrlProcessPrintBatchRequest,
             queueUrlProcessPrintResponseFile = queueUrlProcessPrintResponseFile,
-            queueUrlProcessPrintResponses = queueUrlProcessPrintResponses
+            queueUrlProcessPrintResponses = queueUrlProcessPrintResponses,
+            queueUrlApplicationRemoved = queueUrlApplicationRemoved
         )
     }
 
@@ -147,12 +150,14 @@ class LocalStackContainerConfiguration {
         val queueUrlSendApplicationToPrint: String,
         val queueUrlProcessPrintBatchRequest: String,
         val queueUrlProcessPrintResponseFile: String,
-        val queueUrlProcessPrintResponses: String
+        val queueUrlProcessPrintResponses: String,
+        val queueUrlApplicationRemoved: String
     ) {
         val mappedQueueUrlSendApplicationToPrint: String = toMappedUrl(queueUrlSendApplicationToPrint, apiUrl)
         val mappedQueueUrlProcessPrintBatchRequest: String = toMappedUrl(queueUrlProcessPrintBatchRequest, apiUrl)
         val mappedQueueUrlProcessPrintResponseFile: String = toMappedUrl(queueUrlProcessPrintResponseFile, apiUrl)
         val mappedQueueUrlProcessPrintResponses: String = toMappedUrl(queueUrlProcessPrintResponses, apiUrl)
+        val mappedQueueUrlApplicationRemoved: String = toMappedUrl(queueUrlApplicationRemoved, apiUrl)
 
         private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {
             val rawUrl = URI.create(rawUrlString)

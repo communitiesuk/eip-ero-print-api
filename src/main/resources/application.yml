@@ -23,6 +23,7 @@ sqs:
   process-print-request-batch-queue-name: ${SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME}
   process-print-response-file-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME}
   process-print-response-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME}
+  application-removed-queue-name: ${SQS_APPLICATION_REMOVED_QUEUE_NAME}
 
 api:
   print-api:
