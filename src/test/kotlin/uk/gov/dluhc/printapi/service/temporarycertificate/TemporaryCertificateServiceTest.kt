@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.service.temporarycertificate
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -9,9 +10,13 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
+import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
+import uk.gov.dluhc.printapi.exception.GenerateTemporaryCertificateValidationException
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateMapper
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildGenerateTemporaryCertificateDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
@@ -47,9 +52,10 @@ internal class TemporaryCertificateServiceTest {
     @Test
     fun `should generate temporary certificate pdf`() {
         // Given
+        val eroId = aValidRandomEroId()
         val request = buildGenerateTemporaryCertificateDto()
         val certificateNumber = "ZlxBCBxpjseZU5i3ccyL"
-        val eroDetails = buildEroDto()
+        val eroDetails = buildEroDto(eroId = eroId)
         given(eroClient.getEro(any())).willReturn(eroDetails)
         val templateFilename = aTemplateFilename()
         given(certificatePdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
@@ -61,7 +67,7 @@ internal class TemporaryCertificateServiceTest {
         given(pdfFactory.createPdfContents(any())).willReturn(contents)
 
         // When
-        val actual = temporaryCertificateService.generateTemporaryCertificate(request)
+        val actual = temporaryCertificateService.generateTemporaryCertificate(eroId, request)
 
         // Then
         verify(validator).validate(request)
@@ -69,9 +75,64 @@ internal class TemporaryCertificateServiceTest {
         verify(certificatePdfTemplateDetailsFactory).getTemplateFilename(request.gssCode)
         verify(temporaryCertificateMapper).toTemporaryCertificate(request, eroDetails, templateFilename)
         verify(certificatePdfTemplateDetailsFactory).getTemplateDetails(temporaryCertificate)
-        verify(temporaryCertificateRepository).save(temporaryCertificate)
         verify(pdfFactory).createPdfContents(templateDetails)
-        Assertions.assertThat(actual.filename).isEqualTo("temporary-certificate-ZlxBCBxpjseZU5i3ccyL.pdf")
-        Assertions.assertThat(actual.contents).isSameAs(contents)
+        verify(temporaryCertificateRepository).save(temporaryCertificate)
+        assertThat(actual.filename).isEqualTo("temporary-certificate-ZlxBCBxpjseZU5i3ccyL.pdf")
+        assertThat(actual.contents).isSameAs(contents)
+    }
+
+    @Test
+    fun `should fail to generate temporary certificate pdf as no ERO found by GssCode`() {
+        // Given
+        val eroId = aValidRandomEroId()
+        val request = buildGenerateTemporaryCertificateDto(gssCode = "N06000012")
+        given(eroClient.getEro(any())).willThrow(ElectoralRegistrationOfficeNotFoundException::class.java)
+
+        // When
+        val exception = catchThrowableOfType(
+            { temporaryCertificateService.generateTemporaryCertificate(eroId, request) },
+            GenerateTemporaryCertificateValidationException::class.java
+        )
+
+        // Then
+        verify(validator).validate(request)
+        verify(eroClient).getEro(request.gssCode)
+        verifyNoInteractions(
+            certificatePdfTemplateDetailsFactory,
+            temporaryCertificateMapper,
+            certificatePdfTemplateDetailsFactory,
+            pdfFactory,
+            temporaryCertificateRepository
+        )
+        assertThat(exception).hasMessage("Temporary Certificate gssCode 'N06000012' does not exist")
+    }
+
+    @Test
+    fun `should fail to generate temporary certificate pdf as ERO found by GssCode does not belong to ERO making request`() {
+        // Given
+        val eroIdInRequest = "bath-and-north-east-somerset-council"
+        val eroIdFoundByGssCode = "blackburn-with-darwen"
+        val request = buildGenerateTemporaryCertificateDto(gssCode = "W06000023")
+        val eroDetails = buildEroDto(eroId = eroIdFoundByGssCode)
+        given(eroClient.getEro(any())).willReturn(eroDetails)
+
+        // When
+        val exception = catchThrowableOfType(
+            { temporaryCertificateService.generateTemporaryCertificate(eroIdInRequest, request) },
+            GenerateTemporaryCertificateValidationException::class.java
+        )
+
+        // Then
+        verify(validator).validate(request)
+        verify(eroClient).getEro(request.gssCode)
+        verifyNoInteractions(
+            certificatePdfTemplateDetailsFactory,
+            temporaryCertificateMapper,
+            certificatePdfTemplateDetailsFactory,
+            pdfFactory,
+            temporaryCertificateRepository
+        )
+        assertThat(exception)
+            .hasMessage("Temporary Certificate gssCode 'W06000023' is not valid for eroId 'bath-and-north-east-somerset-council'")
     }
 }

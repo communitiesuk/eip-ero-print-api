@@ -34,15 +34,17 @@ class TemporaryCertificateController(
         @PathVariable eroId: String,
         @RequestBody @Valid generateTemporaryCertificateRequest: GenerateTemporaryCertificateRequest,
         authentication: Authentication
-    ) {
+    ): ResponseEntity<InputStreamResource> {
         val userId = authentication.name
         val dto = generateTemporaryCertificateMapper.toGenerateTemporaryCertificateDto(
             generateTemporaryCertificateRequest,
             userId
         )
-        val pdfFile = temporaryCertificateService.generateTemporaryCertificate(dto)
-
-        TODO("not yet implemented")
+        return temporaryCertificateService.generateTemporaryCertificate(eroId, dto).let { pdfFile ->
+            ResponseEntity.status(HttpStatus.CREATED)
+                .headers(createPdfHttpHeaders(pdfFile))
+                .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
+        }
     }
 
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)

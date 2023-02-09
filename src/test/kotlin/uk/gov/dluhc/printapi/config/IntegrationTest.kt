@@ -31,6 +31,7 @@ import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -111,6 +112,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository
+
+    @Autowired
+    protected lateinit var temporaryCertificateRepository: TemporaryCertificateRepository
 
     @BeforeEach
     fun clearLogAppender() {

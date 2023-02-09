@@ -120,7 +120,7 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
     }
 
     @Test
-    fun `should return temporary certificate pdf document given valid request for authorised user`() {
+    fun `should return temporary certificate explainer document pdf given valid request for authorised user`() {
         // Given
         val eroName = aValidLocalAuthorityName()
         val localAuthorities: List<LocalAuthorityResponse> = listOf(

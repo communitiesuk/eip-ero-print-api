@@ -1,19 +1,32 @@
 package uk.gov.dluhc.printapi.service.temporarycertificate
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.given
+import org.mockito.kotlin.verify
+import software.amazon.awssdk.core.ResponseBytes
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.GetObjectResponse
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_ENGLAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_NORTHERN_IRELAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_SCOTLAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_WALES
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssuingAuthority
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@ExtendWith(MockitoExtension::class)
 internal class CertificatePdfTemplateDetailsFactoryTest {
 
     companion object {
@@ -51,30 +64,39 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     }
 
-    private val templateSelector = CertificatePdfTemplateDetailsFactory(
-        ENGLISH_TEMPLATE_PATH,
-        ENGLISH_PLACEHOLDER_ELECTOR_NAME,
-        ENGLISH_PLACEHOLDER_LA_NAME,
-        ENGLISH_PLACEHOLDER_ISSUE_DATE,
-        ENGLISH_PLACEHOLDER_VALID_ON_DATE,
-        ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER,
-        ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
-        ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
-        ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
-        ENGLISH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
-        ENGLISH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
-        WELSH_TEMPLATE_PATH,
-        WELSH_PLACEHOLDER_ELECTOR_NAME,
-        WELSH_PLACEHOLDER_LA_NAME,
-        WELSH_PLACEHOLDER_ISSUE_DATE,
-        WELSH_PLACEHOLDER_VALID_ON_DATE,
-        WELSH_PLACEHOLDER_CERTIFICATE_NUMBER,
-        WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
-        WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
-        WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
-        WELSH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
-        WELSH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
-    )
+    @Mock
+    private lateinit var s3Client: S3Client
+
+    private lateinit var templateSelector: CertificatePdfTemplateDetailsFactory
+
+    @BeforeEach
+    fun setup() {
+        templateSelector = CertificatePdfTemplateDetailsFactory(
+            s3Client,
+            ENGLISH_TEMPLATE_PATH,
+            ENGLISH_PLACEHOLDER_ELECTOR_NAME,
+            ENGLISH_PLACEHOLDER_LA_NAME,
+            ENGLISH_PLACEHOLDER_ISSUE_DATE,
+            ENGLISH_PLACEHOLDER_VALID_ON_DATE,
+            ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER,
+            ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
+            ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
+            ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
+            ENGLISH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
+            ENGLISH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
+            WELSH_TEMPLATE_PATH,
+            WELSH_PLACEHOLDER_ELECTOR_NAME,
+            WELSH_PLACEHOLDER_LA_NAME,
+            WELSH_PLACEHOLDER_ISSUE_DATE,
+            WELSH_PLACEHOLDER_VALID_ON_DATE,
+            WELSH_PLACEHOLDER_CERTIFICATE_NUMBER,
+            WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
+            WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
+            WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
+            WELSH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
+            WELSH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
+        )
+    }
 
     @Nested
     inner class GetTemplateFilename {
@@ -111,10 +133,13 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             // Given
             val issueDate = "20/04/2023"
             val validOnDate = "04/05/2023"
+            val photoS3Bucket = "some-s3-bucket"
+            val photoS3Path = "path/to/a/photo.png"
             val temporaryCertificate = buildTemporaryCertificate(
                 gssCode = gssCode,
                 issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
                 validOnDate = LocalDate.parse(validOnDate, DATE_TIME_FORMATTER),
+                photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path)
             )
             val expectedPlaceholders = with(temporaryCertificate) {
                 mapOf(
@@ -125,6 +150,8 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
                     ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER to certificateNumber,
                 )
             }
+            val photoBytes = byteArrayOf()
+            mockS3PhotoResponse(photoBytes)
             val expectedImages = listOf(
                 ImageDetails(
                     ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
@@ -132,7 +159,7 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
                     ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
                     ENGLISH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
                     ENGLISH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
-                    byteArrayOf()
+                    photoBytes
                 )
             )
 
@@ -140,6 +167,7 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             val actual = templateSelector.getTemplateDetails(temporaryCertificate)
 
             // Then
+            verify(s3Client).getObjectAsBytes(GetObjectRequest.builder().bucket(photoS3Bucket).key(photoS3Path).build())
             assertThat(actual.path).isEqualTo(ENGLISH_TEMPLATE_PATH)
             assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
             assertThat(actual.images).isEqualTo(expectedImages)
@@ -150,11 +178,14 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             // Given
             val issueDate = "20/04/2023"
             val validOnDate = "04/05/2023"
+            val photoS3Bucket = "some-s3-bucket"
+            val photoS3Path = "path/to/a/photo.png"
             val temporaryCertificate = buildTemporaryCertificate(
                 gssCode = GSS_CODE_WALES,
                 issuingAuthorityCy = aValidIssuingAuthority(),
                 issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
                 validOnDate = LocalDate.parse(validOnDate, DATE_TIME_FORMATTER),
+                photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path)
             )
             val expectedPlaceholders = with(temporaryCertificate) {
                 mapOf(
@@ -165,6 +196,8 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
                     WELSH_PLACEHOLDER_CERTIFICATE_NUMBER to certificateNumber,
                 )
             }
+            val photoBytes = byteArrayOf()
+            mockS3PhotoResponse(photoBytes)
             val expectedImages = listOf(
                 ImageDetails(
                     WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
@@ -172,7 +205,7 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
                     WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
                     WELSH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
                     WELSH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
-                    byteArrayOf()
+                    photoBytes
                 )
             )
 
@@ -180,9 +213,15 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             val actual = templateSelector.getTemplateDetails(temporaryCertificate)
 
             // Then
+            verify(s3Client).getObjectAsBytes(GetObjectRequest.builder().bucket(photoS3Bucket).key(photoS3Path).build())
             assertThat(actual.path).isEqualTo(WELSH_TEMPLATE_PATH)
             assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
             assertThat(actual.images).isEqualTo(expectedImages)
         }
+    }
+
+    private fun mockS3PhotoResponse(photoBytes: ByteArray) {
+        val response = ResponseBytes.fromByteArray(GetObjectResponse.builder().build(), photoBytes)
+        given(s3Client.getObjectAsBytes(any<GetObjectRequest>())).willReturn(response)
     }
 }

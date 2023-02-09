@@ -2,12 +2,16 @@ package uk.gov.dluhc.printapi.service.temporarycertificate
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import uk.gov.dluhc.printapi.database.entity.TemporaryCertificate
 import uk.gov.dluhc.printapi.service.isWalesCode
+import uk.gov.dluhc.printapi.service.parseS3Arn
 import java.time.format.DateTimeFormatter
 
 @Component
 class CertificatePdfTemplateDetailsFactory(
+    private val s3Client: S3Client,
     @Value("\${temporary-certificate.certificate-pdf.english.path}") private val pdfTemplateEnglish: String,
     @Value("\${temporary-certificate.certificate-pdf.english.placeholder.elector-name}") private val electorNameEnPlaceholder: String,
     @Value("\${temporary-certificate.certificate-pdf.english.placeholder.local-authority-name}") private val localAuthorityNameEnPlaceholder: String,
@@ -47,8 +51,10 @@ class CertificatePdfTemplateDetailsFactory(
     }
 
     private fun getPhotoBytes(photoLocationArn: String): ByteArray {
-        // TODO get photo from S3
-        return byteArrayOf()
+        val s3Location = parseS3Arn(photoLocationArn)
+        return s3Client.getObjectAsBytes(
+            GetObjectRequest.builder().bucket(s3Location.bucket).key(s3Location.path).build()
+        ).asByteArray()
     }
 
     private fun getVoterPhotoImageEn(contents: ByteArray): ImageDetails {
