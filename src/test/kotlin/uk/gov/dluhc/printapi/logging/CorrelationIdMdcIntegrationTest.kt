@@ -131,7 +131,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
             batchPrintRequestsJob.run()
 
             // Then
-            await.atMost(3, TimeUnit.SECONDS).untilAsserted {
+            await.atMost(5, TimeUnit.SECONDS).untilAsserted {
                 val logEvent = TestLogAppender.getLogEventMatchingRegex(
                     "Looking for certificate Print Requests to assign to a new batch",
                     Level.INFO

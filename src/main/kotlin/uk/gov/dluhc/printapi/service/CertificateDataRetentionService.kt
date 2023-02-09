@@ -16,18 +16,24 @@ class CertificateDataRetentionService(
     private val certificateRepository: CertificateRepository,
     private val certificateRemovalDateResolver: CertificateRemovalDateResolver
 ) {
+    /**
+     * Sets the initialRetentionRemovalDate on a [uk.gov.dluhc.printapi.database.entity.Certificate], after the
+     * originating application is removed from the source system (e.g. VCA).
+     *
+     * @param message An [ApplicationRemovedMessage] sent from the source system.
+     */
     @Transactional
-    fun sourceApplicationRemoved(message: ApplicationRemovedMessage) {
+    fun handleSourceApplicationRemoved(message: ApplicationRemovedMessage) {
 
         with(message) {
-            val sourceType = sourceTypeMapper.toSourceTypeEntity(sourceType)
+            val sourceType = sourceTypeMapper.mapSqsToEntity(sourceType)
             val certificate = certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
                 gssCode = gssCode,
                 sourceType = sourceType,
                 sourceReference = sourceReference
             )?.also {
                 it.initialRetentionRemovalDate =
-                    certificateRemovalDateResolver.getCertificateDeliveryInfoRemovalDate(it.issueDate, gssCode)
+                    certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
             } ?: throw CertificateNotFoundException(sourceType, sourceReference).also { logger.warn(it.message) }
 
             certificateRepository.save(certificate)

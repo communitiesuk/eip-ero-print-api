@@ -22,7 +22,7 @@ class ApplicationRemovedMessageListener(
     override fun handleMessage(@Valid @Payload payload: ApplicationRemovedMessage) {
         with(payload) {
             logger.info { "ApplicationRemovedMessage for application with source type [$sourceType] and source reference [$sourceReference]" }
-            certificateDataRetentionService.sourceApplicationRemoved(payload)
+            certificateDataRetentionService.handleSourceApplicationRemoved(payload)
         }
     }
 }

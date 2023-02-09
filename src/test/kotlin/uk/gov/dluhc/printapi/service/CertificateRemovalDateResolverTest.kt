@@ -33,15 +33,15 @@ internal class CertificateRemovalDateResolverTest {
         val issueDate = LocalDate.of(2023, 1, 1)
         val upcomingBankHoliday = LocalDate.of(2023, 2, 1)
         val expectedRemovalDate = LocalDate.of(2023, 2, 9)
-        given(dataRetentionConfig.certificateDeliveryInfo).willReturn(Duration.ofDays(28))
+        given(dataRetentionConfig.certificateInitialRetentionPeriod).willReturn(Duration.ofDays(28))
         given(bankHolidayDataClient.getBankHolidayDates(any(), any(), any())).willReturn(listOf(upcomingBankHoliday))
 
         // When
-        val actual = certificateRemovalDateResolver.getCertificateDeliveryInfoRemovalDate(issueDate, gssCode)
+        val actual = certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
 
         // Then
         assertThat(actual).isEqualTo(expectedRemovalDate)
-        verify(dataRetentionConfig).certificateDeliveryInfo
+        verify(dataRetentionConfig).certificateInitialRetentionPeriod
         verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES)
     }
 
@@ -51,15 +51,15 @@ internal class CertificateRemovalDateResolverTest {
         val gssCode = "E09000007"
         val issueDate = LocalDate.of(2023, 1, 1)
         val expectedRemovalDate = LocalDate.of(2023, 2, 8)
-        given(dataRetentionConfig.certificateDeliveryInfo).willReturn(Duration.ofDays(28))
+        given(dataRetentionConfig.certificateInitialRetentionPeriod).willReturn(Duration.ofDays(28))
         given(bankHolidayDataClient.getBankHolidayDates(any(), any(), any())).willReturn(emptyList())
 
         // When
-        val actual = certificateRemovalDateResolver.getCertificateDeliveryInfoRemovalDate(issueDate, gssCode)
+        val actual = certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
 
         // Then
         assertThat(actual).isEqualTo(expectedRemovalDate)
-        verify(dataRetentionConfig).certificateDeliveryInfo
+        verify(dataRetentionConfig).certificateInitialRetentionPeriod
         verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES)
     }
 }

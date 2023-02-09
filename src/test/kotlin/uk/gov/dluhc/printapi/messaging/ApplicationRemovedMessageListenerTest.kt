@@ -17,7 +17,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
     fun `should process message and set delivery info removal date`() {
         // Given
         val certificate = buildCertificate(
-            issueDate = LocalDate.of(2023, 4, 1), // to include Easter bank holidays in calculation
+            issueDate = LocalDate.of(2023, 4, 1), // to include 3 bank holidays in calculation
             printRequests = listOf(
                 buildPrintRequest(delivery = buildDelivery()),
                 buildPrintRequest(delivery = buildDelivery())
@@ -26,7 +26,6 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         certificateRepository.save(certificate)
         val payload = buildApplicationRemovedMessage(
             sourceReference = certificate.sourceReference!!,
-            applicationReference = certificate.applicationReference!!,
             gssCode = certificate.gssCode!!
         )
         val expectedInitialRemovalDate = LocalDate.of(2023, 5, 16)

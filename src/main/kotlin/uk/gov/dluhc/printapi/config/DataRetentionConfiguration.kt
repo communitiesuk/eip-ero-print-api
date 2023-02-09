@@ -7,5 +7,5 @@ import java.time.Duration
 @ConfigurationProperties(prefix = "api.print-api.retention.period")
 @ConstructorBinding
 data class DataRetentionConfiguration(
-    val certificateDeliveryInfo: Duration
+    val certificateInitialRetentionPeriod: Duration
 )
