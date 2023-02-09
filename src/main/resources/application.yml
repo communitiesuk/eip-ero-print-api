@@ -58,11 +58,11 @@ temporary-certificate:
     english:
       path: "classpath:temporary-certificate-template/Temporary Certificate (English).pdf"
       placeholder:
-        elector-name: "electorNameEnPlaceholder"
-        local-authority-name: "localAuthorityNameEnPlaceholder"
-        date-of-issue: "dateOfIssueEnPlaceholder"
-        valid-on-date: "validOnDateEnPlaceholder"
-        certificate-number: "certificateNumberEnPlaceholder"
+        elector-name: "name"
+        local-authority-name: "localAuthorityEn"
+        date-of-issue: "dateOfIssue"
+        valid-on-date: "validOn"
+        certificate-number: "certificateNumber"
       images:
         voter-photo:
           page-number: 1
@@ -73,11 +73,11 @@ temporary-certificate:
     welsh:
       path: "classpath:temporary-certificate-template/Temporary Certificate (Dual Language).pdf"
       placeholder:
-        elector-name: "electorNameCyPlaceholder"
-        local-authority-name: "localAuthorityNameCyPlaceholder"
-        date-of-issue: "dateOfIssueCyPlaceholder"
-        valid-on-date: "validOnDateCyPlaceholder"
-        certificate-number: "certificateNumberCyPlaceholder"
+        elector-name: "name"
+        local-authority-name: "localAuthorityCy"
+        date-of-issue: "dateOfIssue"
+        valid-on-date: "validOn"
+        certificate-number: "certificateNumber"
       images:
         voter-photo:
           page-number: 1
