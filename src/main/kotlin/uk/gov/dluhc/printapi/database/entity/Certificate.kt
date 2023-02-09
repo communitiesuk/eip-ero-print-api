@@ -66,8 +66,20 @@ class Certificate(
     @field:NotNull
     var issueDate: LocalDate = LocalDate.now(),
 
+    /**
+     * The certificate's expiry date. Not to be confused with removal dates related to data retention policies.
+     */
     @field:NotNull
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
+
+    /**
+     * The legislation stipulates there are two retention periods for certificate related data. The first (initial)
+     * period applies to PII data that is not on the printed certificate itself (e.g. the addressee/address on the
+     * envelope), which needs to be removed 28 (configurable) working days after the certificate is "issued".
+     * For standard (non-temporary) certificates, the retention period is considerably longer and is currently specified
+     * as the tenth 1st July.
+     */
+    var initialRetentionRemovalDate: LocalDate? = null,
 
     /**
      * Certificate status corresponds to the current status of the most recent
