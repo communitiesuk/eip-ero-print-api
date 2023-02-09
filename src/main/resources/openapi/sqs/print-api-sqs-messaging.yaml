@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.9.0'
+  version: '1.9.1'
   description: |-
     Print API SQS Message Types
     
@@ -136,6 +136,25 @@ components:
         - photoLocation
         - delivery
         - userId
+
+    ApplicationRemovedMessage:
+      description: The SQS message sent when the source application is removed from the originating system.
+      type: object
+      properties:
+        sourceReference:
+          type: string
+          description: Reference in the source application.
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        gssCode:
+          type: string
+          minLength: 9
+          maxLength: 9
+          description: GSS code of the ERO responsible for sending the message
+      required:
+        - sourceReference
+        - sourceType
+        - gssCode
 
     SourceType:
       title: SourceType
