@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
@@ -38,7 +39,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
-            assertThat(saved.initialRetentionRemovalDate).isEqualTo(expectedInitialRemovalDate)
+            assertThat(saved).hasInitialRetentionRemovalDate(expectedInitialRemovalDate)
         }
     }
 }

@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
+import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -9,12 +9,13 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
-import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
 import java.time.LocalDate
@@ -71,12 +72,10 @@ internal class CertificateDataRetentionServiceTest {
         )
         given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
         given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(null)
+        TestLogAppender.reset()
 
         // When
-        val error = catchThrowableOfType(
-            { certificateDataRetentionService.handleSourceApplicationRemoved(message) },
-            CertificateNotFoundException::class.java
-        )
+        certificateDataRetentionService.handleSourceApplicationRemoved(message)
 
         // Then
         verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
@@ -85,8 +84,7 @@ internal class CertificateDataRetentionServiceTest {
             VOTER_CARD,
             message.sourceReference
         )
-        assertThat(error)
-            .isNotNull
-            .hasMessage("Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found")
+        verify(certificateRepository, times(0)).save(any())
+        assertThat(TestLogAppender.hasLog("Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found", Level.ERROR)).isTrue
     }
 }

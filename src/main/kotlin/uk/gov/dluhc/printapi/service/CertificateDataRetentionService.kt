@@ -3,7 +3,6 @@ package uk.gov.dluhc.printapi.service
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
-import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 import javax.transaction.Transactional
@@ -24,19 +23,18 @@ class CertificateDataRetentionService(
      */
     @Transactional
     fun handleSourceApplicationRemoved(message: ApplicationRemovedMessage) {
-
         with(message) {
             val sourceType = sourceTypeMapper.mapSqsToEntity(sourceType)
-            val certificate = certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
+            certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
                 gssCode = gssCode,
                 sourceType = sourceType,
                 sourceReference = sourceReference
             )?.also {
-                it.initialRetentionRemovalDate =
-                    certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
-            } ?: throw CertificateNotFoundException(sourceType, sourceReference).also { logger.warn(it.message) }
-
-            certificateRepository.save(certificate)
+                it.initialRetentionRemovalDate = certificateRemovalDateResolver
+                    .getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
+                certificateRepository.save(it)
+            }
+                ?: logger.error { "Certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }
         }
     }
 }

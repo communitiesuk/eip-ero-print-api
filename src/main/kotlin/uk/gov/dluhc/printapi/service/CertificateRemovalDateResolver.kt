@@ -35,11 +35,11 @@ class CertificateRemovalDateResolver(
      * @return A [LocalDate] representing when the data should be removed
      */
     fun getCertificateInitialRetentionPeriodRemovalDate(issueDate: LocalDate, gssCode: String): LocalDate =
-        with(getTotalDaysForWorkingDays(issueDate, dataRetentionConfig.certificateInitialRetentionPeriod.toDays(), gssCode)) {
+        with(getTotalDaysForWorkingDays(issueDate, dataRetentionConfig.certificateInitialRetentionPeriod.days, gssCode)) {
             issueDate.plusDays(this.toLong())
         }
 
-    private fun getTotalDaysForWorkingDays(issueDate: LocalDate, requiredWorkingDays: Long, gssCode: String): Int {
+    private fun getTotalDaysForWorkingDays(issueDate: LocalDate, requiredWorkingDays: Int, gssCode: String): Int {
         val upcomingBankHolidays = bankHolidayDataClient.getBankHolidayDates(BankHolidayDivision.fromGssCode(gssCode))
         var date = issueDate
         var workingDays = 0
