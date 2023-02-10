@@ -25,8 +25,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateTemporaryCe
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.time.LocalDate
 import java.util.UUID
 
@@ -255,7 +253,6 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .isEqualTo("temporary-certificate-${temporaryCertificate.certificateNumber}.pdf")
 
         val pdfContent = response.responseBody
-        FileOutputStream(File("Example_TEMPORARY_CERTIFICATE_English.pdf")).use { it.write(pdfContent) }
         assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)

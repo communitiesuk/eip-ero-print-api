@@ -6,8 +6,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.util.ResourceUtils
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
-import java.io.File
-import java.io.FileOutputStream
 
 internal class PdfFactoryTest {
 
@@ -78,7 +76,6 @@ internal class PdfFactoryTest {
         val contents = pdfFactory.createPdfContents(templateDetails)
 
         // Then
-        FileOutputStream(File("Example_EXPLAINER_English.pdf")).use { it.write(contents) }
         verifyGeneratedPdfPlaceholders(contents, placeholders)
     }
 
@@ -125,7 +122,6 @@ internal class PdfFactoryTest {
         val contents = pdfFactory.createPdfContents(templateDetails)
 
         // Then
-        FileOutputStream(File("Example_CERTIFICATE_Welsh.pdf")).use { it.write(contents) }
         verifyGeneratedPdfPlaceholders(contents, placeholders)
     }
 
