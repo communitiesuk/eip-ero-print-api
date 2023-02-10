@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.service.temporarycertificate
 
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
-import liquibase.pro.packaged.it
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.util.ResourceUtils
@@ -39,8 +38,9 @@ internal class PdfFactoryTest {
                 "ero-recipient" to name,
                 "ero-address-1-en" to address.property.orEmpty(),
                 "ero-address-2-en" to address.street,
-                "ero-address-3-en" to address.town.orEmpty(),
-                "ero-address-4-en" to address.area.orEmpty(),
+                // Commented out as the provided template does not include these form fields
+                // "ero-address-3-en" to address.town.orEmpty(),
+                // "ero-address-4-en" to address.area.orEmpty(),
                 "ero-postcode-en" to address.postcode,
                 "ero-email-en" to emailAddress,
                 "ero-phonenumber-en" to phoneNumber,
@@ -64,8 +64,9 @@ internal class PdfFactoryTest {
                 "ero-recipient" to name,
                 "ero-address-1-cy" to address.property.orEmpty(),
                 "ero-address-2-cy" to address.street,
-                "ero-address-3-cy" to address.town.orEmpty(),
-                "ero-address-4-cy" to address.area.orEmpty(),
+                // Commented out as the provided template does not include these form fields
+                // "ero-address-3-cy" to address.town.orEmpty(),
+                // "ero-address-4-cy" to address.area.orEmpty(),
                 "ero-postcode-cy" to address.postcode,
                 "ero-email-cy" to emailAddress,
                 "ero-phonenumber-cy" to phoneNumber,
@@ -77,6 +78,7 @@ internal class PdfFactoryTest {
         val contents = pdfFactory.createPdfContents(templateDetails)
 
         // Then
+        FileOutputStream(File("Example_EXPLAINER_English.pdf")).use { it.write(contents) }
         verifyGeneratedPdfPlaceholders(contents, placeholders)
     }
 
