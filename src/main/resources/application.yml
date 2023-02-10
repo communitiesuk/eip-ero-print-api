@@ -59,35 +59,34 @@ jobs:
 temporary-certificate:
   certificate-pdf:
     english:
-      path: "classpath:temporary-certificate-template/Temporary Certificate (English).pdf"
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English).pdf"
       placeholder:
-        elector-name: "name"
-        local-authority-name: "localAuthorityEn"
-        date-of-issue: "dateOfIssue"
-        valid-on-date: "validOn"
-        certificate-number: "certificateNumber"
+        elector-name: "applicant-name"
+        local-authority-name-en: "local-authority-name-en"
+        date-of-issue: "date-issued"
+        valid-on-date: "date-valid"
+        certificate-number: "certificate-number"
       images:
         voter-photo:
-          page-number: 1
-          absolute-x: 62f
-          absolute-y: 568f
-          fit-width: 99f
-          fit-height: 127f
+          absolute-x: 21.6 # top left-corner of image is at 21.87 mm where bottom left corner is the origin
+          absolute-y: 201.6 # top left-corner of image is at 200.37 mm
+          fit-width: 35 # 35 mm
+          fit-height: 45  # 45 mm
     welsh:
-      path: "classpath:temporary-certificate-template/Temporary Certificate (Dual Language).pdf"
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual).pdf"
       placeholder:
-        elector-name: "name"
-        local-authority-name: "localAuthorityCy"
-        date-of-issue: "dateOfIssue"
-        valid-on-date: "validOn"
-        certificate-number: "certificateNumber"
+        elector-name: "applicant-name"
+        local-authority-name-en: "local-authority-name-en"
+        local-authority-name-cy: "local-authority-name-cy"
+        date-of-issue: "date-issued"
+        valid-on-date: "date-valid"
+        certificate-number: "certificate-number"
       images:
         voter-photo:
-          page-number: 1
-          absolute-x: 62f
-          absolute-y: 568f
-          fit-width: 99f
-          fit-height: 127f
+          absolute-x: 21.6
+          absolute-y: 194.6f
+          fit-width: 35
+          fit-height: 45
   explainer-pdf:
     english:
       path: "classpath:temporary-certificate-template/Explainer Document (English).pdf"

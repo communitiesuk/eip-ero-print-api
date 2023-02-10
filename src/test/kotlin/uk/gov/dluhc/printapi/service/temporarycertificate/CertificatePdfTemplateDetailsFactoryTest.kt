@@ -50,7 +50,8 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
 
         // Welsh placeholders
         private const val WELSH_PLACEHOLDER_ELECTOR_NAME = "electorNameCyPlaceholder"
-        private const val WELSH_PLACEHOLDER_LA_NAME = "localAuthorityNameCyPlaceholder"
+        private const val WELSH_PLACEHOLDER_LA_NAME_EN = "localAuthorityNameEnPlaceholder"
+        private const val WELSH_PLACEHOLDER_LA_NAME_CY = "localAuthorityNameCyPlaceholder"
         private const val WELSH_PLACEHOLDER_ISSUE_DATE = "dateOfIssueCyPlaceholder"
         private const val WELSH_PLACEHOLDER_VALID_ON_DATE = "validOnDateCyPlaceholder"
         private const val WELSH_PLACEHOLDER_CERTIFICATE_NUMBER = "certificateNumberCyPlaceholder"
@@ -86,7 +87,8 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             ENGLISH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
             WELSH_TEMPLATE_PATH,
             WELSH_PLACEHOLDER_ELECTOR_NAME,
-            WELSH_PLACEHOLDER_LA_NAME,
+            WELSH_PLACEHOLDER_LA_NAME_EN,
+            WELSH_PLACEHOLDER_LA_NAME_CY,
             WELSH_PLACEHOLDER_ISSUE_DATE,
             WELSH_PLACEHOLDER_VALID_ON_DATE,
             WELSH_PLACEHOLDER_CERTIFICATE_NUMBER,
@@ -182,6 +184,7 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             val photoS3Path = "path/to/a/photo.png"
             val temporaryCertificate = buildTemporaryCertificate(
                 gssCode = GSS_CODE_WALES,
+                issuingAuthority = aValidIssuingAuthority(),
                 issuingAuthorityCy = aValidIssuingAuthority(),
                 issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
                 validOnDate = LocalDate.parse(validOnDate, DATE_TIME_FORMATTER),
@@ -190,7 +193,8 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             val expectedPlaceholders = with(temporaryCertificate) {
                 mapOf(
                     WELSH_PLACEHOLDER_ELECTOR_NAME to this.getNameOnCertificate(),
-                    WELSH_PLACEHOLDER_LA_NAME to issuingAuthorityCy,
+                    WELSH_PLACEHOLDER_LA_NAME_EN to issuingAuthority,
+                    WELSH_PLACEHOLDER_LA_NAME_CY to issuingAuthorityCy,
                     WELSH_PLACEHOLDER_ISSUE_DATE to issueDate,
                     WELSH_PLACEHOLDER_VALID_ON_DATE to validOnDate,
                     WELSH_PLACEHOLDER_CERTIFICATE_NUMBER to certificateNumber,

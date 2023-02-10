@@ -25,6 +25,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateTemporaryCe
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDate
 import java.util.UUID
 
@@ -37,7 +39,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         private const val GSS_CODE = "W06000023"
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
-        private const val MAX_SIZE_1_MB = 1024 * 1024
+        private const val MAX_SIZE_2_MB = 2 * 1024 * 1024
     }
 
     @Test
@@ -228,7 +230,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
         // When
         val response = webTestClient.mutate()
-            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_1_MB) }
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
             .build().post()
             .uri(URI_TEMPLATE, ERO_ID)
             .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
@@ -253,6 +255,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .isEqualTo("temporary-certificate-${temporaryCertificate.certificateNumber}.pdf")
 
         val pdfContent = response.responseBody
+        FileOutputStream(File("Example_TEMPORARY_CERTIFICATE_English.pdf")).use { it.write(pdfContent) }
         assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
