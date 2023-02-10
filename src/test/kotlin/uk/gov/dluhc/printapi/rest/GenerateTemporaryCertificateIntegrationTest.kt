@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.rest
 
 import com.lowagie.text.pdf.PdfReader
+import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
@@ -254,7 +255,8 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         val pdfContent = response.responseBody
         assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
-            assertThat(reader.acroFields.getField("localAuthorityEn")).isEqualTo(localAuthorityName)
+            val text = PdfTextExtractor(reader).getTextFromPage(1)
+            assertThat(text).contains(localAuthorityName)
         }
     }
 
