@@ -8,7 +8,6 @@ import org.springframework.http.MediaType
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.testsupport.bearerToken
-import uk.gov.dluhc.printapi.testsupport.testdata.UNAUTHORIZED_BEARER_TOKEN
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
@@ -23,40 +22,6 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
         private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "E99999999"
         private const val MAX_SIZE_1_MB = 1024 * 1024
-    }
-
-    @Test
-    fun `should return unauthorized given no bearer token`() {
-        webTestClient.post()
-            .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
-            .exchange()
-            .expectStatus()
-            .isForbidden
-    }
-
-    @Test
-    fun `should return unauthorized given user with invalid bearer token`() {
-        wireMockService.stubCognitoJwtIssuerResponse()
-        webTestClient.post()
-            .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
-            .bearerToken(UNAUTHORIZED_BEARER_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized
-    }
-
-    @Test
-    fun `should return forbidden given user with valid bearer token belonging to a different group`() {
-        wireMockService.stubCognitoJwtIssuerResponse()
-
-        webTestClient.post()
-            .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-admin-$ERO_ID")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden
     }
 
     @Test

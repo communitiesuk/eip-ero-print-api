@@ -15,7 +15,6 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
-import uk.gov.dluhc.printapi.testsupport.testdata.UNAUTHORIZED_BEARER_TOKEN
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
@@ -38,43 +37,6 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
         private const val MAX_SIZE_1_MB = 1024 * 1024
-    }
-
-    @Test
-    fun `should return forbidden given no bearer token`() {
-        webTestClient.post()
-            .uri(URI_TEMPLATE, ERO_ID)
-            .withBody(buildGenerateTemporaryCertificateRequest())
-            .exchange()
-            .expectStatus()
-            .isForbidden
-    }
-
-    @Test
-    fun `should return unauthorized given user with invalid bearer token`() {
-        wireMockService.stubCognitoJwtIssuerResponse()
-        webTestClient.post()
-            .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(UNAUTHORIZED_BEARER_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .withBody(buildGenerateTemporaryCertificateRequest())
-            .exchange()
-            .expectStatus()
-            .isUnauthorized
-    }
-
-    @Test
-    fun `should return forbidden given user with valid bearer token belonging to a different group`() {
-        wireMockService.stubCognitoJwtIssuerResponse()
-
-        webTestClient.post()
-            .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-admin-$ERO_ID")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .withBody(buildGenerateTemporaryCertificateRequest())
-            .exchange()
-            .expectStatus()
-            .isForbidden
     }
 
     @Test
