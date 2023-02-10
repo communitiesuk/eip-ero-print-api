@@ -67,11 +67,11 @@ temporary-certificate:
         valid-on-date: "date-valid"
         certificate-number: "certificate-number"
       images:
-        voter-photo:
-          absolute-x: 21.6 # top left-corner of image is at 21.87 mm where bottom left corner is the origin
-          absolute-y: 201.6 # top left-corner of image is at 200.37 mm
-          fit-width: 35 # 35 mm
-          fit-height: 45  # 45 mm
+        voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
+          absolute-x-mm: 21.6
+          absolute-y-mm: 201.6
+          fit-width-mm: 35
+          fit-height-mm: 45
     welsh:
       path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual).pdf"
       placeholder:
@@ -82,11 +82,11 @@ temporary-certificate:
         valid-on-date: "date-valid"
         certificate-number: "certificate-number"
       images:
-        voter-photo:
-          absolute-x: 21.6
-          absolute-y: 194.6f
-          fit-width: 35
-          fit-height: 45
+        voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
+          absolute-x-mm: 21.6
+          absolute-y-mm: 194.6
+          fit-width-mm: 35
+          fit-height-mm: 45
   explainer-pdf:
     english:
       path: "classpath:temporary-certificate-template/Explainer Document (English).pdf"
