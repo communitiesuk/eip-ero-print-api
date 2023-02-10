@@ -3,7 +3,9 @@ package uk.gov.dluhc.printapi.service.temporarycertificate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
+import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
+import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.dto.GenerateTemporaryCertificateDto
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.exception.GenerateTemporaryCertificateValidationException
@@ -25,14 +27,26 @@ class TemporaryCertificateService(
      * @throws GenerateTemporaryCertificateValidationException if the GenerateTemporaryCertificateDto fails validation
      */
     @Transactional
-    fun generateTemporaryCertificate(request: GenerateTemporaryCertificateDto): PdfFile {
+    fun generateTemporaryCertificate(eroId: String, request: GenerateTemporaryCertificateDto): PdfFile {
         validator.validate(request)
-        val eroDetails = eroClient.getEro(request.gssCode)
+        val eroDetails = getEroOrRaiseValidationException(eroId, request.gssCode)
         val filename = certificatePdfTemplateDetailsFactory.getTemplateFilename(request.gssCode)
         val temporaryCertificate = temporaryCertificateMapper.toTemporaryCertificate(request, eroDetails, filename)
         val templateDetails = certificatePdfTemplateDetailsFactory.getTemplateDetails(temporaryCertificate)
-        temporaryCertificateRepository.save(temporaryCertificate)
         val contents = pdfFactory.createPdfContents(templateDetails)
+        temporaryCertificateRepository.save(temporaryCertificate)
         return PdfFile("temporary-certificate-${temporaryCertificate.certificateNumber}.pdf", contents)
+    }
+
+    private fun getEroOrRaiseValidationException(eroId: String, gssCode: String): EroDto {
+        try {
+            return eroClient.getEro(gssCode).also {
+                if (it.eroId != eroId) {
+                    throw GenerateTemporaryCertificateValidationException("Temporary Certificate gssCode '$gssCode' is not valid for eroId '$eroId'")
+                }
+            }
+        } catch (error: ElectoralRegistrationOfficeNotFoundException) {
+            throw GenerateTemporaryCertificateValidationException("Temporary Certificate gssCode '$gssCode' does not exist")
+        }
     }
 }

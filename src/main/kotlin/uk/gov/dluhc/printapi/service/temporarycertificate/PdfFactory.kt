@@ -16,6 +16,7 @@ class PdfFactory {
         PdfReader(ResourceUtils.getFile(templateDetails.path).inputStream()).use { reader ->
             val stamper = PdfStamper(reader, outputStream)
             stamper.cleanMetadata()
+            stamper.setFormFlattening(true)
             try {
                 populateFormFields(stamper.acroFields, templateDetails.placeholders)
                 addImages(templateDetails.images, stamper)

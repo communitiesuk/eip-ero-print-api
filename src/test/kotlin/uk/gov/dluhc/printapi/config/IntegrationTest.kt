@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.dao.TransientDataAccessException
+import org.springframework.data.repository.CrudRepository
 import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
@@ -31,6 +32,7 @@ import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -115,6 +117,9 @@ internal abstract class IntegrationTest {
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository
 
+    @Autowired
+    protected lateinit var temporaryCertificateRepository: TemporaryCertificateRepository
+
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
@@ -139,12 +144,17 @@ internal abstract class IntegrationTest {
 
     @BeforeEach
     @AfterEach
-    fun clearRdsDatabase() {
+    fun clearDatabase() {
+        clearRepository(certificateRepository, "certificateRepository")
+        clearRepository(temporaryCertificateRepository, "temporaryCertificateRepository")
+    }
+
+    private fun clearRepository(repository: CrudRepository<*, *>, repoName: String) {
         try {
-            certificateRepository.deleteAll()
+            repository.deleteAll()
         } catch (tdae: TransientDataAccessException) {
-            logger.warn("exception while cleaning up db with `certificateRepository.deleteAll()`", tdae)
-            certificateRepository.deleteAll()
+            logger.warn("exception while cleaning up db with `$repoName.deleteAll()`", tdae)
+            repository.deleteAll()
         }
     }
 
