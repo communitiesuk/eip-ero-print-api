@@ -20,22 +20,26 @@ class CertificateRemovalDateResolver(
 ) {
 
     /**
-     * Calculates the date that the delivery info for a Certificate's print requests should be removed. The retention
-     * period is currently 28 (configurable) working days from the certificate's "issue" date, which means weekends and
-     * bank holidays should be excluded when making this calculation. If the issue date was more than 28 working days
-     * ago, the removal date will be in the past.
+     * Calculates the date that certain [uk.gov.dluhc.printapi.database.entity.Certificate] related data should be
+     * removed following the first retention period. The legislation stipulates that PII data which is not on the
+     * printed certificate should be removed 28 (configurable) working days from the certificate's "issue" date. This
+     * means that weekends and bank holidays should be excluded when making this calculation. Note that if the issue
+     * date was more than 28 working days ago, the removal date will be in the past.
+     *
+     * Due to the PII data in question (currently just address related information), this method is only relevant to
+     * standard VCA certificates, not temporary certificates or AEDs.
      *
      * @param issueDate The date the Certificate was issued.
      * @param gssCode The Certificate's GSS code which is used to determine if there are any upcoming bank holidays for
      * the UK nation concerned.
-     * @return A [LocalDate] representing when a Certificate's delivery info should be removed
+     * @return A [LocalDate] representing when the data should be removed
      */
-    fun getCertificateDeliveryInfoRemovalDate(issueDate: LocalDate, gssCode: String): LocalDate =
-        with(getTotalDaysForWorkingDays(issueDate, dataRetentionConfig.certificateDeliveryInfo.toDays(), gssCode)) {
+    fun getCertificateInitialRetentionPeriodRemovalDate(issueDate: LocalDate, gssCode: String): LocalDate =
+        with(getTotalDaysForWorkingDays(issueDate, dataRetentionConfig.certificateInitialRetentionPeriod.days, gssCode)) {
             issueDate.plusDays(this.toLong())
         }
 
-    private fun getTotalDaysForWorkingDays(issueDate: LocalDate, requiredWorkingDays: Long, gssCode: String): Int {
+    private fun getTotalDaysForWorkingDays(issueDate: LocalDate, requiredWorkingDays: Int, gssCode: String): Int {
         val upcomingBankHolidays = bankHolidayDataClient.getBankHolidayDates(BankHolidayDivision.fromGssCode(gssCode))
         var date = issueDate
         var workingDays = 0

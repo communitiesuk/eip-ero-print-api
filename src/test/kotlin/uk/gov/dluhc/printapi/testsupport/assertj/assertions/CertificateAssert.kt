@@ -258,6 +258,29 @@ class CertificateAssert
     }
 
     /**
+     * Verifies that the actual Certificate's initialRetentionRemovalDate is equal to the given one.
+     * @param initialRetentionRemovalDate the given initialRetentionRemovalDate to compare the actual Certificate's one.
+     * @return this assertion object.
+     * @throws AssertionError - if the actual Certificate's initialRetentionRemovalDate is not equal to the given one.
+     */
+    fun hasInitialRetentionRemovalDate(initialRetentionRemovalDate: LocalDate?): CertificateAssert {
+        // check that actual Certificate we want to make assertions on is not null.
+        isNotNull
+
+        // overrides the default error message with a more explicit one
+        val assertjErrorMessage = "\nExpecting initialRetentionRemovalDate of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+
+        // null safe check
+        val actualInitialRetentionRemovalDate = actual!!.initialRetentionRemovalDate
+        if (!Objects.deepEquals(actualInitialRetentionRemovalDate, initialRetentionRemovalDate)) {
+            failWithMessage(assertjErrorMessage, actual, initialRetentionRemovalDate, actualInitialRetentionRemovalDate)
+        }
+
+        // return the current assertion for method chaining
+        return this
+    }
+
+    /**
      * Verifies that the actual Certificate's issuingAuthority is equal to the given one.
      * @param issuingAuthority the given issuingAuthority to compare the actual Certificate's issuingAuthority to.
      * @return this assertion object.

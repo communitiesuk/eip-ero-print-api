@@ -43,6 +43,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 
 fun buildCertificate(
@@ -61,6 +62,7 @@ fun buildCertificate(
     sourceReference: String = aValidSourceReference(),
     applicationReceivedDateTime: Instant = aValidApplicationReceivedDateTime(),
     applicationReference: String = aValidApplicationReference(),
+    issueDate: LocalDate = aValidIssueDate()
 ): Certificate {
     val certificate = Certificate(
         id = id,
@@ -70,10 +72,10 @@ fun buildCertificate(
         applicationReference = applicationReference,
         applicationReceivedDateTime = applicationReceivedDateTime,
         issuingAuthority = aValidIssuingAuthority(),
-        issueDate = aValidIssueDate(),
+        issueDate = issueDate,
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
         gssCode = gssCode,
-        status = status
+        status = status,
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate
