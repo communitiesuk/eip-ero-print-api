@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.dao.TransientDataAccessException
+import org.springframework.data.repository.CrudRepository
 import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
@@ -140,12 +141,17 @@ internal abstract class IntegrationTest {
 
     @BeforeEach
     @AfterEach
-    fun clearRdsDatabase() {
+    fun clearDatabase() {
+        clearRepository(certificateRepository, "certificateRepository")
+        clearRepository(temporaryCertificateRepository, "temporaryCertificateRepository")
+    }
+
+    private fun clearRepository(repository: CrudRepository<*, *>, repoName: String) {
         try {
-            certificateRepository.deleteAll()
+            repository.deleteAll()
         } catch (tdae: TransientDataAccessException) {
-            logger.warn("exception while cleaning up db with `certificateRepository.deleteAll()`", tdae)
-            certificateRepository.deleteAll()
+            logger.warn("exception while cleaning up db with `$repoName.deleteAll()`", tdae)
+            repository.deleteAll()
         }
     }
 
