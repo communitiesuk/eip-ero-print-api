@@ -483,7 +483,7 @@ components:
           format: email
           example: fred.blogs@some-domain.co.uk
           description: UserId of the user who generated the Temporary Certificate
-        dateTime:
+        dateTimeGenerated:
           type: string
           format: date-time
           description: The timestamp in ISO-8601 UTC that the Temporary Certificate was generated
@@ -502,7 +502,7 @@ components:
         - certificateNumber
         - status
         - userId
-        - dateTime
+        - dateTimeGenerated
         - issueDate
         - validOnDate
     TemporaryCertificateStatus:
