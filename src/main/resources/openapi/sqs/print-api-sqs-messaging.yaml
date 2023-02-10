@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.9.1'
+  version: '1.9.2'
   description: |-
     Print API SQS Message Types
     
@@ -59,6 +59,15 @@ paths:
         '204':
           description: No response content.
 
+  '/application-removed':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/ApplicationRemovedMessage'
+      responses:
+        '204':
+          description: No response content.
 components:
   #
   # Schema and Enum Definitions
@@ -365,3 +374,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ProcessPrintResponseMessage'
+    ApplicationRemovedMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApplicationRemovedMessage'
