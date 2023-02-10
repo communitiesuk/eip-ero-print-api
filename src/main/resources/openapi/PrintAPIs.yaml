@@ -488,11 +488,23 @@ components:
           format: date-time
           description: The timestamp in ISO-8601 UTC that the Temporary Certificate was generated
           example: '2022-11-17T10:53:25Z'
+        issueDate:
+          type: string
+          format: date
+          description: The date that the Temporary Certificate was issued
+          example: '2022-11-17'
+        validOnDate:
+          type: string
+          format: date
+          description: The date on which the Temporary Certificate is/was valid
+          example: '2022-11-19'
       required:
         - certificateNumber
         - status
         - userId
         - dateTime
+        - issueDate
+        - validOnDate
     TemporaryCertificateStatus:
       title: TemporaryCertificateStatus
       type: string
