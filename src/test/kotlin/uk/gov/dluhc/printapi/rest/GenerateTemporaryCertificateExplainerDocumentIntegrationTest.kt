@@ -22,6 +22,7 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
         private const val ERO_ID = "some-city-council"
         private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "E99999999"
+        private const val MAX_SIZE_1_MB = 1024 * 1024
     }
 
     @Test
@@ -132,7 +133,10 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
         wireMockService.stubEroManagementGetEroByGssCode(eroResponse, GSS_CODE)
 
         // When
-        val response = webTestClient.post()
+        val response = webTestClient.mutate()
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_1_MB) }
+            .build()
+            .post()
             .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
             .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
             .exchange()
