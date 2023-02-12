@@ -17,7 +17,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
  * Security is a cross-cutting concern across all REST APIs so does not need to be repeated for every REST API endpoint. We
  * only need to test this once.
  */
-internal class SpringSecurityIntegrationTest : IntegrationTest() {
+internal class ControllerSpringSecurityIntegrationTest : IntegrationTest() {
 
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/certificates/applications/{APPLICATION_ID}"
