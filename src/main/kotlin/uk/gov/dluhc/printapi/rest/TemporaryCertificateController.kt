@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
+import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
 import uk.gov.dluhc.printapi.service.temporarycertificate.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import java.io.ByteArrayInputStream
@@ -27,6 +29,15 @@ class TemporaryCertificateController(
     private val temporaryCertificateService: TemporaryCertificateService,
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
 ) {
+
+    @GetMapping("/eros/{eroId}/temporary-certificates/applications/{applicationId}")
+    @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
+    fun getTemporaryCertificateSummariesByApplicationId(
+        @PathVariable eroId: String,
+        @PathVariable applicationId: String,
+    ): TemporaryCertificateSummariesResponse {
+        TODO("not yet implemented")
+    }
 
     @PostMapping("/eros/{eroId}/temporary-certificate")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
