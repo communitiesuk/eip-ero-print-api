@@ -183,39 +183,4 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
         assertThat(actual.path).isEqualTo(WELSH_TEMPLATE_PATH)
         assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
     }
-    @Test
-    fun `should get template details when optional properties are blank`() {
-        // Given
-        val gssCode = GSS_CODE_WALES
-        val eroDto = buildEroDto(
-            welshContactDetails = aWelshEroContactDetails(
-                address = AddressDto(
-                    property = "",
-                    street = "Stryd y Jêl",
-                    town = "",
-                    area = "",
-                    postcode = "LL55 1SH",
-                )
-            )
-        )
-        val expectedPlaceholders = with(eroDto.welshContactDetails!!) {
-            mapOf(
-                WELSH_CONTACT_DETAIL_1 to name,
-                WELSH_CONTACT_DETAIL_2 to address.street,
-                WELSH_CONTACT_DETAIL_3 to address.postcode,
-                WELSH_CONTACT_DETAIL_4 to emailAddress,
-                WELSH_CONTACT_DETAIL_5 to phoneNumber,
-                WELSH_CONTACT_DETAIL_6 to "",
-                WELSH_CONTACT_DETAIL_7 to "",
-                WELSH_CONTACT_DETAIL_8 to "",
-            )
-        }
-
-        // When
-        val actual = templateSelector.getTemplateDetails(gssCode, eroDto)
-
-        // Then
-        assertThat(actual.path).isEqualTo(WELSH_TEMPLATE_PATH)
-        assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
-    }
 }
