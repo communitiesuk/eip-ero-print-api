@@ -12,15 +12,15 @@ internal class PdfFactoryTest {
     companion object {
         // Explainer templates
         private const val EXPLAINER_PDF_TEMPLATE_ENGLISH =
-            "classpath:temporary-certificate-template/Explainer Document (English).pdf"
+            "classpath:temporary-certificate-template/Temp Voter Authority Explainer (English) v1.pdf"
         private const val EXPLAINER_PDF_TEMPLATE_WELSH =
-            "classpath:temporary-certificate-template/Explainer Document (Dual Language).pdf"
+            "classpath:temporary-certificate-template/Temp Voter Authority Explainer (Bilingual) v1.pdf"
 
         // Certificate templates
         private const val CERTIFICATE_PDF_TEMPLATE_ENGLISH =
-            "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English).pdf"
+            "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English) v1.pdf"
         private const val CERTIFICATE_PDF_TEMPLATE_WELSH =
-            "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual).pdf"
+            "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual) v1.pdf"
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
     }
@@ -34,14 +34,13 @@ internal class PdfFactoryTest {
         val placeholders = with(eroDetails.englishContactDetails) {
             mapOf(
                 "ero-recipient" to name,
-                "ero-address-1-en" to address.property.orEmpty(),
-                "ero-address-2-en" to address.street,
-                // Commented out as the provided template does not include these form fields
-                // "ero-address-3-en" to address.town.orEmpty(),
-                // "ero-address-4-en" to address.area.orEmpty(),
-                "ero-postcode-en" to address.postcode,
-                "ero-email-en" to emailAddress,
-                "ero-phonenumber-en" to phoneNumber,
+                "ero-contact-1" to address.property!!,
+                "ero-contact-2" to address.street,
+                "ero-contact-3" to address.town!!,
+                "ero-contact-4" to address.area!!,
+                "ero-contact-5" to address.postcode,
+                "ero-contact-6" to emailAddress,
+                "ero-contact-7" to phoneNumber,
             )
         }
         val templateDetails = TemplateDetails(EXPLAINER_PDF_TEMPLATE_ENGLISH, placeholders)
@@ -60,14 +59,13 @@ internal class PdfFactoryTest {
         val placeholders = with(eroDetails.welshContactDetails!!) {
             mapOf(
                 "ero-recipient" to name,
-                "ero-address-1-cy" to address.property.orEmpty(),
-                "ero-address-2-cy" to address.street,
-                // Commented out as the provided template does not include these form fields
-                // "ero-address-3-cy" to address.town.orEmpty(),
-                // "ero-address-4-cy" to address.area.orEmpty(),
-                "ero-postcode-cy" to address.postcode,
-                "ero-email-cy" to emailAddress,
-                "ero-phonenumber-cy" to phoneNumber,
+                "ero-contact-1" to address.property!!,
+                "ero-contact-2" to address.street,
+                "ero-contact-3" to address.town!!,
+                "ero-contact-4" to address.area!!,
+                "ero-contact-5" to address.postcode,
+                "ero-contact-6" to emailAddress,
+                "ero-contact-7" to phoneNumber,
             )
         }
         val templateDetails = TemplateDetails(EXPLAINER_PDF_TEMPLATE_WELSH, placeholders)

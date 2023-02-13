@@ -14,7 +14,7 @@ fun buildTemplateDetails(
         placeholders = placeholders
     )
 
-fun aTemplateFilename() = "Temp Voter Authority Certificate (English).pdf"
+fun aTemplateFilename() = "Temp Voter Authority Certificate (English) v1.pdf"
 
 fun aTemplatePath(
     templateFilename: String = aTemplateFilename()
