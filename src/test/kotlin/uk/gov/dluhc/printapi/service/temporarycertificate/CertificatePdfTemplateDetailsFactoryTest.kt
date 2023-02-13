@@ -16,6 +16,10 @@ import software.amazon.awssdk.core.ResponseBytes
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
+import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties
+import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties.English
+import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties.PhotoProperties
+import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties.Welsh
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_ENGLAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_NORTHERN_IRELAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_SCOTLAND
@@ -50,7 +54,8 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
 
         // Welsh placeholders
         private const val WELSH_PLACEHOLDER_ELECTOR_NAME = "electorNameCyPlaceholder"
-        private const val WELSH_PLACEHOLDER_LA_NAME = "localAuthorityNameCyPlaceholder"
+        private const val WELSH_PLACEHOLDER_LA_NAME_EN = "localAuthorityNameEnPlaceholder"
+        private const val WELSH_PLACEHOLDER_LA_NAME_CY = "localAuthorityNameCyPlaceholder"
         private const val WELSH_PLACEHOLDER_ISSUE_DATE = "dateOfIssueCyPlaceholder"
         private const val WELSH_PLACEHOLDER_VALID_ON_DATE = "validOnDateCyPlaceholder"
         private const val WELSH_PLACEHOLDER_CERTIFICATE_NUMBER = "certificateNumberCyPlaceholder"
@@ -73,28 +78,47 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
     fun setup() {
         templateSelector = CertificatePdfTemplateDetailsFactory(
             s3Client,
-            ENGLISH_TEMPLATE_PATH,
-            ENGLISH_PLACEHOLDER_ELECTOR_NAME,
-            ENGLISH_PLACEHOLDER_LA_NAME,
-            ENGLISH_PLACEHOLDER_ISSUE_DATE,
-            ENGLISH_PLACEHOLDER_VALID_ON_DATE,
-            ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER,
-            ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
-            ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
-            ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
-            ENGLISH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
-            ENGLISH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
-            WELSH_TEMPLATE_PATH,
-            WELSH_PLACEHOLDER_ELECTOR_NAME,
-            WELSH_PLACEHOLDER_LA_NAME,
-            WELSH_PLACEHOLDER_ISSUE_DATE,
-            WELSH_PLACEHOLDER_VALID_ON_DATE,
-            WELSH_PLACEHOLDER_CERTIFICATE_NUMBER,
-            WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
-            WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
-            WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
-            WELSH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
-            WELSH_IMAGES_VOTER_PHOTO_FIT_HEIGHT,
+            TemporaryCertificatePdfTemplateProperties(
+                english = English(
+                    path = ENGLISH_TEMPLATE_PATH,
+                    placeholder = English.Placeholder(
+                        electorName = ENGLISH_PLACEHOLDER_ELECTOR_NAME,
+                        localAuthorityNameEn = ENGLISH_PLACEHOLDER_LA_NAME,
+                        dateOfIssue = ENGLISH_PLACEHOLDER_ISSUE_DATE,
+                        validOnDate = ENGLISH_PLACEHOLDER_VALID_ON_DATE,
+                        certificateNumber = ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER
+                    ),
+                    images = English.Images(
+                        voterPhoto = PhotoProperties(
+                            pageNumber = ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
+                            absoluteXMm = ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
+                            absoluteYMm = ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
+                            fitWidthMm = ENGLISH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
+                            fitHeightMm = ENGLISH_IMAGES_VOTER_PHOTO_FIT_HEIGHT
+                        )
+                    )
+                ),
+                welsh = Welsh(
+                    path = WELSH_TEMPLATE_PATH,
+                    placeholder = Welsh.Placeholder(
+                        electorName = WELSH_PLACEHOLDER_ELECTOR_NAME,
+                        localAuthorityNameEn = WELSH_PLACEHOLDER_LA_NAME_EN,
+                        localAuthorityNameCy = WELSH_PLACEHOLDER_LA_NAME_CY,
+                        dateOfIssue = WELSH_PLACEHOLDER_ISSUE_DATE,
+                        validOnDate = WELSH_PLACEHOLDER_VALID_ON_DATE,
+                        certificateNumber = WELSH_PLACEHOLDER_CERTIFICATE_NUMBER
+                    ),
+                    images = Welsh.Images(
+                        voterPhoto = PhotoProperties(
+                            pageNumber = WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
+                            absoluteXMm = WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
+                            absoluteYMm = WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
+                            fitWidthMm = WELSH_IMAGES_VOTER_PHOTO_FIT_WIDTH,
+                            fitHeightMm = WELSH_IMAGES_VOTER_PHOTO_FIT_HEIGHT
+                        )
+                    )
+                )
+            )
         )
     }
 
@@ -182,6 +206,7 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             val photoS3Path = "path/to/a/photo.png"
             val temporaryCertificate = buildTemporaryCertificate(
                 gssCode = GSS_CODE_WALES,
+                issuingAuthority = aValidIssuingAuthority(),
                 issuingAuthorityCy = aValidIssuingAuthority(),
                 issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
                 validOnDate = LocalDate.parse(validOnDate, DATE_TIME_FORMATTER),
@@ -190,7 +215,8 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
             val expectedPlaceholders = with(temporaryCertificate) {
                 mapOf(
                     WELSH_PLACEHOLDER_ELECTOR_NAME to this.getNameOnCertificate(),
-                    WELSH_PLACEHOLDER_LA_NAME to issuingAuthorityCy,
+                    WELSH_PLACEHOLDER_LA_NAME_EN to issuingAuthority,
+                    WELSH_PLACEHOLDER_LA_NAME_CY to issuingAuthorityCy,
                     WELSH_PLACEHOLDER_ISSUE_DATE to issueDate,
                     WELSH_PLACEHOLDER_VALID_ON_DATE to validOnDate,
                     WELSH_PLACEHOLDER_CERTIFICATE_NUMBER to certificateNumber,

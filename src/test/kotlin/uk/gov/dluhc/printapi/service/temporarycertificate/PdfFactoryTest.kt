@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.service.temporarycertificate
 
-import com.lowagie.text.pdf.AcroFields
 import com.lowagie.text.pdf.PdfReader
+import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.util.ResourceUtils
@@ -18,9 +18,9 @@ internal class PdfFactoryTest {
 
         // Certificate templates
         private const val CERTIFICATE_PDF_TEMPLATE_ENGLISH =
-            "classpath:temporary-certificate-template/Temporary Certificate (English).pdf"
+            "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English).pdf"
         private const val CERTIFICATE_PDF_TEMPLATE_WELSH =
-            "classpath:temporary-certificate-template/Temporary Certificate (Dual Language).pdf"
+            "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual).pdf"
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
     }
@@ -36,8 +36,9 @@ internal class PdfFactoryTest {
                 "ero-recipient" to name,
                 "ero-address-1-en" to address.property.orEmpty(),
                 "ero-address-2-en" to address.street,
-                "ero-address-3-en" to address.town.orEmpty(),
-                "ero-address-4-en" to address.area.orEmpty(),
+                // Commented out as the provided template does not include these form fields
+                // "ero-address-3-en" to address.town.orEmpty(),
+                // "ero-address-4-en" to address.area.orEmpty(),
                 "ero-postcode-en" to address.postcode,
                 "ero-email-en" to emailAddress,
                 "ero-phonenumber-en" to phoneNumber,
@@ -61,8 +62,9 @@ internal class PdfFactoryTest {
                 "ero-recipient" to name,
                 "ero-address-1-cy" to address.property.orEmpty(),
                 "ero-address-2-cy" to address.street,
-                "ero-address-3-cy" to address.town.orEmpty(),
-                "ero-address-4-cy" to address.area.orEmpty(),
+                // Commented out as the provided template does not include these form fields
+                // "ero-address-3-cy" to address.town.orEmpty(),
+                // "ero-address-4-cy" to address.area.orEmpty(),
                 "ero-postcode-cy" to address.postcode,
                 "ero-email-cy" to emailAddress,
                 "ero-phonenumber-cy" to phoneNumber,
@@ -81,18 +83,16 @@ internal class PdfFactoryTest {
     fun `should create temporary certificate PDF with placeholders and image filled for English template`() {
         // Given
         val placeholders = mapOf(
-            "name" to "John Smith",
-            "nameAdditonalLine" to "",
-            "dateOfIssue" to "20/04/2023",
-            "validOn" to "04/05/2023",
-            "certificateNumber" to "TlbBclMIWfyQhaWxk0Zy",
-            "localAuthorityEn" to "Vale of White Horse District Council",
-            "localAuthorityAdditionalLine" to "",
+            "applicant-name" to "John Smith",
+            "date-issued" to "20/04/2023",
+            "date-valid" to "04/05/2023",
+            "certificate-number" to "TlbBclMIWfyQhaWxk0Zy",
+            "local-authority-name-en" to "Vale of White Horse District Council",
 
         )
         val imageBytes = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
         val imageDetails =
-            ImageDetails(absoluteX = 62f, absoluteY = 568f, fitWidth = 99f, fitHeight = 127f, bytes = imageBytes)
+            ImageDetails(absoluteX = 21.6f, absoluteY = 201.6f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
         val templateDetails = TemplateDetails(CERTIFICATE_PDF_TEMPLATE_ENGLISH, placeholders, listOf(imageDetails))
 
         // When
@@ -106,18 +106,16 @@ internal class PdfFactoryTest {
     fun `should create temporary certificate PDF with placeholders and image filled for Welsh template`() {
         // Given
         val placeholders = mapOf(
-            "name" to "Joe Blogs",
-            "nameAdditionalLine" to "",
-            "dateOfIssue" to "26/04/2023",
-            "validOn" to "06/05/2023",
-            "certificateNumber" to "G1eQIZSYOhP7AeKnhJ8E",
-            "localAuthorityEn" to "Merthyr Tydfil County Borough Council",
-            "localAuthorityAdditionalLine" to "",
-            "localAuthorityCy" to "Cyngor Bwrdeistref Sirol Merthyr Tudful",
+            "applicant-name" to "Joe Blogs",
+            "date-issued" to "26/04/2023",
+            "date-valid" to "06/05/2023",
+            "certificate-number" to "G1eQIZSYOhP7AeKnhJ8E",
+            "local-authority-name-en" to "Merthyr Tydfil County Borough Council",
+            "local-authority-name-cy" to "Cyngor Bwrdeistref Sirol Merthyr Tudful",
         )
         val imageBytes = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
         val imageDetails =
-            ImageDetails(absoluteX = 62f, absoluteY = 547f, fitWidth = 99f, fitHeight = 127f, bytes = imageBytes)
+            ImageDetails(absoluteX = 21.6f, absoluteY = 194.6f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
         val templateDetails = TemplateDetails(CERTIFICATE_PDF_TEMPLATE_WELSH, placeholders, listOf(imageDetails))
 
         // When
@@ -128,13 +126,9 @@ internal class PdfFactoryTest {
     }
 
     private fun verifyGeneratedPdfPlaceholders(contents: ByteArray, placeholders: Map<String, String>) {
-        PdfReader(contents).use { reader -> verifyPlaceholders(reader.acroFields, placeholders) }
-    }
-
-    private fun verifyPlaceholders(form: AcroFields, placeholders: Map<String, String>) {
-        for (field in form.allFields) {
-            assertThat(placeholders).containsKey(field.key)
-            assertThat(form.getField(field.key)).isEqualTo(placeholders[field.key])
+        PdfReader(contents).use { reader ->
+            val text = PdfTextExtractor(reader).getTextFromPage(1)
+            placeholders.values.forEach { assertThat(text).contains(it) }
         }
     }
 }
