@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.4.1'
+  version: '1.5.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -17,7 +17,7 @@ paths:
   #
 
   #
-  # Single Certificate Summary
+  # Voter Authority Certificate (VAC)
   # --------------------------------------------------------------------------------
   '/eros/{eroId}/certificates/applications/{applicationId}':
     parameters:
@@ -38,7 +38,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Single Certificate Summary
+        - Voter Authority Certificates (VAC)
       responses:
         200:
           description: Default response for CORS method
@@ -74,7 +74,7 @@ paths:
       summary: Returns a single certificate summary
       description: Returns a single certificate summary
       tags:
-        - Single Certificate Summary
+        - Voter Authority Certificates (VAC)
       responses:
         '200':
           $ref: '#/components/responses/CertificateSummary'
@@ -120,7 +120,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Temporary Certificate Summaries
+        - VAC Temporary Certificates
       responses:
         200:
           description: Default response for CORS method
@@ -156,7 +156,7 @@ paths:
       summary: Returns the Temporary Certificate summaries for an application
       description: Returns the Temporary Certificate summaries for an application
       tags:
-        - Temporary Certificate Summaries
+        - VAC Temporary Certificates
       responses:
         200:
           $ref: '#/components/responses/TemporaryCertificateSummaries'
@@ -178,9 +178,9 @@ paths:
         httpMethod: GET
 
   #
-  # Temporary Certificate
+  # Temporary Certificates
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/temporary-certificate':
+  '/eros/{eroId}/temporary-certificates':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the application.
@@ -193,7 +193,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Temporary Certificate
+        - VAC Temporary Certificates
       responses:
         200:
           description: Default response for CORS method
@@ -229,7 +229,7 @@ paths:
       summary: Generates and returns a temporary certificate
       description: Generates and returns a temporary certificate
       tags:
-        - Temporary Certificate
+        - VAC Temporary Certificates
       requestBody:
         $ref: '#/components/requestBodies/GenerateTemporaryCertificate'
       responses:
@@ -254,7 +254,7 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/temporary-certificate'
+        uri: '${base_uri}/eros/{eroId}/temporary-certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
         responseParameters:
@@ -268,9 +268,9 @@ paths:
 
 
   #
-  # Temporary Certificate Explainer Document
+  # Temporary Certificates Explainer Document
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document':
+  '/eros/{eroId}/temporary-certificates/{gssCode}/explainer-document':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the application.
@@ -290,7 +290,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Temporary Certificate
+        - VAC Temporary Certificates
       responses:
         200:
           description: Default response for CORS method
@@ -326,7 +326,7 @@ paths:
       summary: Returns the Local Authority's explainer document for a temporary certificate
       description: Returns the Local Authority's explainer document for a temporary certificate
       tags:
-        - Temporary Certificate
+        - VAC Temporary Certificates
       responses:
         '201':
           description: created
@@ -343,7 +343,95 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document'
+        uri: '${base_uri}/eros/{eroId}/temporary-certificates/{gssCode}/explainer-document'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.gssCode: method.request.path.gssCode
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
+  #
+  # Anonymous Elector Document (AED) Explainer Document
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-elector-documents/{gssCode}/explainer-document':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the AED application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: gssCode
+        description: The relevant GSS code for the local authority.
+        schema:
+          type: string
+          example: 'E09000007'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Returns the Local Authority's explainer document for an AED
+      description: Returns the Local Authority's explainer document for an AED
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="aed-explainer-document-E09000007.pdf"
+        '404':
+          description: Not Found
+      operationId: generate-aed-explainer-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/{gssCode}/explainer-document'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.gssCode: method.request.path.gssCode

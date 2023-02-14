@@ -17,7 +17,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityRespo
 
 internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : IntegrationTest() {
     companion object {
-        private const val URI_TEMPLATE = "/eros/{ERO_ID}/temporary-certificate/{GSS_CODE}/explainer-document"
+        private const val URI_TEMPLATE = "/eros/{ERO_ID}/temporary-certificates/{GSS_CODE}/explainer-document"
         private const val ERO_ID = "some-city-council"
         private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "E99999999"
