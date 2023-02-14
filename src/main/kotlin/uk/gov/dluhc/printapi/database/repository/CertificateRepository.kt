@@ -8,6 +8,7 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 
 @Repository
@@ -22,6 +23,8 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
     fun findByGssCodeAndSourceTypeAndSourceReference(gssCode: String, sourceType: SourceType, sourceReference: String): Certificate?
 
     fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): Certificate?
+
+    fun findBySourceTypeAndInitialRetentionRemovalDateBefore(sourceType: SourceType, initialRetentionRemovalDate: LocalDate): List<Certificate>
 
     @Query(
         value = """
@@ -38,5 +41,9 @@ object CertificateRepositoryExtensions {
     fun CertificateRepository.findDistinctByPrintRequestStatusAndBatchId(status: Status, batchId: String): List<Certificate> {
         return findByPrintRequestsBatchId(batchId).toSet()
             .filter { it.printRequests.any { printRequest -> printRequest.getCurrentStatus().status == status } }
+    }
+
+    fun CertificateRepository.findPendingRemovalOfInitialRetentionData(sourceType: SourceType): List<Certificate> {
+        return findBySourceTypeAndInitialRetentionRemovalDateBefore(sourceType = sourceType, initialRetentionRemovalDate = LocalDate.now())
     }
 }

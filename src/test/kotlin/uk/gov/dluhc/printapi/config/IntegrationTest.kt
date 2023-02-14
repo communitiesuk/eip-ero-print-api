@@ -34,6 +34,7 @@ import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_R
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
+import uk.gov.dluhc.printapi.jobs.InitialRetentionPeriodDataRemovalJob
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
@@ -80,6 +81,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var processPrintResponsesBatchJob: ProcessPrintResponsesBatchJob
+
+    @Autowired
+    protected lateinit var initialRetentionPeriodDataRemovalJob: InitialRetentionPeriodDataRemovalJob
 
     @Autowired
     protected lateinit var batchPrintRequestsJob: BatchPrintRequestsJob

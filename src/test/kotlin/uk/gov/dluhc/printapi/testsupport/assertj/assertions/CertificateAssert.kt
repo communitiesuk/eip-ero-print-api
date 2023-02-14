@@ -281,6 +281,40 @@ class CertificateAssert
     }
 
     /**
+     * Verifies that the data which needs to be removed after the initial retention period is null.
+     * @return this assertion object.
+     * @throws AssertionError if the data is not null.
+     */
+    fun doesNotHaveInitialRetentionPeriodData(): CertificateAssert {
+        // check that actual PrintRequest we want to make assertions on is not null.
+        isNotNull
+
+        this.actual?.printRequests?.forEach {
+            PrintRequestAssert(it).doesNotHaveInitialRetentionPeriodData()
+        }
+
+        // return the current assertion for method chaining
+        return this
+    }
+
+    /**
+     * Verifies that the data which needs to be removed after the initial retention period still exists.
+     * @return this assertion object.
+     * @throws AssertionError if the data is null.
+     */
+    fun hasInitialRetentionPeriodData(): CertificateAssert {
+        // check that actual PrintRequest we want to make assertions on is not null.
+        isNotNull
+
+        this.actual?.printRequests?.forEach {
+            PrintRequestAssert(it).hasInitialRetentionPeriodData()
+        }
+
+        // return the current assertion for method chaining
+        return this
+    }
+
+    /**
      * Verifies that the actual Certificate's issuingAuthority is equal to the given one.
      * @param issuingAuthority the given issuingAuthority to compare the actual Certificate's issuingAuthority to.
      * @return this assertion object.
@@ -345,7 +379,7 @@ class CertificateAssert
         // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
-        val printRequest = actual!!.printRequests.find { pr -> pr.requestDateTime!! == requestDateTime }
+        val printRequest = actual!!.printRequests.find { it.requestDateTime!! == requestDateTime }
 
         // check that given PrintRequest collection is not null.
         if (printRequest == null) {
