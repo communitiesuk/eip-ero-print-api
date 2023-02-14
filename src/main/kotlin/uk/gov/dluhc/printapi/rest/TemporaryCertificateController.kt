@@ -53,7 +53,7 @@ class TemporaryCertificateController(
             }
         )
 
-    @PostMapping("/eros/{eroId}/temporary-certificate")
+    @PostMapping("/eros/{eroId}/temporary-certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     fun generateTemporaryCertificate(
         @PathVariable eroId: String,
@@ -74,7 +74,7 @@ class TemporaryCertificateController(
 
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     @PostMapping(
-        value = ["/eros/{eroId}/temporary-certificate/{gssCode}/explainer-document"],
+        value = ["/eros/{eroId}/temporary-certificates/{gssCode}/explainer-document"],
         produces = [MediaType.APPLICATION_PDF_VALUE]
     )
     fun generateTempCertExplainerPdf(

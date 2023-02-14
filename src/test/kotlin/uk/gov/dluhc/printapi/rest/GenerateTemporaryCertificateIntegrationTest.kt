@@ -30,7 +30,7 @@ import java.util.UUID
 internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
     companion object {
-        private const val URI_TEMPLATE = "/eros/{ERO_ID}/temporary-certificate"
+        private const val URI_TEMPLATE = "/eros/{ERO_ID}/temporary-certificates"
         private const val ERO_ID = "some-city-council"
         private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "W06000023"
