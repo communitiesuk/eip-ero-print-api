@@ -18,6 +18,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidTemporaryCertificateTemp
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
+import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
@@ -69,9 +70,11 @@ fun buildTemporaryCertificate(
 fun buildTemporaryCertificateStatus(
     status: TemporaryCertificateStatus.Status = aValidTemporaryCertificateStatus(),
     userId: String = aValidUserId(),
+    dateCreated: Instant? = null
 ): TemporaryCertificateStatus {
     return TemporaryCertificateStatus(
         status = status,
-        userId = userId
+        userId = userId,
+        dateCreated = dateCreated,
     )
 }
