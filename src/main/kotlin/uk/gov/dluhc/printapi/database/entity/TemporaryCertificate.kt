@@ -128,6 +128,11 @@ class TemporaryCertificate(
     val status: TemporaryCertificateStatus.Status?
         get() = statusHistory.sortedByDescending { it.dateCreated }.first().status
 
+    val dateTimeGenerated: Instant?
+        get() = statusHistory
+            .sortedBy { it.dateCreated }
+            .first { it.status == TemporaryCertificateStatus.Status.GENERATED }.dateCreated
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false

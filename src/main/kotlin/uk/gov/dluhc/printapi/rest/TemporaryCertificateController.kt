@@ -13,18 +13,23 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
+import uk.gov.dluhc.printapi.mapper.TemporaryCertificateSummaryMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
 import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
 import uk.gov.dluhc.printapi.service.temporarycertificate.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
+import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateSummaryService
 import java.io.ByteArrayInputStream
 import javax.validation.Valid
 
 @RestController
 @CrossOrigin
 class TemporaryCertificateController(
+    private val temporaryCertificateSummaryService: TemporaryCertificateSummaryService,
+    private val temporaryCertificateSummaryMapper: TemporaryCertificateSummaryMapper,
     private val explainerPdfService: ExplainerPdfService,
     private val temporaryCertificateService: TemporaryCertificateService,
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
@@ -35,9 +40,18 @@ class TemporaryCertificateController(
     fun getTemporaryCertificateSummariesByApplicationId(
         @PathVariable eroId: String,
         @PathVariable applicationId: String,
-    ): TemporaryCertificateSummariesResponse {
-        TODO("not yet implemented")
-    }
+    ): TemporaryCertificateSummariesResponse =
+        TemporaryCertificateSummariesResponse(
+            temporaryCertificateSummaryService.getTemporaryCertificateSummaries(
+                eroId,
+                SourceType.VOTER_CARD,
+                applicationId
+            ).map {
+                temporaryCertificateSummaryMapper.toApiTemporaryCertificateSummary(it)
+            }.sortedByDescending {
+                it.dateTimeGenerated
+            }
+        )
 
     @PostMapping("/eros/{eroId}/temporary-certificate")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)

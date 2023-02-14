@@ -8,6 +8,7 @@ import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
 fun aValidEroId() = "${faker.address().city().lowercase()}-city-council"
@@ -51,6 +52,10 @@ fun aValidApplicationReceivedDateTime(): Instant = Instant.now().truncatedTo(SEC
 fun aValidIssuingAuthority(): String = aValidLocalAuthorityName()
 
 fun aValidIssueDate(): LocalDate = LocalDate.now()
+
+fun aValidOnDate(): LocalDate = LocalDate.now()
+
+fun aValidGeneratedDateTime(): OffsetDateTime = OffsetDateTime.now()
 
 fun aValidSuggestedExpiryDate(): LocalDate = LocalDate.now().plusYears(10)
 
