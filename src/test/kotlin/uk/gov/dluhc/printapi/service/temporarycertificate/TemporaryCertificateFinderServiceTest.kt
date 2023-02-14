@@ -30,7 +30,7 @@ internal class TemporaryCertificateFinderServiceTest {
     private lateinit var temporaryCertificateFinderService: TemporaryCertificateFinderService
 
     @Test
-    fun `should get TemporaryCertificates given one exists for the provided details`() {
+    fun `should get TemporaryCertificates given the provided details`() {
         // Given
         val eroId = aValidRandomEroId()
         val sourceType = VOTER_CARD
