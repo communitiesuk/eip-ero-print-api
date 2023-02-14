@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.4.0'
+  version: '1.4.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -175,7 +175,7 @@ paths:
           method.response.header.Access-Control-Allow-Origin: '''*'''
         connectionType: VPC_LINK
         connectionId: '${vpc_connection_id}'
-        httpMethod: POST
+        httpMethod: GET
 
   #
   # Temporary Certificate
