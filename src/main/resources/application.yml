@@ -31,11 +31,12 @@ api:
       valid-on-date:
         max-calendar-days-in-future: 30
     retention.period:
-      # The legislation defines the first (initial) retention period as 28 working days from the date of "issue", which now means the date the
-      # certificate was printed, not when it was sent to the print provider. Currently, we are not informed of when the certificate was printed - only
-      # when it was dispatched, which is not necessarily the same day. However in the vast majority of cases it is understood to be the next working day.
-      # Therefore, as a workaround, the following property is set to 29 (28+1) for the time being.
-      # A separate story will set this according to the actual printed date, which will require changes to the response files from the print provider.
+      # The legislation defines the first (initial) retention period as 28 working days from the date of "issue", which has been confirmed as the date the
+      # certificate was printed, not when it was sent to the print provider (and therefore not the "issue date" that is currently printed on the certificate
+      # itself). As it stands, we are not informed when the certificate was printed (only when it was dispatched, which may not be the same day).
+      # However, we have established that in the vast majority of cases the certificate will be printed the next working day after it was sent to the print
+      # provider. Therefore, as a workaround, the following property is set to 29 (28+1) for the time being.
+      # A separate story will set this according to the actual printed date, which will require changes to the specification with the print provider.
       certificate-initial-retention-period: "P29D"
   ero-management:
     url: ${API_ERO_MANAGEMENT_URL}
