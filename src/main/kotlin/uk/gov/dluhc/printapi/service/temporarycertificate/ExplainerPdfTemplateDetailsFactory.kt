@@ -1,65 +1,58 @@
 package uk.gov.dluhc.printapi.service.temporarycertificate
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties
+import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties.Placeholder
+import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
 import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.service.isWalesCode
 
 @Component
 class ExplainerPdfTemplateDetailsFactory(
-    @Value("\${temporary-certificate.explainer-pdf.english.path}") private val pdfTemplateEnglish: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-name}") private val eroNameEnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-address-line1}") private val eroAddressLine1EnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-address-line2}") private val eroAddressLine2EnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-address-line3}") private val eroAddressLine3EnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-address-line4}") private val eroAddressLine4EnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-address-postcode}") private val eroAddressPostcodeEnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-email}") private val eroEmailAddressEnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.english.placeholder.ero-phone}") private val eroPhoneNumberEnPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.path}") private val pdfTemplateWelsh: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-name}") private val eroNameCyPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-address-line1}") private val eroAddressLine1CyPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-address-line2}") private val eroAddressLine2CyPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-address-line3}") private val eroAddressLine3CyPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-address-line4}") private val eroAddressLine4CyPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-address-postcode}") private val eroAddressPostcodeCyPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-email}") private val eroEmailAddressCyPlaceholder: String,
-    @Value("\${temporary-certificate.explainer-pdf.welsh.placeholder.ero-phone}") private val eroPhoneNumberCyPlaceholder: String,
+    private val pdfTemplateProperties: TemporaryCertificateExplainerPdfTemplateProperties
 ) {
 
     fun getTemplateDetails(gssCode: String, eroDto: EroDto): TemplateDetails {
         return if (isWalesCode(gssCode)) {
-            TemplateDetails(pdfTemplateWelsh, getWelshTemplatePlaceholders(eroDto))
+            TemplateDetails(
+                pdfTemplateProperties.welsh.path,
+                getTemplatePlaceholders(eroDto.welshContactDetails!!, pdfTemplateProperties.welsh.placeholder)
+            )
         } else {
-            TemplateDetails(pdfTemplateEnglish, getEnglishTemplatePlaceholders(eroDto))
+            TemplateDetails(
+                pdfTemplateProperties.english.path,
+                getTemplatePlaceholders(eroDto.englishContactDetails, pdfTemplateProperties.english.placeholder)
+            )
         }
     }
 
-    private fun getWelshTemplatePlaceholders(eroDto: EroDto): Map<String, String> {
-        val eroContactDetails = eroDto.welshContactDetails!!
+    private fun getTemplatePlaceholders(
+        eroContactDetails: EroContactDetailsDto,
+        pdfPlaceholders: Placeholder
+    ): Map<String, String> {
+        val orderedNonBlankValues = listOfNotNull(
+            eroContactDetails.name,
+            eroContactDetails.address.property,
+            eroContactDetails.address.street,
+            eroContactDetails.address.town,
+            eroContactDetails.address.area,
+            eroContactDetails.address.postcode,
+            eroContactDetails.emailAddress,
+            eroContactDetails.phoneNumber
+        ).filter { it.isNotBlank() }
+
         return mapOf(
-            eroNameCyPlaceholder to eroContactDetails.name,
-            eroAddressLine1CyPlaceholder to eroContactDetails.address.property.orEmpty(),
-            eroAddressLine2CyPlaceholder to eroContactDetails.address.street,
-            eroAddressLine3CyPlaceholder to eroContactDetails.address.town.orEmpty(),
-            eroAddressLine4CyPlaceholder to eroContactDetails.address.area.orEmpty(),
-            eroAddressPostcodeCyPlaceholder to eroContactDetails.address.postcode,
-            eroEmailAddressCyPlaceholder to eroContactDetails.emailAddress,
-            eroPhoneNumberCyPlaceholder to eroContactDetails.phoneNumber,
+            pdfPlaceholders.contactDetails1 to getValueOrBlank(orderedNonBlankValues, 0),
+            pdfPlaceholders.contactDetails2 to getValueOrBlank(orderedNonBlankValues, 1),
+            pdfPlaceholders.contactDetails3 to getValueOrBlank(orderedNonBlankValues, 2),
+            pdfPlaceholders.contactDetails4 to getValueOrBlank(orderedNonBlankValues, 3),
+            pdfPlaceholders.contactDetails5 to getValueOrBlank(orderedNonBlankValues, 4),
+            pdfPlaceholders.contactDetails6 to getValueOrBlank(orderedNonBlankValues, 5),
+            pdfPlaceholders.contactDetails7 to getValueOrBlank(orderedNonBlankValues, 6),
+            pdfPlaceholders.contactDetails8 to getValueOrBlank(orderedNonBlankValues, 7),
         )
     }
 
-    private fun getEnglishTemplatePlaceholders(eroDto: EroDto): Map<String, String> {
-        val eroContactDetails = eroDto.englishContactDetails
-        return mapOf(
-            eroNameEnPlaceholder to eroContactDetails.name,
-            eroAddressLine1EnPlaceholder to eroContactDetails.address.property.orEmpty(),
-            eroAddressLine2EnPlaceholder to eroContactDetails.address.street,
-            eroAddressLine3EnPlaceholder to eroContactDetails.address.town.orEmpty(),
-            eroAddressLine4EnPlaceholder to eroContactDetails.address.area.orEmpty(),
-            eroAddressPostcodeEnPlaceholder to eroContactDetails.address.postcode,
-            eroEmailAddressEnPlaceholder to eroContactDetails.emailAddress,
-            eroPhoneNumberEnPlaceholder to eroContactDetails.phoneNumber,
-        )
-    }
+    private fun getValueOrBlank(values: List<String>, index: Int): String =
+        if (values.size > index) values[index] else ""
 }
