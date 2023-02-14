@@ -59,7 +59,7 @@ jobs:
 temporary-certificate:
   certificate-pdf:
     english:
-      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English).pdf"
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English) v1.pdf"
       placeholder:
         elector-name: "applicant-name"
         local-authority-name-en: "local-authority-name-en"
@@ -73,7 +73,7 @@ temporary-certificate:
           fit-width-mm: 35
           fit-height-mm: 45
     welsh:
-      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual).pdf"
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual) v1.pdf"
       placeholder:
         elector-name: "applicant-name"
         local-authority-name-en: "local-authority-name-en"
@@ -89,27 +89,27 @@ temporary-certificate:
           fit-height-mm: 45
   explainer-pdf:
     english:
-      path: "classpath:temporary-certificate-template/Explainer Document (English).pdf"
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Explainer (English) v1.pdf"
       placeholder:
         contact-details1: "ero-recipient"
-        contact-details2: "ero-address-1-en"
-        contact-details3: "ero-address-2-en"
-        contact-details4: "ero-address-3-en"
-        contact-details5: "ero-address-4-en"
-        contact-details6: "ero-postcode-en"
-        contact-details7: "ero-email-en"
-        contact-details8: "ero-phonenumber-en"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
     welsh:
-      path: "classpath:temporary-certificate-template/Explainer Document (Dual Language).pdf"
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Explainer (Bilingual) v1.pdf"
       placeholder:
         contact-details1: "ero-recipient"
-        contact-details2: "ero-address-1-cy"
-        contact-details3: "ero-address-2-cy"
-        contact-details4: "ero-address-3-cy"
-        contact-details5: "ero-address-4-cy"
-        contact-details6: "ero-postcode-cy"
-        contact-details7: "ero-email-cy"
-        contact-details8: "ero-phonenumber-cy"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
 
 thread-pool:
   zip:
