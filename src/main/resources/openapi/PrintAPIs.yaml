@@ -17,7 +17,7 @@ paths:
   #
 
   #
-  # Single Certificate Summary
+  # Voter Authority Certificate (VAC)
   # --------------------------------------------------------------------------------
   '/eros/{eroId}/certificates/applications/{applicationId}':
     parameters:
@@ -358,7 +358,7 @@ paths:
   #
   # Anonymous Elector Document (AED) Explainer Document
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/anonymous-applications/{gssCode}/explainer-document':
+  '/eros/{eroId}/anonymous-elector-documents/{gssCode}/explainer-document':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the AED application.
