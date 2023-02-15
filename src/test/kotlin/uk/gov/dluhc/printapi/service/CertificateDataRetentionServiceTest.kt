@@ -13,9 +13,11 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
 import java.time.LocalDate
@@ -40,20 +42,20 @@ internal class CertificateDataRetentionServiceTest {
         // Given
         val message = buildApplicationRemovedMessage()
         val certificate = buildCertificate()
-        val expectedRemovalDate = LocalDate.of(2023, 1, 1)
+        val expectedInitialRetentionRemovalDate = LocalDate.of(2023, 1, 1)
         given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
         given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(
             certificate
         )
         given(certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any())).willReturn(
-            expectedRemovalDate
+            expectedInitialRetentionRemovalDate
         )
 
         // When
         certificateDataRetentionService.handleSourceApplicationRemoved(message)
 
         // Then
-        assertThat(certificate.initialRetentionRemovalDate).isEqualTo(expectedRemovalDate)
+        assertThat(certificate.initialRetentionRemovalDate).isEqualTo(expectedInitialRetentionRemovalDate)
         verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
         verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(
             message.gssCode,
@@ -86,5 +88,42 @@ internal class CertificateDataRetentionServiceTest {
         )
         verify(certificateRepository, times(0)).save(any())
         assertThat(TestLogAppender.hasLog("Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found", Level.ERROR)).isTrue
+    }
+
+    @Test
+    fun `should remove initial retention period data`() {
+        // Given
+        val certificate1 = buildCertificate()
+        val certificate2 = buildCertificate()
+        given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(
+            listOf(
+                certificate1,
+                certificate2
+            )
+        )
+
+        // When
+        certificateDataRetentionService.removeInitialRetentionPeriodData(VOTER_CARD)
+
+        // Then
+        assertThat(certificate1).doesNotHaveInitialRetentionPeriodData()
+        assertThat(certificate2).doesNotHaveInitialRetentionPeriodData()
+        verify(certificateRepository).findPendingRemovalOfInitialRetentionData(VOTER_CARD)
+    }
+
+    @Test
+    fun `should not remove initial retention period data given no certificates found`() {
+        // Given
+        val certificate = buildCertificate()
+        given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(
+            emptyList()
+        )
+
+        // When
+        certificateDataRetentionService.removeInitialRetentionPeriodData(VOTER_CARD)
+
+        // Then
+        assertThat(certificate).hasInitialRetentionPeriodData()
+        verify(certificateRepository).findPendingRemovalOfInitialRetentionData(VOTER_CARD)
     }
 }

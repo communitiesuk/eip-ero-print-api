@@ -63,7 +63,6 @@ class PrintRequest(
     @Enumerated(EnumType.STRING)
     var certificateLanguage: CertificateLanguage? = null,
 
-    @field:NotNull
     @Enumerated(EnumType.STRING)
     var supportingInformationFormat: SupportingInformationFormat? = null,
 

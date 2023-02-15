@@ -29,7 +29,8 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             sourceReference = certificate.sourceReference!!,
             gssCode = certificate.gssCode!!
         )
-        val expectedInitialRemovalDate = LocalDate.of(2023, 5, 16)
+        // currently 29 working days following issue date - refer to application.yml
+        val expectedInitialRemovalDate = LocalDate.of(2023, 5, 17)
 
         // When
         sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
