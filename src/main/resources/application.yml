@@ -99,7 +99,7 @@ temporary-certificate:
           fit-width-mm: 35
           fit-height-mm: 45
   explainer-pdf:
-    filename-prefix: "temporary-certificate-explainer-document"
+    download-filename-prefix: "temporary-certificate-explainer-document"
     english:
       path: "classpath:temporary-certificate-template/Temp Voter Authority Explainer (English) v1.pdf"
       placeholder:
@@ -125,7 +125,7 @@ temporary-certificate:
 
 anonymous-elector-document:
   explainer-pdf:
-    filename-prefix: "AED-explainer-document"
+    download-filename-prefix: "AED-explainer-document"
     english:
       path: "classpath:anonymous-elector-document-template/AED Explainer (English) v1.pdf"
       placeholder:

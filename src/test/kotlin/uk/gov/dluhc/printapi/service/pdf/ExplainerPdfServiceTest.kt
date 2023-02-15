@@ -44,7 +44,7 @@ internal class ExplainerPdfServiceTest {
         given(eroClient.getEro(any())).willReturn(eroDto)
         val templateDetails = buildTemplateDetails()
         given(explainerPdfTemplateDetailsFactory.getTemplateDetails(any(), any())).willReturn(templateDetails)
-        given(explainerPdfTemplateDetailsFactory.getFilenamePrefix()).willReturn("temporary-certificate-explainer-document")
+        given(explainerPdfTemplateDetailsFactory.getDownloadFilenamePrefix()).willReturn("temporary-certificate-explainer-document")
         val contents = Random.Default.nextBytes(10)
         given(pdfFactory.createPdfContents(any())).willReturn(contents)
 

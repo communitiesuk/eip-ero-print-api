@@ -16,7 +16,7 @@ class ExplainerPdfService(
         val eroDetails = getEroOrRaiseNotFoundException(eroId, gssCode)
         val templateDetails = explainerPdfTemplateDetailsFactory.getTemplateDetails(gssCode, eroDetails)
         val contents = pdfFactory.createPdfContents(templateDetails)
-        return PdfFile("${explainerPdfTemplateDetailsFactory.getFilenamePrefix()}-$gssCode.pdf", contents)
+        return PdfFile("${explainerPdfTemplateDetailsFactory.getDownloadFilenamePrefix()}-$gssCode.pdf", contents)
     }
 
     private fun getEroOrRaiseNotFoundException(eroId: String, gssCode: String): EroDto {

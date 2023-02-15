@@ -11,8 +11,8 @@ class ExplainerPdfTemplateDetailsFactory(
     private val exceptionMessageFunction: (eroId: String, gssCode: String) -> String
 ) {
 
-    fun getFilenamePrefix(): String =
-        pdfTemplateProperties.filenamePrefix
+    fun getDownloadFilenamePrefix(): String =
+        pdfTemplateProperties.downloadFilenamePrefix
 
     fun getExceptionMessage(eroId: String, gssCode: String): String =
         exceptionMessageFunction(eroId, gssCode)

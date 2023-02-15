@@ -3,8 +3,10 @@ package uk.gov.dluhc.printapi.rest
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
+import org.springframework.http.HttpStatus.CREATED
+import org.springframework.http.MediaType.APPLICATION_PDF
+import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
@@ -67,7 +69,7 @@ class TemporaryCertificateController(
             userId
         )
         return temporaryCertificateService.generateTemporaryCertificate(eroId, dto).let { pdfFile ->
-            ResponseEntity.status(HttpStatus.CREATED)
+            ResponseEntity.status(CREATED)
                 .headers(createPdfHttpHeaders(pdfFile))
                 .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
         }
@@ -76,14 +78,14 @@ class TemporaryCertificateController(
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     @PostMapping(
         value = ["/eros/{eroId}/temporary-certificates/{gssCode}/explainer-document"],
-        produces = [MediaType.APPLICATION_PDF_VALUE]
+        produces = [APPLICATION_PDF_VALUE]
     )
     fun generateTempCertExplainerPdf(
         @PathVariable eroId: String,
         @PathVariable gssCode: String,
     ): ResponseEntity<InputStreamResource> {
         return explainerPdfService.generateExplainerPdf(eroId, gssCode).let { pdfFile ->
-            ResponseEntity.status(HttpStatus.CREATED)
+            ResponseEntity.status(CREATED)
                 .headers(createPdfHttpHeaders(pdfFile))
                 .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
         }
@@ -91,8 +93,8 @@ class TemporaryCertificateController(
 
     private fun createPdfHttpHeaders(pdfFile: PdfFile): HttpHeaders {
         val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_PDF
-        headers.add("Content-Disposition", "inline; filename=${pdfFile.filename}")
+        headers.contentType = APPLICATION_PDF
+        headers.add(CONTENT_DISPOSITION, "inline; filename=${pdfFile.filename}")
         return headers
     }
 }

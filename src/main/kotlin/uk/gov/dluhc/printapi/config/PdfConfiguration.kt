@@ -46,8 +46,8 @@ class PdfConfiguration {
             "Anonymous Elector Document explainer document not found for eroId $eroId and gssCode $gssCode"
         }
 
-    @Bean("anonymousElectorDocumentExplainerExplainerPdfService")
-    fun anonymousElectorDocumentExplainerExplainerPdfService(
+    @Bean("anonymousElectorDocumentExplainerPdfService")
+    fun anonymousElectorDocumentExplainerPdfService(
         eroClient: ElectoralRegistrationOfficeManagementApiClient,
         pdfFactory: PdfFactory,
         @Qualifier("anonymousElectorDocumentExplainerPdfTemplateDetailsFactory") explainerPdfTemplateDetailsFactory: ExplainerPdfTemplateDetailsFactory
