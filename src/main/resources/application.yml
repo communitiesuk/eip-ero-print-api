@@ -99,6 +99,7 @@ temporary-certificate:
           fit-width-mm: 35
           fit-height-mm: 45
   explainer-pdf:
+    download-filename-prefix: "temporary-certificate-explainer-document"
     english:
       path: "classpath:temporary-certificate-template/Temp Voter Authority Explainer (English) v1.pdf"
       placeholder:
@@ -124,8 +125,9 @@ temporary-certificate:
 
 anonymous-elector-document:
   explainer-pdf:
+    download-filename-prefix: "AED-explainer-document"
     english:
-      path: "classpath:anonymous-elector-document/AED Explainer (English) v1.pdf"
+      path: "classpath:anonymous-elector-document-template/AED Explainer (English) v1.pdf"
       placeholder:
         contact-details1: "ero-recipient"
         contact-details2: "ero-contact-1"
@@ -136,7 +138,7 @@ anonymous-elector-document:
         contact-details7: "ero-contact-6"
         contact-details8: "ero-contact-7"
     welsh:
-      path: "classpath:anonymous-elector-document/AED Explainer (Bilingual) v1.pdf"
+      path: "classpath:anonymous-elector-document-template/AED Explainer (Bilingual) v1.pdf"
       placeholder:
         contact-details1: "ero-recipient"
         contact-details2: "ero-contact-1"
