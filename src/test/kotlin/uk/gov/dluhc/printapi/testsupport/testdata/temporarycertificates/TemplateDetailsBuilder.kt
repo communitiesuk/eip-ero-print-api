@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates
 
-import uk.gov.dluhc.printapi.service.temporarycertificate.TemplateDetails
+import uk.gov.dluhc.printapi.service.pdf.TemplateDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber

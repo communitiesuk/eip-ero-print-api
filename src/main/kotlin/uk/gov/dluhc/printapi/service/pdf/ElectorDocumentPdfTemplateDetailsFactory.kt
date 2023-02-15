@@ -1,19 +1,17 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
-import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
-import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties
-import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties.PhotoProperties
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.PhotoProperties
 import uk.gov.dluhc.printapi.database.entity.TemporaryCertificate
 import uk.gov.dluhc.printapi.service.isWalesCode
 import uk.gov.dluhc.printapi.service.parseS3Arn
 import java.time.format.DateTimeFormatter
 
-@Component
-class CertificatePdfTemplateDetailsFactory(
+class ElectorDocumentPdfTemplateDetailsFactory(
     private val s3Client: S3Client,
-    private val pdfTemplateProperties: TemporaryCertificatePdfTemplateProperties
+    private val pdfTemplateProperties: ElectorDocumentPdfTemplateProperties
 ) {
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -70,7 +68,9 @@ class CertificatePdfTemplateDetailsFactory(
             pdfTemplateProperties.english.placeholder.electorName to certificate.getNameOnCertificate(),
             pdfTemplateProperties.english.placeholder.localAuthorityNameEn to certificate.issuingAuthority!!,
             pdfTemplateProperties.english.placeholder.dateOfIssue to certificate.issueDate.format(DATE_TIME_FORMATTER),
-            pdfTemplateProperties.english.placeholder.validOnDate to certificate.validOnDate!!.format(DATE_TIME_FORMATTER),
+            pdfTemplateProperties.english.placeholder.validOnDate to certificate.validOnDate!!.format(
+                DATE_TIME_FORMATTER
+            ),
             pdfTemplateProperties.english.placeholder.certificateNumber to certificate.certificateNumber!!,
         )
     }

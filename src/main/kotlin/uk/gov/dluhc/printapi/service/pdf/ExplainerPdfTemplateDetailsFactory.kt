@@ -1,15 +1,13 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
-import org.springframework.stereotype.Component
-import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties
-import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties.Placeholder
+import uk.gov.dluhc.printapi.config.ExplainerPdfTemplateProperties
+import uk.gov.dluhc.printapi.config.ExplainerPdfTemplateProperties.Placeholder
 import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
 import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.service.isWalesCode
 
-@Component
 class ExplainerPdfTemplateDetailsFactory(
-    private val pdfTemplateProperties: TemporaryCertificateExplainerPdfTemplateProperties
+    private val pdfTemplateProperties: ExplainerPdfTemplateProperties,
 ) {
 
     fun getTemplateDetails(gssCode: String, eroDto: EroDto): TemplateDetails {
@@ -28,7 +26,7 @@ class ExplainerPdfTemplateDetailsFactory(
 
     private fun getTemplatePlaceholders(
         eroContactDetails: EroContactDetailsDto,
-        pdfPlaceholders: Placeholder
+        pdfPlaceholders: Placeholder,
     ): Map<String, String> {
         val orderedNonBlankValues = listOfNotNull(
             eroContactDetails.name,

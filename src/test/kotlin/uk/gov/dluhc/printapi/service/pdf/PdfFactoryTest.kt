@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor

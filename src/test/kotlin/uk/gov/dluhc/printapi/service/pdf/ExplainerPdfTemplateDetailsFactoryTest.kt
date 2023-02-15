@@ -1,13 +1,13 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import uk.gov.dluhc.printapi.config.ExplainerPdfTemplateProperties.English
+import uk.gov.dluhc.printapi.config.ExplainerPdfTemplateProperties.Placeholder
+import uk.gov.dluhc.printapi.config.ExplainerPdfTemplateProperties.Welsh
 import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties
-import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties.English
-import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties.Placeholder
-import uk.gov.dluhc.printapi.config.TemporaryCertificateExplainerPdfTemplateProperties.Welsh
 import uk.gov.dluhc.printapi.dto.AddressDto
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_ENGLAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_NORTHERN_IRELAND

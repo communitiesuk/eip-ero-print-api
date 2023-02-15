@@ -5,7 +5,10 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConfigurationProperties(prefix = "temporary-certificate.certificate-pdf")
 @ConstructorBinding
-data class TemporaryCertificatePdfTemplateProperties(
+class TemporaryCertificatePdfTemplateProperties(english: English, welsh: Welsh) :
+    ElectorDocumentPdfTemplateProperties(english, welsh)
+
+abstract class ElectorDocumentPdfTemplateProperties(
     val english: English,
     val welsh: Welsh
 ) {

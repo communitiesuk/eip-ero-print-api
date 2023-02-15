@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rest
 
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -19,7 +20,7 @@ import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateSummaryMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
 import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
-import uk.gov.dluhc.printapi.service.temporarycertificate.ExplainerPdfService
+import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateSummaryService
 import java.io.ByteArrayInputStream
@@ -30,7 +31,7 @@ import javax.validation.Valid
 class TemporaryCertificateController(
     private val temporaryCertificateSummaryService: TemporaryCertificateSummaryService,
     private val temporaryCertificateSummaryMapper: TemporaryCertificateSummaryMapper,
-    private val explainerPdfService: ExplainerPdfService,
+    @Qualifier("temporaryCertificateExplainerExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
     private val temporaryCertificateService: TemporaryCertificateService,
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
 ) {

@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
 data class ImageDetails(
     val pageNumber: Int = 1,

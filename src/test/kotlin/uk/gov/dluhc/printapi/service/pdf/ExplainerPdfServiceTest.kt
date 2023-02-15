@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchException
