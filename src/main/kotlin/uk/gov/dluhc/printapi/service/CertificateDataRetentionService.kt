@@ -42,12 +42,14 @@ class CertificateDataRetentionService(
 
     @Transactional
     fun removeInitialRetentionPeriodData(sourceType: SourceType) {
-        logger.info { "Finding certificates to remove initial retention period data from" }
+        logger.info { "Finding certificates with sourceType $sourceType to remove initial retention period data from" }
         with(certificateRepository.findPendingRemovalOfInitialRetentionData(sourceType = sourceType)) {
             forEach {
                 it.removeInitialRetentionPeriodData()
                 certificateRepository.save(it)
-                logger.info { "Removed initial retention period data from certificate with sourceReference ${it.sourceReference}" }
+            }
+            if (isNotEmpty()) {
+                logger.info { "Removed initial retention period data from $size certificates" }
             }
         }
     }
