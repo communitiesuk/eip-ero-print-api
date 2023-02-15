@@ -111,6 +111,31 @@ temporary-certificate:
         contact-details7: "ero-contact-6"
         contact-details8: "ero-contact-7"
 
+anonymous-elector-document:
+  explainer-pdf:
+    english:
+      path: "classpath:anonymous-elector-document/AED Explainer (English) v1.pdf"
+      placeholder:
+        contact-details1: "ero-recipient"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
+    welsh:
+      path: "classpath:anonymous-elector-document/AED Explainer (Bilingual) v1.pdf"
+      placeholder:
+        contact-details1: "ero-recipient"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
+
 thread-pool:
   zip:
     core-size: 5

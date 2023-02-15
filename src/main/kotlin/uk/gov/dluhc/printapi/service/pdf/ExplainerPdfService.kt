@@ -1,13 +1,11 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
-import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.exception.TemporaryCertificateExplainerDocumentNotFoundException
 
-@Service
 class ExplainerPdfService(
     private val eroClient: ElectoralRegistrationOfficeManagementApiClient,
     private val explainerPdfTemplateDetailsFactory: ExplainerPdfTemplateDetailsFactory,

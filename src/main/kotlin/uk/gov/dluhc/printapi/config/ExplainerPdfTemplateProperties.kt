@@ -5,9 +5,17 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConfigurationProperties(prefix = "temporary-certificate.explainer-pdf")
 @ConstructorBinding
-class TemporaryCertificateExplainerPdfTemplateProperties(
+class TemporaryCertificateExplainerPdfTemplateProperties(english: English, welsh: Welsh) :
+    ExplainerPdfTemplateProperties(english, welsh)
+
+@ConfigurationProperties(prefix = "anonymous-elector-document.explainer-pdf")
+@ConstructorBinding
+class AnonymousElectorDocumentExplainerPdfTemplateProperties(english: English, welsh: Welsh) :
+    ExplainerPdfTemplateProperties(english, welsh)
+
+abstract class ExplainerPdfTemplateProperties(
     val english: English,
-    val welsh: Welsh
+    val welsh: Welsh,
 ) {
     data class English(
         val path: String,

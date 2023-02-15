@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.temporarycertificate
+package uk.gov.dluhc.printapi.service.pdf
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -16,10 +16,10 @@ import software.amazon.awssdk.core.ResponseBytes
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.English
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.PhotoProperties
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.Welsh
 import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties
-import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties.English
-import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties.PhotoProperties
-import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties.Welsh
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_ENGLAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_NORTHERN_IRELAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_SCOTLAND
@@ -31,7 +31,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @ExtendWith(MockitoExtension::class)
-internal class CertificatePdfTemplateDetailsFactoryTest {
+internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
 
     companion object {
         // Template paths
@@ -72,11 +72,11 @@ internal class CertificatePdfTemplateDetailsFactoryTest {
     @Mock
     private lateinit var s3Client: S3Client
 
-    private lateinit var templateSelector: CertificatePdfTemplateDetailsFactory
+    private lateinit var templateSelector: ElectorDocumentPdfTemplateDetailsFactory
 
     @BeforeEach
     fun setup() {
-        templateSelector = CertificatePdfTemplateDetailsFactory(
+        templateSelector = ElectorDocumentPdfTemplateDetailsFactory(
             s3Client,
             TemporaryCertificatePdfTemplateProperties(
                 english = English(

@@ -16,6 +16,8 @@ import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.exception.GenerateTemporaryCertificateValidationException
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateMapper
+import uk.gov.dluhc.printapi.service.pdf.ElectorDocumentPdfTemplateDetailsFactory
+import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildGenerateTemporaryCertificateDto
@@ -41,7 +43,7 @@ internal class TemporaryCertificateServiceTest {
     private lateinit var temporaryCertificateMapper: TemporaryCertificateMapper
 
     @Mock
-    private lateinit var certificatePdfTemplateDetailsFactory: CertificatePdfTemplateDetailsFactory
+    private lateinit var electorDocumentPdfTemplateDetailsFactory: ElectorDocumentPdfTemplateDetailsFactory
 
     @Mock
     private lateinit var pdfFactory: PdfFactory
@@ -58,11 +60,11 @@ internal class TemporaryCertificateServiceTest {
         val eroDetails = buildEroDto(eroId = eroId)
         given(eroClient.getEro(any())).willReturn(eroDetails)
         val templateFilename = aTemplateFilename()
-        given(certificatePdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
+        given(electorDocumentPdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
         val temporaryCertificate = buildTemporaryCertificate(certificateNumber = certificateNumber)
         given(temporaryCertificateMapper.toTemporaryCertificate(any(), any(), any())).willReturn(temporaryCertificate)
         val templateDetails = buildTemplateDetails()
-        given(certificatePdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
+        given(electorDocumentPdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
         val contents = Random.Default.nextBytes(10)
         given(pdfFactory.createPdfContents(any())).willReturn(contents)
 
@@ -72,9 +74,9 @@ internal class TemporaryCertificateServiceTest {
         // Then
         verify(validator).validate(request)
         verify(eroClient).getEro(request.gssCode)
-        verify(certificatePdfTemplateDetailsFactory).getTemplateFilename(request.gssCode)
+        verify(electorDocumentPdfTemplateDetailsFactory).getTemplateFilename(request.gssCode)
         verify(temporaryCertificateMapper).toTemporaryCertificate(request, eroDetails, templateFilename)
-        verify(certificatePdfTemplateDetailsFactory).getTemplateDetails(temporaryCertificate)
+        verify(electorDocumentPdfTemplateDetailsFactory).getTemplateDetails(temporaryCertificate)
         verify(pdfFactory).createPdfContents(templateDetails)
         verify(temporaryCertificateRepository).save(temporaryCertificate)
         assertThat(actual.filename).isEqualTo("temporary-certificate-ZlxBCBxpjseZU5i3ccyL.pdf")
@@ -98,9 +100,9 @@ internal class TemporaryCertificateServiceTest {
         verify(validator).validate(request)
         verify(eroClient).getEro(request.gssCode)
         verifyNoInteractions(
-            certificatePdfTemplateDetailsFactory,
+            electorDocumentPdfTemplateDetailsFactory,
             temporaryCertificateMapper,
-            certificatePdfTemplateDetailsFactory,
+            electorDocumentPdfTemplateDetailsFactory,
             pdfFactory,
             temporaryCertificateRepository
         )
@@ -126,9 +128,9 @@ internal class TemporaryCertificateServiceTest {
         verify(validator).validate(request)
         verify(eroClient).getEro(request.gssCode)
         verifyNoInteractions(
-            certificatePdfTemplateDetailsFactory,
+            electorDocumentPdfTemplateDetailsFactory,
             temporaryCertificateMapper,
-            certificatePdfTemplateDetailsFactory,
+            electorDocumentPdfTemplateDetailsFactory,
             pdfFactory,
             temporaryCertificateRepository
         )
