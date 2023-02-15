@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.5.0'
+  version: '1.5.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -323,8 +323,11 @@ paths:
               application/json: |
                 {}
     post:
-      summary: Returns the Local Authority's explainer document for a temporary certificate
-      description: Returns the Local Authority's explainer document for a temporary certificate
+      summary: Returns the Local Authority's Explainer Document for a temporary certificate
+      description: |
+        Returns the Local Authority's Explainer Document for a temporary certificate  
+        The Explainer Document is a separately generated and printed document that accompanies the Temporary Certificate
+        and is used to explain to the Elector how to use their Temporary Certificate.
       tags:
         - VAC Temporary Certificates
       responses:
@@ -411,8 +414,11 @@ paths:
               application/json: |
                 {}
     post:
-      summary: Returns the Local Authority's explainer document for an AED
-      description: Returns the Local Authority's explainer document for an AED
+      summary: Returns the Local Authority's Explainer Document for an AED
+      description: |
+        Returns the Local Authority's Explainer Document for an Anonymous Elector Document  
+        The Explainer Document is a separately generated and printed document that accompanies the AED
+        and is used to explain to the Elector how to use their AED.
       tags:
         - Anonymous Elector Documents (AED)
       responses:
