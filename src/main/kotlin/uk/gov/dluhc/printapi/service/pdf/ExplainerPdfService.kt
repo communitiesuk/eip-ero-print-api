@@ -4,7 +4,7 @@ import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClie
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.dto.EroDto
 import uk.gov.dluhc.printapi.dto.PdfFile
-import uk.gov.dluhc.printapi.exception.TemporaryCertificateExplainerDocumentNotFoundException
+import uk.gov.dluhc.printapi.exception.ExplainerDocumentNotFoundException
 
 class ExplainerPdfService(
     private val eroClient: ElectoralRegistrationOfficeManagementApiClient,
@@ -16,18 +16,22 @@ class ExplainerPdfService(
         val eroDetails = getEroOrRaiseNotFoundException(eroId, gssCode)
         val templateDetails = explainerPdfTemplateDetailsFactory.getTemplateDetails(gssCode, eroDetails)
         val contents = pdfFactory.createPdfContents(templateDetails)
-        return PdfFile("temporary-certificate-explainer-document-$gssCode.pdf", contents)
+        return PdfFile("${explainerPdfTemplateDetailsFactory.getFilenamePrefix()}-$gssCode.pdf", contents)
     }
 
     private fun getEroOrRaiseNotFoundException(eroId: String, gssCode: String): EroDto {
         try {
             return eroClient.getEro(gssCode).also {
                 if (it.eroId != eroId) {
-                    throw TemporaryCertificateExplainerDocumentNotFoundException(eroId, gssCode)
+                    throw ExplainerDocumentNotFoundException(
+                        explainerPdfTemplateDetailsFactory.getExceptionMessage(eroId, gssCode)
+                    )
                 }
             }
         } catch (error: ElectoralRegistrationOfficeNotFoundException) {
-            throw TemporaryCertificateExplainerDocumentNotFoundException(eroId, gssCode)
+            throw ExplainerDocumentNotFoundException(
+                explainerPdfTemplateDetailsFactory.getExceptionMessage(eroId, gssCode)
+            )
         }
     }
 }

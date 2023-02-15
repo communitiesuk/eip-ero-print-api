@@ -20,7 +20,7 @@ class GlobalExceptionHandler(
     private var errorAttributes: ApiRequestErrorAttributes
 ) : ResponseEntityExceptionHandler() {
 
-    @ExceptionHandler(value = [CertificateNotFoundException::class, TemporaryCertificateExplainerDocumentNotFoundException::class])
+    @ExceptionHandler(value = [CertificateNotFoundException::class, ExplainerDocumentNotFoundException::class])
     fun handleResourceNotFound(e: RuntimeException, request: WebRequest): ResponseEntity<Any?>? {
         return handleExceptionInternal(e, e.message, HttpHeaders(), NOT_FOUND, request)
     }

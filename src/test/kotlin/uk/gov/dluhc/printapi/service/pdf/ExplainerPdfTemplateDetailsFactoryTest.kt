@@ -47,6 +47,7 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
 
     private val templateSelector = ExplainerPdfTemplateDetailsFactory(
         TemporaryCertificateExplainerPdfTemplateProperties(
+            "temporary-certificate-explainer-document",
             English(
                 ENGLISH_TEMPLATE_PATH,
                 Placeholder(
@@ -74,7 +75,7 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
                 )
             )
         )
-    )
+    ) { eroId: String, gssCode: String -> "Temporary certificate explainer document not found for eroId $eroId and gssCode $gssCode" }
 
     @ParameterizedTest
     @CsvSource(value = [GSS_CODE_ENGLAND, GSS_CODE_SCOTLAND, GSS_CODE_NORTHERN_IRELAND])

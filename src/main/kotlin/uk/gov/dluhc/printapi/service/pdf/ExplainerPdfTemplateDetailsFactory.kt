@@ -8,7 +8,14 @@ import uk.gov.dluhc.printapi.service.isWalesCode
 
 class ExplainerPdfTemplateDetailsFactory(
     private val pdfTemplateProperties: ExplainerPdfTemplateProperties,
+    private val exceptionMessageFunction: (eroId: String, gssCode: String) -> String
 ) {
+
+    fun getFilenamePrefix(): String =
+        pdfTemplateProperties.filenamePrefix
+
+    fun getExceptionMessage(eroId: String, gssCode: String): String =
+        exceptionMessageFunction(eroId, gssCode)
 
     fun getTemplateDetails(gssCode: String, eroDto: EroDto): TemplateDetails {
         return if (isWalesCode(gssCode)) {
