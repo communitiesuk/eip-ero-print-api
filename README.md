@@ -9,7 +9,7 @@ Configure your IDE with the code formatter (ktlint):
 ```
 $ ./gradlew ktlintApplyToIdea
 ```
-This only needs doing once to setup your IDE with the code styles.
+This only needs doing once to set up your IDE with the code styles.
 
 #### Running Tests
 ```
