@@ -92,7 +92,7 @@ internal class CertificateBatchingServiceTest {
         assertThat(firstBatchOfCertificates.size).isEqualTo(4)
         val secondBatchOfCertificates = savedCertificatesArgumentCaptor.secondValue
         assertThat(secondBatchOfCertificates.size).isEqualTo(3)
-        assertThat(batchIds).containsExactly(batchId1, batchId2)
+        assertThat(batchIds).containsExactly(Pair(batchId1, 4), Pair(batchId2, 3))
     }
 
     @Test
@@ -131,7 +131,7 @@ internal class CertificateBatchingServiceTest {
         )
         verify(idFactory).batchId()
         verify(certificateRepository).saveAll(capture(savedCertificatesArgumentCaptor))
-        assertThat(batchIds).containsExactly(batchId)
+        assertThat(batchIds).containsExactly(Pair(batchId, 1))
         val savedCertificates = savedCertificatesArgumentCaptor.value!!
         assertThat(savedCertificates.size).isEqualTo(1)
         assertThat(

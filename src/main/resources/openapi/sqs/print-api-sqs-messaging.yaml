@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.9.2'
+  version: '1.9.3'
   description: |-
     Print API SQS Message Types
     
@@ -289,6 +289,9 @@ components:
         batchId:
           type: string
           description: The batch ID
+        printRequestCount:
+          type: integer
+          description: The number of print requests included in the batch
       required:
         - batchId
 
