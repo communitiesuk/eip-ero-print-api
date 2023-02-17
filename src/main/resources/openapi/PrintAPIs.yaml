@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.5.1'
+  version: '1.6.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -359,6 +359,94 @@ paths:
         httpMethod: POST
 
   #
+  # Anonymous Elector Documents (AEDs)
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-elector-documents':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Generates and returns an Anonymous Elector Document (AED)
+      description: Generates and returns an Anonymous Elector Document (AED)
+      tags:
+        - Anonymous Elector Documents (AED)
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateAnonymousElectorDocument'
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="anonymous-elector-document-DGFF4E6420YHWPJYX560.pdf"
+        '400':
+          description: Error response describing fields in the request payload that are in error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found
+      operationId: generate-anonymous-elector-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
+  #
   # Anonymous Elector Document (AED) Explainer Document
   # --------------------------------------------------------------------------------
   '/eros/{eroId}/anonymous-elector-documents/{gssCode}/explainer-document':
@@ -548,6 +636,58 @@ components:
         - en
       default: en
 
+    SupportingInformationFormat:
+      type: string
+      description: The format of the supporting information sent with the document.
+      enum:
+        - standard
+        - braille
+        - large-print
+        - easy-read
+
+    Address:
+      title: Address
+      description: Address format used throughout gov.uk voter services.
+      type: object
+      x-examples:
+        Minimum data:
+          street: Street 1
+          postcode: PC1 2FB
+        Normal Address:
+          street: East Lodge
+          property: Balruddery
+          locality: Invergowrie
+          town: Dundee
+          area: Angus
+          postcode: DD25LF
+          uprn: '117095813'
+      properties:
+        street:
+          type: string
+          maxLength: 255
+        property:
+          type: string
+          maxLength: 255
+        locality:
+          type: string
+          maxLength: 255
+        town:
+          type: string
+          maxLength: 255
+        area:
+          type: string
+          maxLength: 255
+        postcode:
+          type: string
+          maxLength: 10
+        uprn:
+          type: string
+          description: Unique Property Reference Number consisting of up to 12 digits in length
+          pattern: '^\d{1,12}$'
+      required:
+        - street
+        - postcode
+
     TemporaryCertificateSummariesResponse:
       title: TemporaryCertificateSummariesResponse
       type: object
@@ -666,6 +806,72 @@ components:
         - photoLocation
         - validOnDate
 
+    GenerateAnonymousElectorDocumentRequest:
+      title: GenerateAnonymousElectorDocumentRequest
+      description: Request body to generate an Anonymous Elector Document (AED)
+      type: object
+      properties:
+        gssCode:
+          type: string
+          example: E12345678
+          minLength: 9
+          maxLength: 9
+          description: GSS code of the ERO responsible for the application
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Temporary Certificate is for.
+        applicationReference:
+          type: string
+          example: V3JSZC4CRH
+          description: The application reference as known by the citizen. Not guaranteed to be unique.
+        electoralNumber:
+          type: string
+          example: V3JSZC4CRH
+          description: The electoral number allocated by the Local Authority to the elector.
+        certificateLanguage:
+          $ref: '#/components/schemas/CertificateLanguage'
+        supportingInfoFormat:
+          $ref: '#/components/schemas/SupportingInformationFormat'
+        photoLocation:
+          type: string
+          description: |
+            The location of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the AED by the vc-admin, rather than the photo that the applicant uploaded as part of their original application. 
+            Typically an S3 ARN
+          maxLength: 1024
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - gssCode
+        - sourceType
+        - sourceReference
+        - applicationReference
+        - electoralNumber
+        - certificateLanguage
+        - supportingInfoFormat
+        - photoLocation
+        - firstName
+        - surname
+        - address
+
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
@@ -712,6 +918,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenerateTemporaryCertificateRequest'
+    GenerateAnonymousElectorDocument:
+      description: Request body to generate an Anonymous Elector Document (AED)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerateAnonymousElectorDocumentRequest'
 
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:
