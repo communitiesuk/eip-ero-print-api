@@ -27,9 +27,9 @@ class PrintRequestsServiceTest {
     @Test
     fun `should process print requests and submit to queue`() {
         // Given
-        val batch1 = Pair(aValidBatchId(), 6)
-        val batch2 = Pair(aValidBatchId(), 23)
-        val batch3 = Pair(aValidBatchId(), 2)
+        val batch1 = BatchInfo(aValidBatchId(), 6)
+        val batch2 = BatchInfo(aValidBatchId(), 23)
+        val batch3 = BatchInfo(aValidBatchId(), 2)
         val batchIds = listOf(batch1, batch2, batch3)
         given(certificateBatchingService.batchPendingCertificates()).willReturn(batchIds)
 
@@ -38,9 +38,24 @@ class PrintRequestsServiceTest {
 
         // Then
         verify(certificateBatchingService).batchPendingCertificates()
-        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batch1.first, batch1.second))
-        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batch2.first, batch2.second))
-        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batch3.first, batch3.second))
+        verify(processPrintRequestQueue).submit(
+            ProcessPrintRequestBatchMessage(
+                batch1.batchId,
+                batch1.printRequestCount
+            )
+        )
+        verify(processPrintRequestQueue).submit(
+            ProcessPrintRequestBatchMessage(
+                batch2.batchId,
+                batch2.printRequestCount
+            )
+        )
+        verify(processPrintRequestQueue).submit(
+            ProcessPrintRequestBatchMessage(
+                batch3.batchId,
+                batch3.printRequestCount
+            )
+        )
         verifyNoMoreInteractions(processPrintRequestQueue)
     }
 }

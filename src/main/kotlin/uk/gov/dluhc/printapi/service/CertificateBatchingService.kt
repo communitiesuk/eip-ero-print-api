@@ -26,14 +26,14 @@ class CertificateBatchingService(
     private val clock: Clock
 ) {
     @Transactional
-    fun batchPendingCertificates(): List<Pair<String, Int>> {
+    fun batchPendingCertificates(): List<BatchInfo> {
         val batches = batchCertificates()
         batches.forEach { (batchId, batchOfCertificates) ->
             certificateRepository.saveAll(batchOfCertificates)
             logger.info { "Certificate ids ${batchOfCertificates.map { it.id }} assigned to batch [$batchId]" }
         }
         return batches.map { (batchId, certificates) ->
-            Pair(batchId, countPrintRequestsAssignedToBatch(certificates, batchId))
+            BatchInfo(batchId, countPrintRequestsAssignedToBatch(certificates, batchId))
         }
     }
 
@@ -85,3 +85,8 @@ class CertificateBatchingService(
         }
     }
 }
+
+data class BatchInfo(
+    val batchId: String,
+    val printRequestCount: Int,
+)
