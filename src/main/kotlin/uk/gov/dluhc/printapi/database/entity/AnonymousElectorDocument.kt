@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.database.entity
 
-import liquibase.pro.packaged.it
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
@@ -86,7 +85,7 @@ class AnonymousElectorDocument(
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "aed_id", nullable = false)
-    var printRequests: MutableList<AEDPrintRequest> = mutableListOf(),
+    var printRequests: MutableList<AedPrintRequest> = mutableListOf(),
 
     /**
      * The legislation stipulates there are two retention periods for AED related data. The first (initial)
@@ -108,15 +107,15 @@ class AnonymousElectorDocument(
     var version: Long? = null
 ) {
 
-    val status: AEDPrintRequestStatus.Status?
+    val status: AedPrintRequestStatus.Status?
         get() = printRequests.sortedByDescending { it.requestDateTime }.first().status
 
-    fun addPrintRequest(newPrintRequest: AEDPrintRequest): AnonymousElectorDocument {
+    fun addPrintRequest(newPrintRequest: AedPrintRequest): AnonymousElectorDocument {
         printRequests += newPrintRequest
         return this
     }
 
-    private fun getCurrentPrintRequest(): AEDPrintRequest = printRequests.sortedByDescending { it.requestDateTime }.first()
+    private fun getCurrentPrintRequest(): AedPrintRequest = printRequests.sortedByDescending { it.requestDateTime }.first()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
