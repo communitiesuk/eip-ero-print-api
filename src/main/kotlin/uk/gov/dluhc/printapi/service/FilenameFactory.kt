@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -13,17 +12,11 @@ import java.time.format.DateTimeFormatter
 class FilenameFactory(private val clock: Clock) {
 
     fun createZipFilename(batchId: String, certificates: List<Certificate>): String {
-        return createFilename(batchId, printRequestCount(batchId, certificates), "zip")
+        return createFilename(batchId, countPrintRequestsAssignedToBatch(certificates, batchId), "zip")
     }
 
     fun createPrintRequestsFilename(batchId: String, certificates: List<Certificate>): String {
-        return createFilename(batchId, printRequestCount(batchId, certificates), "psv")
-    }
-
-    private fun printRequestCount(batchId: String, certificates: List<Certificate>): Int {
-        return certificates
-            .flatMap { it.printRequests }
-            .count { it.getCurrentStatus().status == Status.ASSIGNED_TO_BATCH && it.batchId == batchId }
+        return createFilename(batchId, countPrintRequestsAssignedToBatch(certificates, batchId), "psv")
     }
 
     private fun createFilename(batchId: String, count: Int, ext: String): String {

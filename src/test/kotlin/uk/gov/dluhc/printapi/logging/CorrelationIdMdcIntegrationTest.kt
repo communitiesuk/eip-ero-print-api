@@ -117,7 +117,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
         2022-11-24 19:50:21.118 40dd2a03c7384affa779cdb6ad744f98 INFO 69738 --- [    Test worker] u.g.d.p.service.PrintRequestsService     : Looking for certificate Print Requests to assign to a new batch
         2022-11-24 19:50:21.143 40dd2a03c7384affa779cdb6ad744f98 INFO 69738 --- [    Test worker] u.g.d.p.s.CertificateBatchingService     : Certificate with id [cca679f5-5a3d-47f8-95f4-9b924fcab789] assigned to batch [cab0f871e14a48e6b5511422b12d5999]
         2022-11-24 19:50:21.409 40dd2a03c7384affa779cdb6ad744f98 INFO 69738 --- [enerContainer-6] .ProcessPrintRequestBatchMessageListener : Processing print batch request for batchId: cab0f871e14a48e6b5511422b12d5999
-        2022-11-24 19:50:21.410 40dd2a03c7384affa779cdb6ad744f98 INFO 69738 --- [    Test worker] u.g.d.p.service.PrintRequestsService     : Batch [cab0f871e14a48e6b5511422b12d5999] submitted to queue
+        2022-11-24 19:50:21.410 40dd2a03c7384affa779cdb6ad744f98 INFO 69738 --- [    Test worker] u.g.d.p.service.PrintRequestsService     : Batch [cab0f871e14a48e6b5511422b12d5999] containing 1 print requests submitted to queue
         2022-11-24 19:50:21.412 40dd2a03c7384affa779cdb6ad744f98 INFO 69738 --- [    Test worker] u.g.d.p.service.PrintRequestsService     : Completed batching certificate Print Requests
         2022-11-24 19:50:21.483 40dd2a03c7384affa779cdb6ad744f98 INFO 69738 --- [enerContainer-6] .ProcessPrintRequestBatchMessageListener : Successfully processed print request for batchId: cab0f871e14a48e6b5511422b12d5999
          */
@@ -131,7 +131,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
             batchPrintRequestsJob.run()
 
             // Then
-            await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            await.atMost(10, TimeUnit.SECONDS).untilAsserted {
                 val logEvent = TestLogAppender.getLogEventMatchingRegex(
                     "Looking for certificate Print Requests to assign to a new batch",
                     Level.INFO
@@ -147,7 +147,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
                 ).hasCorrelationId(expectedCorrelationId)
                 assertThat(
                     TestLogAppender.getLogEventMatchingRegex(
-                        "Batch \\[.{32}\\] submitted to queue",
+                        "Batch \\[.{32}\\] containing .{1} print requests submitted to queue",
                         Level.INFO
                     )
                 ).hasCorrelationId(expectedCorrelationId)

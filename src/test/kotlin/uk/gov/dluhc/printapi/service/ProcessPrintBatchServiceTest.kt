@@ -18,6 +18,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidInputStream
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSftpPath
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidZipFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aFileDetails
 
 @ExtendWith(MockitoExtension::class)
@@ -44,7 +46,14 @@ internal class ProcessPrintBatchServiceTest {
     fun `should send file to SFTP`() {
         // Given
         val batchId = aValidBatchId()
-        val certificates = listOf(buildCertificate(status = Status.ASSIGNED_TO_BATCH))
+        val printRequests = listOf(
+            buildPrintRequest(
+                batchId = batchId,
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.ASSIGNED_TO_BATCH))
+            )
+        )
+        val certificates = listOf(buildCertificate(printRequests = printRequests))
+        val printRequestCount = 1
         val fileDetails = aFileDetails()
         val sftpInputStream = aValidInputStream()
         val zipFilename = aValidZipFilename()
@@ -56,7 +65,7 @@ internal class ProcessPrintBatchServiceTest {
         given(sftpService.sendFile(any(), any())).willReturn(sftpPath)
 
         // When
-        processPrintBatchService.processBatch(batchId)
+        processPrintBatchService.processBatch(batchId, printRequestCount)
 
         // Then
         verify(certificateRepository).findByPrintRequestsBatchId(batchId)
@@ -71,13 +80,52 @@ internal class ProcessPrintBatchServiceTest {
         // Given
         val batchId = "4143d442a2424740afa3ce5eae630aad"
         val certificates = emptyList<Certificate>()
+        val printRequestCount = null
         given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
 
         // When
-        val error = catchThrowable { processPrintBatchService.processBatch(batchId) }
+        val error = catchThrowable { processPrintBatchService.processBatch(batchId, printRequestCount) }
 
         // Then
         verify(certificateRepository).findByPrintRequestsBatchId(batchId)
-        assertThat(error).hasMessage("No certificates found for batchId = 4143d442a2424740afa3ce5eae630aad and status = ASSIGNED_TO_BATCH")
+        assertThat(error).hasMessage("Found 0 certificates for batchId = 4143d442a2424740afa3ce5eae630aad and status = ASSIGNED_TO_BATCH")
+    }
+
+    @Test
+    fun `should raise exception when no certificates found for provided batchId with expected print request count provided`() {
+        // Given
+        val batchId = "4143d442a2424740afa3ce5eae630aae"
+        val certificates = emptyList<Certificate>()
+        val printRequestCount = 1
+        given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
+
+        // When
+        val error = catchThrowable { processPrintBatchService.processBatch(batchId, printRequestCount) }
+
+        // Then
+        verify(certificateRepository).findByPrintRequestsBatchId(batchId)
+        assertThat(error).hasMessage("Found 0 of 1 certificates for batchId = 4143d442a2424740afa3ce5eae630aae and status = ASSIGNED_TO_BATCH")
+    }
+
+    @Test
+    fun `should raise exception when print requests found is not what's expected`() {
+        // Given
+        val batchId = "4143d442a2424740afa3ce5eae630aaf"
+        val printRequests = listOf(
+            buildPrintRequest(
+                batchId = batchId,
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.ASSIGNED_TO_BATCH))
+            )
+        )
+        val certificates = listOf(buildCertificate(printRequests = printRequests))
+        val printRequestCount = 2
+        given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
+
+        // When
+        val error = catchThrowable { processPrintBatchService.processBatch(batchId, printRequestCount) }
+
+        // Then
+        verify(certificateRepository).findByPrintRequestsBatchId(batchId)
+        assertThat(error).hasMessage("Found 1 of 2 certificates for batchId = 4143d442a2424740afa3ce5eae630aaf and status = ASSIGNED_TO_BATCH")
     }
 }

@@ -18,9 +18,9 @@ class PrintRequestsService(
 
         // split into batches and save to database before sending messages to SQS
         certificateBatchingService.batchPendingCertificates()
-            .onEach { batchId ->
-                processPrintRequestQueue.submit(ProcessPrintRequestBatchMessage(batchId))
-                logger.info { "Batch [$batchId] submitted to queue" }
+            .onEach { (batchId, printRequestCount) ->
+                processPrintRequestQueue.submit(ProcessPrintRequestBatchMessage(batchId, printRequestCount))
+                logger.info { "Batch [$batchId] containing $printRequestCount print requests submitted to queue" }
             }
         logger.info { "Completed batching certificate Print Requests" }
     }

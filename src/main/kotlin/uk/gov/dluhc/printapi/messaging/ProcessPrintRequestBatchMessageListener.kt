@@ -20,7 +20,7 @@ class ProcessPrintRequestBatchMessageListener(
         with(payload) {
             logger.info("Processing print batch request for batchId: $batchId")
 
-            processPrintBatchService.processBatch(batchId)
+            processPrintBatchService.processBatch(batchId, printRequestCount)
 
             logger.info("Successfully processed print request for batchId: $batchId")
         }

@@ -5,7 +5,7 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
-import uk.gov.dluhc.printapi.exception.EmptyBatchException
+import uk.gov.dluhc.printapi.exception.InsufficientPrintRequestsInBatchException
 import javax.transaction.Transactional
 
 /**
@@ -38,16 +38,26 @@ class ProcessPrintBatchService(
      * Step 4: Update Dynamo batch records with new status
      */
     @Transactional
-    fun processBatch(batchId: String) {
+    fun processBatch(batchId: String, printRequestCount: Int?) {
         val certificates = certificateRepository.findDistinctByPrintRequestStatusAndBatchId(ASSIGNED_TO_BATCH, batchId)
-        if (certificates.isEmpty()) {
-            throw EmptyBatchException(batchId, ASSIGNED_TO_BATCH)
-        }
+        verifyPrintRequestCount(certificates, batchId, printRequestCount)
         val fileContents = printFileDetailsFactory.createFileDetailsFromCertificates(batchId, certificates)
         val sftpInputStream = sftpZipInputStreamProvider.createSftpInputStream(fileContents)
         val sftpFilename = filenameFactory.createZipFilename(batchId, certificates)
         sftpService.sendFile(sftpInputStream, sftpFilename)
         updateCertificates(batchId, certificates)
+    }
+
+    private fun verifyPrintRequestCount(certificates: List<Certificate>, batchId: String, expectedCount: Int?) {
+        if (certificates.isEmpty()) {
+            throw InsufficientPrintRequestsInBatchException(batchId, ASSIGNED_TO_BATCH, 0, expectedCount)
+        } else if (expectedCount != null) {
+            countPrintRequestsAssignedToBatch(certificates, batchId).let {
+                if (it != expectedCount) {
+                    throw InsufficientPrintRequestsInBatchException(batchId, ASSIGNED_TO_BATCH, it, expectedCount)
+                }
+            }
+        }
     }
 
     private fun updateCertificates(batchId: String, certificates: List<Certificate>) {
