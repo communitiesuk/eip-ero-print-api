@@ -10,7 +10,7 @@
         <addColumn tableName="certificate">
             <column name="initial_retention_data_removed" type="boolean" value="false"
                     remarks="Indicates if initial retention period data has been removed from a certificate">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
         </addColumn>
 
@@ -23,6 +23,8 @@
         </createIndex>
 
         <rollback>
+            <dropIndex tableName="certificate" indexName="certificate_initial_retention_removal_idx"/>
+
             <dropColumn
                 tableName="certificate"
                 columnName="initial_retention_data_removed"/>
