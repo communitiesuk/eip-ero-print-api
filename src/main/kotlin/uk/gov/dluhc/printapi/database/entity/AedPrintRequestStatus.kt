@@ -36,6 +36,9 @@ class AedPrintRequestStatus(
     @Enumerated(EnumType.STRING)
     var status: Status? = null,
 
+    @field:NotNull
+    var requestDateTime: Instant? = null,
+
     @CreationTimestamp
     var dateCreated: Instant? = null,
 

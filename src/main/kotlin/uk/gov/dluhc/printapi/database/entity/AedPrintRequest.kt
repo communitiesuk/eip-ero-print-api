@@ -75,7 +75,7 @@ class AedPrintRequest(
     }
 
     val status: AedPrintRequestStatus.Status?
-        get() = statusHistory.sortedByDescending { it.dateCreated }.first().status
+        get() = statusHistory.sortedByDescending { it.requestDateTime }.first().status
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
