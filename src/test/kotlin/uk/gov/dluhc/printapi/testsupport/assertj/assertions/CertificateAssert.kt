@@ -285,9 +285,13 @@ class CertificateAssert
      * @return this assertion object.
      * @throws AssertionError if the data is not null.
      */
-    fun doesNotHaveInitialRetentionPeriodData(): CertificateAssert {
+    fun initialRetentionPeriodDataIsRemoved(): CertificateAssert {
         // check that actual PrintRequest we want to make assertions on is not null.
         isNotNull
+
+        if (this.actual?.initialRetentionDataRemoved == false) {
+            failWithMessage("Expecting initialRetentionDataRemoved to be true.")
+        }
 
         this.actual?.printRequests?.forEach {
             PrintRequestAssert(it).doesNotHaveInitialRetentionPeriodData()
@@ -305,6 +309,10 @@ class CertificateAssert
     fun hasInitialRetentionPeriodData(): CertificateAssert {
         // check that actual PrintRequest we want to make assertions on is not null.
         isNotNull
+
+        if (this.actual?.initialRetentionDataRemoved == true) {
+            failWithMessage("Expecting initialRetentionDataRemoved to be false.")
+        }
 
         this.actual?.printRequests?.forEach {
             PrintRequestAssert(it).hasInitialRetentionPeriodData()

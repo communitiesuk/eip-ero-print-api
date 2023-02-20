@@ -47,9 +47,7 @@ class CertificateDataRetentionService(
             forEach {
                 it.removeInitialRetentionPeriodData()
                 certificateRepository.save(it)
-            }
-            if (isNotEmpty()) {
-                logger.info { "Removed initial retention period data from $size certificates" }
+                logger.info { "Removed initial retention period data from certificate with sourceReference ${it.sourceReference}" }
             }
         }
     }
