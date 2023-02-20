@@ -641,9 +641,6 @@ components:
       description: The format of the supporting information sent with the document.
       enum:
         - standard
-        - braille
-        - large-print
-        - easy-read
 
     Address:
       title: Address
