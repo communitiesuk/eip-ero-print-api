@@ -62,7 +62,6 @@ jobs:
     name: "ProcessPrintResponses"
     cron: "0 15/30 * * * *" # every 30 minutes starting at 15 minutes past the hour - see analysis and recommendations in EIP1-2515
   remove-vca-initial-retention-period-data:
-    enabled: false
     name: "RemoveVcaInitialRetentionPeriodData"
     # Runs at 21:35, 01:35 and 05:35.
     # Running outside business hours to avoid delivery info suddenly disappearing.
