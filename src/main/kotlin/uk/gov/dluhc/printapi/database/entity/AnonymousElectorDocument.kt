@@ -65,19 +65,8 @@ class AnonymousElectorDocument(
     @field:Size(max = 255)
     var photoLocationArn: String? = null,
 
-    @field:NotNull
-    @field:Size(max = 255)
-    var firstName: String? = null,
-
-    @field:Size(max = 255)
-    var middleNames: String? = null,
-
-    @field:NotNull
-    @field:Size(max = 255)
-    var surname: String? = null,
-
     @OneToOne(cascade = [CascadeType.ALL])
-    var address: Address,
+    var contactDetails: AedContactDetails,
 
     @field:NotNull
     @field:Size(max = 80)

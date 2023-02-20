@@ -5,6 +5,46 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
+    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-aed-contact-details-table" context="ddl">
+        <createTable tableName="aed_contact_details">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="aed_contact_details_pkey"/>
+            </column>
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_names" type="varchar(255)"/>
+            <column name="surname" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(1024)"/>
+            <column name="phone_number" type="varchar(50)"/>
+            <column name="address_id" type="uuid">
+                <constraints nullable="true"
+                             foreignKeyName="fk_aed_contact_details_address"
+                             references="address(id)"/>
+            </column>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="aed_surname_idx" tableName="aed_contact_details" unique="false">
+            <column name="surname"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="aed_contact_details" />
+        </rollback>
+    </changeSet>
+
     <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-anonymous-elector-document-table" context="ddl">
         <createTable tableName="anonymous_elector_document">
             <column name="id" type="uuid">
@@ -24,18 +64,15 @@
                 <constraints nullable="false"/>
             </column>
             <column name="application_reference" type="varchar(255)"/>
-            <column name="first_name" type="varchar(255)"/>
-            <column name="middle_names" type="varchar(255)"/>
-            <column name="surname" type="varchar(255)"/>
             <column name="certificate_language" type="varchar(20)"/>
             <column name="supporting_information_format" type="varchar(20)"/>
             <column name="photo_location_arn" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="address_id" type="uuid">
+            <column name="aed_contact_details" type="uuid">
                 <constraints nullable="true"
-                             foreignKeyName="fk_aed_address"
-                             references="address(id)"/>
+                             foreignKeyName="fk_aed_aed_contact_details"
+                             references="aed_contact_details(id)"/>
             </column>
             <column name="initial_retention_removal_date" type="date" remarks="The date that certain data should be removed after the first retention period">
                 <constraints nullable="true"/>
