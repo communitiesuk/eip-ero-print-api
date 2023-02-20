@@ -106,8 +106,8 @@ internal class CertificateDataRetentionServiceTest {
         certificateDataRetentionService.removeInitialRetentionPeriodData(VOTER_CARD)
 
         // Then
-        assertThat(certificate1).doesNotHaveInitialRetentionPeriodData()
-        assertThat(certificate2).doesNotHaveInitialRetentionPeriodData()
+        assertThat(certificate1).initialRetentionPeriodDataIsRemoved()
+        assertThat(certificate2).initialRetentionPeriodDataIsRemoved()
         verify(certificateRepository).findPendingRemovalOfInitialRetentionData(VOTER_CARD)
     }
 
