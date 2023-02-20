@@ -208,14 +208,6 @@ class Certificate(
         }
     }
 
-    fun removeInitialRetentionPeriodData() {
-        printRequests.forEach {
-            it.delivery = null
-            it.supportingInformationFormat = null
-        }
-        initialRetentionDataRemoved = true
-    }
-
     private fun processPrintRequestUpdate(update: () -> Unit) {
         update.invoke()
         assignStatus()
