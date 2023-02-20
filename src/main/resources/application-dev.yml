@@ -7,6 +7,5 @@ jobs:
     cron: "0 */10 * ? * *" # every 10 minutes
     daily-limit: 1000
   remove-vca-initial-retention-period-data:
-    enabled: true
     name: "RemoveVcaInitialRetentionPeriodData"
     cron: "0 */10 * ? * *" # every 10 minutes

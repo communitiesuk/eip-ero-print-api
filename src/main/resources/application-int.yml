@@ -1,0 +1,4 @@
+jobs:
+  remove-vca-initial-retention-period-data:
+    name: "RemoveVcaInitialRetentionPeriodData"
+    cron: "0 */10 * ? * *" # every 10 minutes
