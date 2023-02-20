@@ -24,7 +24,11 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
 
     fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): Certificate?
 
-    fun findBySourceTypeAndInitialRetentionRemovalDateBefore(sourceType: SourceType, initialRetentionRemovalDate: LocalDate): List<Certificate>
+    fun findBySourceTypeAndInitialRetentionDataRemovedAndInitialRetentionRemovalDateBefore(
+        sourceType: SourceType,
+        initialRetentionDataRemoved: Boolean = false,
+        initialRetentionRemovalDate: LocalDate
+    ): List<Certificate>
 
     @Query(
         value = """
@@ -44,6 +48,9 @@ object CertificateRepositoryExtensions {
     }
 
     fun CertificateRepository.findPendingRemovalOfInitialRetentionData(sourceType: SourceType): List<Certificate> {
-        return findBySourceTypeAndInitialRetentionRemovalDateBefore(sourceType = sourceType, initialRetentionRemovalDate = LocalDate.now())
+        return findBySourceTypeAndInitialRetentionDataRemovedAndInitialRetentionRemovalDateBefore(
+            sourceType = sourceType,
+            initialRetentionRemovalDate = LocalDate.now()
+        )
     }
 }

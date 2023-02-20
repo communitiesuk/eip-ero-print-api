@@ -19,4 +19,5 @@
     <include relativeToChangelogFile="true" file="ddl/0010_create_temporary_certificate_tables.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0011_initial_data_retention_period_changes.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0012_supporting_information_non_mandatory.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0013_initial_retention_data_removed_column.xml"/>
 </databaseChangeLog>
