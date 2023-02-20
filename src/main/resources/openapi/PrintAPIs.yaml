@@ -827,10 +827,11 @@ components:
           type: string
           example: V3JSZC4CRH
           description: The application reference as known by the citizen. Not guaranteed to be unique.
-        electoralNumber:
+        electoralRollNumber:
           type: string
-          example: V3JSZC4CRH
-          description: The electoral number allocated by the Local Authority to the elector.
+          pattern: "[a-zA-Z]{1,2}[0-9]{1,4}"
+          example: gf5154
+          description: The electoral roll number allocated by the Local Authority to the elector.
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
         supportingInfoFormat:
@@ -864,7 +865,7 @@ components:
         - sourceType
         - sourceReference
         - applicationReference
-        - electoralNumber
+        - electoralRollNumber
         - certificateLanguage
         - supportingInfoFormat
         - photoLocation
