@@ -14,7 +14,7 @@
             </column>
         </addColumn>
 
-        <dropIndex tableName="certificate" indexName="certificate_initial_retention_removal_data_idx"/>
+        <dropIndex tableName="certificate" indexName="certificate_initial_retention_removal_date_idx"/>
 
         <createIndex tableName="certificate" indexName="certificate_initial_retention_removal_idx">
             <column name="source_type"/>
@@ -27,7 +27,7 @@
                 tableName="certificate"
                 columnName="initial_retention_data_removed"/>
 
-            <createIndex tableName="certificate" indexName="certificate_initial_retention_removal_data_idx">
+            <createIndex tableName="certificate" indexName="certificate_initial_retention_removal_date_idx">
                 <column name="source_type"/>
                 <column name="initial_retention_removal_date"/>
             </createIndex>
