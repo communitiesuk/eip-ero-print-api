@@ -25,10 +25,11 @@ internal class InitialRetentionPeriodDataRemovalJobIntegrationTest : Integration
         initialRetentionPeriodDataRemovalJob.removeVoterCardInitialRetentionPeriodData()
 
         // Then
-        assertThat(certificateRepository.findById(certificate1.id!!).get()).doesNotHaveInitialRetentionPeriodData()
-        assertThat(certificateRepository.findById(certificate2.id!!).get()).doesNotHaveInitialRetentionPeriodData()
+        assertThat(certificateRepository.findById(certificate1.id!!).get()).initialRetentionPeriodDataIsRemoved()
+        assertThat(certificateRepository.findById(certificate2.id!!).get()).initialRetentionPeriodDataIsRemoved()
         assertThat(certificateRepository.findById(certificate3.id!!).get()).hasInitialRetentionPeriodData()
         assertThat(certificateRepository.findById(certificate4.id!!).get()).hasInitialRetentionPeriodData()
-        assertThat(TestLogAppender.hasLog("Removed initial retention period data from 2 certificates", Level.INFO)).isTrue
+        assertThat(TestLogAppender.hasLog("Removed initial retention period data from certificate with sourceReference ${certificate1.sourceReference}", Level.INFO)).isTrue
+        assertThat(TestLogAppender.hasLog("Removed initial retention period data from certificate with sourceReference ${certificate2.sourceReference}", Level.INFO)).isTrue
     }
 }

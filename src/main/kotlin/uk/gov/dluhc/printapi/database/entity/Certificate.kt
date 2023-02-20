@@ -82,6 +82,11 @@ class Certificate(
     var initialRetentionRemovalDate: LocalDate? = null,
 
     /**
+     * Set to true after the initial retention period data is removed.
+     */
+    var initialRetentionDataRemoved: Boolean = false,
+
+    /**
      * Certificate status corresponds to the current status of the most recent
      * [PrintRequest], based on the requestDateTime that is included in the
      * [uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage].
@@ -203,11 +208,13 @@ class Certificate(
         }
     }
 
-    fun removeInitialRetentionPeriodData() =
+    fun removeInitialRetentionPeriodData() {
         printRequests.forEach {
             it.delivery = null
             it.supportingInformationFormat = null
         }
+        initialRetentionDataRemoved = true
+    }
 
     private fun processPrintRequestUpdate(update: () -> Unit) {
         update.invoke()

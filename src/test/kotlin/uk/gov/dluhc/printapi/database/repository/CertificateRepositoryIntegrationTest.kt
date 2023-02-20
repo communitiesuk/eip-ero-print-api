@@ -14,7 +14,9 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.DISPATCHED
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressPostcode
@@ -51,6 +53,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCodeList
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.ChronoUnit.SECONDS
 
@@ -393,6 +396,37 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
             // Then
             assertThat(actual).isEqualTo(2)
+        }
+    }
+
+    @Nested
+    inner class GetCertificatesForInitialRetentionDataRemoval {
+        @Test
+        fun `should find certificates for removal of initial retention period data`() {
+            // Given
+            val expected1 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+            val expected2 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+
+            val other1 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().minusDays(1),
+                initialRetentionDataRemoved = true // should be excluded
+            )
+
+            val other2 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().plusDays(1)
+            )
+
+            certificateRepository.saveAll(listOf(other1, expected1, other2, expected2))
+
+            // When
+            val actual = certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)
+
+            // Then
+            assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)
         }
     }
 }
