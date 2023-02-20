@@ -2,7 +2,9 @@ package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 import javax.transaction.Transactional
@@ -35,6 +37,20 @@ class CertificateDataRetentionService(
                 certificateRepository.save(it)
             }
                 ?: logger.error { "Certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }
+        }
+    }
+
+    @Transactional
+    fun removeInitialRetentionPeriodData(sourceType: SourceType) {
+        logger.info { "Finding certificates with sourceType $sourceType to remove initial retention period data from" }
+        with(certificateRepository.findPendingRemovalOfInitialRetentionData(sourceType = sourceType)) {
+            forEach {
+                it.removeInitialRetentionPeriodData()
+                certificateRepository.save(it)
+            }
+            if (isNotEmpty()) {
+                logger.info { "Removed initial retention period data from $size certificates" }
+            }
         }
     }
 }

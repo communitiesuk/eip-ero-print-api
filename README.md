@@ -79,3 +79,19 @@ cd src/test/resources/ssh
 export PORT=<find port number from logs>
 sftp -v -P $PORT -oStrictHostKeyChecking=no -oKexAlgorithms=+diffie-hellman-group1-sha1 -o "IdentityFile=./printer_rsa" -o User=user localhost
 ```
+
+### Scheduled Beans
+
+#### ProcessPrintResponsesBatchJob
+Polls the print provider's SFTP server for response files. Each response file is processed and a number of SQS messages
+are queued for updating the affected batches and specific print requests.
+
+#### BatchPrintRequestsJob
+Assigns print requests with status `PENDING_ASSIGNMENT_TO_BATCH` to a batch for processing.
+Each run processes a maximum of 1,500 print requests and these are divided into batches containing a maximum of 50 requests.
+Remaining requests must wait for the next run of the job to be assigned to a batch. Once the daily threshold of 150,000 requests
+is reached, any remaining requests must wait for the next day to be assigned to a batch.
+
+#### InitialRetentionPeriodDataRemovalJob
+This job removes specific certificate data that needs to be removed after the first retention period (which the legislation
+defines as 28 working days after the certificate is printed).

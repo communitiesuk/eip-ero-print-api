@@ -62,7 +62,8 @@ fun buildCertificate(
     sourceReference: String = aValidSourceReference(),
     applicationReceivedDateTime: Instant = aValidApplicationReceivedDateTime(),
     applicationReference: String = aValidApplicationReference(),
-    issueDate: LocalDate = aValidIssueDate()
+    issueDate: LocalDate = aValidIssueDate(),
+    initialRetentionRemovalDate: LocalDate? = null
 ): Certificate {
     val certificate = Certificate(
         id = id,
@@ -76,6 +77,7 @@ fun buildCertificate(
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
         gssCode = gssCode,
         status = status,
+        initialRetentionRemovalDate = initialRetentionRemovalDate
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate

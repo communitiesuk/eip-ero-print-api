@@ -504,9 +504,7 @@ class PrintRequestAssert
         // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
-        val printRequest = actual!!.statusHistory.find { pr ->
-            pr.status == status
-        }
+        val printRequest = actual!!.statusHistory.find { it.status == status }
 
         // check that given PrintRequest collection is not null.
         if (printRequest == null) {
@@ -614,6 +612,48 @@ class PrintRequestAssert
         // check
         if (actual!!.statusHistory.iterator().hasNext()) {
             failWithMessage(assertjErrorMessage, actual, actual!!.statusHistory)
+        }
+
+        // return the current assertion for method chaining
+        return this
+    }
+
+    /**
+     * Verifies that the data which needs to be removed after the initial retention period is null.
+     * @return this assertion object.
+     * @throws AssertionError if the data is not null.
+     */
+    fun doesNotHaveInitialRetentionPeriodData(): PrintRequestAssert {
+        // check that actual PrintRequest we want to make assertions on is not null.
+        isNotNull
+
+        // we override the default error message with a more explicit one
+        val assertjErrorMessage = "\nExpecting :\n  <%s>\nnot to have initial retention period data"
+
+        // check
+        if (actual!!.delivery != null || actual!!.supportingInformationFormat != null) {
+            failWithMessage(assertjErrorMessage, actual)
+        }
+
+        // return the current assertion for method chaining
+        return this
+    }
+
+    /**
+     * Verifies that the data which needs to be removed after the initial retention period still exists.
+     * @return this assertion object.
+     * @throws AssertionError if the data is null.
+     */
+    fun hasInitialRetentionPeriodData(): PrintRequestAssert {
+        // check that actual PrintRequest we want to make assertions on is not null.
+        isNotNull
+
+        // we override the default error message with a more explicit one
+        val assertjErrorMessage = "\nExpecting :\n  <%s>\n still to have initial retention period data"
+
+        // check
+        if (actual!!.delivery == null || actual!!.supportingInformationFormat == null) {
+            failWithMessage(assertjErrorMessage, actual)
         }
 
         // return the current assertion for method chaining
