@@ -36,7 +36,7 @@ class AedPrintRequest(
     var id: UUID? = null,
 
     @field:NotNull
-    @field:Size(max = 20)
+    @field:Size(max = 7)
     var electoralNumber: String? = null,
 
     @field:NotNull

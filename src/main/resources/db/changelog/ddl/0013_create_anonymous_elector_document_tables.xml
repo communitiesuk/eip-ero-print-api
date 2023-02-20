@@ -78,7 +78,7 @@
                              foreignKeyName="fk_print_request_aed"
                              references="anonymous_elector_document(id)"/>
             </column>
-            <column name="electoral_number" type="varchar(20)">
+            <column name="electoral_number" type="varchar(7)">
                 <constraints nullable="false"/>
             </column>
             <column name="aed_template_filename" type="varchar(255)">
