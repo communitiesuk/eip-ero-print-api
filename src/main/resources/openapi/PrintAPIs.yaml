@@ -822,14 +822,14 @@ components:
         sourceReference:
           type: string
           example: 1f0f76a9a66f438b9bb33070
-          description: Reference in the source application that this Temporary Certificate is for.
+          description: Reference in the source application that this Anonymous Elector Document is for.
         applicationReference:
           type: string
           example: V3JSZC4CRH
           description: The application reference as known by the citizen. Not guaranteed to be unique.
         electoralRollNumber:
           type: string
-          pattern: "[a-zA-Z]{1,2}[0-9]{1,4}"
+          pattern: '^[a-zA-Z]{1,2}\d{1,4}$'
           example: gf5154
           description: The electoral roll number allocated by the Local Authority to the elector.
         certificateLanguage:
@@ -840,7 +840,7 @@ components:
           type: string
           description: |
             The location of the Elector's Certificate photo. 
-            This is the photo that has been prepared and approved for the AED by the vc-admin, rather than the photo that the applicant uploaded as part of their original application. 
+            This is the photo that has been prepared and approved for the AED by the vc-anonymous-admin, rather than the photo that the applicant uploaded as part of their original application. 
             Typically an S3 ARN
           maxLength: 1024
         firstName:
@@ -858,6 +858,17 @@ components:
           maxLength: 255
           description: Surname of the Elector
           example: Smith
+        email:
+          type: string
+          maxLength: 1024
+          format: email
+          description: The applicant's email address. Null if not known
+          example: fred.blogs@some-domain.co.uk
+        phoneNumber:
+          type: string
+          maxLength: 50
+          description: The applicant's phone number. Null if not known
+          example: 01234 567890
         address:
           $ref: '#/components/schemas/Address'
       required:
