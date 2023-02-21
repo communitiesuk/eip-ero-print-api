@@ -8,7 +8,7 @@
     <changeSet author="matt.wills@valtech.com" id="0013_EIP1-4053_alter_certificate - add initial_retention_data_removed column" context="ddl">
 
         <addColumn tableName="certificate">
-            <column name="initial_retention_data_removed" type="boolean" value="false"
+            <column name="initial_retention_data_removed" type="boolean" valueBoolean="false"
                     remarks="Indicates if initial retention period data has been removed from a certificate">
                 <constraints nullable="false"/>
             </column>
