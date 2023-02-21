@@ -7,4 +7,5 @@ fun countPrintRequestsAssignedToBatch(certificates: List<Certificate>, batchId: 
     certificates
         .flatMap { it.printRequests }
         .filter { it.batchId == batchId }
+        .distinct()
         .count { it.getCurrentStatus().status == PrintRequestStatus.Status.ASSIGNED_TO_BATCH }
