@@ -11,9 +11,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
+import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
@@ -33,6 +35,9 @@ internal class CertificateDataRetentionServiceTest {
 
     @Mock
     private lateinit var certificateRepository: CertificateRepository
+
+    @Mock
+    private lateinit var deliveryRepository: DeliveryRepository
 
     @InjectMocks
     private lateinit var certificateDataRetentionService: CertificateDataRetentionService
@@ -95,6 +100,8 @@ internal class CertificateDataRetentionServiceTest {
         // Given
         val certificate1 = buildCertificate()
         val certificate2 = buildCertificate()
+        val delivery1 = certificate1.printRequests[0].delivery!!
+        val delivery2 = certificate2.printRequests[0].delivery!!
         given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(
             listOf(
                 certificate1,
@@ -109,6 +116,8 @@ internal class CertificateDataRetentionServiceTest {
         assertThat(certificate1).initialRetentionPeriodDataIsRemoved()
         assertThat(certificate2).initialRetentionPeriodDataIsRemoved()
         verify(certificateRepository).findPendingRemovalOfInitialRetentionData(VOTER_CARD)
+        verify(deliveryRepository).delete(delivery1)
+        verify(deliveryRepository).delete(delivery2)
     }
 
     @Test
@@ -125,5 +134,6 @@ internal class CertificateDataRetentionServiceTest {
         // Then
         assertThat(certificate).hasInitialRetentionPeriodData()
         verify(certificateRepository).findPendingRemovalOfInitialRetentionData(VOTER_CARD)
+        verifyNoInteractions(deliveryRepository)
     }
 }
