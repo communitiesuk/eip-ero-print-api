@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-aed-contact-details-table" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-aed-contact-details-table" context="ddl">
         <createTable tableName="aed_contact_details">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
@@ -45,7 +45,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-anonymous-elector-document-table" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-anonymous-elector-document-table" context="ddl">
         <createTable tableName="anonymous_elector_document">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
@@ -104,7 +104,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-aed-print-request-table" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-aed-print-request-table" context="ddl">
         <createTable tableName="aed_print_request">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
@@ -150,7 +150,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-aed-print-request-status" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-aed-print-request-status" context="ddl">
         <createTable tableName="aed_print_request_status">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
