@@ -16,8 +16,8 @@ import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.exception.GenerateTemporaryCertificateValidationException
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateMapper
-import uk.gov.dluhc.printapi.service.pdf.ElectorDocumentPdfTemplateDetailsFactory
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
+import uk.gov.dluhc.printapi.service.pdf.TemporaryCertificatePdfTemplateDetailsFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildGenerateTemporaryCertificateDto
@@ -43,7 +43,7 @@ internal class TemporaryCertificateServiceTest {
     private lateinit var temporaryCertificateMapper: TemporaryCertificateMapper
 
     @Mock
-    private lateinit var electorDocumentPdfTemplateDetailsFactory: ElectorDocumentPdfTemplateDetailsFactory
+    private lateinit var temporaryCertificatePdfTemplateDetailsFactory: TemporaryCertificatePdfTemplateDetailsFactory
 
     @Mock
     private lateinit var pdfFactory: PdfFactory
@@ -60,11 +60,11 @@ internal class TemporaryCertificateServiceTest {
         val eroDetails = buildEroDto(eroId = eroId)
         given(eroClient.getEro(any())).willReturn(eroDetails)
         val templateFilename = aTemplateFilename()
-        given(electorDocumentPdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
+        given(temporaryCertificatePdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
         val temporaryCertificate = buildTemporaryCertificate(certificateNumber = certificateNumber)
         given(temporaryCertificateMapper.toTemporaryCertificate(any(), any(), any())).willReturn(temporaryCertificate)
         val templateDetails = buildTemplateDetails()
-        given(electorDocumentPdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
+        given(temporaryCertificatePdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
         val contents = Random.Default.nextBytes(10)
         given(pdfFactory.createPdfContents(any())).willReturn(contents)
 
@@ -74,9 +74,9 @@ internal class TemporaryCertificateServiceTest {
         // Then
         verify(validator).validate(request)
         verify(eroClient).getEro(request.gssCode)
-        verify(electorDocumentPdfTemplateDetailsFactory).getTemplateFilename(request.gssCode)
+        verify(temporaryCertificatePdfTemplateDetailsFactory).getTemplateFilename(request.gssCode)
         verify(temporaryCertificateMapper).toTemporaryCertificate(request, eroDetails, templateFilename)
-        verify(electorDocumentPdfTemplateDetailsFactory).getTemplateDetails(temporaryCertificate)
+        verify(temporaryCertificatePdfTemplateDetailsFactory).getTemplateDetails(temporaryCertificate)
         verify(pdfFactory).createPdfContents(templateDetails)
         verify(temporaryCertificateRepository).save(temporaryCertificate)
         assertThat(actual.filename).isEqualTo("temporary-certificate-ZlxBCBxpjseZU5i3ccyL.pdf")
@@ -100,9 +100,9 @@ internal class TemporaryCertificateServiceTest {
         verify(validator).validate(request)
         verify(eroClient).getEro(request.gssCode)
         verifyNoInteractions(
-            electorDocumentPdfTemplateDetailsFactory,
+            temporaryCertificatePdfTemplateDetailsFactory,
             temporaryCertificateMapper,
-            electorDocumentPdfTemplateDetailsFactory,
+            temporaryCertificatePdfTemplateDetailsFactory,
             pdfFactory,
             temporaryCertificateRepository
         )
@@ -128,9 +128,9 @@ internal class TemporaryCertificateServiceTest {
         verify(validator).validate(request)
         verify(eroClient).getEro(request.gssCode)
         verifyNoInteractions(
-            electorDocumentPdfTemplateDetailsFactory,
+            temporaryCertificatePdfTemplateDetailsFactory,
             temporaryCertificateMapper,
-            electorDocumentPdfTemplateDetailsFactory,
+            temporaryCertificatePdfTemplateDetailsFactory,
             pdfFactory,
             temporaryCertificateRepository
         )

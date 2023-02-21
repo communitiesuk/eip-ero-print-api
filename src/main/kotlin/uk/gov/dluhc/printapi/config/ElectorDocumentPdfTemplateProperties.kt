@@ -2,22 +2,40 @@ package uk.gov.dluhc.printapi.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.AnonymousElectorDocumentPlaceholder
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.English
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.Welsh
 
 @ConfigurationProperties(prefix = "temporary-certificate.certificate-pdf")
 @ConstructorBinding
-class TemporaryCertificatePdfTemplateProperties(english: English, welsh: Welsh) :
-    ElectorDocumentPdfTemplateProperties(english, welsh)
+class TemporaryCertificatePdfTemplateProperties(
+    english: English<English.TemporaryCertificatePlaceholder>,
+    welsh: Welsh<Welsh.TemporaryCertificatePlaceholder>
+) : ElectorDocumentPdfTemplateProperties<English.TemporaryCertificatePlaceholder, Welsh.TemporaryCertificatePlaceholder>(
+    english,
+    welsh
+)
 
-abstract class ElectorDocumentPdfTemplateProperties(
-    val english: English,
-    val welsh: Welsh
+@ConfigurationProperties(prefix = "anonymous-elector-document.certificate-pdf")
+@ConstructorBinding
+class AnonymousElectorDocumentPdfTemplateProperties(
+    english: English<AnonymousElectorDocumentPlaceholder>,
+    welsh: Welsh<AnonymousElectorDocumentPlaceholder>
+) : ElectorDocumentPdfTemplateProperties<AnonymousElectorDocumentPlaceholder, AnonymousElectorDocumentPlaceholder>(
+    english,
+    welsh
+)
+
+abstract class ElectorDocumentPdfTemplateProperties<EP, WP>(
+    val english: English<EP>,
+    val welsh: Welsh<WP>
 ) {
-    data class English(
+    data class English<T>(
         val path: String,
-        val placeholder: Placeholder,
+        val placeholder: T,
         val images: Images
     ) {
-        data class Placeholder(
+        data class TemporaryCertificatePlaceholder(
             val electorName: String,
             val localAuthorityNameEn: String,
             val dateOfIssue: String,
@@ -30,12 +48,12 @@ abstract class ElectorDocumentPdfTemplateProperties(
         )
     }
 
-    data class Welsh(
+    data class Welsh<T>(
         val path: String,
-        val placeholder: Placeholder,
+        val placeholder: T,
         val images: Images
     ) {
-        data class Placeholder(
+        data class TemporaryCertificatePlaceholder(
             val electorName: String,
             val localAuthorityNameEn: String,
             val localAuthorityNameCy: String,
@@ -48,6 +66,12 @@ abstract class ElectorDocumentPdfTemplateProperties(
             val voterPhoto: PhotoProperties
         )
     }
+
+    data class AnonymousElectorDocumentPlaceholder(
+        val electoralRollNumber: String,
+        val dateOfIssue: String,
+        val certificateNumber: String
+    )
 
     data class PhotoProperties(
         val pageNumber: Int = 1,

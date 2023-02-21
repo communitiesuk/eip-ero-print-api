@@ -35,14 +35,14 @@ class AedContactDetails(
 
     @field:NotNull
     @field:Size(max = 255)
-    var firstName: String? = null,
+    var firstName: String,
 
     @field:Size(max = 255)
     var middleNames: String? = null,
 
     @field:NotNull
     @field:Size(max = 255)
-    var surname: String? = null,
+    var surname: String,
 
     @Size(max = 1024)
     var email: String? = null,

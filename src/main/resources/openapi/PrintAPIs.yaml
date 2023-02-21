@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.6.0'
+  version: '1.6.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -826,7 +826,7 @@ components:
           description: The application reference as known by the citizen. Not guaranteed to be unique.
         electoralRollNumber:
           type: string
-          pattern: '^[a-zA-Z]{1,2}\d{1,4}$'
+          pattern: '^[a-zA-Z]{2,3}\d{1,4}$'
           example: gf5154
           description: The electoral roll number allocated by the Local Authority to the elector.
         certificateLanguage:

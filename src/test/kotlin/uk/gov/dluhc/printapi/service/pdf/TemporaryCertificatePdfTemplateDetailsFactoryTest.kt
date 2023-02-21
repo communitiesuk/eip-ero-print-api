@@ -31,7 +31,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @ExtendWith(MockitoExtension::class)
-internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
+internal class TemporaryCertificatePdfTemplateDetailsFactoryTest {
 
     companion object {
         // Template paths
@@ -72,16 +72,16 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
     @Mock
     private lateinit var s3Client: S3Client
 
-    private lateinit var templateSelector: ElectorDocumentPdfTemplateDetailsFactory
+    private lateinit var templateSelector: TemporaryCertificatePdfTemplateDetailsFactory
 
     @BeforeEach
     fun setup() {
-        templateSelector = ElectorDocumentPdfTemplateDetailsFactory(
+        templateSelector = TemporaryCertificatePdfTemplateDetailsFactory(
             s3Client,
             TemporaryCertificatePdfTemplateProperties(
                 english = English(
                     path = ENGLISH_TEMPLATE_PATH,
-                    placeholder = English.Placeholder(
+                    placeholder = English.TemporaryCertificatePlaceholder(
                         electorName = ENGLISH_PLACEHOLDER_ELECTOR_NAME,
                         localAuthorityNameEn = ENGLISH_PLACEHOLDER_LA_NAME,
                         dateOfIssue = ENGLISH_PLACEHOLDER_ISSUE_DATE,
@@ -100,7 +100,7 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
                 ),
                 welsh = Welsh(
                     path = WELSH_TEMPLATE_PATH,
-                    placeholder = Welsh.Placeholder(
+                    placeholder = Welsh.TemporaryCertificatePlaceholder(
                         electorName = WELSH_PLACEHOLDER_ELECTOR_NAME,
                         localAuthorityNameEn = WELSH_PLACEHOLDER_LA_NAME_EN,
                         localAuthorityNameCy = WELSH_PLACEHOLDER_LA_NAME_CY,

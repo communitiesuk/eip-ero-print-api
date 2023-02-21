@@ -21,6 +21,12 @@ internal class PdfFactoryTest {
             "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English) v1.pdf"
         private const val CERTIFICATE_PDF_TEMPLATE_WELSH =
             "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual) v1.pdf"
+
+        // AED templates
+        private const val AED_PDF_TEMPLATE_ENGLISH =
+            "classpath:anonymous-elector-document-template/AED Document (English) v1.pdf"
+        private const val AED_PDF_TEMPLATE_WELSH =
+            "classpath:anonymous-elector-document-template/AED Document (Bilingual) v1.pdf"
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
     }
@@ -115,6 +121,46 @@ internal class PdfFactoryTest {
         val imageDetails =
             ImageDetails(absoluteX = 21.6f, absoluteY = 194.6f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
         val templateDetails = TemplateDetails(CERTIFICATE_PDF_TEMPLATE_WELSH, placeholders, listOf(imageDetails))
+
+        // When
+        val contents = pdfFactory.createPdfContents(templateDetails)
+
+        // Then
+        verifyGeneratedPdfPlaceholders(contents, placeholders)
+    }
+
+    @Test
+    fun `should create AED PDF with placeholders and image filled for English template`() {
+        // Given
+        val placeholders = mapOf(
+            "electoral-number" to "GN422",
+            "date-issued" to "20/04/2023",
+            "certificate-number" to "TlbBclMIWfyQhaWxk0Zy",
+        )
+        val imageBytes = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
+        val imageDetails =
+            ImageDetails(absoluteX = 21.6f, absoluteY = 201.6f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
+        val templateDetails = TemplateDetails(AED_PDF_TEMPLATE_ENGLISH, placeholders, listOf(imageDetails))
+
+        // When
+        val contents = pdfFactory.createPdfContents(templateDetails)
+
+        // Then
+        verifyGeneratedPdfPlaceholders(contents, placeholders)
+    }
+
+    @Test
+    fun `should create AED PDF with placeholders and image filled for Welsh template`() {
+        // Given
+        val placeholders = mapOf(
+            "electoral-number" to "KS7223",
+            "date-issued" to "26/04/2023",
+            "certificate-number" to "G1eQIZSYOhP7AeKnhJ8E",
+        )
+        val imageBytes = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
+        val imageDetails =
+            ImageDetails(absoluteX = 21.6f, absoluteY = 194.6f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
+        val templateDetails = TemplateDetails(AED_PDF_TEMPLATE_WELSH, placeholders, listOf(imageDetails))
 
         // When
         val contents = pdfFactory.createPdfContents(templateDetails)

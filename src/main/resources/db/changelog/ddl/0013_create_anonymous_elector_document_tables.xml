@@ -21,7 +21,7 @@
             <column name="email" type="varchar(1024)"/>
             <column name="phone_number" type="varchar(50)"/>
             <column name="address_id" type="uuid">
-                <constraints nullable="true"
+                <constraints nullable="false"
                              foreignKeyName="fk_aed_contact_details_address"
                              references="address(id)"/>
             </column>
@@ -115,7 +115,7 @@
                              foreignKeyName="fk_print_request_aed"
                              references="anonymous_elector_document(id)"/>
             </column>
-            <column name="electoral_number" type="varchar(7)">
+            <column name="electoral_roll_number" type="varchar(7)">
                 <constraints nullable="false"/>
             </column>
             <column name="aed_template_filename" type="varchar(255)">
@@ -141,8 +141,8 @@
             </column>
         </createTable>
 
-        <createIndex indexName="electoral_number_idx" tableName="aed_print_request" unique="false">
-            <column name="electoral_number"/>
+        <createIndex indexName="electoral_roll_number_idx" tableName="aed_print_request" unique="false">
+            <column name="electoral_roll_number"/>
         </createIndex>
 
         <rollback>
@@ -164,7 +164,7 @@
             <column name="status" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="request_date_time" type="timestamp">
+            <column name="event_date_time" type="timestamp">
                 <constraints nullable="false"/>
             </column>
             <column name="date_created" type="timestamp">

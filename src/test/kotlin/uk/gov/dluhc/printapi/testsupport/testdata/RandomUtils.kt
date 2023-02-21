@@ -47,6 +47,8 @@ fun aValidSourceReference(): String = getAMongoDbId()
 
 fun aValidApplicationReference(): String = "V${RandomStringUtils.randomAlphabetic(9).uppercase()}"
 
+fun aValidElectoralRollNumber(): String = "${RandomStringUtils.randomAlphabetic(2)}${RandomStringUtils.randomNumeric(4)}"
+
 fun aValidApplicationReceivedDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
 fun aValidIssuingAuthority(): String = aValidLocalAuthorityName()
