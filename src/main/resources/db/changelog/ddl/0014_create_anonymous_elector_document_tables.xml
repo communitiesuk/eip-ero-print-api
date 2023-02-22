@@ -90,7 +90,7 @@
             </column>
         </createTable>
 
-        <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document">
+        <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document" unique="true">
             <column name="gss_code"/>
             <column name="source_type"/>
             <column name="source_reference"/>
