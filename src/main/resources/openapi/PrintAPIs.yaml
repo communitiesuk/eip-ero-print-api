@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.6.1'
+  version: '1.6.2'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -831,7 +831,7 @@ components:
           description: The electoral roll number allocated by the Local Authority to the elector.
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
-        SupportingInformationFormat:
+        supportingInformationFormat:
           $ref: '#/components/schemas/SupportingInformationFormat'
         photoLocation:
           type: string
@@ -875,7 +875,7 @@ components:
         - applicationReference
         - electoralRollNumber
         - certificateLanguage
-        - supportingInfoFormat
+        - supportingInformationFormat
         - photoLocation
         - firstName
         - surname

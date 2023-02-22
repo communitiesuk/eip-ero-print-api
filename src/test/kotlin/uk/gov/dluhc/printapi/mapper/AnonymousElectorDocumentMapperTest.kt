@@ -97,7 +97,7 @@ class AnonymousElectorDocumentMapperTest {
         // Then
         verify(sourceTypeMapper).mapDtoToEntity(request.sourceType)
         verify(certificateLanguageMapper).mapDtoToEntity(request.certificateLanguage)
-        verify(supportingInformationFormatMapper).mapDtoToEntity(request.supportingInformationFormat)
+        verify(supportingInformationFormatMapper).mapDtoToEntity(request.supportingInformationFormat!!)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(request, aedTemplateFilename)
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)

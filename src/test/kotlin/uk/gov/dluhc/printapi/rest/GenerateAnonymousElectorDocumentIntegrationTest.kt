@@ -13,6 +13,7 @@ import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.models.ErrorResponse
+import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
@@ -20,6 +21,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
 import java.util.UUID
@@ -173,6 +175,30 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         // Given
         val photoLocationArn = addPhotoToS3()
         val request = buildGenerateAnonymousElectorDocumentRequest(photoLocation = photoLocationArn)
+        processValidRequest(request)
+    }
+
+    @Test
+    fun `should return AED pdf given valid request for authorised user with all optional data omitted`() {
+        // Given
+        val photoLocationArn = addPhotoToS3()
+        val request = buildGenerateAnonymousElectorDocumentRequest(
+            photoLocation = photoLocationArn,
+            email = null,
+            phoneNumber = null,
+            address = buildValidAddress(
+                property = null,
+                locality = null,
+                town = null,
+                area = null,
+                uprn = null
+            )
+        )
+        processValidRequest(request)
+    }
+
+    private fun processValidRequest(request: GenerateAnonymousElectorDocumentRequest) {
+        // Given
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
             buildLocalAuthorityResponse(
                 gssCode = request.gssCode,

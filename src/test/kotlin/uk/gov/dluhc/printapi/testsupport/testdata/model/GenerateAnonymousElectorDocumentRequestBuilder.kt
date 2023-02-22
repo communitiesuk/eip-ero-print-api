@@ -29,8 +29,8 @@ fun buildGenerateAnonymousElectorDocumentRequest(
     firstName: String = aValidFirstName(),
     middleNames: String? = null,
     surname: String = aValidSurname(),
-    email: String = aValidEmailAddress(),
-    phoneNumber: String = aValidPhoneNumber(),
+    email: String? = aValidEmailAddress(),
+    phoneNumber: String? = aValidPhoneNumber(),
     address: Address = buildValidAddress(),
 ): GenerateAnonymousElectorDocumentRequest =
     GenerateAnonymousElectorDocumentRequest(
