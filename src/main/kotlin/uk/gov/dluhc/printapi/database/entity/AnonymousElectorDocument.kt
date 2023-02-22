@@ -66,6 +66,7 @@ class AnonymousElectorDocument(
     var photoLocationArn: String,
 
     @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "aed_contact_details_id")
     var contactDetails: AedContactDetails?,
 
     @field:NotNull

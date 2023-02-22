@@ -99,7 +99,7 @@ internal class AnonymousElectorDocumentServiceTest {
             pdfFactory,
             anonymousElectorDocumentRepository
         )
-        Assertions.assertThat(exception).hasMessage("Anonymous Electoral Document gssCode 'N06000012' does not exist")
+        Assertions.assertThat(exception).hasMessage("Anonymous Elector Document gssCode 'N06000012' does not exist")
     }
 
     @Test
@@ -127,6 +127,6 @@ internal class AnonymousElectorDocumentServiceTest {
             anonymousElectorDocumentRepository
         )
         Assertions.assertThat(exception)
-            .hasMessage("Anonymous Electoral Document gssCode 'W06000023' is not valid for eroId 'bath-and-north-east-somerset-council'")
+            .hasMessage("Anonymous Elector Document gssCode 'W06000023' is not valid for eroId 'bath-and-north-east-somerset-council'")
     }
 }

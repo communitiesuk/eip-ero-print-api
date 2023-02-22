@@ -71,9 +71,9 @@
             <column name="photo_location_arn" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="aed_contact_details" type="uuid">
+            <column name="aed_contact_details_id" type="uuid">
                 <constraints nullable="true"
-                             foreignKeyName="fk_aed_aed_contact_details"
+                             foreignKeyName="fk_aed_aed_contact_details_id"
                              references="aed_contact_details(id)"/>
             </column>
             <column name="initial_retention_removal_date" type="date" remarks="The date that certain data should be removed after the first retention period">

@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
+import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
@@ -128,6 +129,9 @@ internal abstract class IntegrationTest {
     @Autowired
     protected lateinit var temporaryCertificateRepository: TemporaryCertificateRepository
 
+    @Autowired
+    protected lateinit var anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository
+
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
@@ -155,6 +159,7 @@ internal abstract class IntegrationTest {
     fun clearDatabase() {
         clearRepository(certificateRepository, "certificateRepository")
         clearRepository(temporaryCertificateRepository, "temporaryCertificateRepository")
+        clearRepository(anonymousElectorDocumentRepository, "anonymousElectorDocumentRepository")
     }
 
     private fun clearRepository(repository: CrudRepository<*, *>, repoName: String) {
