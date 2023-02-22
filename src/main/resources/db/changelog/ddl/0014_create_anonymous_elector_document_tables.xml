@@ -64,7 +64,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="application_reference" type="varchar(255)"/>
-            <column name="certificate_language" type="varchar(20)"/>
+            <column name="certificate_language" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
             <column name="supporting_information_format" type="varchar(20)"/>
             <column name="photo_location_arn" type="varchar(255)">
                 <constraints nullable="false"/>

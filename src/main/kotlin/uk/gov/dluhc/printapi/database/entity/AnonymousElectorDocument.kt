@@ -56,7 +56,7 @@ class AnonymousElectorDocument(
 
     @field:NotNull
     @Enumerated(EnumType.STRING)
-    var certificateLanguage: CertificateLanguage?,
+    var certificateLanguage: CertificateLanguage,
 
     @Enumerated(EnumType.STRING)
     var supportingInformationFormat: SupportingInformationFormat?,
