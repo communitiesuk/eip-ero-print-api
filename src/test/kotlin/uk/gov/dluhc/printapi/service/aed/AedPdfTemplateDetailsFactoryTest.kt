@@ -77,7 +77,7 @@ internal class AedPdfTemplateDetailsFactoryTest {
                         dateOfIssue = ENGLISH_PLACEHOLDER_ISSUE_DATE,
                         certificateNumber = ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER
                     ),
-                    images = ElectorDocumentPdfTemplateProperties.English.Images(
+                    images = ElectorDocumentPdfTemplateProperties.Images(
                         voterPhoto = ElectorDocumentPdfTemplateProperties.PhotoProperties(
                             pageNumber = ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
                             absoluteXMm = ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
@@ -94,7 +94,7 @@ internal class AedPdfTemplateDetailsFactoryTest {
                         dateOfIssue = WELSH_PLACEHOLDER_ISSUE_DATE,
                         certificateNumber = WELSH_PLACEHOLDER_CERTIFICATE_NUMBER
                     ),
-                    images = ElectorDocumentPdfTemplateProperties.Welsh.Images(
+                    images = ElectorDocumentPdfTemplateProperties.Images(
                         voterPhoto = ElectorDocumentPdfTemplateProperties.PhotoProperties(
                             pageNumber = WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
                             absoluteXMm = WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,

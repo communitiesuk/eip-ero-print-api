@@ -831,7 +831,7 @@ components:
           description: The electoral roll number allocated by the Local Authority to the elector.
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
-        supportingInfoFormat:
+        SupportingInformationFormat:
           $ref: '#/components/schemas/SupportingInformationFormat'
         photoLocation:
           type: string

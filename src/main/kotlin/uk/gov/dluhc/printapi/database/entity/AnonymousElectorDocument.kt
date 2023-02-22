@@ -97,7 +97,7 @@ class AnonymousElectorDocument(
 ) {
 
     val status: AedPrintRequestStatus.Status?
-        get() = printRequests.maxBy { it.requestDateTime }.status
+        get() = getLatestPrintRequest().status
 
     fun addPrintRequest(newPrintRequest: AedPrintRequest): AnonymousElectorDocument {
         printRequests += newPrintRequest

@@ -17,8 +17,11 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
 import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.English
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.EnglishTemporaryCertificatePlaceholder
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.Images
 import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.PhotoProperties
 import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.Welsh
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.WelshTemporaryCertificatePlaceholder
 import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_ENGLAND
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_NORTHERN_IRELAND
@@ -81,14 +84,14 @@ internal class TemporaryCertificatePdfTemplateDetailsFactoryTest {
             TemporaryCertificatePdfTemplateProperties(
                 english = English(
                     path = ENGLISH_TEMPLATE_PATH,
-                    placeholder = English.TemporaryCertificatePlaceholder(
+                    placeholder = EnglishTemporaryCertificatePlaceholder(
                         electorName = ENGLISH_PLACEHOLDER_ELECTOR_NAME,
                         localAuthorityNameEn = ENGLISH_PLACEHOLDER_LA_NAME,
                         dateOfIssue = ENGLISH_PLACEHOLDER_ISSUE_DATE,
                         validOnDate = ENGLISH_PLACEHOLDER_VALID_ON_DATE,
                         certificateNumber = ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER
                     ),
-                    images = English.Images(
+                    images = Images(
                         voterPhoto = PhotoProperties(
                             pageNumber = ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
                             absoluteXMm = ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
@@ -100,7 +103,7 @@ internal class TemporaryCertificatePdfTemplateDetailsFactoryTest {
                 ),
                 welsh = Welsh(
                     path = WELSH_TEMPLATE_PATH,
-                    placeholder = Welsh.TemporaryCertificatePlaceholder(
+                    placeholder = WelshTemporaryCertificatePlaceholder(
                         electorName = WELSH_PLACEHOLDER_ELECTOR_NAME,
                         localAuthorityNameEn = WELSH_PLACEHOLDER_LA_NAME_EN,
                         localAuthorityNameCy = WELSH_PLACEHOLDER_LA_NAME_CY,
@@ -108,7 +111,7 @@ internal class TemporaryCertificatePdfTemplateDetailsFactoryTest {
                         validOnDate = WELSH_PLACEHOLDER_VALID_ON_DATE,
                         certificateNumber = WELSH_PLACEHOLDER_CERTIFICATE_NUMBER
                     ),
-                    images = Welsh.Images(
+                    images = Images(
                         voterPhoto = PhotoProperties(
                             pageNumber = WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
                             absoluteXMm = WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
