@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
 import uk.gov.dluhc.printapi.database.entity.AddressFormat
+import uk.gov.dluhc.printapi.database.entity.AedPrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
@@ -29,7 +30,11 @@ fun aValidAddressFormat(): AddressFormat = AddressFormat.UK
 
 fun aValidTemporaryCertificateTemplateFilename(): String = "temporary-certificate-template-en.pdf"
 
+fun aValidAnonymousElectorDocumentTemplateFilename(): String = "anonymous-elector-document-template-en.pdf"
+
 fun aValidTemporaryCertificateStatus() = TemporaryCertificateStatus.Status.GENERATED
+
+fun aValidAnonymousElectorDocumentStatus() = AedPrintRequestStatus.Status.GENERATED
 
 fun aValidSourceTypeDto() = SourceTypeDto.VOTER_CARD
 

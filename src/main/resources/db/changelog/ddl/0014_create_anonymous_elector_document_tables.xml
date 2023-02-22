@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-aed-contact-details-table" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-aed-contact-details-table" context="ddl">
         <createTable tableName="aed_contact_details">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
@@ -21,7 +21,7 @@
             <column name="email" type="varchar(1024)"/>
             <column name="phone_number" type="varchar(50)"/>
             <column name="address_id" type="uuid">
-                <constraints nullable="true"
+                <constraints nullable="false"
                              foreignKeyName="fk_aed_contact_details_address"
                              references="address(id)"/>
             </column>
@@ -45,7 +45,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-anonymous-elector-document-table" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-anonymous-elector-document-table" context="ddl">
         <createTable tableName="anonymous_elector_document">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
@@ -64,7 +64,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="application_reference" type="varchar(255)"/>
-            <column name="certificate_language" type="varchar(20)"/>
+            <column name="certificate_language" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
             <column name="supporting_information_format" type="varchar(20)"/>
             <column name="photo_location_arn" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -88,7 +90,7 @@
             </column>
         </createTable>
 
-        <createIndex indexName="source_details_inx" tableName="anonymous_elector_document">
+        <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document" unique="true">
             <column name="gss_code"/>
             <column name="source_type"/>
             <column name="source_reference"/>
@@ -104,7 +106,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-aed-print-request-table" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-aed-print-request-table" context="ddl">
         <createTable tableName="aed_print_request">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
@@ -115,7 +117,7 @@
                              foreignKeyName="fk_print_request_aed"
                              references="anonymous_elector_document(id)"/>
             </column>
-            <column name="electoral_number" type="varchar(7)">
+            <column name="electoral_roll_number" type="varchar(7)">
                 <constraints nullable="false"/>
             </column>
             <column name="aed_template_filename" type="varchar(255)">
@@ -141,8 +143,8 @@
             </column>
         </createTable>
 
-        <createIndex indexName="electoral_number_idx" tableName="aed_print_request" unique="false">
-            <column name="electoral_number"/>
+        <createIndex indexName="aed_electoral_roll_number_idx" tableName="aed_print_request" unique="false">
+            <column name="electoral_roll_number"/>
         </createIndex>
 
         <rollback>
@@ -150,7 +152,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="neil.massey@valtech.com" id="0013-EIP1-3823-create-aed-print-request-status" context="ddl">
+    <changeSet author="neil.massey@valtech.com" id="0014-EIP1-3823-create-aed-print-request-status" context="ddl">
         <createTable tableName="aed_print_request_status">
             <column name="id" type="uuid">
                 <constraints nullable="false" primaryKey="true" unique="true"
@@ -164,7 +166,7 @@
             <column name="status" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="request_date_time" type="timestamp">
+            <column name="event_date_time" type="timestamp">
                 <constraints nullable="false"/>
             </column>
             <column name="date_created" type="timestamp">
@@ -178,7 +180,7 @@
             </column>
         </createTable>
 
-        <createIndex indexName="status_date_created_idx" tableName="aed_print_request_status" unique="false">
+        <createIndex indexName="aed_status_date_created_idx" tableName="aed_print_request_status" unique="false">
             <column name="status"/>
             <column name="date_created"/>
         </createIndex>

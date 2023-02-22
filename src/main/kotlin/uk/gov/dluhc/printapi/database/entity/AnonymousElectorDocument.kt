@@ -41,40 +41,40 @@ class AnonymousElectorDocument(
 
     @field:NotNull
     @field:Size(max = 20)
-    var certificateNumber: String? = null,
+    var certificateNumber: String,
 
     @field:NotNull
     @Enumerated(EnumType.STRING)
-    var sourceType: SourceType? = null,
+    var sourceType: SourceType,
 
     @field:NotNull
     @field:Size(max = 255)
-    var sourceReference: String? = null,
+    var sourceReference: String,
 
     @field:Size(max = 255)
-    var applicationReference: String? = null,
+    var applicationReference: String?,
 
     @field:NotNull
     @Enumerated(EnumType.STRING)
-    var certificateLanguage: CertificateLanguage? = null,
+    var certificateLanguage: CertificateLanguage,
 
     @Enumerated(EnumType.STRING)
-    var supportingInformationFormat: SupportingInformationFormat? = null,
+    var supportingInformationFormat: SupportingInformationFormat?,
 
     @field:NotNull
     @field:Size(max = 255)
-    var photoLocationArn: String? = null,
+    var photoLocationArn: String,
 
     @OneToOne(cascade = [CascadeType.ALL])
-    var contactDetails: AedContactDetails,
+    var contactDetails: AedContactDetails?,
 
     @field:NotNull
     @field:Size(max = 80)
-    var gssCode: String? = null,
+    var gssCode: String,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "aed_id", nullable = false)
-    var printRequests: MutableList<AedPrintRequest> = mutableListOf(),
+    var printRequests: MutableList<AedPrintRequest>,
 
     /**
      * The legislation stipulates there are two retention periods for AED related data. The first (initial)
@@ -97,14 +97,14 @@ class AnonymousElectorDocument(
 ) {
 
     val status: AedPrintRequestStatus.Status?
-        get() = printRequests.sortedByDescending { it.requestDateTime }.first().status
+        get() = getLatestPrintRequest().status
 
     fun addPrintRequest(newPrintRequest: AedPrintRequest): AnonymousElectorDocument {
         printRequests += newPrintRequest
         return this
     }
 
-    private fun getCurrentPrintRequest(): AedPrintRequest = printRequests.sortedByDescending { it.requestDateTime }.first()
+    fun getLatestPrintRequest(): AedPrintRequest = printRequests.maxBy { it.requestDateTime }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

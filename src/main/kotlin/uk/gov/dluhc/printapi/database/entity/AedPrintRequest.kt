@@ -37,21 +37,21 @@ class AedPrintRequest(
 
     @field:NotNull
     @field:Size(max = 7)
-    var electoralNumber: String? = null,
+    var electoralRollNumber: String,
 
     @field:NotNull
     @field:Size(max = 255)
-    var aedTemplateFilename: String? = null,
+    var aedTemplateFilename: String,
 
     @field:NotNull
-    var issueDate: LocalDate = LocalDate.now(),
+    var issueDate: LocalDate,
 
     @field:NotNull
-    var requestDateTime: Instant? = null,
+    var requestDateTime: Instant,
 
     @field:NotNull
     @field:Size(max = 255)
-    var userId: String? = null,
+    var userId: String,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "print_request_id", nullable = false)
@@ -75,7 +75,7 @@ class AedPrintRequest(
     }
 
     val status: AedPrintRequestStatus.Status?
-        get() = statusHistory.sortedByDescending { it.requestDateTime }.first().status
+        get() = statusHistory.sortedByDescending { it.eventDateTime }.first().status
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

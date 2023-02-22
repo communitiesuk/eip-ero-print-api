@@ -1,6 +1,6 @@
-package uk.gov.dluhc.printapi.service.pdf
+package uk.gov.dluhc.printapi.service.aed
 
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -16,22 +16,18 @@ import software.amazon.awssdk.core.ResponseBytes
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
-import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.English
-import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.PhotoProperties
-import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.Welsh
-import uk.gov.dluhc.printapi.config.TemporaryCertificatePdfTemplateProperties
-import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_ENGLAND
-import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_NORTHERN_IRELAND
-import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_SCOTLAND
-import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest.Companion.GSS_CODE_WALES
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssuingAuthority
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
+import uk.gov.dluhc.printapi.config.AnonymousElectorDocumentPdfTemplateProperties
+import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties
+import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest
+import uk.gov.dluhc.printapi.service.pdf.ImageDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @ExtendWith(MockitoExtension::class)
-internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
+internal class AedPdfTemplateDetailsFactoryTest {
 
     companion object {
         // Template paths
@@ -41,10 +37,8 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
         private const val WELSH_TEMPLATE_PATH = "/path/to/$WELSH_TEMPLATE_FILENAME"
 
         // English placeholders
-        private const val ENGLISH_PLACEHOLDER_ELECTOR_NAME = "electorNameEnPlaceholder"
-        private const val ENGLISH_PLACEHOLDER_LA_NAME = "localAuthorityNameEnPlaceholder"
+        private const val ENGLISH_PLACEHOLDER_ELECTORAL_ROLL_NUMBER = "electoralRollNumberPlaceholder"
         private const val ENGLISH_PLACEHOLDER_ISSUE_DATE = "dateOfIssueEnPlaceholder"
-        private const val ENGLISH_PLACEHOLDER_VALID_ON_DATE = "validOnDateEnPlaceholder"
         private const val ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER = "certificateNumberEnPlaceholder"
         private const val ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER = 1
         private const val ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X = 62f
@@ -53,11 +47,8 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
         private const val ENGLISH_IMAGES_VOTER_PHOTO_FIT_HEIGHT = 127f
 
         // Welsh placeholders
-        private const val WELSH_PLACEHOLDER_ELECTOR_NAME = "electorNameCyPlaceholder"
-        private const val WELSH_PLACEHOLDER_LA_NAME_EN = "localAuthorityNameEnPlaceholder"
-        private const val WELSH_PLACEHOLDER_LA_NAME_CY = "localAuthorityNameCyPlaceholder"
+        private const val WELSH_PLACEHOLDER_ELECTORAL_ROLL_NUMBER = "electoralRollNumberCyPlaceholder"
         private const val WELSH_PLACEHOLDER_ISSUE_DATE = "dateOfIssueCyPlaceholder"
-        private const val WELSH_PLACEHOLDER_VALID_ON_DATE = "validOnDateCyPlaceholder"
         private const val WELSH_PLACEHOLDER_CERTIFICATE_NUMBER = "certificateNumberCyPlaceholder"
         private const val WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER = 2
         private const val WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X = 12f
@@ -72,24 +63,22 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
     @Mock
     private lateinit var s3Client: S3Client
 
-    private lateinit var templateSelector: ElectorDocumentPdfTemplateDetailsFactory
+    private lateinit var templateDetailsFactory: AedPdfTemplateDetailsFactory
 
     @BeforeEach
     fun setup() {
-        templateSelector = ElectorDocumentPdfTemplateDetailsFactory(
+        templateDetailsFactory = AedPdfTemplateDetailsFactory(
             s3Client,
-            TemporaryCertificatePdfTemplateProperties(
-                english = English(
+            AnonymousElectorDocumentPdfTemplateProperties(
+                english = ElectorDocumentPdfTemplateProperties.English(
                     path = ENGLISH_TEMPLATE_PATH,
-                    placeholder = English.Placeholder(
-                        electorName = ENGLISH_PLACEHOLDER_ELECTOR_NAME,
-                        localAuthorityNameEn = ENGLISH_PLACEHOLDER_LA_NAME,
+                    placeholder = ElectorDocumentPdfTemplateProperties.AnonymousElectorDocumentPlaceholder(
+                        electoralRollNumber = ENGLISH_PLACEHOLDER_ELECTORAL_ROLL_NUMBER,
                         dateOfIssue = ENGLISH_PLACEHOLDER_ISSUE_DATE,
-                        validOnDate = ENGLISH_PLACEHOLDER_VALID_ON_DATE,
                         certificateNumber = ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER
                     ),
-                    images = English.Images(
-                        voterPhoto = PhotoProperties(
+                    images = ElectorDocumentPdfTemplateProperties.Images(
+                        voterPhoto = ElectorDocumentPdfTemplateProperties.PhotoProperties(
                             pageNumber = ENGLISH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
                             absoluteXMm = ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
                             absoluteYMm = ENGLISH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
@@ -98,18 +87,15 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
                         )
                     )
                 ),
-                welsh = Welsh(
+                welsh = ElectorDocumentPdfTemplateProperties.Welsh(
                     path = WELSH_TEMPLATE_PATH,
-                    placeholder = Welsh.Placeholder(
-                        electorName = WELSH_PLACEHOLDER_ELECTOR_NAME,
-                        localAuthorityNameEn = WELSH_PLACEHOLDER_LA_NAME_EN,
-                        localAuthorityNameCy = WELSH_PLACEHOLDER_LA_NAME_CY,
+                    placeholder = ElectorDocumentPdfTemplateProperties.AnonymousElectorDocumentPlaceholder(
+                        electoralRollNumber = WELSH_PLACEHOLDER_ELECTORAL_ROLL_NUMBER,
                         dateOfIssue = WELSH_PLACEHOLDER_ISSUE_DATE,
-                        validOnDate = WELSH_PLACEHOLDER_VALID_ON_DATE,
                         certificateNumber = WELSH_PLACEHOLDER_CERTIFICATE_NUMBER
                     ),
-                    images = Welsh.Images(
-                        voterPhoto = PhotoProperties(
+                    images = ElectorDocumentPdfTemplateProperties.Images(
+                        voterPhoto = ElectorDocumentPdfTemplateProperties.PhotoProperties(
                             pageNumber = WELSH_IMAGES_VOTER_PHOTO_PAGE_NUMBER,
                             absoluteXMm = WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_X,
                             absoluteYMm = WELSH_IMAGES_VOTER_PHOTO_ABSOLUTE_Y,
@@ -125,52 +111,54 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
     @Nested
     inner class GetTemplateFilename {
         @ParameterizedTest
-        @CsvSource(value = [GSS_CODE_ENGLAND, GSS_CODE_SCOTLAND, GSS_CODE_NORTHERN_IRELAND])
+        @CsvSource(value = [GssCodeInterpreterKtTest.GSS_CODE_ENGLAND, GssCodeInterpreterKtTest.GSS_CODE_SCOTLAND, GssCodeInterpreterKtTest.GSS_CODE_NORTHERN_IRELAND])
         fun `should get Template Filename when English template selected`(gssCode: String) {
             // Given
 
             // When
-            val actual = templateSelector.getTemplateFilename(gssCode)
+            val actual = templateDetailsFactory.getTemplateFilename(gssCode)
 
             // Then
-            assertThat(actual).isEqualTo(ENGLISH_TEMPLATE_FILENAME)
+            Assertions.assertThat(actual).isEqualTo(ENGLISH_TEMPLATE_FILENAME)
         }
 
         @Test
         fun `should get template details when Welsh template selected`() {
             // Given
-            val gssCode = GSS_CODE_WALES
+            val gssCode = GssCodeInterpreterKtTest.GSS_CODE_WALES
 
             // When
-            val actual = templateSelector.getTemplateFilename(gssCode)
+            val actual = templateDetailsFactory.getTemplateFilename(gssCode)
 
             // Then
-            assertThat(actual).isEqualTo(WELSH_TEMPLATE_FILENAME)
+            Assertions.assertThat(actual).isEqualTo(WELSH_TEMPLATE_FILENAME)
         }
     }
 
     @Nested
     inner class GetTemplateDetails {
         @ParameterizedTest
-        @CsvSource(value = [GSS_CODE_ENGLAND, GSS_CODE_SCOTLAND, GSS_CODE_NORTHERN_IRELAND])
+        @CsvSource(value = [GssCodeInterpreterKtTest.GSS_CODE_ENGLAND, GssCodeInterpreterKtTest.GSS_CODE_SCOTLAND, GssCodeInterpreterKtTest.GSS_CODE_NORTHERN_IRELAND])
         fun `should get template details when English template selected`(gssCode: String) {
             // Given
+            val electoralRollNumber = "GN542"
             val issueDate = "20/04/2023"
-            val validOnDate = "04/05/2023"
             val photoS3Bucket = "some-s3-bucket"
             val photoS3Path = "path/to/a/photo.png"
-            val temporaryCertificate = buildTemporaryCertificate(
+            val electorDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
-                issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
-                validOnDate = LocalDate.parse(validOnDate, DATE_TIME_FORMATTER),
-                photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path)
+                photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path),
+                printRequests = mutableListOf(
+                    buildAedPrintRequest(
+                        electoralRollNumber = electoralRollNumber,
+                        issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
+                    )
+                )
             )
-            val expectedPlaceholders = with(temporaryCertificate) {
+            val expectedPlaceholders = with(electorDocument) {
                 mapOf(
-                    ENGLISH_PLACEHOLDER_ELECTOR_NAME to this.getNameOnCertificate(),
-                    ENGLISH_PLACEHOLDER_LA_NAME to issuingAuthority,
+                    ENGLISH_PLACEHOLDER_ELECTORAL_ROLL_NUMBER to electoralRollNumber,
                     ENGLISH_PLACEHOLDER_ISSUE_DATE to issueDate,
-                    ENGLISH_PLACEHOLDER_VALID_ON_DATE to validOnDate,
                     ENGLISH_PLACEHOLDER_CERTIFICATE_NUMBER to certificateNumber,
                 )
             }
@@ -188,37 +176,36 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
             )
 
             // When
-            val actual = templateSelector.getTemplateDetails(temporaryCertificate)
+            val actual = templateDetailsFactory.getTemplateDetails(electorDocument)
 
             // Then
             verify(s3Client).getObjectAsBytes(GetObjectRequest.builder().bucket(photoS3Bucket).key(photoS3Path).build())
-            assertThat(actual.path).isEqualTo(ENGLISH_TEMPLATE_PATH)
-            assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
-            assertThat(actual.images).isEqualTo(expectedImages)
+            Assertions.assertThat(actual.path).isEqualTo(ENGLISH_TEMPLATE_PATH)
+            Assertions.assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
+            Assertions.assertThat(actual.images).isEqualTo(expectedImages)
         }
 
         @Test
         fun `should get template details when Welsh template selected`() {
             // Given
+            val electoralRollNumber = "GN542"
             val issueDate = "20/04/2023"
-            val validOnDate = "04/05/2023"
             val photoS3Bucket = "some-s3-bucket"
             val photoS3Path = "path/to/a/photo.png"
-            val temporaryCertificate = buildTemporaryCertificate(
-                gssCode = GSS_CODE_WALES,
-                issuingAuthority = aValidIssuingAuthority(),
-                issuingAuthorityCy = aValidIssuingAuthority(),
-                issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
-                validOnDate = LocalDate.parse(validOnDate, DATE_TIME_FORMATTER),
-                photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path)
+            val temporaryCertificate = buildAnonymousElectorDocument(
+                gssCode = GssCodeInterpreterKtTest.GSS_CODE_WALES,
+                photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path),
+                printRequests = mutableListOf(
+                    buildAedPrintRequest(
+                        electoralRollNumber = electoralRollNumber,
+                        issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
+                    )
+                )
             )
             val expectedPlaceholders = with(temporaryCertificate) {
                 mapOf(
-                    WELSH_PLACEHOLDER_ELECTOR_NAME to this.getNameOnCertificate(),
-                    WELSH_PLACEHOLDER_LA_NAME_EN to issuingAuthority,
-                    WELSH_PLACEHOLDER_LA_NAME_CY to issuingAuthorityCy,
+                    WELSH_PLACEHOLDER_ELECTORAL_ROLL_NUMBER to electoralRollNumber,
                     WELSH_PLACEHOLDER_ISSUE_DATE to issueDate,
-                    WELSH_PLACEHOLDER_VALID_ON_DATE to validOnDate,
                     WELSH_PLACEHOLDER_CERTIFICATE_NUMBER to certificateNumber,
                 )
             }
@@ -236,13 +223,13 @@ internal class ElectorDocumentPdfTemplateDetailsFactoryTest {
             )
 
             // When
-            val actual = templateSelector.getTemplateDetails(temporaryCertificate)
+            val actual = templateDetailsFactory.getTemplateDetails(temporaryCertificate)
 
             // Then
             verify(s3Client).getObjectAsBytes(GetObjectRequest.builder().bucket(photoS3Bucket).key(photoS3Path).build())
-            assertThat(actual.path).isEqualTo(WELSH_TEMPLATE_PATH)
-            assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
-            assertThat(actual.images).isEqualTo(expectedImages)
+            Assertions.assertThat(actual.path).isEqualTo(WELSH_TEMPLATE_PATH)
+            Assertions.assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
+            Assertions.assertThat(actual.images).isEqualTo(expectedImages)
         }
     }
 
