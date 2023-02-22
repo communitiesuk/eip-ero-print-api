@@ -90,7 +90,7 @@
             </column>
         </createTable>
 
-        <createIndex indexName="source_details_inx" tableName="anonymous_elector_document">
+        <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document">
             <column name="gss_code"/>
             <column name="source_type"/>
             <column name="source_reference"/>
@@ -143,7 +143,7 @@
             </column>
         </createTable>
 
-        <createIndex indexName="electoral_roll_number_idx" tableName="aed_print_request" unique="false">
+        <createIndex indexName="aed_electoral_roll_number_idx" tableName="aed_print_request" unique="false">
             <column name="electoral_roll_number"/>
         </createIndex>
 
@@ -180,7 +180,7 @@
             </column>
         </createTable>
 
-        <createIndex indexName="status_date_created_idx" tableName="aed_print_request_status" unique="false">
+        <createIndex indexName="aed_status_date_created_idx" tableName="aed_print_request_status" unique="false">
             <column name="status"/>
             <column name="date_created"/>
         </createIndex>
