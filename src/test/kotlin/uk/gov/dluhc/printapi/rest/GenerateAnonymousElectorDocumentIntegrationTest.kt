@@ -208,16 +208,16 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             request.sourceReference
         )
         assertThat(electorDocuments).hasSize(1)
-        val temporaryCertificate = electorDocuments[0]
+        val electorDocument = electorDocuments[0]
         val contentDisposition = response.responseHeaders.contentDisposition
         assertThat(contentDisposition.filename)
-            .isEqualTo("anonymous-elector-document-${temporaryCertificate.certificateNumber}.pdf")
+            .isEqualTo("anonymous-elector-document-${electorDocument.certificateNumber}.pdf")
 
         val pdfContent = response.responseBody
         assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
-            assertThat(text).contains(temporaryCertificate.certificateNumber)
+            assertThat(text).contains(electorDocument.certificateNumber)
         }
     }
 
