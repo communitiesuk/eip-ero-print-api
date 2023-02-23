@@ -32,7 +32,7 @@ class AedPdfTemplateDetailsFactory(
         printRequest: AedPrintRequest
     ): Map<String, String> {
         return mapOf(
-            pdfTemplateProperties.welsh.placeholder.electoralRollNumber to printRequest.electoralRollNumber,
+            pdfTemplateProperties.welsh.placeholder.electoralRollNumber to printRequest.electoralRollNumber.uppercase(),
             pdfTemplateProperties.welsh.placeholder.dateOfIssue to printRequest.issueDate.format(DATE_TIME_FORMATTER),
             pdfTemplateProperties.welsh.placeholder.certificateNumber to electorDocument.certificateNumber,
         )
@@ -43,7 +43,7 @@ class AedPdfTemplateDetailsFactory(
         printRequest: AedPrintRequest
     ): Map<String, String> {
         return mapOf(
-            pdfTemplateProperties.english.placeholder.electoralRollNumber to printRequest.electoralRollNumber,
+            pdfTemplateProperties.english.placeholder.electoralRollNumber to printRequest.electoralRollNumber.uppercase(),
             pdfTemplateProperties.english.placeholder.dateOfIssue to printRequest.issueDate.format(DATE_TIME_FORMATTER),
             pdfTemplateProperties.english.placeholder.certificateNumber to electorDocument.certificateNumber,
         )

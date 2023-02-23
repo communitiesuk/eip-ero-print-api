@@ -34,7 +34,7 @@ abstract class AnonymousElectorDocumentMapper {
     ): AnonymousElectorDocument
 
     @AfterMapping
-    protected fun addPrintRequestToAnonymousElectoralDocument(
+    protected fun addPrintRequestToAnonymousElectorDocument(
         aedRequest: GenerateAnonymousElectorDocumentDto,
         aedTemplateFilename: String,
         @MappingTarget anonymousElectorDocument: AnonymousElectorDocument

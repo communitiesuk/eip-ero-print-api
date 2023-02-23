@@ -6,6 +6,7 @@ import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntity
 import uk.gov.dluhc.printapi.dto.SupportingInformationFormat as SupportingInformationFormatDto
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat as SupportingInformationFormatModelEnum
+import uk.gov.dluhc.printapi.models.SupportingInformationFormat as SupportingInformationFormatApi
 
 @Mapper
 interface SupportingInformationFormatMapper {
@@ -26,4 +27,6 @@ interface SupportingInformationFormatMapper {
     fun toPrintRequestEntityEnum(supportingInformationFormat: SupportingInformationFormatModelEnum): SupportingInformationFormatEntity
 
     fun mapDtoToEntity(supportingInformationFormat: SupportingInformationFormatDto): SupportingInformationFormatEntity
+
+    fun mapApiToDto(supportingInformationFormat: SupportingInformationFormatApi): SupportingInformationFormatDto
 }

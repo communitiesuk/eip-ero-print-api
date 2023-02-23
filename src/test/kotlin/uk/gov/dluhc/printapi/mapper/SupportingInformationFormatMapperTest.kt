@@ -8,6 +8,8 @@ import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntityEnum
 import uk.gov.dluhc.printapi.dto.SupportingInformationFormat as SupportingInformationFormatDto
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat as SupportingInformationFormatModelEnum
+import uk.gov.dluhc.printapi.models.SupportingInformationFormat as SupportingInformationFormatApi
+
 class SupportingInformationFormatMapperTest {
 
     private val mapper = SupportingInformationFormatMapperImpl()
@@ -70,6 +72,20 @@ class SupportingInformationFormatMapperTest {
         // Given
         // When
         val actual = mapper.mapDtoToEntity(supportingInformationFormatModelEnum)
+
+        // Then
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["STANDARD, STANDARD"])
+    fun `should map SupportingInformationFormat REST API enum to DTO enum`(
+        supportingInformationFormat: SupportingInformationFormatApi,
+        expected: SupportingInformationFormatDto
+    ) {
+        // Given
+        // When
+        val actual = mapper.mapApiToDto(supportingInformationFormat)
 
         // Then
         assertThat(actual).isEqualTo(expected)

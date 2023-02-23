@@ -35,11 +35,11 @@ class AnonymousElectorDocumentService(
         try {
             eroClient.getEro(gssCode).also {
                 if (it.eroId != eroId) {
-                    throw GenerateAnonymousElectorDocumentValidationException("Anonymous Electoral Document gssCode '$gssCode' is not valid for eroId '$eroId'")
+                    throw GenerateAnonymousElectorDocumentValidationException("Anonymous Elector Document gssCode '$gssCode' is not valid for eroId '$eroId'")
                 }
             }
         } catch (error: ElectoralRegistrationOfficeNotFoundException) {
-            throw GenerateAnonymousElectorDocumentValidationException("Anonymous Electoral Document gssCode '$gssCode' does not exist")
+            throw GenerateAnonymousElectorDocumentValidationException("Anonymous Elector Document gssCode '$gssCode' does not exist")
         }
     }
 }

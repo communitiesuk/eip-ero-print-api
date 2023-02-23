@@ -54,7 +54,7 @@ class AedPrintRequest(
     var userId: String,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "print_request_id", nullable = false)
+    @JoinColumn(name = "aed_print_request_id", nullable = false)
     var statusHistory: MutableList<AedPrintRequestStatus> = mutableListOf(),
 
     @CreationTimestamp

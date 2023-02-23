@@ -25,8 +25,13 @@ class GlobalExceptionHandler(
         return handleExceptionInternal(e, e.message, HttpHeaders(), NOT_FOUND, request)
     }
 
-    @ExceptionHandler(value = [GenerateTemporaryCertificateValidationException::class])
-    fun handleGenerateTemporaryCertificateValidationException(e: RuntimeException, request: WebRequest): ResponseEntity<Any> {
+    @ExceptionHandler(
+        value = [
+            GenerateTemporaryCertificateValidationException::class,
+            GenerateAnonymousElectorDocumentValidationException::class
+        ]
+    )
+    fun handleRequestValidationException(e: RuntimeException, request: WebRequest): ResponseEntity<Any> {
         return populateErrorResponseAndHandleExceptionInternal(e, BAD_REQUEST, request)
     }
 
