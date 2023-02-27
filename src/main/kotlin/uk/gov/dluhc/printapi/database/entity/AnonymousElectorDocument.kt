@@ -115,15 +115,10 @@ class AnonymousElectorDocument(
     var version: Long? = null
 ) {
 
-    val status: AnonymousElectorDocumentStatus.Status?
-        get() = getLatestStatus().status
-
     fun addStatus(newStatus: AnonymousElectorDocumentStatus): AnonymousElectorDocument {
         statusHistory += newStatus
         return this
     }
-
-    fun getLatestStatus(): AnonymousElectorDocumentStatus = statusHistory.maxBy { it.eventDateTime }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
