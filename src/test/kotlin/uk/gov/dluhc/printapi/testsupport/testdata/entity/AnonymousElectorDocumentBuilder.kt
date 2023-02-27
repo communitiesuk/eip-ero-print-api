@@ -2,9 +2,8 @@ package uk.gov.dluhc.printapi.testsupport.testdata.entity
 
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.AedContactDetails
-import uk.gov.dluhc.printapi.database.entity.AedPrintRequest
-import uk.gov.dluhc.printapi.database.entity.AedPrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
@@ -38,7 +37,13 @@ fun buildAnonymousElectorDocument(
     supportingInformationFormat: SupportingInformationFormat = SupportingInformationFormat.STANDARD,
     photoLocationArn: String = aPhotoArn(),
     contactDetails: AedContactDetails = buildAedContactDetails(),
-    printRequests: MutableList<AedPrintRequest> = mutableListOf(buildAedPrintRequest()),
+    aedTemplateFilename: String = aValidAnonymousElectorDocumentTemplateFilename(),
+    electoralRollNumber: String = aValidElectoralRollNumber(),
+    issueDate: LocalDate = aValidIssueDate(),
+    aedStatuses: List<AnonymousElectorDocumentStatus> = listOf(buildAnonymousElectorDocumentStatus()),
+    requestDateTime: Instant = aValidRequestDateTime(),
+    userId: String = aValidUserId(),
+
     initialRetentionRemovalDate: LocalDate? = null
 ): AnonymousElectorDocument {
     return AnonymousElectorDocument(
@@ -53,34 +58,21 @@ fun buildAnonymousElectorDocument(
         photoLocationArn = photoLocationArn,
         contactDetails = contactDetails,
         initialRetentionRemovalDate = initialRetentionRemovalDate,
-        printRequests = printRequests,
-    )
-}
-
-fun buildAedPrintRequest(
-    aedTemplateFilename: String = aValidAnonymousElectorDocumentTemplateFilename(),
-    electoralRollNumber: String = aValidElectoralRollNumber(),
-    issueDate: LocalDate = aValidIssueDate(),
-    printRequestStatuses: List<AedPrintRequestStatus> = listOf(buildAedPrintRequestStatus()),
-    requestDateTime: Instant = aValidRequestDateTime(),
-    userId: String = aValidUserId(),
-): AedPrintRequest {
-    val printRequest = AedPrintRequest(
         aedTemplateFilename = aedTemplateFilename,
         electoralRollNumber = electoralRollNumber,
         issueDate = issueDate,
         requestDateTime = requestDateTime,
         userId = userId,
-    )
-    printRequestStatuses.forEach { printRequestStatus -> printRequest.addPrintRequestStatus(printRequestStatus) }
-    return printRequest
+    ).also {
+        aedStatuses.forEach { electorDocumentStatus -> it.addStatus(electorDocumentStatus) }
+    }
 }
 
-fun buildAedPrintRequestStatus(
-    status: AedPrintRequestStatus.Status = aValidAnonymousElectorDocumentStatus(),
+fun buildAnonymousElectorDocumentStatus(
+    status: AnonymousElectorDocumentStatus.Status = aValidAnonymousElectorDocumentStatus(),
     eventDateTime: Instant = aValidPrintRequestStatusEventDateTime(),
-): AedPrintRequestStatus {
-    return AedPrintRequestStatus(
+): AnonymousElectorDocumentStatus {
+    return AnonymousElectorDocumentStatus(
         status = status,
         eventDateTime = eventDateTime,
     )
