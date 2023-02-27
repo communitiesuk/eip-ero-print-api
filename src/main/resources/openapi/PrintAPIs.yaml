@@ -458,7 +458,7 @@ paths:
         in: path
         required: true
       - name: applicationId
-        description: The identifier of the Anonymous Elector Document.
+        description: The identifier of the Anonymous Voter Card Application.
         schema:
           type: string
         in: path
@@ -501,8 +501,8 @@ paths:
               application/json: |
                 {}
     get:
-      summary: Returns the Anonymous Elector Document summary for an application
-      description: Returns the Anonymous Elector Document summary for an application
+      summary: Returns the Anonymous Elector Document summary for an anonymous application
+      description: Returns the Anonymous Elector Document summary for an anonymous application
       tags:
         - Anonymous Elector Documents (AED)
       responses:
@@ -510,7 +510,7 @@ paths:
           $ref: '#/components/responses/AnonymousElectorDocumentSummaries'
         '404':
           description: Not Found
-      operationId: get-anonymous-elector-document-summary-by-application-id
+      operationId: get-anonymous-elector-document-summaries-by-application-id
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
@@ -912,11 +912,11 @@ components:
           type: string
           format: email
           example: fred.blogs@some-domain.co.uk
-          description: UserId of the user who made the print request update
+          description: UserId of the user who made the update to the AED
         dateTime:
           type: string
           format: date-time
-          description: The timestamp in ISO-8601 UTC when the print request status update was received
+          description: The timestamp in ISO-8601 UTC when the status was updated on the AED
           example: '2022-11-17T10:53:25Z'
         electoralRollNumber:
           type: string
@@ -925,7 +925,7 @@ components:
         issueDate:
           type: string
           format: date
-          description: The date that the Anonymous Elector Document was issued
+          description: The date that the AED was issued
           example: '2022-11-17'
       required:
         - certificateNumber
