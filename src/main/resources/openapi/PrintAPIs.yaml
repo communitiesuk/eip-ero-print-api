@@ -507,7 +507,7 @@ paths:
         - Anonymous Elector Documents (AED)
       responses:
         '200':
-          $ref: '#/components/responses/AnonymousElectorDocumentSummary'
+          $ref: '#/components/responses/AnonymousElectorDocumentSummaries'
         '404':
           description: Not Found
       operationId: get-anonymous-elector-document-summary-by-application-id
@@ -884,31 +884,30 @@ components:
         - photoLocation
         - validOnDate
 
-    AnonymousElectorDocumentResponse:
-      title: AnonymousElectorDocumentResponse
+    AnonymousElectorDocumentSummariesResponse:
+      title: AnonymousElectorDocumentSummariesResponse
       type: object
-      description: A response containing a single Anonymous Elector Document summary
+      description: A response containing a collection of Anonymous Elector Document summaries
+      properties:
+        anonymousElectorDocuments:
+          type: array
+          description: List of Anonymous Elector Document summaries for the application.
+          items:
+            $ref: '#/components/schemas/AnonymousElectorDocumentSummary'
+      required:
+        - anonymousElectorDocuments
+    AnonymousElectorDocumentSummary:
+      title: AnonymousElectorDocumentSummary
+      type: object
+      description: An object containing an Anonymous Elector Document (AED) summary
       properties:
         certificateNumber:
           type: string
           pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
           description: The unique identifier of the Anonymous Electoral Document. A 20 character alphanumeric string.
           example: DEV1W0XDH1368LWE1J40
-        printRequestSummaries:
-          type: array
-          description: List of print request summaries for the Anonymous Elector Document.
-          items:
-            $ref: '#/components/schemas/AnonymousElectorDocumentPrintRequestSummary'
-      required:
-        - certificateNumber
-        - printRequestSummaries
-    AnonymousElectorDocumentPrintRequestSummary:
-      title: AnonymousElectorDocumentPrintRequestSummary
-      type: object
-      description: An object containing print request summary
-      properties:
         status:
-          $ref: '#/components/schemas/AnonymousElectorDocumentPrintRequestStatus'
+          $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
         userId:
           type: string
           format: email
@@ -929,13 +928,14 @@ components:
           description: The date that the Anonymous Elector Document was issued
           example: '2022-11-17'
       required:
+        - certificateNumber
         - status
         - userId
-        - dateTimeGenerated
+        - dateTime
         - electoralRollNumber
         - issueDate
-    AnonymousElectorDocumentPrintRequestStatus:
-      title: AnonymousElectorDocumentPrintRequestStatus
+    AnonymousElectorDocumentStatus:
+      title: AnonymousElectorDocumentStatus
       type: string
       enum:
         - generated
@@ -1055,8 +1055,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TemporaryCertificateSummariesResponse'
-    AnonymousElectorDocumentSummary:
-      description: Response containing a single Anonymous Elector Document summary
+    AnonymousElectorDocumentSummaries:
+      description: Response containing a collection of Anonymous Elector Document summaries
       headers:
         Access-Control-Allow-Origin:
           schema:
@@ -1070,7 +1070,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AnonymousElectorDocumentResponse'
+            $ref: '#/components/schemas/AnonymousElectorDocumentSummariesResponse'
   #
   # Request Body Definitions
   # --------------------------------------------------------------------------------
