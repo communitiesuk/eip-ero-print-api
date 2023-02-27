@@ -1,13 +1,15 @@
 package uk.gov.dluhc.printapi.mapper
 
-import org.mapstruct.AfterMapping
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
-import org.mapstruct.MappingTarget
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.service.IdFactory
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
 
 @Mapper(
     uses = [
@@ -22,23 +24,29 @@ abstract class AnonymousElectorDocumentMapper {
     protected lateinit var idFactory: IdFactory
 
     @Autowired
-    protected lateinit var printRequestMapper: AedPrintRequestMapper
+    protected lateinit var clock: Clock
 
     @Mapping(target = "photoLocationArn", source = "aedRequest.photoLocation")
     @Mapping(target = "certificateNumber", expression = "java( idFactory.vacNumber() )")
-    @Mapping(target = "printRequests", expression = "java( kotlin.collections.CollectionsKt.mutableListOf() )")
+    @Mapping(target = "issueDate", expression = "java( issueDate() )")
+    @Mapping(target = "requestDateTime", expression = "java( requestDateTime() )")
     @Mapping(target = "contactDetails", source = "aedRequest")
+    @Mapping(target = "statusHistory", expression = "java( initialStatus() )")
     abstract fun toAnonymousElectorDocument(
         aedRequest: GenerateAnonymousElectorDocumentDto,
         aedTemplateFilename: String
     ): AnonymousElectorDocument
 
-    @AfterMapping
-    protected fun addPrintRequestToAnonymousElectorDocument(
-        aedRequest: GenerateAnonymousElectorDocumentDto,
-        aedTemplateFilename: String,
-        @MappingTarget anonymousElectorDocument: AnonymousElectorDocument
-    ) {
-        anonymousElectorDocument.addPrintRequest(printRequestMapper.toPrintRequest(aedRequest, aedTemplateFilename))
+    protected fun issueDate(): LocalDate = LocalDate.now(clock)
+
+    protected fun requestDateTime(): Instant = Instant.now(clock)
+
+    protected fun initialStatus(): List<AnonymousElectorDocumentStatus> {
+        return listOf(
+            AnonymousElectorDocumentStatus(
+                status = AnonymousElectorDocumentStatus.Status.GENERATED,
+                eventDateTime = Instant.now(clock)
+            )
+        )
     }
 }

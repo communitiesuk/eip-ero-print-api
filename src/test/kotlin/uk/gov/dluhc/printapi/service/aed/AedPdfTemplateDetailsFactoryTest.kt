@@ -20,7 +20,6 @@ import uk.gov.dluhc.printapi.config.AnonymousElectorDocumentPdfTemplatePropertie
 import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties
 import uk.gov.dluhc.printapi.service.GssCodeInterpreterKtTest
 import uk.gov.dluhc.printapi.service.pdf.ImageDetails
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.LocalDate
@@ -148,12 +147,8 @@ internal class AedPdfTemplateDetailsFactoryTest {
             val electorDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path),
-                printRequests = mutableListOf(
-                    buildAedPrintRequest(
-                        electoralRollNumber = electoralRollNumber,
-                        issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
-                    )
-                )
+                electoralRollNumber = electoralRollNumber,
+                issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
             )
             val expectedPlaceholders = with(electorDocument) {
                 mapOf(
@@ -195,12 +190,8 @@ internal class AedPdfTemplateDetailsFactoryTest {
             val temporaryCertificate = buildAnonymousElectorDocument(
                 gssCode = GssCodeInterpreterKtTest.GSS_CODE_WALES,
                 photoLocationArn = aPhotoArn(bucket = photoS3Bucket, path = photoS3Path),
-                printRequests = mutableListOf(
-                    buildAedPrintRequest(
-                        electoralRollNumber = electoralRollNumber,
-                        issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
-                    )
-                )
+                electoralRollNumber = electoralRollNumber,
+                issueDate = LocalDate.parse(issueDate, DATE_TIME_FORMATTER),
             )
             val expectedPlaceholders = with(temporaryCertificate) {
                 mapOf(

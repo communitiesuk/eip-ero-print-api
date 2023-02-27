@@ -73,9 +73,27 @@ class AnonymousElectorDocument(
     @field:Size(max = 80)
     var gssCode: String,
 
+    @field:NotNull
+    @field:Size(max = 7)
+    var electoralRollNumber: String,
+
+    @field:NotNull
+    @field:Size(max = 255)
+    var aedTemplateFilename: String,
+
+    @field:NotNull
+    var issueDate: LocalDate,
+
+    @field:NotNull
+    var requestDateTime: Instant,
+
+    @field:NotNull
+    @field:Size(max = 255)
+    var userId: String,
+
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "aed_id", nullable = false)
-    var printRequests: MutableList<AedPrintRequest>,
+    var statusHistory: MutableList<AnonymousElectorDocumentStatus> = mutableListOf(),
 
     /**
      * The legislation stipulates there are two retention periods for AED related data. The first (initial)
@@ -97,15 +115,10 @@ class AnonymousElectorDocument(
     var version: Long? = null
 ) {
 
-    val status: AedPrintRequestStatus.Status?
-        get() = getLatestPrintRequest().status
-
-    fun addPrintRequest(newPrintRequest: AedPrintRequest): AnonymousElectorDocument {
-        printRequests += newPrintRequest
+    fun addStatus(newStatus: AnonymousElectorDocumentStatus): AnonymousElectorDocument {
+        statusHistory += newStatus
         return this
     }
-
-    fun getLatestPrintRequest(): AedPrintRequest = printRequests.maxBy { it.requestDateTime }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
@@ -12,19 +13,30 @@ import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAnonymousElectorDocumentTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildGenerateAnonymousElectorDocumentDto
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedPrintRequest
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
 import uk.gov.dluhc.printapi.database.entity.SourceType as SourceTypeEntity
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntity
 
 @ExtendWith(MockitoExtension::class)
 class AnonymousElectorDocumentMapperTest {
+
+    companion object {
+        private const val FIXED_DATE_STRING = "2022-10-18"
+        private val FIXED_DATE = LocalDate.parse(FIXED_DATE_STRING)
+        private val FIXED_TIME = Instant.parse("${FIXED_DATE_STRING}T11:22:32.123Z")
+        private val FIXED_CLOCK = Clock.fixed(FIXED_TIME, ZoneOffset.UTC)
+    }
 
     @InjectMocks
     private lateinit var mapper: AnonymousElectorDocumentMapperImpl
@@ -39,10 +51,10 @@ class AnonymousElectorDocumentMapperTest {
     private lateinit var supportingInformationFormatMapper: SupportingInformationFormatMapper
 
     @Mock
-    private lateinit var printRequestMapper: AedPrintRequestMapper
-
-    @Mock
     private lateinit var idFactory: IdFactory
+
+    @Spy
+    private val clock: Clock = FIXED_CLOCK
 
     @Test
     fun `should map send application to print message for an English certificate to print details`() {
@@ -55,9 +67,6 @@ class AnonymousElectorDocumentMapperTest {
         given(supportingInformationFormatMapper.mapDtoToEntity(any())).willReturn(SupportingInformationFormat.STANDARD)
         given(idFactory.vacNumber()).willReturn(certificateNumber)
 
-        val printRequest = buildAedPrintRequest()
-        given(printRequestMapper.toPrintRequest(any(), any())).willReturn(printRequest)
-
         val expected = with(request) {
             AnonymousElectorDocument(
                 id = null,
@@ -69,6 +78,10 @@ class AnonymousElectorDocumentMapperTest {
                 supportingInformationFormat = SupportingInformationFormatEntity.STANDARD,
                 certificateNumber = certificateNumber,
                 photoLocationArn = photoLocation,
+                electoralRollNumber = electoralRollNumber,
+                issueDate = FIXED_DATE,
+                aedTemplateFilename = aedTemplateFilename,
+                requestDateTime = FIXED_TIME,
                 contactDetails = AedContactDetails(
                     firstName = firstName,
                     middleNames = middleNames,
@@ -87,7 +100,13 @@ class AnonymousElectorDocumentMapperTest {
                         )
                     },
                 ),
-                printRequests = mutableListOf(printRequest),
+                userId = userId,
+                statusHistory = mutableListOf(
+                    AnonymousElectorDocumentStatus(
+                        status = AnonymousElectorDocumentStatus.Status.GENERATED,
+                        eventDateTime = FIXED_TIME
+                    )
+                )
             )
         }
 
@@ -99,7 +118,6 @@ class AnonymousElectorDocumentMapperTest {
         verify(certificateLanguageMapper).mapDtoToEntity(request.certificateLanguage)
         verify(supportingInformationFormatMapper).mapDtoToEntity(request.supportingInformationFormat!!)
         verify(idFactory).vacNumber()
-        verify(printRequestMapper).toPrintRequest(request, aedTemplateFilename)
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
     }
 }
