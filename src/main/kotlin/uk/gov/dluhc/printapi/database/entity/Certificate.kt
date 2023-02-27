@@ -73,11 +73,12 @@ class Certificate(
     var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
 
     /**
-     * The legislation stipulates there are two retention periods for certificate related data. The first (initial)
-     * period applies to PII data that is not on the printed certificate itself (e.g. the addressee/address on the
-     * envelope), which needs to be removed 28 (configurable) working days after the certificate is "issued".
-     * For standard (non-temporary) certificates, the retention period is considerably longer and is currently specified
-     * as the tenth 1st July.
+     * The legislation stipulates there are three retention periods for certificate related data. The first (initial)
+     * period (which this field relates to), applies to PII data that is not on the printed certificate itself (e.g. the
+     * addressee/address on the envelope). This needs to be removed 28 (configurable) working days after the
+     * certificate is "issued".
+     * The second retention period applies to Temporary Certificates (see [TemporaryCertificate]) and the third (final)
+     * retention period is handled by `finalRetentionRemovalDate` below.
      */
     var initialRetentionRemovalDate: LocalDate? = null,
 
@@ -85,6 +86,12 @@ class Certificate(
      * Set to true after the initial retention period data is removed.
      */
     var initialRetentionDataRemoved: Boolean = false,
+
+    /**
+     * The date that all remaining certificate data should be removed after the third (final) retention period. This is
+     * currently specified as the tenth 1st July in the legislation.
+     */
+    var finalRetentionRemovalDate: LocalDate? = null,
 
     /**
      * Certificate status corresponds to the current status of the most recent

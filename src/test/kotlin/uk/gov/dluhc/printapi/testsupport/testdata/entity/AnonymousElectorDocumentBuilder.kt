@@ -43,8 +43,9 @@ fun buildAnonymousElectorDocument(
     aedStatuses: List<AnonymousElectorDocumentStatus> = listOf(buildAnonymousElectorDocumentStatus()),
     requestDateTime: Instant = aValidRequestDateTime(),
     userId: String = aValidUserId(),
-
-    initialRetentionRemovalDate: LocalDate? = null
+    initialRetentionRemovalDate: LocalDate? = null,
+    initialRetentionDataRemoved: Boolean = false,
+    finalRetentionRemovalDate: LocalDate? = null,
 ): AnonymousElectorDocument {
     return AnonymousElectorDocument(
         id = id,
@@ -58,6 +59,8 @@ fun buildAnonymousElectorDocument(
         photoLocationArn = photoLocationArn,
         contactDetails = contactDetails,
         initialRetentionRemovalDate = initialRetentionRemovalDate,
+        initialRetentionDataRemoved = initialRetentionDataRemoved,
+        finalRetentionRemovalDate = finalRetentionRemovalDate,
         aedTemplateFilename = aedTemplateFilename,
         electoralRollNumber = electoralRollNumber,
         issueDate = issueDate,

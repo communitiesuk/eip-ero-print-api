@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="matt.wills@valtech.com" id="0016_EIP1-4154_alter_certificate - add final_retention_removal_date column" context="ddl">
+
+        <addColumn tableName="certificate">
+            <column name="final_retention_removal_date" type="date" afterColumn="initial_retention_data_removed"
+                    remarks="The date any remaining certificate data should be removed after the final retention period">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <createIndex tableName="certificate" indexName="certificate_final_retention_removal_date_idx">
+            <column name="source_type"/>
+            <column name="final_retention_removal_date"/>
+        </createIndex>
+
+        <rollback>
+            <dropColumn
+                tableName="certificate"
+                columnName="final_retention_removal_date"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="matt.wills@valtech.com" id="0016_EIP1-4154_alter_aed - add data retention columns" context="ddl">
+
+        <addColumn tableName="anonymous_elector_document">
+            <column name="initial_retention_data_removed" type="boolean" valueBoolean="false" afterColumn="initial_retention_removal_date"
+                    remarks="Indicates if initial retention period data has been removed from an AED">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="anonymous_elector_document">
+            <column name="final_retention_removal_date" type="date" afterColumn="initial_retention_data_removed"
+                    remarks="The date that all remaining data should be removed after the final retention period">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- remove existing index based on just source type and initial_retention_removal_date -->
+        <dropIndex tableName="anonymous_elector_document" indexName="aed_initial_retention_removal_date_idx"/>
+
+        <!-- include initial_retention_data_removed column in new index -->
+        <createIndex tableName="anonymous_elector_document" indexName="aed_initial_retention_removal_idx">
+            <column name="source_type"/>
+            <column name="initial_retention_data_removed"/>
+            <column name="initial_retention_removal_date"/>
+        </createIndex>
+
+        <!-- create new index for final_retention_removal_date -->
+        <createIndex tableName="anonymous_elector_document" indexName="aed_final_retention_removal_date_idx">
+            <column name="source_type"/>
+            <column name="final_retention_removal_date"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_initial_retention_removal_idx"/>
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_final_retention_removal_date_idx"/>
+
+            <dropColumn
+                tableName="anonymous_elector_document"
+                columnName="initial_retention_data_removed"/>
+            <dropColumn
+                tableName="anonymous_elector_document"
+                columnName="final_retention_removal_date"/>
+
+            <!-- restore the original index based on source type and initial_retention_removal_date -->
+            <createIndex tableName="anonymous_elector_document" indexName="aed_initial_retention_removal_date_idx">
+                <column name="source_type"/>
+                <column name="initial_retention_removal_date"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
