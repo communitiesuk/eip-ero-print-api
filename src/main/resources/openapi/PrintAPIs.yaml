@@ -887,7 +887,7 @@ components:
     AnonymousElectorDocumentSummariesResponse:
       title: AnonymousElectorDocumentSummariesResponse
       type: object
-      description: A response containing a collection of Anonymous Elector Document summaries
+      description: A response containing a collection of Anonymous Elector Document summaries sorted with latest changes ordered first.
       properties:
         anonymousElectorDocuments:
           type: array
@@ -899,7 +899,7 @@ components:
     AnonymousElectorDocumentSummary:
       title: AnonymousElectorDocumentSummary
       type: object
-      description: An object containing an Anonymous Elector Document (AED) summary
+      description: An object summarising the current state of an Anonymous Elector Document (AED)
       properties:
         certificateNumber:
           type: string
