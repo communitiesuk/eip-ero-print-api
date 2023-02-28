@@ -79,13 +79,13 @@
     <changeSet author="matt.wills@valtech.com" id="0016_EIP1-4154_alter_aed elector_roll_number width" context="ddl">
         <modifyDataType
             columnName="electoral_roll_number"
-            newDataType="varchar(30)"
+            newDataType="varchar(30) NOT NULL"
             tableName="anonymous_elector_document"/>
 
         <rollback>
             <modifyDataType
                 columnName="electoral_roll_number"
-                newDataType="varchar(7)"
+                newDataType="varchar(7) NOT NULL"
                 tableName="anonymous_elector_document"/>
         </rollback>
     </changeSet>
