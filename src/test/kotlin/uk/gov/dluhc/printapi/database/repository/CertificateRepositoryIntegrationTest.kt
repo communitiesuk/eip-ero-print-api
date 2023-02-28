@@ -16,6 +16,7 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.DISPATCHE
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
@@ -424,6 +425,31 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
             // When
             val actual = certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)
+
+            // Then
+            assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)
+        }
+    }
+
+    @Nested
+    inner class GetCertificatesForFinalRetentionDataRemoval {
+        @Test
+        fun `should find certificates for removal of final retention period data`() {
+            // Given
+            val expected1 = buildCertificate(
+                finalRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+            val expected2 = buildCertificate(
+                finalRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+            val other = buildCertificate(
+                finalRetentionRemovalDate = LocalDate.now().plusDays(1)
+            )
+
+            certificateRepository.saveAll(listOf(expected1, expected2, other))
+
+            // When
+            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)

@@ -74,7 +74,7 @@ class AnonymousElectorDocument(
     var gssCode: String,
 
     @field:NotNull
-    @field:Size(max = 7)
+    @field:Size(max = 30)
     var electoralRollNumber: String,
 
     @field:NotNull
@@ -97,12 +97,22 @@ class AnonymousElectorDocument(
 
     /**
      * The legislation stipulates there are two retention periods for AED related data. The first (initial)
-     * period applies to PII data that is not on the printed certificate itself (e.g. the addressee/address on the
-     * envelope), which needs to be removed 15 months after the AED is "issued".
-     * For standard (non-temporary) certificates, the retention period is considerably longer and is currently specified
-     * as the tenth 1st July.
+     * period (which this field relates to) applies to PII data that is not on the printed document itself (e.g. the
+     * addressee/address on the envelope). This needs to be removed 15 months after the AED is "issued" (generated).
+     * The second (final) retention period is handled by the `finalRetentionRemovalDate` field below.
      */
     var initialRetentionRemovalDate: LocalDate? = null,
+
+    /**
+     * Set to true after the initial retention period data is removed.
+     */
+    var initialRetentionDataRemoved: Boolean = false,
+
+    /**
+     * The date that all remaining document data should be removed after the second (final) retention period. This is
+     * currently specified as the tenth 1st July in the legislation.
+     */
+    var finalRetentionRemovalDate: LocalDate? = null,
 
     @CreationTimestamp
     var dateCreated: Instant? = null,

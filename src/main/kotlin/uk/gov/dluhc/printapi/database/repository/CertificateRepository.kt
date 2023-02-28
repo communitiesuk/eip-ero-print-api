@@ -30,6 +30,11 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
         initialRetentionRemovalDate: LocalDate
     ): List<Certificate>
 
+    fun findBySourceTypeAndFinalRetentionRemovalDateBefore(
+        sourceType: SourceType,
+        finalRetentionRemovalDate: LocalDate
+    ): List<Certificate>
+
     @Query(
         value = """
             SELECT COUNT(s) FROM PrintRequestStatus s
@@ -51,6 +56,13 @@ object CertificateRepositoryExtensions {
         return findBySourceTypeAndInitialRetentionDataRemovedAndInitialRetentionRemovalDateBefore(
             sourceType = sourceType,
             initialRetentionRemovalDate = LocalDate.now()
+        )
+    }
+
+    fun CertificateRepository.findPendingRemovalOfFinalRetentionData(sourceType: SourceType): List<Certificate> {
+        return findBySourceTypeAndFinalRetentionRemovalDateBefore(
+            sourceType = sourceType,
+            finalRetentionRemovalDate = LocalDate.now()
         )
     }
 }
