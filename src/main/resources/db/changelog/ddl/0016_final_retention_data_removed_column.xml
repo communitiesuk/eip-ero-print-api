@@ -14,7 +14,7 @@
             </column>
         </addColumn>
 
-        <createIndex tableName="certificate" indexName="certificate_final_retention_removal_date_idx">
+        <createIndex tableName="certificate" indexName="certificate_final_retention_removal_idx">
             <column name="source_type"/>
             <column name="final_retention_removal_date"/>
         </createIndex>
@@ -23,6 +23,8 @@
             <dropColumn
                 tableName="certificate"
                 columnName="final_retention_removal_date"/>
+
+            <dropIndex tableName="certificate" indexName="certificate_final_retention_removal_idx"/>
         </rollback>
     </changeSet>
 
@@ -33,9 +35,6 @@
                     remarks="Indicates if initial retention period data has been removed from an AED">
                 <constraints nullable="false"/>
             </column>
-        </addColumn>
-
-        <addColumn tableName="anonymous_elector_document">
             <column name="final_retention_removal_date" type="date" afterColumn="initial_retention_data_removed"
                     remarks="The date that all remaining data should be removed after the final retention period">
                 <constraints nullable="true"/>
@@ -53,14 +52,14 @@
         </createIndex>
 
         <!-- create new index for final_retention_removal_date -->
-        <createIndex tableName="anonymous_elector_document" indexName="aed_final_retention_removal_date_idx">
+        <createIndex tableName="anonymous_elector_document" indexName="aed_final_retention_removal_idx">
             <column name="source_type"/>
             <column name="final_retention_removal_date"/>
         </createIndex>
 
         <rollback>
             <dropIndex tableName="anonymous_elector_document" indexName="aed_initial_retention_removal_idx"/>
-            <dropIndex tableName="anonymous_elector_document" indexName="aed_final_retention_removal_date_idx"/>
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_final_retention_removal_idx"/>
 
             <dropColumn
                 tableName="anonymous_elector_document"
@@ -74,6 +73,20 @@
                 <column name="source_type"/>
                 <column name="initial_retention_removal_date"/>
             </createIndex>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="matt.wills@valtech.com" id="0016_EIP1-4154_alter_aed elector_roll_number width" context="ddl">
+        <modifyDataType
+            columnName="electoral_roll_number"
+            newDataType="varchar(30)"
+            tableName="anonymous_elector_document"/>
+
+        <rollback>
+            <modifyDataType
+                columnName="electoral_roll_number"
+                newDataType="varchar(7)"
+                tableName="anonymous_elector_document"/>
         </rollback>
     </changeSet>
 

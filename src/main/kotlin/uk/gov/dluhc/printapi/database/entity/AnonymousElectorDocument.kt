@@ -74,7 +74,7 @@ class AnonymousElectorDocument(
     var gssCode: String,
 
     @field:NotNull
-    @field:Size(max = 7)
+    @field:Size(max = 30)
     var electoralRollNumber: String,
 
     @field:NotNull
