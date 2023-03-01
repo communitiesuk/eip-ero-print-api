@@ -7,6 +7,7 @@ import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
+import java.time.Month
 import java.time.temporal.ChronoUnit
 
 /**
@@ -38,6 +39,30 @@ class CertificateRemovalDateResolver(
         with(getTotalDaysForWorkingDays(issueDate, dataRetentionConfig.certificateInitialRetentionPeriod.days, gssCode)) {
             issueDate.plusDays(this.toLong())
         }
+
+    /**
+     * Calculates the date that any remaining "Elector Document" data should be removed following the final retention
+     * period. The legislation stipulates that all remaining data should be removed on the tenth 1st July following the
+     * date the VAC's issue date.
+     *
+     * "Elector Document" here means either a [uk.gov.dluhc.printapi.database.entity.Certificate] or a
+     * [uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument]). but does not include
+     * [uk.gov.dluhc.printapi.database.entity.TemporaryCertificate], which has a different retention period.
+     *
+     * TODO - EIP1-3556 - add a separate calculation for Temporary Certificates.
+     *
+     * @param issueDate The date the Elector Document was issued.
+     * @return A [LocalDate] representing when the data should be removed
+     */
+    fun getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate: LocalDate): LocalDate {
+        val firstJuly = LocalDate.of(issueDate.year, Month.JULY, 1)
+        val numberOfYears =
+            when (issueDate.isBefore(firstJuly)) {
+                true -> 9L
+                false -> 10L
+            }
+        return firstJuly.plusYears(numberOfYears)
+    }
 
     private fun getTotalDaysForWorkingDays(issueDate: LocalDate, requiredWorkingDays: Int, gssCode: String): Int {
         val upcomingBankHolidays = bankHolidayDataClient.getBankHolidayDates(BankHolidayDivision.fromGssCode(gssCode))
