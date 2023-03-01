@@ -80,10 +80,8 @@ internal class CertificateRemovalDateResolverTest {
             "2024-01-01, 2033-07-01",
             "2024-12-31, 2034-07-01"
         )
-        fun `should get final retention period removal date for elector document`(issueDateStr: String, targetDateStr: String) {
+        fun `should get final retention period removal date for elector document`(issueDate: LocalDate, expectedTargetDate: LocalDate) {
             // Given
-            val issueDate = LocalDate.parse(issueDateStr)
-            val expectedTargetDate = LocalDate.parse(targetDateStr)
 
             // When
             val actualTargetDate = certificateRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)

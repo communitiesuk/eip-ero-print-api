@@ -7,6 +7,7 @@ import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
+import java.time.Month
 import java.time.temporal.ChronoUnit
 
 /**
@@ -54,7 +55,7 @@ class CertificateRemovalDateResolver(
      * @return A [LocalDate] representing when the data should be removed
      */
     fun getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate: LocalDate): LocalDate {
-        val firstJuly = LocalDate.of(issueDate.year, 7, 1)
+        val firstJuly = LocalDate.of(issueDate.year, Month.JULY, 1)
         val numberOfYears =
             when (issueDate.isBefore(firstJuly)) {
                 true -> 9L
