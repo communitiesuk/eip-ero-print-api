@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
@@ -52,6 +53,17 @@ class CertificateDataRetentionService(
                 it.initialRetentionDataRemoved = true
                 certificateRepository.save(it)
                 logger.info { "Removed initial retention period data from certificate with sourceReference ${it.sourceReference}" }
+            }
+        }
+    }
+
+    @Transactional
+    fun removeFinalRetentionPeriodData(sourceType: SourceType) {
+        logger.info { "Finding certificates with sourceType $sourceType to remove final retention period data from" }
+        with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType)) {
+            forEach {
+                certificateRepository.delete(it)
+                logger.info { "Removed remaining data after final retention period from certificate with sourceReference ${it.sourceReference}" }
             }
         }
     }

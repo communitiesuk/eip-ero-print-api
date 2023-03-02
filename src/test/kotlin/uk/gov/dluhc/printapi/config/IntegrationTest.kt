@@ -36,6 +36,7 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
+import uk.gov.dluhc.printapi.jobs.FinalRetentionPeriodDataRemovalJob
 import uk.gov.dluhc.printapi.jobs.InitialRetentionPeriodDataRemovalJob
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -86,6 +87,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var initialRetentionPeriodDataRemovalJob: InitialRetentionPeriodDataRemovalJob
+
+    @Autowired
+    protected lateinit var finalRetentionPeriodDataRemovalJob: FinalRetentionPeriodDataRemovalJob
 
     @Autowired
     protected lateinit var batchPrintRequestsJob: BatchPrintRequestsJob
