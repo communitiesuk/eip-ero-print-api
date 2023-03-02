@@ -53,30 +53,22 @@ internal class CertificateDataRetentionServiceTest {
             val message = buildApplicationRemovedMessage()
             val certificate = buildCertificate()
             val expectedInitialRetentionRemovalDate = LocalDate.of(2023, 1, 1)
+            val expectedFinalRetentionRemovalDate = LocalDate.of(2032, 1, 7)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
-            given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(
-                certificate
-            )
-            given(
-                certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(
-                    any(),
-                    any()
-                )
-            ).willReturn(
-                expectedInitialRetentionRemovalDate
-            )
+            given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(certificate)
+            given(certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any())).willReturn(expectedInitialRetentionRemovalDate)
+            given(certificateRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
 
             // When
             certificateDataRetentionService.handleSourceApplicationRemoved(message)
 
             // Then
             assertThat(certificate.initialRetentionRemovalDate).isEqualTo(expectedInitialRetentionRemovalDate)
+            assertThat(certificate.finalRetentionRemovalDate).isEqualTo(expectedFinalRetentionRemovalDate)
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
-            verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(
-                message.gssCode,
-                VOTER_CARD,
-                message.sourceReference
-            )
+            verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
+            verify(certificateRemovalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate, message.gssCode)
+            verify(certificateRemovalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(certificate.issueDate)
             verify(certificateRepository).save(certificate)
         }
 
@@ -96,12 +88,9 @@ internal class CertificateDataRetentionServiceTest {
 
             // Then
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
-            verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(
-                message.gssCode,
-                VOTER_CARD,
-                message.sourceReference
-            )
+            verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
             verify(certificateRepository, times(0)).save(any())
+            verifyNoInteractions(certificateRemovalDateResolver)
             assertThat(
                 TestLogAppender.hasLog(
                     "Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found",

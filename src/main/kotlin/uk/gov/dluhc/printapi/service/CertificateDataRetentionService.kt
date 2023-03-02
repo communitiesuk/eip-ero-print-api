@@ -36,8 +36,8 @@ class CertificateDataRetentionService(
                 sourceType = sourceType,
                 sourceReference = sourceReference
             )?.also {
-                it.initialRetentionRemovalDate = certificateRemovalDateResolver
-                    .getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
+                it.initialRetentionRemovalDate = certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
+                it.finalRetentionRemovalDate = certificateRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
                 certificateRepository.save(it)
             }
                 ?: logger.error { "Certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }

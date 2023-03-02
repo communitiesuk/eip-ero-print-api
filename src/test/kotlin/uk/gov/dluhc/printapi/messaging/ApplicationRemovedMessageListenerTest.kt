@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
 
     @Test
-    fun `should process message and set delivery info removal date`() {
+    fun `should process message and set initial and final removal dates`() {
         // Given
         val certificate = buildCertificate(
             issueDate = LocalDate.of(2023, 4, 1), // to include 3 bank holidays in calculation
@@ -31,6 +31,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         )
         // currently 29 working days following issue date - refer to application.yml
         val expectedInitialRemovalDate = LocalDate.of(2023, 5, 17)
+        val expectedFinalRemovalDate = LocalDate.of(2032, 7, 1)
 
         // When
         sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
@@ -41,6 +42,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             assertThat(response).hasSize(1)
             val saved = response[0]
             assertThat(saved).hasInitialRetentionRemovalDate(expectedInitialRemovalDate)
+            assertThat(saved).hasFinalRetentionRemovalDate(expectedFinalRemovalDate)
         }
     }
 }
