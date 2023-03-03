@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.7.0'
+  version: '1.8.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -19,16 +19,10 @@ paths:
   #
   # Voter Authority Certificate (VAC)
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/certificates/applications/{applicationId}':
+  '/eros/{eroId}/certificates':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the application.
-        schema:
-          type: string
-        in: path
-        required: true
-      - name: applicationId
-        description: The identifier of the Voter Card Application to retrieve.
         schema:
           type: string
         in: path
@@ -71,8 +65,15 @@ paths:
               application/json: |
                 {}
     get:
-      summary: Returns a single certificate summary
-      description: Returns a single certificate summary
+      summary: Returns a single certificate summary for a Voter Card Application
+      description: Returns a single certificate summary for a Voter Card Application
+      parameters:
+        - name: applicationId
+          description: The identifier of the Voter Card Application.
+          schema:
+            type: string
+          in: query
+          required: true
       tags:
         - Voter Authority Certificates (VAC)
       responses:
@@ -81,6 +82,85 @@ paths:
         '404':
           description: Not Found
       operationId: get-certificate-summary-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/certificates'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  '/eros/{eroId}/certificates/applications/{applicationId}':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: applicationId
+        description: The identifier of the Voter Card Application to retrieve.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      deprecated: true
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Voter Authority Certificates (VAC)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      deprecated: true
+      summary: Returns a single certificate summary. Deprecated. Use /eros/{eroId}/certificates?applicationId={applicationId} instead
+      description: Returns a single certificate summary. Deprecated. Use /eros/{eroId}/certificates?applicationId={applicationId} instead
+      tags:
+        - Voter Authority Certificates (VAC)
+      responses:
+        '200':
+          $ref: '#/components/responses/CertificateSummary'
+        '404':
+          description: Not Found
+      operationId: deprecated-get-certificate-summary-by-application-id
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
@@ -116,6 +196,7 @@ paths:
         in: path
         required: true
     options:
+      deprecated: true
       summary: CORS support
       description: |
         Enable CORS by returning correct headers
@@ -153,14 +234,15 @@ paths:
               application/json: |
                 {}
     get:
-      summary: Returns the Temporary Certificate summaries for an application
-      description: Returns the Temporary Certificate summaries for an application
+      deprecated: true
+      summary: Returns the Temporary Certificate summaries for an application. Deprecated. Use /eros/{eroId}/temporary-certificates?applicationId={applicationId} instead
+      description: Returns the Temporary Certificate summaries for an application. Deprecated. Use /eros/{eroId}/temporary-certificates?applicationId={applicationId} instead
       tags:
         - VAC Temporary Certificates
       responses:
         200:
           $ref: '#/components/responses/TemporaryCertificateSummaries'
-      operationId: get-temporary-certificate-summaries-by-application-id
+      operationId: deprecated-get-temporary-certificate-summaries-by-application-id
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
@@ -265,7 +347,37 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
 
-
+    get:
+      summary: Returns the Temporary Certificate summaries for a Voter Card Application
+      description: Returns the Temporary Certificate summaries for a Voter Card Application
+      parameters:
+        - name: applicationId
+          description: The identifier of the Voter Card Application.
+          schema:
+            type: string
+          in: query
+          required: true
+      tags:
+        - VAC Temporary Certificates
+      responses:
+        200:
+          $ref: '#/components/responses/TemporaryCertificateSummaries'
+      operationId: get-temporary-certificate-summaries-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/temporary-certificates'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.applicationId: method.request.path.applicationId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
 
   #
   # Temporary Certificates Explainer Document
@@ -446,65 +558,18 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
 
-  #
-  # Get an Anonymous Elector Document (AED) from its application identifier
-  # --------------------------------------------------------------------------------
-  '/eros/{eroId}/anonymous-elector-documents/applications/{applicationId}':
-    parameters:
-      - name: eroId
-        description: The ID of the Electoral Registration Office responsible for the application.
-        schema:
-          type: string
-        in: path
-        required: true
-      - name: applicationId
-        description: The identifier of the Anonymous Voter Card Application.
-        schema:
-          type: string
-        in: path
-        required: true
-    options:
-      summary: CORS support
-      description: |
-        Enable CORS by returning correct headers
-      tags:
-        - Anonymous Elector Documents (AED)
-      responses:
-        200:
-          description: Default response for CORS method
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-          content: { }
-      x-amazon-apigateway-integration:
-        type: mock
-        requestTemplates:
-          application/json: |
-            {
-              "statusCode" : 200
-            }
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
-              method.response.header.Access-Control-Allow-Methods: '''*'''
-              method.response.header.Access-Control-Allow-Origin: '''*'''
-            responseTemplates:
-              application/json: |
-                {}
     get:
-      summary: Returns the Anonymous Elector Document summary for an anonymous application
-      description: Returns the Anonymous Elector Document summary for an anonymous application
+      summary: Returns the Anonymous Elector Document summaries for an anonymous application
+      description: Returns the Anonymous Elector Document summaries for an anonymous application
       tags:
         - Anonymous Elector Documents (AED)
+      parameters:
+        - name: applicationId
+          description: The identifier of the Anonymous Voter Card Application.
+          schema:
+            type: string
+          in: query
+          required: true
       responses:
         '200':
           $ref: '#/components/responses/AnonymousElectorDocumentSummaries'
@@ -515,10 +580,9 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/applications/{applicationId}'
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.path.applicationId: method.request.path.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''

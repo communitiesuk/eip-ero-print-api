@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.dto.PdfFile
@@ -38,11 +39,11 @@ class TemporaryCertificateController(
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
 ) {
 
-    @GetMapping("/eros/{eroId}/temporary-certificates/applications/{applicationId}")
+    @GetMapping("/eros/{eroId}/temporary-certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     fun getTemporaryCertificateSummariesByApplicationId(
         @PathVariable eroId: String,
-        @PathVariable applicationId: String,
+        @RequestParam applicationId: String,
     ): TemporaryCertificateSummariesResponse =
         TemporaryCertificateSummariesResponse(
             temporaryCertificateSummaryService.getTemporaryCertificateSummaries(
@@ -55,6 +56,15 @@ class TemporaryCertificateController(
                 it.dateTimeGenerated
             }
         )
+
+    @Deprecated("Use /eros/{eroId}/temporary-certificates?applicationId={applicationId} instead")
+    @GetMapping("/eros/{eroId}/temporary-certificates/applications/{applicationId}")
+    @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
+    fun deprecatedGetTemporaryCertificateSummariesByApplicationId(
+        @PathVariable eroId: String,
+        @PathVariable applicationId: String,
+    ): TemporaryCertificateSummariesResponse =
+        getTemporaryCertificateSummariesByApplicationId(eroId, applicationId)
 
     @PostMapping("/eros/{eroId}/temporary-certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)

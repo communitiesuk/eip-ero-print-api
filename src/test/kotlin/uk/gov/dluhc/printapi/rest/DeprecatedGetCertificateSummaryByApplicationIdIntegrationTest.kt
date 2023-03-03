@@ -20,24 +20,17 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit.SECONDS
 
-internal class GetCertificateSummaryByApplicationIdIntegrationTest : IntegrationTest() {
+@Deprecated(
+    """
+        The endpoint /eros/{ERO_ID}/certificates/applications/{APPLICATION_ID} has been deprecated 
+        and this test class should be removed when the implementation is removed.    
+    """
+)
+internal class DeprecatedGetCertificateSummaryByApplicationIdIntegrationTest : IntegrationTest() {
     companion object {
-        private const val URI_TEMPLATE = "/eros/{ERO_ID}/certificates?applicationId={APPLICATION_ID}"
+        private const val URI_TEMPLATE = "/eros/{ERO_ID}/certificates/applications/{APPLICATION_ID}"
         private const val ERO_ID = "some-city-council"
         private const val APPLICATION_ID = "7762ccac7c056046b75d4aa3"
-    }
-
-    @Test
-    fun `should return bad request given request without applicationId query string parameter`() {
-        wireMockService.stubCognitoJwtIssuerResponse()
-
-        webTestClient.get()
-            .uri("/eros/{ERO_ID}/certificates", ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isBadRequest
     }
 
     @Test
