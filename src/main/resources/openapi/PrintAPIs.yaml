@@ -559,8 +559,8 @@ paths:
         httpMethod: POST
 
     get:
-      summary: Returns the Anonymous Elector Document summary for an anonymous application
-      description: Returns the Anonymous Elector Document summary for an anonymous application
+      summary: Returns the Anonymous Elector Document summaries for an anonymous application
+      description: Returns the Anonymous Elector Document summaries for an anonymous application
       tags:
         - Anonymous Elector Documents (AED)
       parameters:
