@@ -281,6 +281,29 @@ class CertificateAssert
     }
 
     /**
+     * Verifies that the actual Certificate's finalRetentionRemovalDate is equal to the given one.
+     * @param finalRetentionRemovalDate the given finalRetentionRemovalDate to compare the actual Certificate's one.
+     * @return this assertion object.
+     * @throws AssertionError - if the actual Certificate's finalRetentionRemovalDate is not equal to the given one.
+     */
+    fun hasFinalRetentionRemovalDate(finalRetentionRemovalDate: LocalDate?): CertificateAssert {
+        // check that actual Certificate we want to make assertions on is not null.
+        isNotNull
+
+        // overrides the default error message with a more explicit one
+        val assertjErrorMessage = "\nExpecting finalRetentionRemovalDate of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+
+        // null safe check
+        val actualFinalRetentionRemovalDate = actual!!.finalRetentionRemovalDate
+        if (!Objects.deepEquals(actualFinalRetentionRemovalDate, finalRetentionRemovalDate)) {
+            failWithMessage(assertjErrorMessage, actual, finalRetentionRemovalDate, actualFinalRetentionRemovalDate)
+        }
+
+        // return the current assertion for method chaining
+        return this
+    }
+
+    /**
      * Verifies that the data which needs to be removed after the initial retention period is null.
      * @return this assertion object.
      * @throws AssertionError if the data is not null.
