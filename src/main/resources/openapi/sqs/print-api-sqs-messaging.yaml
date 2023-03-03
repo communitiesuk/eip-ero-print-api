@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.9.3'
+  version: '1.9.4'
   description: |-
     Print API SQS Message Types
     
@@ -171,6 +171,7 @@ components:
       type: string
       enum:
         - voter-card
+        - anonymous-elector-document
 
     CertificateLanguage:
       title: CertificateLanguage
