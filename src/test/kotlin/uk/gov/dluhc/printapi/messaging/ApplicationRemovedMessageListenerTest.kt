@@ -10,6 +10,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
 import java.time.LocalDate
+import java.time.Month.APRIL
+import java.time.Month.JULY
+import java.time.Month.MAY
 import java.util.concurrent.TimeUnit
 
 internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
@@ -18,7 +21,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
     fun `should process message and set initial and final removal dates`() {
         // Given
         val certificate = buildCertificate(
-            issueDate = LocalDate.of(2023, 4, 1), // to include 3 bank holidays in calculation
+            issueDate = LocalDate.of(2023, APRIL, 1), // to include 3 bank holidays in calculation
             printRequests = listOf(
                 buildPrintRequest(delivery = buildDelivery()),
                 buildPrintRequest(delivery = buildDelivery())
@@ -30,8 +33,8 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             gssCode = certificate.gssCode!!
         )
         // currently 29 working days following issue date - refer to application.yml
-        val expectedInitialRemovalDate = LocalDate.of(2023, 5, 17)
-        val expectedFinalRemovalDate = LocalDate.of(2032, 7, 1)
+        val expectedInitialRemovalDate = LocalDate.of(2023, MAY, 17)
+        val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
 
         // When
         sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
