@@ -17,7 +17,7 @@ import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -30,7 +30,6 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
 
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents"
-        private const val ERO_ID = "some-city-council"
         private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "W06000023"
         private const val AED_SAMPLE_PHOTO = "classpath:temporary-certificate-template/sample-certificate-photo.png"
@@ -48,12 +47,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                 ERO_ID,
                 GSS_CODE
             )
-            .bearerToken(
-                getBearerToken(
-                    eroId = userGroupEroId,
-                    groups = listOf("ero-$userGroupEroId", "ero-vc-anonymous-admin-$userGroupEroId")
-                )
-            )
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = userGroupEroId))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(buildGenerateAnonymousElectorDocumentRequest())
             .exchange()
@@ -73,12 +67,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         // When
         val response = webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(
-                getBearerToken(
-                    eroId = ERO_ID,
-                    groups = listOf("ero-$ERO_ID", "ero-vc-anonymous-admin-$ERO_ID")
-                )
-            )
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(requestBody)
             .exchange()
@@ -108,12 +97,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                 URI_TEMPLATE,
                 ERO_ID
             )
-            .bearerToken(
-                getBearerToken(
-                    eroId = ERO_ID,
-                    groups = listOf("ero-$ERO_ID", "ero-vc-anonymous-admin-$ERO_ID")
-                )
-            )
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(requestBody)
             .exchange()
@@ -149,12 +133,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                 URI_TEMPLATE,
                 ERO_ID
             )
-            .bearerToken(
-                getBearerToken(
-                    eroId = ERO_ID,
-                    groups = listOf("ero-$ERO_ID", "ero-vc-anonymous-admin-$ERO_ID")
-                )
-            )
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(requestBody)
             .exchange()
@@ -213,12 +192,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
             .build().post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(
-                getBearerToken(
-                    eroId = ERO_ID,
-                    groups = listOf("ero-$ERO_ID", "ero-vc-anonymous-admin-$ERO_ID")
-                )
-            )
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(request)
             .exchange()

@@ -10,7 +10,7 @@ import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -18,7 +18,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityRespo
 internal class GenerateAedExplainerDocumentIntegrationTest : IntegrationTest() {
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents/{GSS_CODE}/explainer-document"
-        private const val ERO_ID = "some-city-council"
         private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "E99999999"
         private const val MAX_SIZE_1_MB = 1024 * 1024
@@ -31,12 +30,7 @@ internal class GenerateAedExplainerDocumentIntegrationTest : IntegrationTest() {
 
         webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
-            .bearerToken(
-                getBearerToken(
-                    eroId = userGroupEroId,
-                    groups = listOf("ero-$userGroupEroId", "ero-vc-anonymous-admin-$userGroupEroId")
-                )
-            )
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = userGroupEroId))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -52,7 +46,7 @@ internal class GenerateAedExplainerDocumentIntegrationTest : IntegrationTest() {
         // When
         val response = webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-anonymous-admin-$ERO_ID")))
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
 
@@ -76,7 +70,7 @@ internal class GenerateAedExplainerDocumentIntegrationTest : IntegrationTest() {
         // When
         val response = webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-anonymous-admin-$ERO_ID")))
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
 
@@ -103,7 +97,7 @@ internal class GenerateAedExplainerDocumentIntegrationTest : IntegrationTest() {
             .build()
             .post()
             .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-anonymous-admin-$ERO_ID")))
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .exchange()
 
         // Then
