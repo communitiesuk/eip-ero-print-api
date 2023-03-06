@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.8.0'
+  version: '1.8.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -771,6 +771,7 @@ components:
       type: string
       enum:
         - voter-card
+        - anonymous-elector-document
 
     CertificateLanguage:
       title: CertificateLanguage

@@ -12,7 +12,12 @@ class SourceTypeMapperTest {
     private val mapper = SourceTypeMapperImpl()
 
     @ParameterizedTest
-    @CsvSource(value = ["VOTER_MINUS_CARD, VOTER_CARD"])
+    @CsvSource(
+        value = [
+            "VOTER_MINUS_CARD, VOTER_CARD",
+            "ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT, ANONYMOUS_ELECTOR_DOCUMENT",
+        ]
+    )
     fun `should map sqs model source type to entity`(sourceTypeModel: SourceTypeSqsModel, sourceTypeEntity: SourceTypeEntity) {
         // Given
         // When
@@ -23,7 +28,12 @@ class SourceTypeMapperTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["VOTER_MINUS_CARD, VOTER_CARD"])
+    @CsvSource(
+        value = [
+            "VOTER_MINUS_CARD, VOTER_CARD",
+            "ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT, ANONYMOUS_ELECTOR_DOCUMENT",
+        ]
+    )
     fun `should map api source type to dto`(sourceTypeApi: SourceTypeApi, sourceTypeDto: SourceTypeDto) {
         // Given
         // When
@@ -34,7 +44,12 @@ class SourceTypeMapperTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["VOTER_CARD, VOTER_CARD"])
+    @CsvSource(
+        value = [
+            "VOTER_CARD, VOTER_CARD",
+            "ANONYMOUS_ELECTOR_DOCUMENT, ANONYMOUS_ELECTOR_DOCUMENT"
+        ]
+    )
     fun `should map dto source type to entity`(sourceTypeDto: SourceTypeDto, sourceTypeEntity: SourceTypeEntity) {
         // Given
         // When

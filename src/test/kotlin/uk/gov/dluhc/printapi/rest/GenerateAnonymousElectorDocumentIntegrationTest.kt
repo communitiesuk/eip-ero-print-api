@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
-import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
+import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ErrorResponseAssert.Companion.assertThat
@@ -230,7 +230,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         // Then
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
             listOf(request.gssCode),
-            VOTER_CARD,
+            ANONYMOUS_ELECTOR_DOCUMENT,
             request.sourceReference
         )
         assertThat(electorDocuments).hasSize(1)
@@ -244,6 +244,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(electorDocument.certificateNumber)
+            assertThat(text).doesNotContainIgnoringCase(request.surname)
         }
     }
 
