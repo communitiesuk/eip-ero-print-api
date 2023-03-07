@@ -10,8 +10,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 internal class UpdateAnonymousElectorDocumentStatusIntegrationTest : IntegrationTest() {
 
     companion object {
-        private const val URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents/{DOCUMENT_NUMBER}/status"
-        private const val DOCUMENT_NUMBER = "A123456789"
+        private const val URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents/{CERTIFICATE_NUMBER}/status"
+        private const val CERTIFICATE_NUMBER = "DEV1W0XDH1368LWE1J40"
     }
 
     @Test
@@ -20,7 +20,7 @@ internal class UpdateAnonymousElectorDocumentStatusIntegrationTest : Integration
         val userGroupEroId = anotherValidEroId(ERO_ID)
 
         webTestClient.patch()
-            .uri(URI_TEMPLATE, ERO_ID, DOCUMENT_NUMBER)
+            .uri(URI_TEMPLATE, ERO_ID, CERTIFICATE_NUMBER)
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = userGroupEroId))
             .contentType(APPLICATION_JSON)
             .exchange()

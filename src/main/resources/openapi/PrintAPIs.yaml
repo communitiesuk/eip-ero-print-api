@@ -685,7 +685,7 @@ paths:
   #
   # Anonymous Elector Document (AED) Status
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/anonymous-elector-documents/{documentNumber}/status':
+  '/eros/{eroId}/anonymous-elector-documents/{certificateNumber}/status':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for an AED application.
@@ -693,11 +693,12 @@ paths:
           type: string
         in: path
         required: true
-      - name: documentNumber
-        description: The relevant `documentNumber` of an anonymous elector document.
+      - name: certificateNumber
+        description: The relevant `certificateNumber` of an anonymous elector document. A 20 character alphanumeric string.
         schema:
           type: string
-          example: '0123456789ACDEFGHJKLMNPQRTUVWXYZ'
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          example: 'DEV1W0XDH1368LWE1J40'
         in: path
         required: true
     options:
@@ -756,10 +757,10 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/{documentNumber}/status'
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/{certificateNumber}/status'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.path.documentNumber: method.request.path.documentNumber
+          integration.request.path.certificateNumber: method.request.path.certificateNumber
         connectionType: VPC_LINK
         connectionId: '${vpc_connection_id}'
         httpMethod: PATCH

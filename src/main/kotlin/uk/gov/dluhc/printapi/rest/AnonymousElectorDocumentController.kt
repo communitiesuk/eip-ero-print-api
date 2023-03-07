@@ -55,10 +55,10 @@ class AnonymousElectorDocumentController(
         }
     }
 
-    @PatchMapping("{documentNumber}/status")
+    @PatchMapping("{certificateNumber}/status")
     @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun updateAnonymousElectorDocumentStatus(@PathVariable eroId: String, @PathVariable documentNumber: String) {
+    fun updateAnonymousElectorDocumentStatus(@PathVariable eroId: String, @PathVariable certificateNumber: String) {
         TODO("Not yet implemented")
     }
 
