@@ -10,7 +10,7 @@ import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildTemporaryCertificateSummary
 import java.time.ZoneOffset.UTC
@@ -20,7 +20,6 @@ internal class GetTemporaryCertificateSummariesByApplicationIdIntegrationTest : 
 
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/temporary-certificates?applicationId={APPLICATION_ID}"
-        private const val ERO_ID = "some-city-council"
         private const val APPLICATION_ID = "7762ccac7c056046b75d4aa3"
     }
 
@@ -30,7 +29,7 @@ internal class GetTemporaryCertificateSummariesByApplicationIdIntegrationTest : 
 
         webTestClient.get()
             .uri("/eros/{ERO_ID}/temporary-certificates", ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -44,12 +43,7 @@ internal class GetTemporaryCertificateSummariesByApplicationIdIntegrationTest : 
 
         webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(
-                getBearerToken(
-                    eroId = userGroupEroId,
-                    groups = listOf("ero-$userGroupEroId", "ero-vc-admin-$userGroupEroId")
-                )
-            )
+            .bearerToken(getVCAdminBearerToken(eroId = userGroupEroId))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -105,7 +99,7 @@ internal class GetTemporaryCertificateSummariesByApplicationIdIntegrationTest : 
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.8.1'
+  version: '1.9.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -614,7 +614,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Anonymous Elector Documents (AED)
+        - Anonymous Elector Documents (AED) Explainer Document
       responses:
         200:
           description: Default response for CORS method
@@ -652,8 +652,9 @@ paths:
         Returns the Local Authority's Explainer Document for an Anonymous Elector Document  
         The Explainer Document is a separately generated and printed document that accompanies the AED
         and is used to explain to the Elector how to use their AED.
+      operationId: generate-aed-explainer-document
       tags:
-        - Anonymous Elector Documents (AED)
+        - Anonymous Elector Documents (AED) Explainer Document
       responses:
         '201':
           description: created
@@ -665,7 +666,6 @@ paths:
                 example: attachment; filename="aed-explainer-document-E09000007.pdf"
         '404':
           description: Not Found
-      operationId: generate-aed-explainer-document
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
@@ -682,11 +682,116 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
 
+  #
+  # Anonymous Elector Document (AED) Status
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-elector-documents/{certificateNumber}/status':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for an AED application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: certificateNumber
+        description: The relevant `certificateNumber` of an anonymous elector document. A 20 character alphanumeric string.
+        schema:
+          type: string
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          example: 'DEV1W0XDH1368LWE1J40'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED) Status
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    patch:
+      summary: Updates the status of an Anonymous Elector Document.
+      description: Updates the status of an Anonymous Elector Document.
+      operationId: update-anonymous-elector-document-status
+      tags:
+        - Anonymous Elector Documents (AED) Status
+      responses:
+        204:
+          description: The status was updated successfully
+        '409':
+          description: An anonymous elector document current status does not permit the status to be updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictErrorResponse'
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/{certificateNumber}/status'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.certificateNumber: method.request.path.certificateNumber
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: PATCH
+
 components:
   #
   # Schema and Enum Definitions
   # --------------------------------------------------------------------------------
   schemas:
+    ConflictErrorResponse:
+      title: ConflictErrorResponse
+      description: Response describing errors in a web request for conflicts.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: '2022-09-28T18:01:42.105Z'
+        status:
+          type: integer
+          example: 409
+        error:
+          type: string
+          example: 'Conflict'
+        message:
+          type: string
+          example: 'An application with applicationId = 34ed0c0bc47d8d741539ccac has an unexpected status RECEIVED'
+      required:
+        - timestamp
+        - status
+        - error
+        - message
     ErrorResponse:
       title: ErrorResponse
       description: Response describing errors in a web request

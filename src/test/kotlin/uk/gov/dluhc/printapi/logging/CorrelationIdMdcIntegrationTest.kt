@@ -19,7 +19,7 @@ import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ILoggingEventAssert.
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
@@ -56,7 +56,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
             // When
             webTestClient.get()
                 .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-                .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+                .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
 
@@ -80,7 +80,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
             // When
             webTestClient.get()
                 .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-                .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+                .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("x-correlation-id", expectedCorrelationId)
                 .exchange()

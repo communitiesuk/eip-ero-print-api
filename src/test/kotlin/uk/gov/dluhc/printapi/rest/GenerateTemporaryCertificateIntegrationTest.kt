@@ -17,7 +17,7 @@ import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ErrorResponseAssert.
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateTemporaryCertificateRequest
@@ -31,7 +31,6 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/temporary-certificates"
-        private const val ERO_ID = "some-city-council"
         private const val OTHER_ERO_ID = "other-city-council"
         private const val GSS_CODE = "W06000023"
         private const val CERTIFICATE_SAMPLE_PHOTO =
@@ -46,12 +45,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
         webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(
-                getBearerToken(
-                    eroId = userGroupEroId,
-                    groups = listOf("ero-$userGroupEroId", "ero-vc-admin-$userGroupEroId")
-                )
-            )
+            .bearerToken(getVCAdminBearerToken(eroId = userGroupEroId))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(buildGenerateTemporaryCertificateRequest())
             .exchange()
@@ -71,7 +65,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         // When
         val response = webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(requestBody)
             .exchange()
@@ -100,7 +94,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         // When
         val response = webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(requestBody)
             .exchange()
@@ -126,7 +120,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         // When
         val response = webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(requestBody)
             .exchange()
@@ -156,7 +150,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         // When
         val response = webTestClient.post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(requestBody)
             .exchange()
@@ -193,7 +187,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
             .build().post()
             .uri(URI_TEMPLATE, ERO_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(request)
             .exchange()

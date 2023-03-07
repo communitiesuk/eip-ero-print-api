@@ -180,6 +180,7 @@ internal abstract class IntegrationTest {
         val localStackContainer = LocalStackContainerConfiguration.getInstance()
         val sftpContainer = SftpContainerConfiguration.getInstance()
         const val LOCAL_SFTP_OUTBOUND_TEST_DIRECTORY = "src/test/resources/sftp/local/OutBound"
+        const val ERO_ID = "some-city-council"
     }
 
     @TestConfiguration
