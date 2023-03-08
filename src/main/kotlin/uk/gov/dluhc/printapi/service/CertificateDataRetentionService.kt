@@ -19,8 +19,10 @@ class CertificateDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val certificateRepository: CertificateRepository,
     private val deliveryRepository: DeliveryRepository,
-    private val certificateRemovalDateResolver: CertificateRemovalDateResolver
+    private val certificateRemovalDateResolver: CertificateRemovalDateResolver,
+    private val s3CertificatePhotoService: S3CertificatePhotoService
 ) {
+
     /**
      * Sets the initialRetentionRemovalDate on a [uk.gov.dluhc.printapi.database.entity.Certificate], after the
      * originating application is removed from the source system (e.g. VCA).
@@ -62,6 +64,7 @@ class CertificateDataRetentionService(
         logger.info { "Finding certificates with sourceType $sourceType to remove final retention period data from" }
         with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType)) {
             forEach {
+                s3CertificatePhotoService.removeCertificatePhoto(it)
                 certificateRepository.delete(it)
                 logger.info { "Removed remaining data after final retention period from certificate with sourceReference ${it.sourceReference}" }
             }

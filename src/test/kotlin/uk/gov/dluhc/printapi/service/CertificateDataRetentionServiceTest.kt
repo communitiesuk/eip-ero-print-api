@@ -42,6 +42,9 @@ internal class CertificateDataRetentionServiceTest {
     @Mock
     private lateinit var deliveryRepository: DeliveryRepository
 
+    @Mock
+    private lateinit var s3CertificatePhotoService: S3CertificatePhotoService
+
     @InjectMocks
     private lateinit var certificateDataRetentionService: CertificateDataRetentionService
 
@@ -109,12 +112,7 @@ internal class CertificateDataRetentionServiceTest {
             val certificate2 = buildCertificate()
             val delivery1 = certificate1.printRequests[0].delivery!!
             val delivery2 = certificate2.printRequests[0].delivery!!
-            given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(
-                listOf(
-                    certificate1,
-                    certificate2
-                )
-            )
+            given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(listOf(certificate1, certificate2))
 
             // When
             certificateDataRetentionService.removeInitialRetentionPeriodData(VOTER_CARD)
@@ -152,12 +150,7 @@ internal class CertificateDataRetentionServiceTest {
             // Given
             val certificate1 = buildCertificate()
             val certificate2 = buildCertificate()
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(
-                listOf(
-                    certificate1,
-                    certificate2
-                )
-            )
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(listOf(certificate1, certificate2))
 
             // When
             certificateDataRetentionService.removeFinalRetentionPeriodData(VOTER_CARD)
@@ -166,15 +159,15 @@ internal class CertificateDataRetentionServiceTest {
             verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
             verify(certificateRepository).delete(certificate1)
             verify(certificateRepository).delete(certificate2)
+            verify(s3CertificatePhotoService).removeCertificatePhoto(certificate1)
+            verify(s3CertificatePhotoService).removeCertificatePhoto(certificate2)
         }
 
         @Test
         fun `should not remove final retention period data given no certificates found`() {
             // Given
             val certificate = buildCertificate()
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(
-                emptyList()
-            )
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(emptyList())
 
             // When
             certificateDataRetentionService.removeFinalRetentionPeriodData(VOTER_CARD)
@@ -182,6 +175,7 @@ internal class CertificateDataRetentionServiceTest {
             // Then
             verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
             verify(certificateRepository, never()).delete(certificate)
+            verify(s3CertificatePhotoService, never()).removeCertificatePhoto(certificate)
         }
     }
 }
