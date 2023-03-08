@@ -16,6 +16,8 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoBucketPath
 import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.util.UUID
@@ -29,24 +31,24 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
     fun `should remove voter card final retention period data`() {
         // Given
         val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
-        val s3Path1 = "E99999999/6407b6158f529a11713a1e5c/certificate-photos/0d77b2ad-64e7-4aa9-b4de-d58380392962_certificate-photo-1.png"
+        val s3PathPhoto1 = aPhotoBucketPath()
         val certificate1 = buildCertificate(
             sourceReference = "6407b6158f529a11713a1e5c",
             finalRetentionRemovalDate = LocalDate.now().minusDays(1),
-            printRequests = listOf(buildPrintRequest(photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path1"))
+            printRequests = listOf(buildPrintRequest(photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathPhoto1"))
         )
-        val s3Path2 = "E99999999/2304v5134f529a11713a1e6a/certificate-photos/0d21c6de-72d4-5aa2-c4da-c33456252922_certificate-photo-1.png"
+        val s3PathPhoto2 = anotherPhotoBucketPath()
         val certificate2 = buildCertificate(
             sourceReference = "2304v5134f529a11713a1e6a",
             finalRetentionRemovalDate = LocalDate.now().minusDays(1),
-            printRequests = listOf(buildPrintRequest(photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path2"))
+            printRequests = listOf(buildPrintRequest(photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathPhoto2"))
         )
         val certificate3 = buildCertificate(finalRetentionRemovalDate = LocalDate.now()) // should not be removed until tomorrow
         val certificate4 = buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be removed
         certificateRepository.saveAll(listOf(certificate1, certificate2, certificate3, certificate4))
 
-        addCertificatePhotoToS3(s3Bucket, s3Path1)
-        addCertificatePhotoToS3(s3Bucket, s3Path2)
+        addCertificatePhotoToS3(s3Bucket, s3PathPhoto1)
+        addCertificatePhotoToS3(s3Bucket, s3PathPhoto2)
         TestLogAppender.reset()
 
         // When
@@ -61,12 +63,12 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
         assertThat(testPrintRequestRepository.findById(certificate2.printRequests[0].id!!)).isEmpty
         assertThat(testPrintRequestRepository.findById(certificate3.printRequests[0].id!!)).isNotEmpty
         assertThat(testPrintRequestRepository.findById(certificate4.printRequests[0].id!!)).isNotEmpty
-        assertThat(certificatePhotoExists(s3Bucket, s3Path1)).isFalse
-        assertThat(certificatePhotoExists(s3Bucket, s3Path2)).isFalse
+        assertThat(certificatePhotoExists(s3Bucket, s3PathPhoto1)).isFalse
+        assertThat(certificatePhotoExists(s3Bucket, s3PathPhoto2)).isFalse
         assertThat(TestLogAppender.hasLog("Removed remaining data after final retention period from certificate with sourceReference ${certificate1.sourceReference}", Level.INFO)).isTrue
         assertThat(TestLogAppender.hasLog("Removed remaining data after final retention period from certificate with sourceReference ${certificate2.sourceReference}", Level.INFO)).isTrue
-        assertThat(TestLogAppender.hasLog("Deleted certificate photo with s3arn [${certificate1.printRequests[0].photoLocationArn}]", Level.INFO)).isTrue
-        assertThat(TestLogAppender.hasLog("Deleted certificate photo with s3arn [${certificate2.printRequests[0].photoLocationArn}]", Level.INFO)).isTrue
+        assertThat(TestLogAppender.hasLog("Deleted photo with S3 arn [${certificate1.printRequests[0].photoLocationArn}]", Level.INFO)).isTrue
+        assertThat(TestLogAppender.hasLog("Deleted photo with S3 arn [${certificate2.printRequests[0].photoLocationArn}]", Level.INFO)).isTrue
     }
 
     private fun addCertificatePhotoToS3(bucket: String, path: String) {

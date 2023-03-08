@@ -20,7 +20,7 @@ class CertificateDataRetentionService(
     private val certificateRepository: CertificateRepository,
     private val deliveryRepository: DeliveryRepository,
     private val certificateRemovalDateResolver: CertificateRemovalDateResolver,
-    private val s3CertificatePhotoService: S3CertificatePhotoService
+    private val s3CertificatePhotoService: S3PhotoService
 ) {
 
     /**
@@ -64,7 +64,8 @@ class CertificateDataRetentionService(
         logger.info { "Finding certificates with sourceType $sourceType to remove final retention period data from" }
         with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType)) {
             forEach {
-                s3CertificatePhotoService.removeCertificatePhoto(it)
+                // TODO - EIP1-4481 - get s3 arn from certificate instead of print request
+                s3CertificatePhotoService.removePhoto(it.printRequests[0].photoLocationArn!!)
                 certificateRepository.delete(it)
                 logger.info { "Removed remaining data after final retention period from certificate with sourceReference ${it.sourceReference}" }
             }

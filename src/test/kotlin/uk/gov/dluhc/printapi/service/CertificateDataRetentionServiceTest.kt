@@ -24,7 +24,10 @@ import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoArn
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
@@ -43,7 +46,7 @@ internal class CertificateDataRetentionServiceTest {
     private lateinit var deliveryRepository: DeliveryRepository
 
     @Mock
-    private lateinit var s3CertificatePhotoService: S3CertificatePhotoService
+    private lateinit var s3CertificatePhotoService: S3PhotoService
 
     @InjectMocks
     private lateinit var certificateDataRetentionService: CertificateDataRetentionService
@@ -148,8 +151,8 @@ internal class CertificateDataRetentionServiceTest {
         @Test
         fun `should remove final retention period data`() {
             // Given
-            val certificate1 = buildCertificate()
-            val certificate2 = buildCertificate()
+            val certificate1 = buildCertificate(printRequests = listOf(buildPrintRequest(photoLocationArn = aPhotoArn())))
+            val certificate2 = buildCertificate(printRequests = listOf(buildPrintRequest(photoLocationArn = anotherPhotoArn())))
             given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(listOf(certificate1, certificate2))
 
             // When
@@ -159,8 +162,8 @@ internal class CertificateDataRetentionServiceTest {
             verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
             verify(certificateRepository).delete(certificate1)
             verify(certificateRepository).delete(certificate2)
-            verify(s3CertificatePhotoService).removeCertificatePhoto(certificate1)
-            verify(s3CertificatePhotoService).removeCertificatePhoto(certificate2)
+            verify(s3CertificatePhotoService).removePhoto(certificate1.printRequests[0].photoLocationArn!!)
+            verify(s3CertificatePhotoService).removePhoto(certificate2.printRequests[0].photoLocationArn!!)
         }
 
         @Test
@@ -175,7 +178,7 @@ internal class CertificateDataRetentionServiceTest {
             // Then
             verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
             verify(certificateRepository, never()).delete(certificate)
-            verify(s3CertificatePhotoService, never()).removeCertificatePhoto(certificate)
+            verify(s3CertificatePhotoService, never()).removePhoto(certificate.printRequests[0].photoLocationArn!!)
         }
     }
 }
