@@ -19,10 +19,11 @@ class S3PhotoService(
         try {
             with(parseS3Arn(photoS3Arn)) {
                 s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(path).build())
-                logger.info { "Deleted photo with S3 arn [$photoS3Arn]" }
+                logger.debug { "Deleted photo with S3 arn [$photoS3Arn]" }
             }
         } catch (e: SdkException) {
             logger.warn { "Unable to delete photo with S3 arn [$photoS3Arn] due to error [${e.cause?.message ?: e.cause}]" }
+            throw e
         }
     }
 }

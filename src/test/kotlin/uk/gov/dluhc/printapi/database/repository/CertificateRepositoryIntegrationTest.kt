@@ -436,20 +436,21 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
         @Test
         fun `should find certificates for removal of final retention period data`() {
             // Given
-            val expected1 = buildCertificate(
+            val certificate1 = buildCertificate(
                 finalRetentionRemovalDate = LocalDate.now().minusDays(1)
             )
-            val expected2 = buildCertificate(
+            val certificate2 = buildCertificate(
                 finalRetentionRemovalDate = LocalDate.now().minusDays(1)
             )
-            val other = buildCertificate(
+            val certificate3 = buildCertificate(
                 finalRetentionRemovalDate = LocalDate.now().plusDays(1)
             )
-
-            certificateRepository.saveAll(listOf(expected1, expected2, other))
+            certificateRepository.saveAll(listOf(certificate1, certificate2, certificate3))
+            val expected1 = CertificateRemovalSummary(certificate1.id, certificate1.applicationReference) // TODO EIP1-4307 - change to photoLocationArn
+            val expected2 = CertificateRemovalSummary(certificate2.id, certificate2.applicationReference) // TODO EIP1-4307 - change to photoLocationArn
 
             // When
-            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)
+            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)

@@ -8,18 +8,25 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.quality.Strictness
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
+import uk.gov.dluhc.printapi.database.repository.CertificateRemovalSummary
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
+import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
@@ -29,8 +36,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedM
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoArn
 import java.time.LocalDate
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 internal class CertificateDataRetentionServiceTest {
 
     @Mock
@@ -47,6 +56,9 @@ internal class CertificateDataRetentionServiceTest {
 
     @Mock
     private lateinit var s3CertificatePhotoService: S3PhotoService
+
+    @Mock
+    private lateinit var removeCertificateQueue: MessageQueue<RemoveCertificateMessage>
 
     @InjectMocks
     private lateinit var certificateDataRetentionService: CertificateDataRetentionService
@@ -147,38 +159,60 @@ internal class CertificateDataRetentionServiceTest {
     }
 
     @Nested
-    inner class RemoveFinalRetentionPeriodData {
+    inner class QueueCertificatesForRemoval {
         @Test
-        fun `should remove final retention period data`() {
+        fun `should queue certificates for removal`() {
             // Given
             val certificate1 = buildCertificate(printRequests = listOf(buildPrintRequest(photoLocationArn = aPhotoArn())))
             val certificate2 = buildCertificate(printRequests = listOf(buildPrintRequest(photoLocationArn = anotherPhotoArn())))
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(listOf(certificate1, certificate2))
+            val certificateRemovalSummary1 = CertificateRemovalSummary(certificate1.id!!, certificate1.printRequests[0].photoLocationArn)
+            val certificateRemovalSummary2 = CertificateRemovalSummary(certificate2.id!!, certificate2.printRequests[0].photoLocationArn)
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)).willReturn(
+                PageImpl(listOf(certificateRemovalSummary1, certificateRemovalSummary2))
+            )
+            TestLogAppender.reset()
 
             // When
-            certificateDataRetentionService.removeFinalRetentionPeriodData(VOTER_CARD)
+            certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
 
             // Then
-            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
-            verify(certificateRepository).delete(certificate1)
-            verify(certificateRepository).delete(certificate2)
-            verify(s3CertificatePhotoService).removePhoto(certificate1.printRequests[0].photoLocationArn!!)
-            verify(s3CertificatePhotoService).removePhoto(certificate2.printRequests[0].photoLocationArn!!)
+            verify(certificateRepository, times(2)).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)
+            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary1.id!!, certificateRemovalSummary1.applicationReference!!)) // TODO EIP1-4307 - change to photoLocationArn
+            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary2.id!!, certificateRemovalSummary2.applicationReference!!)) // TODO EIP1-4307 - change to photoLocationArn
+            assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove final retention period data from", Level.INFO)).isTrue
         }
 
         @Test
-        fun `should not remove final retention period data given no certificates found`() {
+        fun `should not queue certificates for removal given no certificates due to be removed`() {
             // Given
             val certificate = buildCertificate()
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(emptyList())
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)).willReturn(Page.empty())
+            TestLogAppender.reset()
 
             // When
-            certificateDataRetentionService.removeFinalRetentionPeriodData(VOTER_CARD)
+            certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
 
             // Then
-            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)
             verify(certificateRepository, never()).delete(certificate)
-            verify(s3CertificatePhotoService, never()).removePhoto(certificate.printRequests[0].photoLocationArn!!)
+            assertThat(TestLogAppender.hasLog("No certificates with sourceType VOTER_CARD to remove final retention period data from", Level.INFO)).isTrue
+        }
+    }
+
+    @Nested
+    inner class RemoveFinalRetentionPeriodData {
+
+        @Test
+        fun `should remove certificate final retention data`() {
+            // Given
+            val message = RemoveCertificateMessage(certificateId = UUID.randomUUID(), certificatePhotoArn = aPhotoArn())
+
+            // When
+            certificateDataRetentionService.removeFinalRetentionPeriodData(message)
+
+            // Then
+            verify(s3CertificatePhotoService).removePhoto(message.certificatePhotoArn)
+            verify(certificateRepository).deleteById(message.certificateId)
         }
     }
 }

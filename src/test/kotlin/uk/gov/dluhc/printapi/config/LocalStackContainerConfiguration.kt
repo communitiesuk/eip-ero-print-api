@@ -111,13 +111,15 @@ class LocalStackContainerConfiguration {
         @Value("\${sqs.process-print-request-batch-queue-name}") processPrintRequestBatchQueueName: String,
         @Value("\${sqs.process-print-response-file-queue-name}") processPrintResponseFileQueueName: String,
         @Value("\${sqs.process-print-response-queue-name}") processPrintResponsesQueueName: String,
-        @Value("\${sqs.application-removed-queue-name}") applicationRemovedQueueName: String
+        @Value("\${sqs.application-removed-queue-name}") applicationRemovedQueueName: String,
+        @Value("\${sqs.remove-certificate-queue-name}") removeCertificateQueueName: String
     ): LocalStackContainerSettings {
         val queueUrlSendApplicationToPrint = localStackContainer.createSqsQueue(sendApplicationToPrintQueueName)
         val queueUrlProcessPrintBatchRequest = localStackContainer.createSqsQueue(processPrintRequestBatchQueueName)
         val queueUrlProcessPrintResponseFile = localStackContainer.createSqsQueue(processPrintResponseFileQueueName)
         val queueUrlProcessPrintResponses = localStackContainer.createSqsQueue(processPrintResponsesQueueName)
         val queueUrlApplicationRemoved = localStackContainer.createSqsQueue(applicationRemovedQueueName)
+        val queueUrlRemoveCertificate = localStackContainer.createSqsQueue(removeCertificateQueueName)
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
 
         TestPropertyValues.of(
@@ -130,7 +132,8 @@ class LocalStackContainerConfiguration {
             queueUrlProcessPrintBatchRequest = queueUrlProcessPrintBatchRequest,
             queueUrlProcessPrintResponseFile = queueUrlProcessPrintResponseFile,
             queueUrlProcessPrintResponses = queueUrlProcessPrintResponses,
-            queueUrlApplicationRemoved = queueUrlApplicationRemoved
+            queueUrlApplicationRemoved = queueUrlApplicationRemoved,
+            queueUrlRemoveCertificate = queueUrlRemoveCertificate
         )
     }
 
@@ -151,13 +154,15 @@ class LocalStackContainerConfiguration {
         val queueUrlProcessPrintBatchRequest: String,
         val queueUrlProcessPrintResponseFile: String,
         val queueUrlProcessPrintResponses: String,
-        val queueUrlApplicationRemoved: String
+        val queueUrlApplicationRemoved: String,
+        val queueUrlRemoveCertificate: String
     ) {
         val mappedQueueUrlSendApplicationToPrint: String = toMappedUrl(queueUrlSendApplicationToPrint, apiUrl)
         val mappedQueueUrlProcessPrintBatchRequest: String = toMappedUrl(queueUrlProcessPrintBatchRequest, apiUrl)
         val mappedQueueUrlProcessPrintResponseFile: String = toMappedUrl(queueUrlProcessPrintResponseFile, apiUrl)
         val mappedQueueUrlProcessPrintResponses: String = toMappedUrl(queueUrlProcessPrintResponses, apiUrl)
         val mappedQueueUrlApplicationRemoved: String = toMappedUrl(queueUrlApplicationRemoved, apiUrl)
+        val mappedQueueUrlRemoveCertificate: String = toMappedUrl(queueUrlRemoveCertificate, apiUrl)
 
         private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {
             val rawUrl = URI.create(rawUrlString)

@@ -42,6 +42,7 @@ import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
+import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
@@ -110,6 +111,9 @@ internal abstract class IntegrationTest {
     protected lateinit var processPrintResponseMessageQueue: MessageQueue<ProcessPrintResponseMessage>
 
     @Autowired
+    protected lateinit var removeCertificateMessageQueue: MessageQueue<RemoveCertificateMessage>
+
+    @Autowired
     protected lateinit var objectMapper: ObjectMapper
 
     @Value("\${sqs.send-application-to-print-queue-name}")
@@ -123,6 +127,9 @@ internal abstract class IntegrationTest {
 
     @Value("\${sqs.application-removed-queue-name}")
     protected lateinit var applicationRemovedQueueName: String
+
+    @Value("\${sqs.remove-certificate-queue-name}")
+    protected lateinit var removeCertificateQueueName: String
 
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository

@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -9,8 +10,9 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
+import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
-import javax.transaction.Transactional
+import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 
 private val logger = KotlinLogging.logger {}
 
@@ -20,7 +22,8 @@ class CertificateDataRetentionService(
     private val certificateRepository: CertificateRepository,
     private val deliveryRepository: DeliveryRepository,
     private val certificateRemovalDateResolver: CertificateRemovalDateResolver,
-    private val s3CertificatePhotoService: S3PhotoService
+    private val s3CertificatePhotoService: S3PhotoService,
+    private val removeCertificateQueue: MessageQueue<RemoveCertificateMessage>
 ) {
 
     /**
@@ -59,16 +62,40 @@ class CertificateDataRetentionService(
         }
     }
 
-    @Transactional
-    fun removeFinalRetentionPeriodData(sourceType: SourceType) {
-        logger.info { "Finding certificates with sourceType $sourceType to remove final retention period data from" }
-        with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType)) {
-            forEach {
-                // TODO - EIP1-4481 - get s3 arn from certificate instead of print request
-                s3CertificatePhotoService.removePhoto(it.printRequests[0].photoLocationArn!!)
-                certificateRepository.delete(it)
-                logger.info { "Removed remaining data after final retention period from certificate with sourceReference ${it.sourceReference}" }
+    /**
+     * Finds Certificates that are due for removal and places each one on a queue to be processed separately. The data
+     * that is kept on the Certificate itself must be kept until the tenth 1st July (so nearly 10 years), which means
+     * there could be a very large number to remove on the 1st July. Because of this, this method retrieves the required
+     * "identifiers" (namely the Certificate ID and Photo S3 arn) in "pages" (batches) of 1000 at a time.
+     */
+    @Transactional(readOnly = true)
+    fun queueCertificatesForRemoval(sourceType: SourceType) {
+        val pagedResults = certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, pageNumber = 0)
+        if (pagedResults.isEmpty) {
+            logger.info { "No certificates with sourceType $sourceType to remove final retention period data from" }
+            return
+        }
+
+        logger.info { "Found ${pagedResults.totalElements} certificates with sourceType $sourceType to remove final retention period data from" }
+        // items are removed as we go through them (via the SQS queue), so start at the last page
+        var pageNumber = pagedResults.totalPages - 1
+        while (pageNumber >= 0) {
+            with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, pageNumber = pageNumber)) {
+                forEach { removeCertificateQueue.submit(RemoveCertificateMessage(it.id!!, it.applicationReference!!)) } // TODO EIP1-4307 - change to photoLocationArn
+                pageNumber--
             }
+        }
+    }
+
+    /**
+     * Removes any remaining Certificate data from the database, as well as its photo in S3. This method processes each
+     * message placed on the `removeCertificateQueue` in `removeFinalRetentionPeriodData()` above.
+     */
+    @Transactional
+    fun removeFinalRetentionPeriodData(message: RemoveCertificateMessage) {
+        with(message) {
+            s3CertificatePhotoService.removePhoto(certificatePhotoArn)
+            certificateRepository.deleteById(certificateId)
         }
     }
 

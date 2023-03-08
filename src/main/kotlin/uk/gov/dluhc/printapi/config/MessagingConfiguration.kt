@@ -16,6 +16,7 @@ import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
+import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 
 @Configuration
 class MessagingConfiguration {
@@ -29,6 +30,9 @@ class MessagingConfiguration {
     @Value("\${sqs.process-print-response-queue-name}")
     private lateinit var processPrintResponseQueueName: String
 
+    @Value("\${sqs.remove-certificate-queue-name}")
+    private lateinit var removeCertificateQueueName: String
+
     @Bean
     fun processPrintRequestBatchQueue(queueMessagingTemplate: QueueMessagingTemplate) =
         MessageQueue<ProcessPrintRequestBatchMessage>(processPrintRequestBatchQueueName, queueMessagingTemplate)
@@ -40,6 +44,10 @@ class MessagingConfiguration {
     @Bean
     fun processPrintResponseQueue(queueMessagingTemplate: QueueMessagingTemplate) =
         MessageQueue<ProcessPrintResponseMessage>(processPrintResponseQueueName, queueMessagingTemplate)
+
+    @Bean
+    fun removeCertificateQueue(queueMessagingTemplate: QueueMessagingTemplate) =
+        MessageQueue<RemoveCertificateMessage>(removeCertificateQueueName, queueMessagingTemplate)
 
     @Bean
     fun queueMessageHandlerFactory(
