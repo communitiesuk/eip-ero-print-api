@@ -10,12 +10,10 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucket
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 import java.io.ByteArrayInputStream
-import java.time.LocalDate
-import java.time.Month.APRIL
 import java.util.concurrent.TimeUnit
 
 internal class RemoveCertificateMessageListenerTest : IntegrationTest() {
@@ -23,22 +21,16 @@ internal class RemoveCertificateMessageListenerTest : IntegrationTest() {
     @Test
     fun `should remove certificate`() {
         // Given
-        val certificate = buildCertificate(
-            issueDate = LocalDate.of(2023, APRIL, 1), // to include 3 bank holidays in calculation
-            printRequests = listOf(
-                buildPrintRequest(delivery = buildDelivery()),
-                buildPrintRequest(delivery = buildDelivery())
-            )
-        )
+        val certificate = buildCertificate()
         certificateRepository.save(certificate)
-        val s3PhotoBucket = aPhotoBucket()
-        val s3PhotoArn = certificate.printRequests[0].photoLocationArn!! // TODO EIP1-4307 - switch to photoLocationArn on certificate once in place
-        addCertificatePhotoToS3(s3PhotoBucket, s3PhotoArn)
         val certificateId = certificate.id!!
+        val s3PhotoBucket = aPhotoBucket()
+        val s3PhotoPath = aPhotoBucketPath()
+        addCertificatePhotoToS3(s3PhotoBucket, s3PhotoPath)
 
         val payload = RemoveCertificateMessage(
             certificateId = certificateId,
-            certificatePhotoArn = s3PhotoArn
+            certificatePhotoArn = aPhotoArn()
         )
 
         // When
@@ -47,7 +39,7 @@ internal class RemoveCertificateMessageListenerTest : IntegrationTest() {
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
             assertThat(certificateRepository.findById(certificateId)).isEmpty
-            assertThat(certificatePhotoExists(s3PhotoBucket, s3PhotoArn)).isFalse
+            assertThat(certificatePhotoExists(s3PhotoBucket, s3PhotoPath)).isFalse
         }
     }
 
