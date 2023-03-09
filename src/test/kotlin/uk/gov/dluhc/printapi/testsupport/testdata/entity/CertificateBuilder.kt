@@ -58,6 +58,7 @@ fun buildCertificate(
         )
     ),
     gssCode: String = aGssCode(),
+    photoLocationArn: String = aPhotoArn(),
     sourceType: SourceType = aValidSourceType(),
     sourceReference: String = aValidSourceReference(),
     applicationReceivedDateTime: Instant = aValidApplicationReceivedDateTime(),
@@ -66,6 +67,8 @@ fun buildCertificate(
     initialRetentionRemovalDate: LocalDate? = null,
     initialRetentionDataRemoved: Boolean = false,
     finalRetentionRemovalDate: LocalDate? = null,
+    issuingAuthority: String = aValidIssuingAuthority(),
+    issuingAuthorityCy: String? = null,
 ): Certificate {
     val certificate = Certificate(
         id = id,
@@ -74,10 +77,12 @@ fun buildCertificate(
         sourceReference = sourceReference,
         applicationReference = applicationReference,
         applicationReceivedDateTime = applicationReceivedDateTime,
-        issuingAuthority = aValidIssuingAuthority(),
+        issuingAuthority = issuingAuthority,
+        issuingAuthorityCy = issuingAuthorityCy,
         issueDate = issueDate,
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
         gssCode = gssCode,
+        photoLocationArn = photoLocationArn,
         status = status,
         initialRetentionRemovalDate = initialRetentionRemovalDate,
         initialRetentionDataRemoved = initialRetentionDataRemoved,
@@ -95,7 +100,6 @@ fun buildPrintRequest(
     eroWelsh: ElectoralRegistrationOffice? = null,
     delivery: Delivery = buildDelivery(),
     batchId: String? = null,
-    photoLocationArn: String? = aPhotoArn(),
     userId: String = aValidUserId(),
 ): PrintRequest {
     val printRequest = PrintRequest(
@@ -106,7 +110,6 @@ fun buildPrintRequest(
         surname = aValidSurname(),
         certificateLanguage = aValidCertificateLanguage(),
         supportingInformationFormat = aValidSupportingInformationFormat(),
-        photoLocationArn = photoLocationArn,
         delivery = delivery,
         eroEnglish = eroEnglish,
         eroWelsh = eroWelsh,

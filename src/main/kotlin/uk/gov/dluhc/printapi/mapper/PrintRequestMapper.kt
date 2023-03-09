@@ -35,7 +35,6 @@ abstract class PrintRequestMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "vacVersion", constant = "A")
     @Mapping(target = "requestId", expression = "java( idFactory.requestId() )")
-    @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     @Mapping(target = "statusHistory", expression = "java( initialStatus() )")
     @Mapping(target = "eroEnglish", expression = "java( toEnglishContactDetails(ero) )")
     @Mapping(target = "eroWelsh", expression = "java( toWelshContactDetails(message, ero) )")

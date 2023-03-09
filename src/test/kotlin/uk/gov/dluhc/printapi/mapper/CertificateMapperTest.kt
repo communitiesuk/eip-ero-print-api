@@ -77,7 +77,6 @@ class CertificateMapperTest {
                 middleNames = middleNames,
                 surname = surname,
                 certificateLanguage = CertificateLanguageEntity.EN,
-                photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(
                         addressee = addressee,
@@ -125,6 +124,7 @@ class CertificateMapperTest {
                 issueDate = LocalDate.now(),
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                photoLocationArn = photoLocation,
             )
         }
 
@@ -163,7 +163,6 @@ class CertificateMapperTest {
                 middleNames = middleNames,
                 surname = surname,
                 certificateLanguage = CertificateLanguageEntity.EN,
-                photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(
                         addressee = addressee,
@@ -211,6 +210,7 @@ class CertificateMapperTest {
                 issueDate = LocalDate.now(),
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                photoLocationArn = photoLocation,
             )
         }
 

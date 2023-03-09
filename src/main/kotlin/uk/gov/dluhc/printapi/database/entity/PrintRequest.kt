@@ -66,10 +66,6 @@ class PrintRequest(
     @Enumerated(EnumType.STRING)
     var supportingInformationFormat: SupportingInformationFormat? = null,
 
-    @field:NotNull
-    @field:Size(max = 255)
-    var photoLocationArn: String? = null,
-
     @OneToOne(cascade = [CascadeType.ALL])
     var delivery: Delivery? = null,
 

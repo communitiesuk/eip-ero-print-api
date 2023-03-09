@@ -53,11 +53,11 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         // save certificates in MySQL
         var certificate = buildCertificate(
             status = ASSIGNED_TO_BATCH,
+            photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
             printRequests = mutableListOf(
                 buildPrintRequest(
                     batchId = batchId,
                     requestId = requestId,
-                    photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
                     printRequestStatuses = listOf(
                         buildPrintRequestStatus(
                             status = ASSIGNED_TO_BATCH,
@@ -118,11 +118,11 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         // save certificates in MySQL
         var certificate = buildCertificate(
             status = ASSIGNED_TO_BATCH,
+            photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
             printRequests = mutableListOf(
                 buildPrintRequest(
                     batchId = batchId,
                     requestId = firstRequestId,
-                    photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
                     printRequestStatuses = listOf(
                         buildPrintRequestStatus(
                             status = ASSIGNED_TO_BATCH,
@@ -133,7 +133,6 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
                 buildPrintRequest(
                     batchId = batchId,
                     requestId = secondRequestId,
-                    photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
                     printRequestStatuses = listOf(
                         buildPrintRequestStatus(
                             status = ASSIGNED_TO_BATCH,

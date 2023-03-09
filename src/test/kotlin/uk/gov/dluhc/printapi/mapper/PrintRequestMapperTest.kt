@@ -113,7 +113,6 @@ class PrintRequestMapperTest {
                 surname = surname,
                 certificateLanguage = certificateLanguageEntity,
                 supportingInformationFormat = supportingInformationFormatEntityEnum,
-                photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(
                         addressee = addressee,
@@ -203,7 +202,6 @@ class PrintRequestMapperTest {
                 surname = surname,
                 certificateLanguage = CertificateLanguageEntity.EN,
                 supportingInformationFormat = supportingInformationFormatEntityEnum,
-                photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(
                         addressee = addressee,
@@ -289,7 +287,6 @@ class PrintRequestMapperTest {
                 surname = surname,
                 certificateLanguage = CertificateLanguageEntity.CY,
                 supportingInformationFormat = supportingInformationFormatEntityEnum,
-                photoLocationArn = photoLocation,
                 delivery = with(delivery) {
                     Delivery(
                         addressee = addressee,

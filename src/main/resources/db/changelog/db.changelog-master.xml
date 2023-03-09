@@ -24,4 +24,5 @@
     <include relativeToChangelogFile="true" file="ddl/0015_refactor_anonymous_elector_document_tables.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0016_final_retention_data_removed_column.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0017_anonymous_elector_document_source_type.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0018_EIP1-4481_alter_photo_location_arn_column_in_tables.xml"/>
 </databaseChangeLog>

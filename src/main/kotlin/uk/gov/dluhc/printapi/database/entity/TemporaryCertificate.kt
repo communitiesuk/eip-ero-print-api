@@ -84,7 +84,7 @@ class TemporaryCertificate(
     var certificateLanguage: CertificateLanguage? = null,
 
     @field:NotNull
-    @field:Size(max = 255)
+    @field:Size(max = 1024)
     var photoLocationArn: String? = null,
 
     @field:NotNull

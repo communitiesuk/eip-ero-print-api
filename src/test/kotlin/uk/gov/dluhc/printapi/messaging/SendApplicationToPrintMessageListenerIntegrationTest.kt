@@ -43,6 +43,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
+import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage as SqsCertificateLanguage
 import uk.gov.dluhc.printapi.messaging.models.DeliveryAddressType as SqsDeliveryAddressType
 import uk.gov.dluhc.printapi.messaging.models.SourceType as SqsSourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAddress as buildDeliveryAddress
@@ -63,12 +64,14 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val payload = buildSendApplicationToPrintMessage(
             gssCode = gssCode,
             supportingInformationFormat = EASY_MINUS_READ,
-            certificateLanguage = uk.gov.dluhc.printapi.messaging.models.CertificateLanguage.CY
+            certificateLanguage = SqsCertificateLanguage.CY
         )
+
+        val payloadPhotoLocationArn = payload.photoLocation
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
 
         val expected = with(payload) {
-            val certificate = Certificate(
+            val certificate = buildCertificate(
                 id = UUID.randomUUID(),
                 sourceReference = sourceReference,
                 applicationReference = applicationReference,
@@ -79,6 +82,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 issuingAuthority = localAuthority.contactDetailsEnglish.name,
                 issuingAuthorityCy = localAuthority.contactDetailsWelsh?.name,
                 issueDate = LocalDate.now(),
+                photoLocationArn = payloadPhotoLocationArn,
             )
             val printRequest = toPrintRequest(localAuthority, SupportingInformationFormat.EASY_READ, CertificateLanguage.CY)
             certificate.addPrintRequest(printRequest)
@@ -235,7 +239,6 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             surname = surname,
             certificateLanguage = certificateLanguage,
             supportingInformationFormat = supportingInfoFormat,
-            photoLocationArn = photoLocation,
             delivery = with(delivery) {
                 Delivery(
                     addressee = addressee,
@@ -320,6 +323,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             .hasSuggestedExpiryDate(expected.suggestedExpiryDate)
             .hasStatus(expected.status)
             .hasGssCode(expected.gssCode)
+            .hasPhotoLocationArn(expected.photoLocationArn)
             .hasPrintRequests(expected.printRequests)
             .hasDateCreated()
             .hasCreatedBy()
