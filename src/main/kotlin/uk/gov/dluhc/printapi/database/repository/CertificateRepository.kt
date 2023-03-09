@@ -93,5 +93,5 @@ object CertificateRepositoryExtensions {
  */
 data class CertificateRemovalSummary(
     val id: UUID? = null,
-    val applicationReference: String? // TODO EIP1-4307 - change to photoLocationArn
+    val photoLocationArn: String?
 )

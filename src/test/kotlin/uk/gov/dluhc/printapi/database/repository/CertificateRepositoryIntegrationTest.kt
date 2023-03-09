@@ -466,8 +466,8 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 finalRetentionRemovalDate = LocalDate.now().plusDays(1)
             )
             certificateRepository.saveAll(listOf(certificate1, certificate2, certificate3))
-            val expected1 = CertificateRemovalSummary(certificate1.id, certificate1.applicationReference) // TODO EIP1-4307 - change to photoLocationArn
-            val expected2 = CertificateRemovalSummary(certificate2.id, certificate2.applicationReference) // TODO EIP1-4307 - change to photoLocationArn
+            val expected1 = CertificateRemovalSummary(certificate1.id, certificate1.photoLocationArn)
+            val expected2 = CertificateRemovalSummary(certificate2.id, certificate2.photoLocationArn)
 
             // When
             val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, 10000)

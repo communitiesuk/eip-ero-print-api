@@ -88,7 +88,7 @@ class CertificateDataRetentionService(
         while (batchNumber > 0) {
             logger.info { "Retrieving batch [$batchNumber] of [$totalBatches] of CertificateRemovalSummary" }
             with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, batchNumber = batchNumber, batchSize = batchSize)) {
-                forEach { removeCertificateQueue.submit(RemoveCertificateMessage(it.id!!, it.applicationReference!!)) } // TODO EIP1-4307 - change to photoLocationArn
+                forEach { removeCertificateQueue.submit(RemoveCertificateMessage(it.id!!, it.photoLocationArn!!)) }
                 batchNumber--
             }
         }

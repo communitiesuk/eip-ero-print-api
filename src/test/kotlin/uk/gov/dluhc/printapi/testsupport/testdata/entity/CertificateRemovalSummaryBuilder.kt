@@ -6,6 +6,6 @@ import java.util.UUID
 
 fun buildCertificateRemovalSummary(
     id: UUID? = UUID.randomUUID(),
-    applicationReference: String = aPhotoArn() // TODO EIP1-4307 - change to photoLocationArn
+    photoLocationArn: String = aPhotoArn()
 ): CertificateRemovalSummary =
-    CertificateRemovalSummary(id = id, applicationReference = applicationReference)
+    CertificateRemovalSummary(id = id, photoLocationArn = photoLocationArn)

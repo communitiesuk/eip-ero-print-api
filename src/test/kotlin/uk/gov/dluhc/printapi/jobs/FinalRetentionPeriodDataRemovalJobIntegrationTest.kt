@@ -33,13 +33,13 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
         val certificate1 = buildCertificate(
             sourceReference = "6407b6158f529a11713a1e5c",
             finalRetentionRemovalDate = LocalDate.now().minusDays(1),
-            applicationReference = "arn:aws:s3:::$s3Bucket/$s3PathPhoto1", // TODO EIP1-4307 - switch to photoLocationArn once in place
+            photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathPhoto1"
         )
         val s3PathPhoto2 = anotherPhotoBucketPath()
         val certificate2 = buildCertificate(
             sourceReference = "2304v5134f529a11713a1e6a",
             finalRetentionRemovalDate = LocalDate.now().minusDays(1),
-            applicationReference = "arn:aws:s3:::$s3Bucket/$s3PathPhoto2", // TODO EIP1-4307 - switch to photoLocationArn once in place
+            photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathPhoto2"
         )
         val certificate3 = buildCertificate(finalRetentionRemovalDate = LocalDate.now()) // should not be removed until tomorrow
         val certificate4 = buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be removed

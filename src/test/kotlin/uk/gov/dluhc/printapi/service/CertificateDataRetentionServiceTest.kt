@@ -177,8 +177,8 @@ internal class CertificateDataRetentionServiceTest {
             // Then
             verify(certificateRepository).countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)
             verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, batchSize)
-            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary1.id!!, certificateRemovalSummary1.applicationReference!!)) // TODO EIP1-4307 - change to photoLocationArn
-            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary2.id!!, certificateRemovalSummary2.applicationReference!!)) // TODO EIP1-4307 - change to photoLocationArn
+            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary1.id!!, certificateRemovalSummary1.photoLocationArn!!))
+            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary2.id!!, certificateRemovalSummary2.photoLocationArn!!))
             assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
         }
 
