@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.service
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -23,7 +24,8 @@ class CertificateDataRetentionService(
     private val deliveryRepository: DeliveryRepository,
     private val certificateRemovalDateResolver: CertificateRemovalDateResolver,
     private val s3CertificatePhotoService: S3PhotoService,
-    private val removeCertificateQueue: MessageQueue<RemoveCertificateMessage>
+    private val removeCertificateQueue: MessageQueue<RemoveCertificateMessage>,
+    private val dataRetentionConfiguration: DataRetentionConfiguration
 ) {
 
     /**
@@ -66,23 +68,28 @@ class CertificateDataRetentionService(
      * Finds Certificates that are due for removal and places each one on a queue to be processed separately. The data
      * that is kept on the Certificate itself must be kept until the tenth 1st July (so nearly 10 years), which means
      * there could be a very large number to remove on the 1st July. Because of this, this method retrieves the required
-     * "identifiers" (namely the Certificate ID and Photo S3 arn) in "pages" (batches) of 1000 at a time.
+     * "identifiers" (namely the Certificate ID and Photo S3 arn) in batches of 10,000 at a time.
      */
     @Transactional(readOnly = true)
     fun queueCertificatesForRemoval(sourceType: SourceType) {
-        val pagedResults = certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, pageNumber = 0)
-        if (pagedResults.isEmpty) {
+        val batchSize = dataRetentionConfiguration.certificateRemovalBatchSize
+        val batchedResults = certificateRepository.findPendingRemovalOfFinalRetentionData(
+            sourceType = sourceType,
+            batchIndex = 0,
+            batchSize = batchSize
+        )
+        if (batchedResults.isEmpty) {
             logger.info { "No certificates with sourceType $sourceType to remove final retention period data from" }
             return
         }
 
-        logger.info { "Found ${pagedResults.totalElements} certificates with sourceType $sourceType to remove final retention period data from" }
-        // items are removed as we go through them (via the SQS queue), so start at the last page
-        var pageNumber = pagedResults.totalPages - 1
-        while (pageNumber >= 0) {
-            with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, pageNumber = pageNumber)) {
+        logger.info { "Found ${batchedResults.totalElements} certificates with sourceType $sourceType to remove final retention period data from" }
+        // items are removed as we go through them (via the SQS queue), so start at the last batch
+        var batchIndex = batchedResults.totalPages - 1
+        while (batchIndex >= 0) {
+            with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, batchIndex = batchIndex, batchSize = batchSize)) {
                 forEach { removeCertificateQueue.submit(RemoveCertificateMessage(it.id!!, it.applicationReference!!)) } // TODO EIP1-4307 - change to photoLocationArn
-                pageNumber--
+                batchIndex--
             }
         }
     }

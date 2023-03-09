@@ -30,7 +30,7 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
     private lateinit var testPrintRequestRepository: TestPrintRequestRepository
 
     @Test
-    fun `should remove voter card final retention period data`() {
+    fun `should remove voter card certificate final retention period data`() {
         // Given
         val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
         val s3PathPhoto1 = aPhotoBucketPath()

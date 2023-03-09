@@ -36,7 +36,7 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
     fun findBySourceTypeAndFinalRetentionRemovalDateBefore(
         sourceType: SourceType,
         finalRetentionRemovalDate: LocalDate,
-        pageRequest: Pageable
+        batchRequest: Pageable
     ): Page<CertificateRemovalSummary>
 
     @Query(
@@ -63,17 +63,21 @@ object CertificateRepositoryExtensions {
         )
     }
 
-    fun CertificateRepository.findPendingRemovalOfFinalRetentionData(sourceType: SourceType, pageNumber: Int): Page<CertificateRemovalSummary> {
-        val pageRequest: Pageable = PageRequest.of(
-            pageNumber,
-            1000,
+    fun CertificateRepository.findPendingRemovalOfFinalRetentionData(
+        sourceType: SourceType,
+        batchIndex: Int,
+        batchSize: Int = 10000
+    ): Page<CertificateRemovalSummary> {
+        val batchRequest = PageRequest.of(
+            batchIndex,
+            batchSize,
             Sort.by(Sort.Direction.ASC, "issueDate")
         )
 
         return findBySourceTypeAndFinalRetentionRemovalDateBefore(
             sourceType = sourceType,
             finalRetentionRemovalDate = LocalDate.now(),
-            pageRequest = pageRequest
+            batchRequest = batchRequest
         )
     }
 }

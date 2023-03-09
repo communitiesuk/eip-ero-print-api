@@ -450,7 +450,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val expected2 = CertificateRemovalSummary(certificate2.id, certificate2.applicationReference) // TODO EIP1-4307 - change to photoLocationArn
 
             // When
-            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)
+            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, 10000)
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)

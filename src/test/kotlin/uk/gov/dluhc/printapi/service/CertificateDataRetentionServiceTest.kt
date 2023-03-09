@@ -8,18 +8,17 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.quality.Strictness
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
-import uk.gov.dluhc.printapi.database.repository.CertificateRemovalSummary
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
@@ -31,15 +30,13 @@ import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificateRemovalSummary
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
-import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoArn
 import java.time.LocalDate
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 internal class CertificateDataRetentionServiceTest {
 
     @Mock
@@ -59,6 +56,9 @@ internal class CertificateDataRetentionServiceTest {
 
     @Mock
     private lateinit var removeCertificateQueue: MessageQueue<RemoveCertificateMessage>
+
+    @Mock
+    private lateinit var dataRetentionConfiguration: DataRetentionConfiguration
 
     @InjectMocks
     private lateinit var certificateDataRetentionService: CertificateDataRetentionService
@@ -163,37 +163,65 @@ internal class CertificateDataRetentionServiceTest {
         @Test
         fun `should queue certificates for removal`() {
             // Given
-            val certificate1 = buildCertificate(printRequests = listOf(buildPrintRequest(photoLocationArn = aPhotoArn())))
-            val certificate2 = buildCertificate(printRequests = listOf(buildPrintRequest(photoLocationArn = anotherPhotoArn())))
-            val certificateRemovalSummary1 = CertificateRemovalSummary(certificate1.id!!, certificate1.printRequests[0].photoLocationArn)
-            val certificateRemovalSummary2 = CertificateRemovalSummary(certificate2.id!!, certificate2.printRequests[0].photoLocationArn)
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)).willReturn(
-                PageImpl(listOf(certificateRemovalSummary1, certificateRemovalSummary2))
-            )
+            val certificateRemovalSummary1 = buildCertificateRemovalSummary()
+            val certificateRemovalSummary2 = buildCertificateRemovalSummary()
+            val batchSize = 10000
+            given(dataRetentionConfiguration.certificateRemovalBatchSize).willReturn(batchSize)
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, batchSize))
+                .willReturn(PageImpl(listOf(certificateRemovalSummary1, certificateRemovalSummary2)))
             TestLogAppender.reset()
 
             // When
             certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
 
             // Then
-            verify(certificateRepository, times(2)).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)
+            verify(certificateRepository, times(2)).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, batchSize)
             verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary1.id!!, certificateRemovalSummary1.applicationReference!!)) // TODO EIP1-4307 - change to photoLocationArn
             verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary2.id!!, certificateRemovalSummary2.applicationReference!!)) // TODO EIP1-4307 - change to photoLocationArn
             assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove final retention period data from", Level.INFO)).isTrue
         }
 
         @Test
-        fun `should not queue certificates for removal given no certificates due to be removed`() {
+        fun `should retrieve certificates in batches and queue for removal`() {
             // Given
-            val certificate = buildCertificate()
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)).willReturn(Page.empty())
+            val batchSize = 2
+            val removalSummaries = listOf(buildCertificateRemovalSummary(), buildCertificateRemovalSummary())
+            given(dataRetentionConfiguration.certificateRemovalBatchSize).willReturn(batchSize)
+            // the repository calls in the exact expected order
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(0, batchSize), 6))
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 2, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(2, batchSize), 6))
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(1, batchSize), 6))
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(0, batchSize), 6))
             TestLogAppender.reset()
 
             // When
             certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
 
             // Then
-            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0)
+            verify(certificateRepository, times(2)).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, batchSize)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 2, batchSize)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, batchSize)
+            assertThat(TestLogAppender.hasLog("Found 6 certificates with sourceType VOTER_CARD to remove final retention period data from", Level.INFO)).isTrue
+        }
+
+        @Test
+        fun `should not queue certificates for removal given no certificates due to be removed`() {
+            // Given
+            val certificate = buildCertificate()
+            val batchSize = 10000
+            given(dataRetentionConfiguration.certificateRemovalBatchSize).willReturn(batchSize)
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, batchSize)).willReturn(Page.empty())
+            TestLogAppender.reset()
+
+            // When
+            certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
+
+            // Then
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, batchSize)
             verify(certificateRepository, never()).delete(certificate)
             assertThat(TestLogAppender.hasLog("No certificates with sourceType VOTER_CARD to remove final retention period data from", Level.INFO)).isTrue
         }
