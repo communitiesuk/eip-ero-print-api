@@ -17,16 +17,15 @@
         </rollback>
     </changeSet>
 
-
-    <changeSet author="vishal.gupta@valtech.com" id="0018b_EIP1-4481_certificate_table_data_migration - populate photo_location_arn column of certificate">
+    <changeSet author="vishal.gupta@valtech.com" id="0018b1_EIP1-4481_certificate_table_data_migration - populate photo_location_arn column of certificate">
         <sql>
             <comment>Populating [photo_location_arn] column of certificate entity from any of the matching print_requests [photo_location_arn] column</comment>
             UPDATE certificate cert
-            INNER JOIN print_request pr
-            ON cert.id = pr.certificate_id
-            SET cert.photo_location_arn = pr.photo_location_arn
-            WHERE cert.photo_location_arn IS NULL
+            SET cert.photo_location_arn = (SELECT pr.photo_location_arn FROM print_request pr WHERE pr.certificate_id = cert.id ORDER BY pr.date_created DESC LIMIT 1)
         </sql>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018b2_EIP1-4481_certificate_table_data_migration - make photo_location_arn column non-nullable">
         <modifyDataType tableName="certificate" columnName="photo_location_arn" newDataType="varchar(1024) NOT NULL"/>
 
         <rollback>
@@ -71,5 +70,20 @@
         </rollback>
     </changeSet>
 
+    <changeSet author="vishal.gupta@valtech.com" id="0018f_EIP1-4481_alter_certificate_final_retention_removal_idx - Adds id to existing index" context="ddl">
+        <dropIndex tableName="certificate" indexName="certificate_final_retention_removal_idx"/>
+        <createIndex tableName="certificate" indexName="certificate_final_retention_removal_idx">
+            <column name="source_type"/>
+            <column name="final_retention_removal_date"/>
+            <column name="id"/>
+        </createIndex>
+
+        <rollback>
+            <createIndex tableName="certificate" indexName="certificate_final_retention_removal_idx">
+                <column name="source_type"/>
+                <column name="final_retention_removal_date"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>
