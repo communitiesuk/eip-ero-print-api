@@ -433,6 +433,26 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
     @Nested
     inner class GetCertificatesForFinalRetentionDataRemoval {
+
+        @Test
+        fun `should count certificates for removal of final retention period data`() {
+            // Given
+            val expectedCount = 2
+            certificateRepository.saveAll(
+                listOf(
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1)),
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1)),
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be included
+                )
+            )
+
+            // When
+            val count = certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)
+
+            // Then
+            assertThat(count).isEqualTo(expectedCount)
+        }
+
         @Test
         fun `should find certificates for removal of final retention period data`() {
             // Given
@@ -450,7 +470,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val expected2 = CertificateRemovalSummary(certificate2.id, certificate2.applicationReference) // TODO EIP1-4307 - change to photoLocationArn
 
             // When
-            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 0, 10000)
+            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, 10000)
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)

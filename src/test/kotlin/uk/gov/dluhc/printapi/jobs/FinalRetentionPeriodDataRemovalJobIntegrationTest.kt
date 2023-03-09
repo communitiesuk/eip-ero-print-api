@@ -16,7 +16,6 @@ import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoBucketPath
 import java.io.ByteArrayInputStream
@@ -38,14 +37,12 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
             sourceReference = "6407b6158f529a11713a1e5c",
             finalRetentionRemovalDate = LocalDate.now().minusDays(1),
             applicationReference = "arn:aws:s3:::$s3Bucket/$s3PathPhoto1", // TODO EIP1-4307 - switch to photoLocationArn once in place
-            printRequests = listOf(buildPrintRequest(photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathPhoto1"))
         )
         val s3PathPhoto2 = anotherPhotoBucketPath()
         val certificate2 = buildCertificate(
             sourceReference = "2304v5134f529a11713a1e6a",
             finalRetentionRemovalDate = LocalDate.now().minusDays(1),
             applicationReference = "arn:aws:s3:::$s3Bucket/$s3PathPhoto2", // TODO EIP1-4307 - switch to photoLocationArn once in place
-            printRequests = listOf(buildPrintRequest(photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathPhoto2"))
         )
         val certificate3 = buildCertificate(finalRetentionRemovalDate = LocalDate.now()) // should not be removed until tomorrow
         val certificate4 = buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be removed
@@ -70,12 +67,7 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
             assertThat(testPrintRequestRepository.findById(certificate4.printRequests[0].id!!)).isNotEmpty
             assertThat(certificatePhotoExists(s3Bucket, s3PathPhoto1)).isFalse
             assertThat(certificatePhotoExists(s3Bucket, s3PathPhoto2)).isFalse
-            assertThat(
-                TestLogAppender.hasLog(
-                    "Found 2 certificates with sourceType VOTER_CARD to remove final retention period data from",
-                    Level.INFO
-                )
-            ).isTrue
+            assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
         }
     }
 

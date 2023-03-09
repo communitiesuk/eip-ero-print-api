@@ -72,24 +72,24 @@ class CertificateDataRetentionService(
      */
     @Transactional(readOnly = true)
     fun queueCertificatesForRemoval(sourceType: SourceType) {
-        val batchSize = dataRetentionConfiguration.certificateRemovalBatchSize
-        val batchedResults = certificateRepository.findPendingRemovalOfFinalRetentionData(
-            sourceType = sourceType,
-            batchIndex = 0,
-            batchSize = batchSize
-        )
-        if (batchedResults.isEmpty) {
+        // initial query to get the number of records
+        val totalElements = certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(sourceType = sourceType)
+        if (totalElements == 0) {
             logger.info { "No certificates with sourceType $sourceType to remove final retention period data from" }
             return
         }
 
-        logger.info { "Found ${batchedResults.totalElements} certificates with sourceType $sourceType to remove final retention period data from" }
+        logger.info { "Found $totalElements certificates with sourceType $sourceType to remove" }
+        val batchSize = dataRetentionConfiguration.certificateRemovalBatchSize
+        val totalBatches = calculateTotalBatches(totalElements, batchSize)
+
         // items are removed as we go through them (via the SQS queue), so start at the last batch
-        var batchIndex = batchedResults.totalPages - 1
-        while (batchIndex >= 0) {
-            with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, batchIndex = batchIndex, batchSize = batchSize)) {
+        var batchNumber = totalBatches
+        while (batchNumber > 0) {
+            logger.info { "Retrieving batch [$batchNumber] of [$totalBatches] of CertificateRemovalSummary" }
+            with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, batchNumber = batchNumber, batchSize = batchSize)) {
                 forEach { removeCertificateQueue.submit(RemoveCertificateMessage(it.id!!, it.applicationReference!!)) } // TODO EIP1-4307 - change to photoLocationArn
-                batchIndex--
+                batchNumber--
             }
         }
     }
@@ -112,5 +112,11 @@ class CertificateDataRetentionService(
             it.delivery = null
             it.supportingInformationFormat = null
         }
+    }
+
+    private fun calculateTotalBatches(totalElements: Int, batchSize: Int): Int {
+        val totalBatches = (totalElements / batchSize)
+        val remainder = if (totalElements % batchSize == 0) 0 else 1
+        return totalBatches + remainder
     }
 }

@@ -39,6 +39,11 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
         batchRequest: Pageable
     ): Page<CertificateRemovalSummary>
 
+    fun countBySourceTypeAndFinalRetentionRemovalDateBefore(
+        sourceType: SourceType,
+        finalRetentionRemovalDate: LocalDate = LocalDate.now(),
+    ): Int
+
     @Query(
         value = """
             SELECT COUNT(s) FROM PrintRequestStatus s
@@ -65,11 +70,11 @@ object CertificateRepositoryExtensions {
 
     fun CertificateRepository.findPendingRemovalOfFinalRetentionData(
         sourceType: SourceType,
-        batchIndex: Int,
+        batchNumber: Int,
         batchSize: Int = 10000
     ): Page<CertificateRemovalSummary> {
         val batchRequest = PageRequest.of(
-            batchIndex,
+            batchNumber - 1,
             batchSize,
             Sort.by(Sort.Direction.ASC, "issueDate")
         )
