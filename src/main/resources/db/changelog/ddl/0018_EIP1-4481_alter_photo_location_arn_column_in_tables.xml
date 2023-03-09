@@ -19,7 +19,7 @@
 
     <changeSet author="vishal.gupta@valtech.com" id="0018b1_EIP1-4481_certificate_table_data_migration - populate photo_location_arn column of certificate">
         <sql>
-            <comment>Populating [photo_location_arn] column of certificate entity from any of the matching print_requests [photo_location_arn] column</comment>
+            <comment>Populating [photo_location_arn] column of certificate entity from most recent matching print_request [photo_location_arn] column</comment>
             UPDATE certificate cert
             SET cert.photo_location_arn = (SELECT pr.photo_location_arn FROM print_request pr WHERE pr.certificate_id = cert.id ORDER BY pr.date_created DESC LIMIT 1)
         </sql>
