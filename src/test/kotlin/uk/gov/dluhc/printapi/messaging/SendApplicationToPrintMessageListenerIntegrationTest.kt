@@ -71,7 +71,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
 
         val expected = with(payload) {
-            val certificate = buildCertificate(
+            val certificate = Certificate(
                 id = UUID.randomUUID(),
                 sourceReference = sourceReference,
                 applicationReference = applicationReference,

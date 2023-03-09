@@ -24,6 +24,7 @@
             UPDATE certificate cert
             INNER JOIN print_request pr on cert.id = pr.certificate_id
             SET cert.photo_location_arn = pr.photo_location_arn
+            WHERE cert.photo_location_arn IS NULL
         </sql>
 
         <rollback/>

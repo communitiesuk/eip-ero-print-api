@@ -67,8 +67,6 @@ fun buildCertificate(
     initialRetentionRemovalDate: LocalDate? = null,
     initialRetentionDataRemoved: Boolean = false,
     finalRetentionRemovalDate: LocalDate? = null,
-    issuingAuthority: String = aValidIssuingAuthority(),
-    issuingAuthorityCy: String? = null,
 ): Certificate {
     val certificate = Certificate(
         id = id,
@@ -77,8 +75,7 @@ fun buildCertificate(
         sourceReference = sourceReference,
         applicationReference = applicationReference,
         applicationReceivedDateTime = applicationReceivedDateTime,
-        issuingAuthority = issuingAuthority,
-        issuingAuthorityCy = issuingAuthorityCy,
+        issuingAuthority = aValidIssuingAuthority(),
         issueDate = issueDate,
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
         gssCode = gssCode,
