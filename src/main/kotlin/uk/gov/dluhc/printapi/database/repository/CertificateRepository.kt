@@ -76,7 +76,7 @@ object CertificateRepositoryExtensions {
         val batchRequest = PageRequest.of(
             batchNumber - 1,
             batchSize,
-            Sort.by(Sort.Direction.ASC, "issueDate")
+            Sort.by(Sort.Direction.ASC, "id")
         )
 
         return findBySourceTypeAndFinalRetentionRemovalDateBefore(
