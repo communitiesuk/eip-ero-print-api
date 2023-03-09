@@ -7,18 +7,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
-import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
+import uk.gov.dluhc.printapi.testsupport.addCertificatePhotoToS3
+import uk.gov.dluhc.printapi.testsupport.certificatePhotoExists
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoBucketPath
-import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -48,8 +45,8 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
         val certificate4 = buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be removed
         certificateRepository.saveAll(listOf(certificate1, certificate2, certificate3, certificate4))
 
-        addCertificatePhotoToS3(s3Bucket, s3PathPhoto1)
-        addCertificatePhotoToS3(s3Bucket, s3PathPhoto2)
+        s3Client.addCertificatePhotoToS3(s3Bucket, s3PathPhoto1)
+        s3Client.addCertificatePhotoToS3(s3Bucket, s3PathPhoto2)
         TestLogAppender.reset()
 
         // When
@@ -65,31 +62,9 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
             assertThat(testPrintRequestRepository.findById(certificate2.printRequests[0].id!!)).isEmpty
             assertThat(testPrintRequestRepository.findById(certificate3.printRequests[0].id!!)).isNotEmpty
             assertThat(testPrintRequestRepository.findById(certificate4.printRequests[0].id!!)).isNotEmpty
-            assertThat(certificatePhotoExists(s3Bucket, s3PathPhoto1)).isFalse
-            assertThat(certificatePhotoExists(s3Bucket, s3PathPhoto2)).isFalse
+            assertThat(s3Client.certificatePhotoExists(s3Bucket, s3PathPhoto1)).isFalse
+            assertThat(s3Client.certificatePhotoExists(s3Bucket, s3PathPhoto2)).isFalse
             assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
-        }
-    }
-
-    private fun addCertificatePhotoToS3(bucket: String, path: String) {
-        // add resource to S3
-        val s3ResourceContents = "S3 Object Contents"
-        val s3Resource = s3ResourceContents.encodeToByteArray()
-        s3Client.putObject(
-            PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(path)
-                .build(),
-            RequestBody.fromInputStream(ByteArrayInputStream(s3Resource), s3Resource.size.toLong())
-        )
-    }
-
-    private fun certificatePhotoExists(bucket: String, path: String): Boolean {
-        return try {
-            s3Client.headObject(HeadObjectRequest.builder().bucket(bucket).key(path).build())
-            true
-        } catch (e: NoSuchKeyException) {
-            false
         }
     }
 }
