@@ -47,9 +47,9 @@ internal class PrintFileDetailsFactoryTest {
             batchId = batchId,
             printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.ASSIGNED_TO_BATCH)),
             requestId = requestId,
-            photoLocationArn = photoArn
         )
         val certificate = buildCertificate(
+            photoLocationArn = photoArn,
             printRequests = mutableListOf(currentPrintRequest)
         )
         val certificates = listOf(certificate)
@@ -84,15 +84,14 @@ internal class PrintFileDetailsFactoryTest {
             batchId = batchId,
             printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.ASSIGNED_TO_BATCH)),
             requestId = firstRequestId,
-            photoLocationArn = photoArn
         )
         val secondPrintRequest = buildPrintRequest(
             batchId = batchId,
             printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.ASSIGNED_TO_BATCH)),
             requestId = secondRequestId,
-            photoLocationArn = photoArn
         )
         val certificate = buildCertificate(
+            photoLocationArn = photoArn,
             printRequests = mutableListOf(firstPrintRequest, secondPrintRequest)
         )
         val certificates = listOf(certificate)

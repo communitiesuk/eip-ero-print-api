@@ -62,7 +62,7 @@ class AnonymousElectorDocument(
     var supportingInformationFormat: SupportingInformationFormat?,
 
     @field:NotNull
-    @field:Size(max = 255)
+    @field:Size(max = 1024)
     var photoLocationArn: String,
 
     @OneToOne(cascade = [CascadeType.ALL])

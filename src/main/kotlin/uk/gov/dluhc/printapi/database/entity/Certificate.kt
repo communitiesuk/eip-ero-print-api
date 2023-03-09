@@ -106,6 +106,10 @@ class Certificate(
     @field:Size(max = 80)
     var gssCode: String? = null,
 
+    @field:NotNull
+    @field:Size(max = 1024)
+    var photoLocationArn: String? = null,
+
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "certificate_id", nullable = false)
     var printRequests: MutableList<PrintRequest> = mutableListOf(),

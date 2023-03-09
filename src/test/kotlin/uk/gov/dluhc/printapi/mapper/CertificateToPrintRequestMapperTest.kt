@@ -100,7 +100,6 @@ class CertificateToPrintRequestMapperTest {
             surname = surname,
             certificateLanguage = certificateLanguage,
             supportingInformationFormat = supportingInformationFormat,
-            photoLocationArn = photoLocation,
             delivery = delivery,
             eroEnglish = eroEnglish,
             eroWelsh = null,
@@ -120,6 +119,7 @@ class CertificateToPrintRequestMapperTest {
             suggestedExpiryDate = suggestedExpiryDate,
             status = Status.PENDING_ASSIGNMENT_TO_BATCH,
             gssCode = gssCode,
+            photoLocationArn = photoLocation,
             printRequests = mutableListOf(printRequest)
         )
 
@@ -201,7 +201,6 @@ class CertificateToPrintRequestMapperTest {
             surname = surname,
             certificateLanguage = certificateLanguage,
             supportingInformationFormat = supportingInformationFormat,
-            photoLocationArn = photoLocation,
             delivery = delivery,
             eroEnglish = eroEnglish,
             eroWelsh = eroWelsh,
@@ -221,6 +220,7 @@ class CertificateToPrintRequestMapperTest {
             suggestedExpiryDate = suggestedExpiryDate,
             status = Status.PENDING_ASSIGNMENT_TO_BATCH,
             gssCode = gssCode,
+            photoLocationArn = photoLocation,
             printRequests = mutableListOf(printRequest)
         )
 

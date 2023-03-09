@@ -363,29 +363,6 @@ class PrintRequestAssert
     }
 
     /**
-     * Verifies that the actual PrintRequest's photoLocationArn is equal to the given one.
-     * @param photoLocationArn the given photoLocationArn to compare the actual PrintRequest's photoLocationArn to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual PrintRequest's photoLocationArn is not equal to the given one.
-     */
-    fun hasPhotoLocationArn(photoLocationArn: String?): PrintRequestAssert {
-        // check that actual PrintRequest we want to make assertions on is not null.
-        isNotNull
-
-        // overrides the default error message with a more explicit one
-        val assertjErrorMessage = "\nExpecting photoLocationArn of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
-
-        // null safe check
-        val actualPhotoLocationArn = actual!!.photoLocationArn
-        if (!Objects.deepEquals(actualPhotoLocationArn, photoLocationArn)) {
-            failWithMessage(assertjErrorMessage, actual, photoLocationArn, actualPhotoLocationArn)
-        }
-
-        // return the current assertion for method chaining
-        return this
-    }
-
-    /**
      * Verifies that the actual PrintRequest's requestDateTime is equal to within margin of the given one.
      * @param requestDateTime the given requestDateTime to compare the actual PrintRequest's requestDateTime to.
      * @return this assertion object.

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018a_EIP1-4481_add_photo_location_arn_to_certificate_table - add photo_location_arn column" context="ddl">
+        <addColumn tableName="certificate">
+            <column name="photo_location_arn" type="varchar(1024)" afterColumn="status">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="certificate" columnName="photo_location_arn"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018b1_EIP1-4481_certificate_table_data_migration - populate photo_location_arn column of certificate">
+        <sql>
+            <comment>Populating [photo_location_arn] column of certificate entity from most recent matching print_request [photo_location_arn] column</comment>
+            UPDATE certificate cert
+            SET cert.photo_location_arn = (SELECT pr.photo_location_arn FROM print_request pr WHERE pr.certificate_id = cert.id ORDER BY pr.date_created DESC LIMIT 1)
+        </sql>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018b2_EIP1-4481_certificate_table_data_migration - make photo_location_arn column non-nullable">
+        <modifyDataType tableName="certificate" columnName="photo_location_arn" newDataType="varchar(1024) NOT NULL"/>
+
+        <rollback>
+            <modifyDataType tableName="certificate" columnName="photo_location_arn" newDataType="varchar(1024)"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018c_EIP1-4481_remove_photo_location_arn_column_in_print_request_table - Drop photo_location_arn column" context="ddl">
+        <dropColumn tableName="print_request" columnName="photo_location_arn"/>
+
+        <rollback>
+            <addColumn tableName="print_request">
+                <column name="photo_location_arn" type="varchar(255)" afterColumn="supporting_information_format">
+                    <constraints nullable="true"/>
+                </column>
+            </addColumn>
+
+            <sql>
+                <comment>Populating [photo_location_arn] of a every print_requests from certificate entity [photo_location_arn] column</comment>
+                UPDATE print_request pr
+                INNER JOIN certificate cert
+                ON cert.id = pr.certificate_id
+                SET pr.photo_location_arn = cert.photo_location_arn
+            </sql>
+            <modifyDataType tableName="print_request" columnName="photo_location_arn" newDataType="varchar(255) NOT NULL"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018d_EIP1-4481_alter_photo_location_arn_column_in_temporary_certificate_table - Increase photo_location_arn column size" context="ddl">
+        <modifyDataType tableName="temporary_certificate" columnName="photo_location_arn" newDataType="varchar(1024) NOT NULL"/>
+
+        <rollback>
+            <modifyDataType tableName="temporary_certificate" columnName="photo_location_arn" newDataType="varchar(255) NOT NULL"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018e_EIP1-4481_alter_photo_location_arn_column_in_anonymous_elector_document_table - Increase photo_location_arn column size" context="ddl">
+        <modifyDataType tableName="anonymous_elector_document" columnName="photo_location_arn" newDataType="varchar(1024) NOT NULL"/>
+
+        <rollback>
+            <modifyDataType tableName="anonymous_elector_document" columnName="photo_location_arn" newDataType="varchar(255) NOT NULL"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0018f_EIP1-4481_alter_certificate_final_retention_removal_idx - Adds id to existing index" context="ddl">
+        <dropIndex tableName="certificate" indexName="certificate_final_retention_removal_idx"/>
+        <createIndex tableName="certificate" indexName="certificate_final_retention_removal_idx">
+            <column name="source_type"/>
+            <column name="final_retention_removal_date"/>
+            <column name="id"/>
+        </createIndex>
+
+        <rollback>
+            <createIndex tableName="certificate" indexName="certificate_final_retention_removal_idx">
+                <column name="source_type"/>
+                <column name="final_retention_removal_date"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

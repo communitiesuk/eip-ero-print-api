@@ -291,12 +291,9 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
     private fun saveCertificate(certificateId: UUID): Certificate {
         val certificate = buildCertificate(
             id = certificateId,
+            photoLocationArn = s3Resource(),
             status = Status.PENDING_ASSIGNMENT_TO_BATCH,
-            printRequests = listOf(
-                buildPrintRequest(
-                    photoLocationArn = s3Resource()
-                )
-            )
+            printRequests = listOf(buildPrintRequest())
         )
         return certificateRepository.save(certificate)
     }

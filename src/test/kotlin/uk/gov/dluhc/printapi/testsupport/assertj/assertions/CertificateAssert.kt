@@ -37,7 +37,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's applicationReceivedDateTime is not equal to the given one.
      */
     fun hasApplicationReceivedDateTime(applicationReceivedDateTime: Instant?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         val assertjErrorMessage =
@@ -63,7 +62,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's applicationReference is not equal to the given one.
      */
     fun hasApplicationReference(applicationReference: String?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -85,7 +83,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's createdBy is null.
      */
     fun hasCreatedBy(): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -95,7 +92,6 @@ class CertificateAssert
             .overridingErrorMessage(assertjErrorMessage, actual)
             .isNotNull
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -106,7 +102,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's createdBy is not equal to the given one.
      */
     fun hasCreatedBy(createdBy: String?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -118,7 +113,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, createdBy, actualCreatedBy)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -128,7 +122,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's dateCreated is null.
      */
     fun hasDateCreated(): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -138,7 +131,6 @@ class CertificateAssert
             .overridingErrorMessage(assertjErrorMessage, actual)
             .isNotNull
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -149,7 +141,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's dateCreated is not equal to the given one.
      */
     fun hasDateCreated(dateCreated: Instant?, margin: Long = 1): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         val assertjErrorMessage =
@@ -175,7 +166,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's gssCode is not equal to the given one.
      */
     fun hasGssCode(gssCode: String?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -187,7 +177,27 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, gssCode, actualGssCode)
         }
 
-        // return the current assertion for method chaining
+        return this
+    }
+
+    /**
+     * Verifies that the actual Certificate's photoLocationArn is equal to the given one.
+     * @param photoLocationArn the given photoLocationArn to compare the actual Certificate's photoLocationArn to.
+     * @return this assertion object.
+     * @throws AssertionError - if the actual Certificate's photoLocationArn is not equal to the given one.
+     */
+    fun hasPhotoLocationArn(photoLocationArn: String?): CertificateAssert {
+        isNotNull
+
+        // overrides the default error message with a more explicit one
+        val assertjErrorMessage = "\nExpecting photoLocationArn of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+
+        // null safe check
+        val actualPhotoLocationArn = actual!!.photoLocationArn
+        if (!Objects.deepEquals(actualPhotoLocationArn, photoLocationArn)) {
+            failWithMessage(assertjErrorMessage, actual, photoLocationArn, actualPhotoLocationArn)
+        }
+
         return this
     }
 
@@ -197,7 +207,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's id is null.
      */
     fun hasId(): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -207,7 +216,6 @@ class CertificateAssert
             .overridingErrorMessage(assertjErrorMessage, actual)
             .isNotNull
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -218,7 +226,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's id is not equal to the given one.
      */
     fun hasId(id: UUID?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -230,7 +237,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, id, actualId)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -241,7 +247,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's issueDate is not equal to the given one.
      */
     fun hasIssueDate(issueDate: LocalDate?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -253,7 +258,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, issueDate, actualIssueDate)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -264,7 +268,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's initialRetentionRemovalDate is not equal to the given one.
      */
     fun hasInitialRetentionRemovalDate(initialRetentionRemovalDate: LocalDate?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -276,7 +279,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, initialRetentionRemovalDate, actualInitialRetentionRemovalDate)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -287,7 +289,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's finalRetentionRemovalDate is not equal to the given one.
      */
     fun hasFinalRetentionRemovalDate(finalRetentionRemovalDate: LocalDate?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -299,7 +300,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, finalRetentionRemovalDate, actualFinalRetentionRemovalDate)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -309,7 +309,6 @@ class CertificateAssert
      * @throws AssertionError if the data is not null.
      */
     fun initialRetentionPeriodDataIsRemoved(): CertificateAssert {
-        // check that actual PrintRequest we want to make assertions on is not null.
         isNotNull
 
         if (this.actual?.initialRetentionDataRemoved == false) {
@@ -320,7 +319,6 @@ class CertificateAssert
             PrintRequestAssert(it).doesNotHaveInitialRetentionPeriodData()
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -330,7 +328,6 @@ class CertificateAssert
      * @throws AssertionError if the data is null.
      */
     fun hasInitialRetentionPeriodData(): CertificateAssert {
-        // check that actual PrintRequest we want to make assertions on is not null.
         isNotNull
 
         if (this.actual?.initialRetentionDataRemoved == true) {
@@ -341,7 +338,6 @@ class CertificateAssert
             PrintRequestAssert(it).hasInitialRetentionPeriodData()
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -352,7 +348,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's issuingAuthority is not equal to the given one.
      */
     fun hasIssuingAuthority(issuingAuthority: String?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -364,7 +359,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, issuingAuthority, actualIssuingAuthority)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -375,7 +369,6 @@ class CertificateAssert
      * @throws AssertionError if the actual Certificate's printRequests does not contain all given PrintRequest elements.
      */
     fun hasPrintRequests(printRequests: Collection<PrintRequest>): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         for (printRequest in printRequests) {
@@ -389,7 +382,6 @@ class CertificateAssert
                 .hasSurname(printRequest.surname)
                 .hasCertificateLanguage(printRequest.certificateLanguage)
                 .hasSupportingInformationFormat(printRequest.supportingInformationFormat)
-                .hasPhotoLocationArn(printRequest.photoLocationArn)
                 .hasDelivery(printRequest.delivery!!)
                 .hasEroEnglish(printRequest.eroEnglish!!)
                 .hasEroWelsh(printRequest.eroWelsh)
@@ -402,12 +394,10 @@ class CertificateAssert
                 .hasVersion()
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
     fun hasPrintRequest(requestDateTime: Instant): PrintRequestAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         val printRequest = actual!!.printRequests.find { it.requestDateTime!! == requestDateTime }
@@ -417,7 +407,6 @@ class CertificateAssert
             failWithMessage("Expecting printRequest to exist with requestDateTime of `$requestDateTime")
         }
 
-        // return the print request assertion to continue assertions on the print request
         return PrintRequestAssert(printRequest)
     }
 
@@ -428,13 +417,11 @@ class CertificateAssert
      * @throws AssertionError if the actual Certificate's printRequests does not contain all given PrintRequest elements.
      */
     fun hasOnlyPrintRequests(vararg printRequests: PrintRequest?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // check with standard error message, to set another message call: info.overridingErrorMessage("my error message");
         Iterables.instance().assertContainsOnly(info, actual!!.printRequests, printRequests)
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -445,7 +432,6 @@ class CertificateAssert
      * @throws AssertionError if the actual Certificate's printRequests does not contain all given PrintRequest elements.
      */
     fun hasOnlyPrintRequests(printRequests: Collection<PrintRequest?>?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // check that given PrintRequest collection is not null.
@@ -457,7 +443,6 @@ class CertificateAssert
         // check with standard error message, to set another message call: info.overridingErrorMessage("my error message");
         Iterables.instance().assertContainsOnly(info, actual!!.printRequests, printRequests.toTypedArray())
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -469,13 +454,11 @@ class CertificateAssert
      * @throws AssertionError if the actual Certificate's printRequests contains any given PrintRequest elements.
      */
     fun doesNotHavePrintRequests(vararg printRequests: PrintRequest?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // check with standard error message (use overridingErrorMessage before contains to set your own message).
         Iterables.instance().assertDoesNotContain(info, actual!!.printRequests, printRequests)
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -487,7 +470,6 @@ class CertificateAssert
      * @throws AssertionError if the actual Certificate's printRequests contains any given PrintRequest elements.
      */
     fun doesNotHavePrintRequests(printRequests: Collection<PrintRequest?>?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // check that given PrintRequest collection is not null.
@@ -499,7 +481,6 @@ class CertificateAssert
         // check with standard error message (use overridingErrorMessage before contains to set your own message).
         Iterables.instance().assertDoesNotContain(info, actual!!.printRequests, printRequests.toTypedArray())
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -509,7 +490,6 @@ class CertificateAssert
      * @throws AssertionError if the actual Certificate's printRequests is not empty.
      */
     fun hasNoPrintRequests(): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // we override the default error message with a more explicit one
@@ -520,7 +500,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, actual!!.printRequests)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -531,7 +510,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's sourceReference is not equal to the given one.
      */
     fun hasSourceReference(sourceReference: String?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -543,7 +521,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, sourceReference, actualSourceReference)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -554,7 +531,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's sourceType is not equal to the given one.
      */
     fun hasSourceType(sourceType: SourceType?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -566,7 +542,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, sourceType, actualSourceType)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -577,7 +552,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's status is not equal to the given one.
      */
     fun hasStatus(status: Status?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -589,7 +563,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, status, actualStatus)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -600,7 +573,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's suggestedExpiryDate is not equal to the given one.
      */
     fun hasSuggestedExpiryDate(suggestedExpiryDate: LocalDate?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -612,7 +584,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, suggestedExpiryDate, actualSuggestedExpiryDate)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -622,7 +593,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's vacNumber is null or does not match pattern.
      */
     fun hasVacNumber(): CertificateAssert {
-        // check that actual PrintRequest we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -634,7 +604,6 @@ class CertificateAssert
             .overridingErrorMessage(assertjErrorMessage, actual, actualVacNumber)
             .containsPattern(Regex("^[A-Za-z\\d]{20}\$").pattern)
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -645,7 +614,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's vacNumber is not equal to the given one.
      */
     fun hasVacNumber(vacNumber: String?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -657,7 +625,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, vacNumber, actualVacNumber)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -667,7 +634,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's version is null.
      */
     fun hasVersion(): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -677,7 +643,6 @@ class CertificateAssert
             .overridingErrorMessage(assertjErrorMessage, actual)
             .isNotNull
 
-        // return the current assertion for method chaining
         return this
     }
 
@@ -688,7 +653,6 @@ class CertificateAssert
      * @throws AssertionError - if the actual Certificate's version is not equal to the given one.
      */
     fun hasVersion(version: Long?): CertificateAssert {
-        // check that actual Certificate we want to make assertions on is not null.
         isNotNull
 
         // overrides the default error message with a more explicit one
@@ -700,7 +664,6 @@ class CertificateAssert
             failWithMessage(assertjErrorMessage, actual, version, actualVersion)
         }
 
-        // return the current assertion for method chaining
         return this
     }
 

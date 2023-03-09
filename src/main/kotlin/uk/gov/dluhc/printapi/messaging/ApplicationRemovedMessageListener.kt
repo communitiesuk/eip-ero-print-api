@@ -21,7 +21,11 @@ class ApplicationRemovedMessageListener(
     @SqsListener("\${sqs.application-removed-queue-name}")
     override fun handleMessage(@Valid @Payload payload: ApplicationRemovedMessage) {
         with(payload) {
-            logger.info { "ApplicationRemovedMessage for application with source type [$sourceType] and source reference [$sourceReference]" }
+            logger.info {
+                "ApplicationRemovedMessage for application with source type [$sourceType] " +
+                    "and source reference [$sourceReference] " +
+                    "and gssCode [$gssCode]"
+            }
             certificateDataRetentionService.handleSourceApplicationRemoved(payload)
         }
     }

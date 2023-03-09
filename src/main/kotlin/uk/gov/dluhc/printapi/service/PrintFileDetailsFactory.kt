@@ -45,9 +45,8 @@ class PrintFileDetailsFactory(
         requests: MutableList<PrintRequest>,
         photos: MutableList<PhotoLocation>
     ) {
-        val photoArn = pendingPrintRequest.photoLocationArn!!
         val photoLocation =
-            photoLocationFactory.create(pendingPrintRequest.batchId!!, pendingPrintRequest.requestId!!, photoArn)
+            photoLocationFactory.create(pendingPrintRequest.batchId!!, pendingPrintRequest.requestId!!, certificate.photoLocationArn!!)
         val printRequest = certificateToPrintRequestMapper.map(certificate, pendingPrintRequest, photoLocation.zipPath)
         requests.add(printRequest)
         photos.add(photoLocation)

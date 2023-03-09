@@ -79,7 +79,8 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 issueDate = aValidIssueDate(),
                 suggestedExpiryDate = aValidSuggestedExpiryDate(),
                 gssCode = aGssCode(),
-                status = null
+                status = null,
+                photoLocationArn = aPhotoArn(),
             )
             val deliveryAddress = Address(
                 street = aValidAddressStreet(),
@@ -110,7 +111,6 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 surname = aValidSurname(),
                 certificateLanguage = aValidCertificateLanguage(),
                 supportingInformationFormat = aValidSupportingInformationFormat(),
-                photoLocationArn = aPhotoArn(),
                 delivery = delivery,
                 eroEnglish = eroEnglish,
                 eroWelsh = null,
