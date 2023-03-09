@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.9.3'
+  version: '1.9.4'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -69,7 +69,7 @@ paths:
       description: Returns a single certificate summary for a Voter Card Application
       parameters:
         - name: applicationId
-          description: The identifier of the Voter Card Application.
+          description: The identifier of the Voter Card Application as a `query param`.
           schema:
             type: string
           in: query
@@ -89,6 +89,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.querystring.applicationId: method.request.querystring.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -352,7 +353,7 @@ paths:
       description: Returns the Temporary Certificate summaries for a Voter Card Application
       parameters:
         - name: applicationId
-          description: The identifier of the Voter Card Application.
+          description: The identifier of the Voter Card Application as a `query param`.
           schema:
             type: string
           in: query
@@ -370,7 +371,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/temporary-certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.path.applicationId: method.request.path.applicationId
+          integration.request.querystring.applicationId: method.request.querystring.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -559,16 +560,16 @@ paths:
         httpMethod: POST
 
     get:
-      summary: Returns the Anonymous Elector Document summaries for an anonymous application
-      description: Returns the Anonymous Elector Document summaries for an anonymous application
+      summary: Returns the Anonymous Elector Document summaries for an Anonymous application
+      description: Returns the Anonymous Elector Document summaries for an Anonymous application
       tags:
         - Anonymous Elector Documents (AED)
       parameters:
-        - name: eroId
-          description: The ID of the Electoral Registration Office responsible for the application.
+        - name: applicationId
+          description: An identifier of an Anonymous Elector Document application as a `query param`
           schema:
             type: string
-          in: path
+          in: query
           required: true
       responses:
         '200':
@@ -583,6 +584,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.querystring.applicationId: method.request.querystring.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -973,10 +975,11 @@ components:
 
     AnonymousElectorDocumentSummariesResponse:
       title: AnonymousElectorDocumentSummariesResponse
-      type: object
       description: A response containing a collection of Anonymous Elector Document summaries sorted with latest changes ordered first.
+      type: object
       properties:
         anonymousElectorDocuments:
+          title: AnonymousElectorDocuments
           type: array
           description: List of Anonymous Elector Document summaries for the application.
           items:
@@ -985,8 +988,8 @@ components:
         - anonymousElectorDocuments
     AnonymousElectorDocumentSummary:
       title: AnonymousElectorDocumentSummary
-      type: object
       description: An object summarising the current state of an Anonymous Elector Document (AED)
+      type: object
       properties:
         certificateNumber:
           type: string
@@ -1023,6 +1026,7 @@ components:
         - issueDate
     AnonymousElectorDocumentStatus:
       title: AnonymousElectorDocumentStatus
+      description: Status of an Anonymous Elector document
       type: string
       enum:
         - generated
