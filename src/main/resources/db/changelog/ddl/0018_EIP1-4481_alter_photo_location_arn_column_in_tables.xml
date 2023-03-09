@@ -8,7 +8,7 @@
     <changeSet author="vishal.gupta@valtech.com" id="0018a_EIP1-4481_add_photo_location_arn_to_certificate_table - add photo_location_arn column" context="ddl">
         <addColumn tableName="certificate">
             <column name="photo_location_arn" type="varchar(1024)" afterColumn="status">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
         </addColumn>
 
@@ -20,14 +20,18 @@
 
     <changeSet author="vishal.gupta@valtech.com" id="0018b_EIP1-4481_certificate_table_data_migration - populate photo_location_arn column of certificate">
         <sql>
-            <comment>Populating [photo_location_arn] of a certificate entity from any of the matching print_requests [photo_location_arn]</comment>
+            <comment>Populating [photo_location_arn] column of certificate entity from any of the matching print_requests [photo_location_arn] column</comment>
             UPDATE certificate cert
-            INNER JOIN print_request pr on cert.id = pr.certificate_id
+            INNER JOIN print_request pr
+            ON cert.id = pr.certificate_id
             SET cert.photo_location_arn = pr.photo_location_arn
             WHERE cert.photo_location_arn IS NULL
         </sql>
+        <modifyDataType tableName="certificate" columnName="photo_location_arn" newDataType="varchar(1024) NOT NULL"/>
 
-        <rollback/>
+        <rollback>
+            <modifyDataType tableName="certificate" columnName="photo_location_arn" newDataType="varchar(1024)"/>
+        </rollback>
     </changeSet>
 
     <changeSet author="vishal.gupta@valtech.com" id="0018c_EIP1-4481_remove_photo_location_arn_column_in_print_request_table - Drop photo_location_arn column" context="ddl">
@@ -36,9 +40,18 @@
         <rollback>
             <addColumn tableName="print_request">
                 <column name="photo_location_arn" type="varchar(255)" afterColumn="supporting_information_format">
-                    <constraints nullable="false"/>
+                    <constraints nullable="true"/>
                 </column>
             </addColumn>
+
+            <sql>
+                <comment>Populating [photo_location_arn] of a every print_requests from certificate entity [photo_location_arn] column</comment>
+                UPDATE print_request pr
+                INNER JOIN certificate cert
+                ON cert.id = pr.certificate_id
+                SET pr.photo_location_arn = cert.photo_location_arn
+            </sql>
+            <modifyDataType tableName="print_request" columnName="photo_location_arn" newDataType="varchar(255) NOT NULL"/>
         </rollback>
     </changeSet>
 
