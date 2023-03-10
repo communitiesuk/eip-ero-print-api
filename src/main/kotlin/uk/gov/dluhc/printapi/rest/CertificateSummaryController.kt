@@ -27,7 +27,10 @@ class CertificateSummaryController(
             .let { certificateSummaryResponseMapper.toCertificateSummaryResponse(it) }
     }
 
-    @Deprecated("Use /eros/{eroId}/certificates?applicationId={applicationId} instead")
+    @Deprecated(
+        "Use /eros/{eroId}/certificates?applicationId={applicationId} instead",
+        ReplaceWith("getCertificateSummaryByApplicationId(eroId, applicationId)")
+    )
     @GetMapping("/eros/{eroId}/certificates/applications/{applicationId}")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     fun deprecatedGetCertificateSummaryByApplicationId(

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.9.2'
+  version: '1.9.3'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -681,89 +681,6 @@ paths:
         connectionType: VPC_LINK
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
-
-  #
-  # Anonymous Elector Document (AED) Status
-  # --------------------------------------------------------------------------------
-  '/eros/{eroId}/anonymous-elector-documents/{certificateNumber}/status':
-    parameters:
-      - name: eroId
-        description: The ID of the Electoral Registration Office responsible for an AED application.
-        schema:
-          type: string
-        in: path
-        required: true
-      - name: certificateNumber
-        description: The relevant `certificateNumber` of an anonymous elector document. A 20 character alphanumeric string.
-        schema:
-          type: string
-          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
-          example: 'DEV1W0XDH1368LWE1J40'
-        in: path
-        required: true
-    options:
-      summary: CORS support
-      description: |
-        Enable CORS by returning correct headers
-      tags:
-        - Anonymous Elector Documents (AED) Status
-      responses:
-        200:
-          description: Default response for CORS method
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-          content: { }
-      x-amazon-apigateway-integration:
-        type: mock
-        requestTemplates:
-          application/json: |
-            {
-              "statusCode" : 200
-            }
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
-              method.response.header.Access-Control-Allow-Methods: '''*'''
-              method.response.header.Access-Control-Allow-Origin: '''*'''
-            responseTemplates:
-              application/json: |
-                {}
-    patch:
-      summary: Updates the status of an Anonymous Elector Document.
-      description: Updates the status of an Anonymous Elector Document.
-      operationId: update-anonymous-elector-document-status
-      tags:
-        - Anonymous Elector Documents (AED) Status
-      responses:
-        204:
-          description: The status was updated successfully
-        '409':
-          description: An anonymous elector document current status does not permit the status to be updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConflictErrorResponse'
-      security:
-        - eroUserCognitoUserPoolAuthorizer: [ ]
-      x-amazon-apigateway-integration:
-        type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/{certificateNumber}/status'
-        requestParameters:
-          integration.request.path.eroId: method.request.path.eroId
-          integration.request.path.certificateNumber: method.request.path.certificateNumber
-        connectionType: VPC_LINK
-        connectionId: '${vpc_connection_id}'
-        httpMethod: PATCH
 
 components:
   #
