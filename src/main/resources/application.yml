@@ -24,6 +24,7 @@ sqs:
   process-print-response-file-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME}
   process-print-response-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME}
   application-removed-queue-name: ${SQS_APPLICATION_REMOVED_QUEUE_NAME}
+  remove-certificate-queue-name: ${SQS_REMOVE_CERTIFICATE_QUEUE_NAME}
 
 api:
   print-api:
