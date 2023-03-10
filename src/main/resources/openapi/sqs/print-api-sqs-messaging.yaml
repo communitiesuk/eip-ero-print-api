@@ -177,6 +177,7 @@ components:
         - gssCode
 
     RemoveCertificateMessage:
+      title: RemoveCertificateMessage
       description: The SQS message sent to remove an individual Certificate record from the database and its corresponding photo from S3.
       type: object
       properties:
