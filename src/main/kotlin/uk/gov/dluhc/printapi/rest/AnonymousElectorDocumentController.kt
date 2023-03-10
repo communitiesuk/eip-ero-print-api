@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
@@ -12,12 +11,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.GenerateAnonymousElectorDocumentMapper
@@ -53,13 +50,6 @@ class AnonymousElectorDocumentController(
                 .headers(createPdfHttpHeaders(pdfFile))
                 .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
         }
-    }
-
-    @PatchMapping("{certificateNumber}/status")
-    @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun updateAnonymousElectorDocumentStatus(@PathVariable eroId: String, @PathVariable certificateNumber: String) {
-        TODO("Not yet implemented")
     }
 
     @PostMapping(value = ["{gssCode}/explainer-document"], produces = [APPLICATION_PDF_VALUE])

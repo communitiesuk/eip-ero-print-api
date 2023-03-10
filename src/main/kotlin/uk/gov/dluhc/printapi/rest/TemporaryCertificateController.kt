@@ -57,7 +57,10 @@ class TemporaryCertificateController(
             }
         )
 
-    @Deprecated("Use /eros/{eroId}/temporary-certificates?applicationId={applicationId} instead")
+    @Deprecated(
+        "Use /eros/{eroId}/temporary-certificates?applicationId={applicationId} instead",
+        ReplaceWith("getTemporaryCertificateSummariesByApplicationId(eroId, applicationId)")
+    )
     @GetMapping("/eros/{eroId}/temporary-certificates/applications/{applicationId}")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     fun deprecatedGetTemporaryCertificateSummariesByApplicationId(
