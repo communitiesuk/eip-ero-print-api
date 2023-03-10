@@ -10,22 +10,30 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
-import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
+import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificateRemovalSummary
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.LocalDate
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 internal class CertificateDataRetentionServiceTest {
@@ -41,6 +49,15 @@ internal class CertificateDataRetentionServiceTest {
 
     @Mock
     private lateinit var deliveryRepository: DeliveryRepository
+
+    @Mock
+    private lateinit var s3CertificatePhotoService: S3PhotoService
+
+    @Mock
+    private lateinit var removeCertificateQueue: MessageQueue<RemoveCertificateMessage>
+
+    @Mock
+    private lateinit var dataRetentionConfiguration: DataRetentionConfiguration
 
     @InjectMocks
     private lateinit var certificateDataRetentionService: CertificateDataRetentionService
@@ -109,12 +126,7 @@ internal class CertificateDataRetentionServiceTest {
             val certificate2 = buildCertificate()
             val delivery1 = certificate1.printRequests[0].delivery!!
             val delivery2 = certificate2.printRequests[0].delivery!!
-            given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(
-                listOf(
-                    certificate1,
-                    certificate2
-                )
-            )
+            given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(listOf(certificate1, certificate2))
 
             // When
             certificateDataRetentionService.removeInitialRetentionPeriodData(VOTER_CARD)
@@ -146,42 +158,96 @@ internal class CertificateDataRetentionServiceTest {
     }
 
     @Nested
-    inner class RemoveFinalRetentionPeriodData {
+    inner class QueueCertificatesForRemoval {
         @Test
-        fun `should remove final retention period data`() {
+        fun `should queue certificates for removal`() {
             // Given
-            val certificate1 = buildCertificate()
-            val certificate2 = buildCertificate()
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(
-                listOf(
-                    certificate1,
-                    certificate2
-                )
-            )
+            val certificateRemovalSummary1 = buildCertificateRemovalSummary()
+            val certificateRemovalSummary2 = buildCertificateRemovalSummary()
+            val summaries = listOf(certificateRemovalSummary1, certificateRemovalSummary2)
+            val batchSize = 10000
+            given(dataRetentionConfiguration.certificateRemovalBatchSize).willReturn(batchSize)
+            given(certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)).willReturn(2)
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, batchSize)).willReturn(PageImpl(summaries))
+            TestLogAppender.reset()
 
             // When
-            certificateDataRetentionService.removeFinalRetentionPeriodData(VOTER_CARD)
+            certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
 
             // Then
-            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
-            verify(certificateRepository).delete(certificate1)
-            verify(certificateRepository).delete(certificate2)
+            verify(certificateRepository).countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, batchSize)
+            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary1.id!!, certificateRemovalSummary1.photoLocationArn!!))
+            verify(removeCertificateQueue).submit(RemoveCertificateMessage(certificateRemovalSummary2.id!!, certificateRemovalSummary2.photoLocationArn!!))
+            assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
         }
 
         @Test
-        fun `should not remove final retention period data given no certificates found`() {
+        fun `should retrieve certificates in batches and queue for removal`() {
             // Given
-            val certificate = buildCertificate()
-            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)).willReturn(
-                emptyList()
-            )
+            val batchSize = 4
+            val removalSummaries = listOf(buildCertificateRemovalSummary(), buildCertificateRemovalSummary(), buildCertificateRemovalSummary())
+            given(dataRetentionConfiguration.certificateRemovalBatchSize).willReturn(batchSize)
+            // initial query to retrieve the number of results
+            given(certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(any(), any())).willReturn(13)
+
+            // the batched calls in the exact expected order
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 4, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(4, batchSize), 13))
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 3, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(3, batchSize), 13))
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 2, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(2, batchSize), 13))
+            given(certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, batchSize))
+                .willReturn(PageImpl(removalSummaries, PageRequest.of(1, batchSize), 13))
+            TestLogAppender.reset()
 
             // When
-            certificateDataRetentionService.removeFinalRetentionPeriodData(VOTER_CARD)
+            certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
 
             // Then
-            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD)
-            verify(certificateRepository, never()).delete(certificate)
+            verify(certificateRepository).countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 4, batchSize)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 3, batchSize)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 2, batchSize)
+            verify(certificateRepository).findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, batchSize)
+            assertThat(TestLogAppender.hasLog("Found 13 certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
+            assertThat(TestLogAppender.hasLog("Retrieving batch [4] of [4] of CertificateRemovalSummary", Level.INFO)).isTrue
+            assertThat(TestLogAppender.hasLog("Retrieving batch [3] of [4] of CertificateRemovalSummary", Level.INFO)).isTrue
+            assertThat(TestLogAppender.hasLog("Retrieving batch [2] of [4] of CertificateRemovalSummary", Level.INFO)).isTrue
+            assertThat(TestLogAppender.hasLog("Retrieving batch [1] of [4] of CertificateRemovalSummary", Level.INFO)).isTrue
+        }
+
+        @Test
+        fun `should not queue certificates for removal given no certificates due to be removed`() {
+            // Given
+            given(certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)).willReturn(0)
+            TestLogAppender.reset()
+
+            // When
+            certificateDataRetentionService.queueCertificatesForRemoval(VOTER_CARD)
+
+            // Then
+            verify(certificateRepository).countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)
+            verifyNoMoreInteractions(certificateRepository)
+            assertThat(TestLogAppender.hasLog("No certificates with sourceType VOTER_CARD to remove final retention period data from", Level.INFO)).isTrue
+        }
+    }
+
+    @Nested
+    inner class RemoveFinalRetentionPeriodData {
+
+        @Test
+        fun `should remove certificate final retention data`() {
+            // Given
+            val message = RemoveCertificateMessage(certificateId = UUID.randomUUID(), certificatePhotoArn = aPhotoArn())
+
+            // When
+            certificateDataRetentionService.removeFinalRetentionPeriodData(message)
+
+            // Then
+            verify(s3CertificatePhotoService).removePhoto(message.certificatePhotoArn)
+            verify(certificateRepository).deleteById(message.certificateId)
         }
     }
 }

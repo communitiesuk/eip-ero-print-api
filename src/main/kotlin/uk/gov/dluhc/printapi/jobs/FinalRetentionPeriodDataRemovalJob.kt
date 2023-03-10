@@ -14,6 +14,6 @@ class FinalRetentionPeriodDataRemovalJob(
     @Scheduled(cron = "\${jobs.remove-vca-final-retention-period-data.cron}")
     @SchedulerLock(name = "\${jobs.remove-vca-final-retention-period-data.name}")
     fun removeVoterCardFinalRetentionPeriodData() {
-        certificateDataRetentionService.removeFinalRetentionPeriodData(sourceType = VOTER_CARD)
+        certificateDataRetentionService.queueCertificatesForRemoval(sourceType = VOTER_CARD)
     }
 }

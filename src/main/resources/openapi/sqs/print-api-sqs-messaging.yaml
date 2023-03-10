@@ -68,6 +68,17 @@ paths:
       responses:
         '204':
           description: No response content.
+
+  '/remove-certificate':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/RemoveCertificateMessage'
+      responses:
+        '204':
+          description: No response content.
+
 components:
   #
   # Schema and Enum Definitions
@@ -164,6 +175,22 @@ components:
         - sourceReference
         - sourceType
         - gssCode
+
+    RemoveCertificateMessage:
+      title: RemoveCertificateMessage
+      description: The SQS message sent to remove an individual Certificate record from the database and its corresponding photo from S3.
+      type: object
+      properties:
+        certificateId:
+          type: string
+          format: uuid
+          description: The id (primary key) of the Certificate row
+        certificatePhotoArn:
+          type: string
+          description: The Certificate photo's S3 arn
+      required:
+        - certificateId
+        - certificatePhotoArn
 
     SourceType:
       title: SourceType
@@ -383,3 +410,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApplicationRemovedMessage'
+    RemoveCertificateMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RemoveCertificateMessage'

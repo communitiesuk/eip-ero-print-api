@@ -33,6 +33,8 @@ The following environment variables must be set in order to run the application:
 * `SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME` - the queue name for processing print request batches
 * `SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME` - the queue name for processing print response files
 * `SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME` - the queue name for processing individual print responses
+* `SQS_APPLICATION_REMOVED_QUEUE_NAME` - the queue name to notify this api that a source application has been removed
+* `SQS_REMOVE_CERTIFICATE_QUEUE_NAME` - the queue name for removing certificates after the final data retention period
 * `API_ERO_MANAGEMENT_URL` - the base URL of the ERO Management REST API service.
 * `THREAD_POOL_ZIP_CORE_SIZE` - number of core threads for the Zip producer thread pool 
 * `THREAD_POOL_ZIP_MAX_SIZE` - maximum number of threads for the Zip producer thread pool

@@ -1,6 +1,9 @@
 package uk.gov.dluhc.printapi.database.repository
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -32,8 +35,14 @@ interface CertificateRepository : JpaRepository<Certificate, UUID> {
 
     fun findBySourceTypeAndFinalRetentionRemovalDateBefore(
         sourceType: SourceType,
-        finalRetentionRemovalDate: LocalDate
-    ): List<Certificate>
+        finalRetentionRemovalDate: LocalDate,
+        batchRequest: Pageable
+    ): Page<CertificateRemovalSummary>
+
+    fun countBySourceTypeAndFinalRetentionRemovalDateBefore(
+        sourceType: SourceType,
+        finalRetentionRemovalDate: LocalDate = LocalDate.now(),
+    ): Int
 
     @Query(
         value = """
@@ -59,10 +68,30 @@ object CertificateRepositoryExtensions {
         )
     }
 
-    fun CertificateRepository.findPendingRemovalOfFinalRetentionData(sourceType: SourceType): List<Certificate> {
+    fun CertificateRepository.findPendingRemovalOfFinalRetentionData(
+        sourceType: SourceType,
+        batchNumber: Int,
+        batchSize: Int = 10000
+    ): Page<CertificateRemovalSummary> {
+        val batchRequest = PageRequest.of(
+            batchNumber - 1,
+            batchSize,
+            Sort.by(Sort.Direction.ASC, "sourceType", "finalRetentionRemovalDate", "id")
+        )
+
         return findBySourceTypeAndFinalRetentionRemovalDateBefore(
             sourceType = sourceType,
-            finalRetentionRemovalDate = LocalDate.now()
+            finalRetentionRemovalDate = LocalDate.now(),
+            batchRequest = batchRequest
         )
     }
 }
+
+/**
+ * Used as a JPA class based projection to retrieve the minimum set of data to remove a Certificate and its photo, via
+ * an SQS queue.
+ */
+data class CertificateRemovalSummary(
+    val id: UUID? = null,
+    val photoLocationArn: String?
+)

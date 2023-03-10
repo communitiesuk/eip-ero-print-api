@@ -433,23 +433,44 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
     @Nested
     inner class GetCertificatesForFinalRetentionDataRemoval {
+
+        @Test
+        fun `should count certificates for removal of final retention period data`() {
+            // Given
+            val expectedCount = 2
+            certificateRepository.saveAll(
+                listOf(
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1)),
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1)),
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be included
+                )
+            )
+
+            // When
+            val count = certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)
+
+            // Then
+            assertThat(count).isEqualTo(expectedCount)
+        }
+
         @Test
         fun `should find certificates for removal of final retention period data`() {
             // Given
-            val expected1 = buildCertificate(
+            val certificate1 = buildCertificate(
                 finalRetentionRemovalDate = LocalDate.now().minusDays(1)
             )
-            val expected2 = buildCertificate(
+            val certificate2 = buildCertificate(
                 finalRetentionRemovalDate = LocalDate.now().minusDays(1)
             )
-            val other = buildCertificate(
+            val certificate3 = buildCertificate(
                 finalRetentionRemovalDate = LocalDate.now().plusDays(1)
             )
-
-            certificateRepository.saveAll(listOf(expected1, expected2, other))
+            certificateRepository.saveAll(listOf(certificate1, certificate2, certificate3))
+            val expected1 = CertificateRemovalSummary(certificate1.id, certificate1.photoLocationArn)
+            val expected2 = CertificateRemovalSummary(certificate2.id, certificate2.photoLocationArn)
 
             // When
-            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)
+            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, 10000)
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)

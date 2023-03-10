@@ -28,6 +28,7 @@ sqs:
   process-print-response-file-queue-name: process-print-response-file
   process-print-response-queue-name: process-print-response
   application-removed-queue-name: application-removed
+  remove-certificate-queue-name: remove-certificate
 
 api:
   ero-management:
