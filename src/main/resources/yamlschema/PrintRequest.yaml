@@ -19,11 +19,6 @@ properties:
     maxLength: 255
     description: Issuing authority (LA/ERO/VJB)
     example: Camden Borough Council
-  issueDate:
-    type: string
-    format: date
-    description: The issue date of the Voter Authority Card
-    example: '2022-06-01'
   suggestedExpiryDate:
     type: string
     format: date

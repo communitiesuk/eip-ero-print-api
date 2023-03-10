@@ -28,6 +28,11 @@ properties:
       - SUCCESS
       - FAILED
     description: Indicates if the step change was successful or not.
+  issueDate:
+    type: string
+    format: date
+    description: Required when status is IN-PRODUCTION and indicates the actual issue date of the Voter Certificate.
+    example: '2022-06-01'    
   message:
     type: string
     maxLength: 255
