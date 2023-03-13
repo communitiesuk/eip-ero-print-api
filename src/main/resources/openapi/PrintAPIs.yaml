@@ -69,7 +69,7 @@ paths:
       description: Returns a single certificate summary for a Voter Card Application
       parameters:
         - name: applicationId
-          description: The identifier of the Voter Card Application as a `query param`.
+          description: The identifier of the Voter Card Application.
           schema:
             type: string
           in: query
@@ -353,7 +353,7 @@ paths:
       description: Returns the Temporary Certificate summaries for a Voter Card Application
       parameters:
         - name: applicationId
-          description: The identifier of the Voter Card Application as a `query param`.
+          description: The identifier of the Voter Card Application.
           schema:
             type: string
           in: query
@@ -566,7 +566,7 @@ paths:
         - Anonymous Elector Documents (AED)
       parameters:
         - name: applicationId
-          description: An identifier of an Anonymous Elector Document application as a `query param`
+          description: An identifier of an Anonymous Elector Document application
           schema:
             type: string
           in: query
