@@ -5,19 +5,24 @@ import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.GenerateAnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
@@ -50,6 +55,16 @@ class AnonymousElectorDocumentController(
                 .headers(createPdfHttpHeaders(pdfFile))
                 .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
         }
+    }
+
+    @GetMapping
+    @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
+    @ResponseStatus(OK)
+    fun getAnonymousElectorDocumentSummaries(
+        @PathVariable eroId: String,
+        @RequestParam applicationId: String,
+    ): ResponseEntity<AnonymousElectorDocumentSummariesResponse> {
+        TODO("Not yet implemented, Will be implemented by EIP1-4145")
     }
 
     @PostMapping(value = ["{gssCode}/explainer-document"], produces = [APPLICATION_PDF_VALUE])

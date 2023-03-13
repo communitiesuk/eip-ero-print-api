@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.9.3'
+  version: '1.9.4'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -370,7 +370,6 @@ paths:
         uri: '${base_uri}/eros/{eroId}/temporary-certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.path.applicationId: method.request.path.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -559,16 +558,16 @@ paths:
         httpMethod: POST
 
     get:
-      summary: Returns the Anonymous Elector Document summaries for an anonymous application
-      description: Returns the Anonymous Elector Document summaries for an anonymous application
+      summary: Returns the Anonymous Elector Document summaries for an Anonymous application
+      description: Returns the Anonymous Elector Document summaries for an Anonymous application
       tags:
         - Anonymous Elector Documents (AED)
       parameters:
-        - name: eroId
-          description: The ID of the Electoral Registration Office responsible for the application.
+        - name: applicationId
+          description: An identifier of an Anonymous Elector Document application
           schema:
             type: string
-          in: path
+          in: query
           required: true
       responses:
         '200':
@@ -756,28 +755,18 @@ components:
         - printRequestSummaries
     PrintRequestSummary:
       title: PrintRequestSummary
-      type: object
       description: An object containing print request summary
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UpdatedBy'
       properties:
         status:
           $ref: '#/components/schemas/PrintRequestStatus'
-        userId:
-          type: string
-          format: email
-          example: fred.blogs@some-domain.co.uk
-          description: UserId of the user who made the print request
-        dateTime:
-          type: string
-          format: date-time
-          description: The timestamp in ISO-8601 UTC that the print request status update was received
-          example: '2022-11-17T10:53:25Z'
         message:
           type: string
           description: Message received for the print request status update
       required:
         - status
-        - userId
-        - dateTime
     PrintRequestStatus:
       title: PrintRequestStatus
       type: string
@@ -803,6 +792,25 @@ components:
         - cy
         - en
       default: en
+
+    UpdatedBy:
+      title: UpdatedBy
+      description: Object containing the updated by details of a resource.
+      type: object
+      properties:
+        userId:
+          description: "UserId (email address) of who last updated the resource."
+          format: email
+          type: string
+          example: fred@some-ero.gov.uk
+        dateTime:
+          description: "The timestamp in ISO-8601 UTC when an update on the resource occurred."
+          type: string
+          format: date-time
+          example: '2022-08-17T16:38:06Z'
+      required:
+        - userId
+        - dateTime
 
     SupportingInformationFormat:
       type: string
@@ -973,10 +981,11 @@ components:
 
     AnonymousElectorDocumentSummariesResponse:
       title: AnonymousElectorDocumentSummariesResponse
-      type: object
       description: A response containing a collection of Anonymous Elector Document summaries sorted with latest changes ordered first.
+      type: object
       properties:
         anonymousElectorDocuments:
+          title: AnonymousElectorDocuments
           type: array
           description: List of Anonymous Elector Document summaries for the application.
           items:
@@ -985,8 +994,10 @@ components:
         - anonymousElectorDocuments
     AnonymousElectorDocumentSummary:
       title: AnonymousElectorDocumentSummary
-      type: object
       description: An object summarising the current state of an Anonymous Elector Document (AED)
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UpdatedBy'
       properties:
         certificateNumber:
           type: string
@@ -995,16 +1006,6 @@ components:
           example: DEV1W0XDH1368LWE1J40
         status:
           $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
-        userId:
-          type: string
-          format: email
-          example: fred.blogs@some-domain.co.uk
-          description: UserId of the user who made the update to the AED
-        dateTime:
-          type: string
-          format: date-time
-          description: The timestamp in ISO-8601 UTC when the status was updated on the AED
-          example: '2022-11-17T10:53:25Z'
         electoralRollNumber:
           type: string
           description: Electoral roll number printed on the AED
@@ -1012,17 +1013,17 @@ components:
         issueDate:
           type: string
           format: date
-          description: The date that the AED was issued
+          description: The date on which the AED was issued
           example: '2022-11-17'
       required:
         - certificateNumber
         - status
-        - userId
-        - dateTime
         - electoralRollNumber
         - issueDate
+
     AnonymousElectorDocumentStatus:
       title: AnonymousElectorDocumentStatus
+      description: Status of an Anonymous Elector document
       type: string
       enum:
         - generated
