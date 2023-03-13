@@ -19,11 +19,21 @@ properties:
     maxLength: 255
     description: Issuing authority (LA/ERO/VJB)
     example: Camden Borough Council
+  issueDate:
+    type: string
+    format: date
+    description: |-
+      Only supplied in the case of a re-print. 
+      Returned in Print Response from printer if not a re-print.
+    example: '2022-06-01'
   suggestedExpiryDate:
     type: string
     format: date
-    example: '2022-06-01'
-    description: issueDate + 10 years
+    example: '2023-06-01'
+    description: |-
+      Only supplied in the case of a re-print. 
+      Returned in Print Response from printer if not a re-print.
+      issueDate + 10 years
   requestDateTime:
     type: string
     format: date-time
@@ -171,8 +181,6 @@ properties:
 required:
   - requestId
   - issuingAuthorityEn
-  - issueDate
-  - suggestedExpiryDate
   - requestDateTime
   - cardFirstname
   - cardSurname
