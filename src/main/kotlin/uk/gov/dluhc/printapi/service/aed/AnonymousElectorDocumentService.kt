@@ -24,11 +24,12 @@ class AnonymousElectorDocumentService(
     fun generateAnonymousElectorDocument(eroId: String, request: GenerateAnonymousElectorDocumentDto): PdfFile {
         verifyGssCodeIsValidForEro(eroId, request.gssCode)
         val filename = pdfTemplateDetailsFactory.getTemplateFilename(request.gssCode)
-        val electorDocument = anonymousElectorDocumentMapper.toAnonymousElectorDocument(request, filename)
-        val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(electorDocument)
-        val contents = pdfFactory.createPdfContents(templateDetails)
-        anonymousElectorDocumentRepository.save(electorDocument)
-        return PdfFile("anonymous-elector-document-${electorDocument.certificateNumber}.pdf", contents)
+        with(anonymousElectorDocumentMapper.toAnonymousElectorDocument(request, filename)) {
+            val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)
+            val contents = pdfFactory.createPdfContents(templateDetails)
+            anonymousElectorDocumentRepository.save(this)
+            return PdfFile("anonymous-elector-document-$certificateNumber.pdf", contents)
+        }
     }
 
     private fun verifyGssCodeIsValidForEro(eroId: String, gssCode: String) {

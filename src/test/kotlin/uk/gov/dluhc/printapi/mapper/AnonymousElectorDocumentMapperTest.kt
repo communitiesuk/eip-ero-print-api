@@ -103,7 +103,7 @@ class AnonymousElectorDocumentMapperTest {
                 userId = userId,
                 statusHistory = mutableListOf(
                     AnonymousElectorDocumentStatus(
-                        status = AnonymousElectorDocumentStatus.Status.GENERATED,
+                        status = AnonymousElectorDocumentStatus.Status.PRINTED,
                         eventDateTime = FIXED_TIME
                     )
                 )

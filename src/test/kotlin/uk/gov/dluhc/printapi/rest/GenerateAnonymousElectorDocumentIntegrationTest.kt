@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
@@ -163,14 +164,9 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         val photoLocationArn = addPhotoToS3()
         val request = buildGenerateAnonymousElectorDocumentRequest(
             photoLocation = photoLocationArn,
-            email = null,
-            phoneNumber = null,
+            email = null, phoneNumber = null,
             address = buildValidAddress(
-                property = null,
-                locality = null,
-                town = null,
-                area = null,
-                uprn = null
+                property = null, locality = null, town = null, area = null, uprn = null
             )
         )
         processValidRequest(request)
@@ -207,11 +203,14 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             ANONYMOUS_ELECTOR_DOCUMENT,
             request.sourceReference
         )
-        assertThat(electorDocuments).hasSize(1)
-        val electorDocument = electorDocuments[0]
+
+        assertThat(electorDocuments.size).isOne
+        val electorDocument = electorDocuments.first()
+        assertThat(electorDocument.statusHistory.size).isOne
+        assertThat(electorDocument.statusHistory.first().status).isEqualTo(AnonymousElectorDocumentStatus.Status.PRINTED)
+
         val contentDisposition = response.responseHeaders.contentDisposition
-        assertThat(contentDisposition.filename)
-            .isEqualTo("anonymous-elector-document-${electorDocument.certificateNumber}.pdf")
+        assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${electorDocument.certificateNumber}.pdf")
 
         val pdfContent = response.responseBody
         assertThat(pdfContent).isNotNull
