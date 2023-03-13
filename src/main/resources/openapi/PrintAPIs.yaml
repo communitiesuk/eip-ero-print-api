@@ -89,7 +89,6 @@ paths:
         uri: '${base_uri}/eros/{eroId}/certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.querystring.applicationId: method.request.querystring.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -371,7 +370,6 @@ paths:
         uri: '${base_uri}/eros/{eroId}/temporary-certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.querystring.applicationId: method.request.querystring.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -584,7 +582,6 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
-          integration.request.querystring.applicationId: method.request.querystring.applicationId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''

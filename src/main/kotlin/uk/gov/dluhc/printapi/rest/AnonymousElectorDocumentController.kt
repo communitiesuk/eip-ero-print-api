@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_PDF
 import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
 import org.springframework.http.ResponseEntity
@@ -59,7 +59,7 @@ class AnonymousElectorDocumentController(
 
     @GetMapping
     @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(OK)
     fun getAnonymousElectorDocumentSummaries(
         @PathVariable eroId: String,
         @RequestParam applicationId: String,
