@@ -8,6 +8,7 @@ import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertTha
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildApplicationRemovedMessage
 import java.time.LocalDate
 import java.time.Month.APRIL
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit
 internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
 
     @Test
-    fun `should process message and set initial and final removal dates`() {
+    fun `should process application removed message and set initial and final removal dates on certificate`() {
         // Given
         val certificate = buildCertificate(
             issueDate = LocalDate.of(2023, APRIL, 1), // to include 3 bank holidays in calculation
@@ -45,6 +46,31 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             assertThat(response).hasSize(1)
             val saved = response[0]
             assertThat(saved).hasInitialRetentionRemovalDate(expectedInitialRemovalDate)
+            assertThat(saved).hasFinalRetentionRemovalDate(expectedFinalRemovalDate)
+        }
+    }
+
+    @Test
+    fun `should process application removed message and set final removal date on temporary certificate`() {
+        // Given
+        val temporaryCertificate = buildTemporaryCertificate(
+            issueDate = LocalDate.of(2023, APRIL, 1)
+        )
+        temporaryCertificateRepository.save(temporaryCertificate)
+        val payload = buildApplicationRemovedMessage(
+            sourceReference = temporaryCertificate.sourceReference!!,
+            gssCode = temporaryCertificate.gssCode!!
+        )
+        val expectedFinalRemovalDate = LocalDate.of(2024, JULY, 1)
+
+        // When
+        sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
+
+        // Then
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            val response = temporaryCertificateRepository.findAll()
+            assertThat(response).hasSize(1)
+            val saved = response[0]
             assertThat(saved).hasFinalRetentionRemovalDate(expectedFinalRemovalDate)
         }
     }

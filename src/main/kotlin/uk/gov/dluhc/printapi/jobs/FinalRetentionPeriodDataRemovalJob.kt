@@ -5,15 +5,18 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
+import uk.gov.dluhc.printapi.service.TemporaryCertificateDataRetentionService
 
 @Component
 class FinalRetentionPeriodDataRemovalJob(
-    private val certificateDataRetentionService: CertificateDataRetentionService
+    private val certificateDataRetentionService: CertificateDataRetentionService,
+    private val temporaryCertificateDataRetentionService: TemporaryCertificateDataRetentionService
 ) {
 
     @Scheduled(cron = "\${jobs.remove-vca-final-retention-period-data.cron}")
     @SchedulerLock(name = "\${jobs.remove-vca-final-retention-period-data.name}")
     fun removeVoterCardFinalRetentionPeriodData() {
+        temporaryCertificateDataRetentionService.removeTemporaryCertificateData(sourceType = VOTER_CARD)
         certificateDataRetentionService.queueCertificatesForRemoval(sourceType = VOTER_CARD)
     }
 }

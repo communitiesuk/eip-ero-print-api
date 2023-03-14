@@ -14,6 +14,7 @@ import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.addCertificatePhotoToS3
 import uk.gov.dluhc.printapi.testsupport.certificatePhotoExists
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoBucketPath
 import java.time.LocalDate
@@ -45,6 +46,11 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
         val certificate4 = buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be removed
         certificateRepository.saveAll(listOf(certificate1, certificate2, certificate3, certificate4))
 
+        val temporaryCertificate1 = buildTemporaryCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1))
+        val temporaryCertificate2 = buildTemporaryCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1))
+        val temporaryCertificate3 = buildTemporaryCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1))
+        temporaryCertificateRepository.saveAll(listOf(temporaryCertificate1, temporaryCertificate2, temporaryCertificate3))
+
         s3Client.addCertificatePhotoToS3(s3Bucket, s3PathPhoto1)
         s3Client.addCertificatePhotoToS3(s3Bucket, s3PathPhoto2)
         TestLogAppender.reset()
@@ -54,6 +60,10 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
 
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertThat(temporaryCertificateRepository.findById(temporaryCertificate1.id!!)).isEmpty
+            assertThat(temporaryCertificateRepository.findById(temporaryCertificate2.id!!)).isEmpty
+            assertThat(temporaryCertificateRepository.findById(temporaryCertificate3.id!!)).isNotEmpty
+
             assertThat(certificateRepository.findById(certificate1.id!!)).isEmpty
             assertThat(certificateRepository.findById(certificate2.id!!)).isEmpty
             assertThat(certificateRepository.findById(certificate3.id!!)).isNotEmpty
@@ -64,6 +74,8 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
             assertThat(testPrintRequestRepository.findById(certificate4.printRequests[0].id!!)).isNotEmpty
             assertThat(s3Client.certificatePhotoExists(s3Bucket, s3PathPhoto1)).isFalse
             assertThat(s3Client.certificatePhotoExists(s3Bucket, s3PathPhoto2)).isFalse
+
+            assertThat(TestLogAppender.hasLog("Found 2 temporary certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
             assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
         }
     }

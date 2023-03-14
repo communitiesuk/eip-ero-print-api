@@ -43,6 +43,7 @@ fun buildTemporaryCertificate(
         buildTemporaryCertificateStatus()
     ),
     userId: String = aValidUserId(),
+    finalRetentionRemovalDate: LocalDate? = null
 ): TemporaryCertificate {
     return TemporaryCertificate(
         id = id,
@@ -61,7 +62,8 @@ fun buildTemporaryCertificate(
         photoLocationArn = photoLocationArn,
         issueDate = issueDate,
         validOnDate = validOnDate,
-        userId = userId
+        userId = userId,
+        finalRetentionRemovalDate = finalRetentionRemovalDate
     ).apply {
         this.statusHistory.addAll(statusHistory)
     }
