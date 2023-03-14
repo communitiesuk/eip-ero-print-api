@@ -518,8 +518,8 @@ paths:
               application/json: |
                 {}
     post:
-      summary: Generates and returns an Anonymous Elector Document (AED)
-      description: Generates and returns an Anonymous Elector Document (AED)
+      summary: Generates and returns an Anonymous Elector Document (AED). The document status is marked as `PRINTED` upon successful generation of AED document.
+      description: Generates and returns an Anonymous Elector Document (AED). The document status is marked as `PRINTED` upon successful generation of AED document.
       tags:
         - Anonymous Elector Documents (AED)
       requestBody:

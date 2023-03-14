@@ -31,7 +31,7 @@ abstract class AnonymousElectorDocumentMapper {
     @Mapping(target = "issueDate", expression = "java( issueDate() )")
     @Mapping(target = "requestDateTime", expression = "java( requestDateTime() )")
     @Mapping(target = "contactDetails", source = "aedRequest")
-    @Mapping(target = "statusHistory", expression = "java( initialStatus() )")
+    @Mapping(target = "statusHistory", expression = "java( markStatusAsPrinted() )")
     abstract fun toAnonymousElectorDocument(
         aedRequest: GenerateAnonymousElectorDocumentDto,
         aedTemplateFilename: String
@@ -41,10 +41,10 @@ abstract class AnonymousElectorDocumentMapper {
 
     protected fun requestDateTime(): Instant = Instant.now(clock)
 
-    protected fun initialStatus(): List<AnonymousElectorDocumentStatus> {
+    protected fun markStatusAsPrinted(): List<AnonymousElectorDocumentStatus> {
         return listOf(
             AnonymousElectorDocumentStatus(
-                status = AnonymousElectorDocumentStatus.Status.GENERATED,
+                status = AnonymousElectorDocumentStatus.Status.PRINTED,
                 eventDateTime = Instant.now(clock)
             )
         )
