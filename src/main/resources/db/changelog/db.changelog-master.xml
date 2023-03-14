@@ -26,4 +26,5 @@
     <include relativeToChangelogFile="true" file="ddl/0017_anonymous_elector_document_source_type.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0018_EIP1-4481_alter_photo_location_arn_column_in_tables.xml"/>
     <include relativeToChangelogFile="true" file="migration/0002_EIP1-4616_update_aed_status.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0019_final_retention_date_removed_column.xml"/>
 </databaseChangeLog>

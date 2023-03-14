@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="matt.wills@valtech.com" id="0019_EIP1-4633_alter_certificate - add final_retention_removal_date column" context="ddl">
+
+        <addColumn tableName="temporary_certificate">
+            <column name="final_retention_removal_date" type="date" afterColumn="valid_on_date"
+                    remarks="The date the temporary certificate data should be removed">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <createIndex tableName="temporary_certificate" indexName="temp_cert_final_retention_removal_idx">
+            <column name="source_type"/>
+            <column name="final_retention_removal_date"/>
+        </createIndex>
+
+        <rollback>
+            <dropColumn
+                tableName="temporary_certificate"
+                columnName="final_retention_removal_date"/>
+
+            <dropIndex tableName="temporary_certificate" indexName="temp_cert_final_retention_removal_idx"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

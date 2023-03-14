@@ -97,6 +97,12 @@ class TemporaryCertificate(
     @JoinColumn(name = "temporary_certificate_id", nullable = false)
     var statusHistory: MutableList<TemporaryCertificateStatus> = mutableListOf(),
 
+    /**
+     * The date this [TemporaryCertificate] should be removed. This is specified as the second 1st July in the
+     * legislation.
+     */
+    var finalRetentionRemovalDate: LocalDate? = null,
+
     @field:NotNull
     @field:Size(max = 255)
     var userId: String? = null,
