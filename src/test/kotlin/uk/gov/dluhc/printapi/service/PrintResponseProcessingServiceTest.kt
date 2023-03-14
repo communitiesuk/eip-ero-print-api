@@ -35,9 +35,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildProcessPrintResponseMessage
 
 @ExtendWith(MockitoExtension::class)
 class PrintResponseProcessingServiceTest {

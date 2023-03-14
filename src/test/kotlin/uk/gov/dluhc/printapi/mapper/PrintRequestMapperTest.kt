@@ -31,7 +31,7 @@ import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.toElectoralRegistrationOffice
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildCertificateDelivery
+import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildMessagingCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Clock
 import java.time.Instant
@@ -85,7 +85,7 @@ class PrintRequestMapperTest {
         val message = buildSendApplicationToPrintMessage(
             certificateLanguage = certificateLanguageModel,
             supportingInformationFormat = supportingInformationFormatModelEnum,
-            delivery = buildCertificateDelivery(
+            delivery = buildMessagingCertificateDelivery(
                 deliveryAddressType = deliveryAddressTypeModelEnum
             )
         )
@@ -144,7 +144,7 @@ class PrintRequestMapperTest {
                 userId = userId
             )
         }
-        given(deliveryAddressTypeMapper.toDeliveryAddressTypeEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.fromSqsToDeliveryAddressTypeEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
 
         // When
         val actual = mapper.toPrintRequest(message, ero)
@@ -153,7 +153,7 @@ class PrintRequestMapperTest {
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
         verify(idFactory).requestId()
         verify(supportingInformationFormatMapper).toPrintRequestEntityEnum(supportingInformationFormatModelEnum)
-        verify(deliveryAddressTypeMapper).toDeliveryAddressTypeEntity(deliveryAddressTypeModelEnum)
+        verify(deliveryAddressTypeMapper).fromSqsToDeliveryAddressTypeEntity(deliveryAddressTypeModelEnum)
         verify(electoralRegistrationOfficeMapper)
             .toElectoralRegistrationOffice(ero.englishContactDetails, CertificateLanguageModel.EN)
         verify(electoralRegistrationOfficeMapper)
@@ -170,7 +170,7 @@ class PrintRequestMapperTest {
         val message = buildSendApplicationToPrintMessage(
             certificateLanguage = CertificateLanguageModel.EN,
             supportingInformationFormat = supportingInformationFormatModelEnum,
-            delivery = buildCertificateDelivery(
+            delivery = buildMessagingCertificateDelivery(
                 deliveryAddressType = deliveryAddressTypeModelEnum
             )
         )
@@ -233,7 +233,7 @@ class PrintRequestMapperTest {
                 userId = userId
             )
         }
-        given(deliveryAddressTypeMapper.toDeliveryAddressTypeEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.fromSqsToDeliveryAddressTypeEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
 
         // When
         val actual = mapper.toPrintRequest(message, ero)
@@ -242,7 +242,7 @@ class PrintRequestMapperTest {
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
         verify(idFactory).requestId()
         verify(supportingInformationFormatMapper).toPrintRequestEntityEnum(supportingInformationFormatModelEnum)
-        verify(deliveryAddressTypeMapper).toDeliveryAddressTypeEntity(deliveryAddressTypeModelEnum)
+        verify(deliveryAddressTypeMapper).fromSqsToDeliveryAddressTypeEntity(deliveryAddressTypeModelEnum)
         verify(electoralRegistrationOfficeMapper)
             .toElectoralRegistrationOffice(ero.englishContactDetails, CertificateLanguageModel.EN)
         verify(electoralRegistrationOfficeMapper)
@@ -261,7 +261,7 @@ class PrintRequestMapperTest {
         val message = buildSendApplicationToPrintMessage(
             certificateLanguage = CertificateLanguageModel.CY,
             supportingInformationFormat = supportingInformationFormatModelEnum,
-            delivery = buildCertificateDelivery(
+            delivery = buildMessagingCertificateDelivery(
                 deliveryAddressType = deliveryAddressTypeModelEnum
             )
         )
@@ -318,7 +318,7 @@ class PrintRequestMapperTest {
                 userId = userId
             )
         }
-        given(deliveryAddressTypeMapper.toDeliveryAddressTypeEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.fromSqsToDeliveryAddressTypeEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
 
         // When
         val actual = mapper.toPrintRequest(message, ero)
@@ -327,7 +327,7 @@ class PrintRequestMapperTest {
         assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected)
         verify(idFactory).requestId()
         verify(supportingInformationFormatMapper).toPrintRequestEntityEnum(supportingInformationFormatModelEnum)
-        verify(deliveryAddressTypeMapper).toDeliveryAddressTypeEntity(deliveryAddressTypeModelEnum)
+        verify(deliveryAddressTypeMapper).fromSqsToDeliveryAddressTypeEntity(deliveryAddressTypeModelEnum)
         verify(electoralRegistrationOfficeMapper, times(2))
             .toElectoralRegistrationOffice(ero.englishContactDetails, CertificateLanguageModel.EN)
         verify(electoralRegistrationOfficeMapper, never())

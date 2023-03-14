@@ -8,7 +8,7 @@ import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertTha
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
+import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildApplicationRemovedMessage
 import java.time.LocalDate
 import java.time.Month.APRIL
 import java.time.Month.JULY

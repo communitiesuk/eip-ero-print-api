@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.testsupport.testdata.model
+package uk.gov.dluhc.printapi.testsupport.testdata.messaging.model
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.messaging.models.Address

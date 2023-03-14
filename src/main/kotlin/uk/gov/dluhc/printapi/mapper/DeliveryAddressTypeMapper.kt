@@ -8,8 +8,6 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddr
 @Mapper
 interface DeliveryAddressTypeMapper {
 
-    @ValueMapping(source = "REGISTERED", target = "REGISTERED")
     @ValueMapping(source = "ERO_MINUS_COLLECTION", target = "ERO_COLLECTION")
-    @ValueMapping(source = "ALTERNATIVE", target = "ALTERNATIVE")
-    fun toDeliveryAddressTypeEntity(sourceType: DeliveryAddressType): DeliveryAddressTypeEntity
+    fun fromSqsToDeliveryAddressTypeEntity(sourceType: DeliveryAddressType): DeliveryAddressTypeEntity
 }

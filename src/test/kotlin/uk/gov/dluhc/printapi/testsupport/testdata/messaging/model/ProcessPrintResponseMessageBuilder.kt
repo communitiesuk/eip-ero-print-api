@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.testsupport.testdata.model
+package uk.gov.dluhc.printapi.testsupport.testdata.messaging.model
 
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
