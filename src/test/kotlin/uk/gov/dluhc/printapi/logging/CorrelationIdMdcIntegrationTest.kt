@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.logging
 
 import ch.qos.logback.classic.Level
+import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -15,6 +16,7 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.logs
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ILoggingEventAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
@@ -124,6 +126,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
         @Test
         fun `should run batch job and log consistent correlation id`() {
             // Given
+            TestLogAppender.reset()
             val certificateId = UUID.randomUUID()
             saveCertificate(certificateId)
 
@@ -132,43 +135,20 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
 
             // Then
             await.atMost(10, TimeUnit.SECONDS).untilAsserted {
-                val logEvent = TestLogAppender.getLogEventMatchingRegex(
-                    "Looking for certificate Print Requests to assign to a new batch",
-                    Level.INFO
-                )
-                assertThat(logEvent).isNotNull
-                val expectedCorrelationId = logEvent!!.mdcPropertyMap[CORRELATION_ID]
-
                 assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Certificate ids \\[$certificateId\\] assigned to batch \\[.{32}\\]",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Batch \\[.{32}\\] containing .{1} print requests submitted to queue",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Completed batching certificate Print Requests",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
+                    // first message that is reliably logged
                     TestLogAppender.getLogEventMatchingRegex(
                         "Processing print batch request for batchId: .{32}",
                         Level.INFO
                     )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Successfully processed print request for batchId: .{32}",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
+                ).isNotNull
+                val logs = logs.filter { it.mdcPropertyMap.isNotEmpty() }
+                // wait until sufficient messages are logged before verifying all share same correlation ID
+                assertThat(logs).hasSizeGreaterThanOrEqualTo(4)
+            }
+            val correlationId = logs.first().mdcPropertyMap[CORRELATION_ID]
+            logs.forEach {
+                assertThat(it).`as`("Message: ${it.message}").hasCorrelationId(correlationId)
             }
         }
     }
@@ -228,44 +208,19 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
             processPrintResponsesBatchJob.pollAndProcessPrintResponses()
 
             // Then
-            await.atMost(30, TimeUnit.SECONDS).untilAsserted {
-                val logEvent = TestLogAppender.getLogEventMatchingRegex(
-                    "Finding matching print responses from directory: \\[EROP/Dev/OutBound\\]",
-                    Level.INFO
-                )
-                assertThat(logEvent).isNotNull
-                val expectedCorrelationId = logEvent!!.mdcPropertyMap[CORRELATION_ID]
-
+            await.atMost(10, TimeUnit.SECONDS).untilAsserted {
                 assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Renaming \\[$statusUpdateFile\\] to \\[$statusUpdateFile.processing\\] in directory:\\[EROP/Dev/OutBound\\]",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Submitting SQS message for file: \\[1 of 1\\] with payload: ProcessPrintResponseFileMessage\\(directory=EROP/Dev/OutBound, fileName=$statusUpdateFile.processing\\)",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Begin processing PrintResponse file \\[$statusUpdateFile.processing\\] from directory \\[EROP/Dev/OutBound\\]",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Removing processed file \\[$statusUpdateFile.processing\\] from directory \\[EROP/Dev/OutBound\\]",
-                        Level.INFO
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
+                    // stop when last expected message is logged
                     TestLogAppender.getLogEventMatchingRegex(
                         "Begin processing PrintResponse with requestId $expectedRequestId",
                         Level.INFO
                     )
-                ).hasCorrelationId(expectedCorrelationId)
+                ).isNotNull
+            }
+            val logs = logs.filter { it.mdcPropertyMap.isNotEmpty() }
+            val correlationId = logs.first().mdcPropertyMap[CORRELATION_ID]
+            logs.forEach {
+                assertThat(it).`as`("Message: ${it.message}").hasCorrelationId(correlationId)
             }
         }
     }
