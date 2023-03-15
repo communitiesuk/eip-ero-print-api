@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
+import uk.gov.dluhc.printapi.service.TemporaryCertificateDataRetentionService
 import javax.validation.Valid
 
 private val logger = KotlinLogging.logger { }
@@ -15,7 +16,8 @@ private val logger = KotlinLogging.logger { }
  */
 @Component
 class ApplicationRemovedMessageListener(
-    val certificateDataRetentionService: CertificateDataRetentionService
+    val certificateDataRetentionService: CertificateDataRetentionService,
+    val temporaryCertificateDataRetentionService: TemporaryCertificateDataRetentionService
 ) : MessageListener<ApplicationRemovedMessage> {
 
     @SqsListener("\${sqs.application-removed-queue-name}")
@@ -27,6 +29,7 @@ class ApplicationRemovedMessageListener(
                     "and gssCode [$gssCode]"
             }
             certificateDataRetentionService.handleSourceApplicationRemoved(payload)
+            temporaryCertificateDataRetentionService.handleSourceApplicationRemoved(payload)
         }
     }
 }

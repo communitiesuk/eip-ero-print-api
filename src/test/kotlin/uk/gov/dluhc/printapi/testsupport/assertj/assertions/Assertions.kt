@@ -8,6 +8,7 @@ import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.TemporaryCertificate
 
 /**
  * Entry point for assertions of different data types. Each method in this class is a static factory for the
@@ -34,6 +35,17 @@ object Assertions : Assertions() {
     @CheckReturnValue
     fun assertThat(actual: Certificate?): CertificateAssert {
         return CertificateAssert(actual)
+    }
+
+    /**
+     * Creates a new instance of `[TemporaryCertificateAssert]`.
+     *
+     * @param actual the actual value.
+     * @return the created assertion object.
+     */
+    @CheckReturnValue
+    fun assertThat(actual: TemporaryCertificate?): TemporaryCertificateAssert {
+        return TemporaryCertificateAssert(actual)
     }
 
     /**

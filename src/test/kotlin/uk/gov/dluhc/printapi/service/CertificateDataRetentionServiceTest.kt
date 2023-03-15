@@ -33,6 +33,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificateRemoval
 import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildApplicationRemovedMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.LocalDate
+import java.time.Month.JANUARY
+import java.time.Month.JULY
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -69,8 +71,8 @@ internal class CertificateDataRetentionServiceTest {
             // Given
             val message = buildApplicationRemovedMessage()
             val certificate = buildCertificate()
-            val expectedInitialRetentionRemovalDate = LocalDate.of(2023, 1, 1)
-            val expectedFinalRetentionRemovalDate = LocalDate.of(2032, 1, 7)
+            val expectedInitialRetentionRemovalDate = LocalDate.of(2023, JANUARY, 1)
+            val expectedFinalRetentionRemovalDate = LocalDate.of(2032, JULY, 1)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
             given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(certificate)
             given(certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any())).willReturn(expectedInitialRetentionRemovalDate)
@@ -80,8 +82,8 @@ internal class CertificateDataRetentionServiceTest {
             certificateDataRetentionService.handleSourceApplicationRemoved(message)
 
             // Then
-            assertThat(certificate.initialRetentionRemovalDate).isEqualTo(expectedInitialRetentionRemovalDate)
-            assertThat(certificate.finalRetentionRemovalDate).isEqualTo(expectedFinalRetentionRemovalDate)
+            assertThat(certificate).hasInitialRetentionRemovalDate(expectedInitialRetentionRemovalDate)
+            assertThat(certificate).hasFinalRetentionRemovalDate(expectedFinalRetentionRemovalDate)
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
             verify(certificateRemovalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate, message.gssCode)
@@ -90,7 +92,7 @@ internal class CertificateDataRetentionServiceTest {
         }
 
         @Test
-        fun `should throw exception when certificate doesn't exist`() {
+        fun `should log error when certificate doesn't exist`() {
             // Given
             val message = buildApplicationRemovedMessage(
                 sourceReference = "63774ff4bb4e7049b67182d9",
