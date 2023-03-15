@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.Clock
 import java.time.Instant
@@ -25,6 +26,11 @@ abstract class AnonymousElectorDocumentMapper {
 
     @Autowired
     protected lateinit var clock: Clock
+
+    abstract fun toGenerateAnonymousElectorDocumentDto(
+        apiRequest: GenerateAnonymousElectorDocumentRequest,
+        userId: String
+    ): GenerateAnonymousElectorDocumentDto
 
     @Mapping(target = "photoLocationArn", source = "aedRequest.photoLocation")
     @Mapping(target = "certificateNumber", expression = "java( idFactory.vacNumber() )")

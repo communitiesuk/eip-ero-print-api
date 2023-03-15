@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service
+package uk.gov.dluhc.printapi.messaging.service
 
 import ch.qos.logback.classic.Level
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -15,6 +15,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.inOrder
 import org.springframework.messaging.MessagingException
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
+import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import java.io.IOException
 

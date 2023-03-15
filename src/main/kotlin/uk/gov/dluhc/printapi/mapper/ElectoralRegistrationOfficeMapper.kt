@@ -13,12 +13,6 @@ private const val ELECTORAL_REGISTRATION_OFFICER_CY = "Swyddog Cofrestru Etholia
 
 @Mapper
 abstract class ElectoralRegistrationOfficeMapper {
-    @Mapping(target = "name", expression = "java( getName(language) )")
-    protected abstract fun toElectoralRegistrationOfficeFromNotNullContactDetails(
-        eroContactDetails: EroContactDetailsDto,
-        language: CertificateLanguage
-    ): ElectoralRegistrationOffice
-
     fun toElectoralRegistrationOffice(
         eroContactDetails: EroContactDetailsDto?,
         language: CertificateLanguage
@@ -29,6 +23,12 @@ abstract class ElectoralRegistrationOfficeMapper {
 
         return toElectoralRegistrationOfficeFromNotNullContactDetails(eroContactDetails, language)
     }
+
+    @Mapping(target = "name", expression = "java( getName(language) )")
+    protected abstract fun toElectoralRegistrationOfficeFromNotNullContactDetails(
+        eroContactDetails: EroContactDetailsDto,
+        language: CertificateLanguage
+    ): ElectoralRegistrationOffice
 
     protected fun getName(language: CertificateLanguage): String {
         return when (language) {

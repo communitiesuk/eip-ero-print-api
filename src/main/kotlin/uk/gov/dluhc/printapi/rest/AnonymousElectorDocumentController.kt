@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
-import uk.gov.dluhc.printapi.mapper.GenerateAnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
@@ -34,7 +34,7 @@ import javax.validation.Valid
 @RequestMapping("/eros/{eroId}/anonymous-elector-documents")
 class AnonymousElectorDocumentController(
     @Qualifier("anonymousElectorDocumentExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
-    private val generateAnonymousElectorDocumentMapper: GenerateAnonymousElectorDocumentMapper,
+    private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
     private val anonymousElectorDocumentService: AnonymousElectorDocumentService,
 ) {
 
@@ -46,7 +46,7 @@ class AnonymousElectorDocumentController(
         authentication: Authentication
     ): ResponseEntity<InputStreamResource> {
         val userId = authentication.name
-        val dto = generateAnonymousElectorDocumentMapper.toGenerateAnonymousElectorDocumentDto(
+        val dto = anonymousElectorDocumentMapper.toGenerateAnonymousElectorDocumentDto(
             generateAnonymousElectorDocumentRequest,
             userId
         )

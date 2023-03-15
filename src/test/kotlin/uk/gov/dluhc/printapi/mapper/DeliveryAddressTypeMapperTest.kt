@@ -18,11 +18,11 @@ class DeliveryAddressTypeMapperTest {
             "ALTERNATIVE, ALTERNATIVE",
         ]
     )
-    fun `should map to entity`(source: DeliveryAddressType, expected: DeliveryAddressTypeEntity) {
+    fun `should map messaging model to entity`(source: DeliveryAddressType, expected: DeliveryAddressTypeEntity) {
         // Given
 
         // When
-        val actual = mapper.toDeliveryAddressTypeEntity(source)
+        val actual = mapper.fromSqsToDeliveryAddressTypeEntity(source)
 
         // Then
         assertThat(actual).isEqualTo(expected)

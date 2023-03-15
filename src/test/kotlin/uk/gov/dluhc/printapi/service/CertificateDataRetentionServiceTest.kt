@@ -30,7 +30,7 @@ import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificateRemovalSummary
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
+import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildApplicationRemovedMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.LocalDate
 import java.util.UUID

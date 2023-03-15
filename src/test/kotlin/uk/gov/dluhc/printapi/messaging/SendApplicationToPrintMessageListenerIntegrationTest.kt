@@ -33,7 +33,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildCertificateDelivery
+import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildMessagingCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit.SECONDS
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage as SqsCertificateLanguage
 import uk.gov.dluhc.printapi.messaging.models.DeliveryAddressType as SqsDeliveryAddressType
 import uk.gov.dluhc.printapi.messaging.models.SourceType as SqsSourceType
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAddress as buildDeliveryAddress
+import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildAddress as buildDeliveryAddress
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
@@ -179,7 +179,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             sourceReference = certificate.sourceReference!!,
             supportingInformationFormat = LARGE_MINUS_PRINT,
             requestDateTime = expected.printRequests[0].requestDateTime!!.plusSeconds(5).atOffset(UTC),
-            delivery = buildCertificateDelivery(
+            delivery = buildMessagingCertificateDelivery(
                 deliveryAddressType = SqsDeliveryAddressType.REGISTERED,
                 address = buildDeliveryAddress(property = "Applicant Property", street = "Applicant Street")
             )

@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.testsupport.testdata.model
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.models.Address
+import uk.gov.dluhc.printapi.models.CertificateDelivery
 import uk.gov.dluhc.printapi.models.CertificateLanguage
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.models.SourceType
@@ -32,6 +33,7 @@ fun buildGenerateAnonymousElectorDocumentRequest(
     email: String? = aValidEmailAddress(),
     phoneNumber: String? = aValidPhoneNumber(),
     address: Address = buildValidAddress(),
+    delivery: CertificateDelivery? = null // TODO EIP-4668 makes this `delivery` field as mandatory
 ): GenerateAnonymousElectorDocumentRequest =
     GenerateAnonymousElectorDocumentRequest(
         gssCode = gssCode,
@@ -47,11 +49,12 @@ fun buildGenerateAnonymousElectorDocumentRequest(
         surname = surname,
         email = email,
         phoneNumber = phoneNumber,
-        address = address
+        address = address,
+        delivery = delivery
     )
 
 fun buildValidAddress(
-    fakeAddress: net.datafaker.Address = DataFaker.faker.address(),
+    fakeAddress: net.datafaker.providers.base.Address = DataFaker.faker.address(),
     property: String? = fakeAddress.buildingNumber(),
     street: String = fakeAddress.streetName(),
     locality: String? = fakeAddress.streetName(),

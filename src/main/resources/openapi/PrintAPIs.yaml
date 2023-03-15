@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.9.4'
+  version: '1.10.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -817,6 +817,54 @@ components:
       description: The format of the supporting information sent with the document.
       enum:
         - standard
+    CertificateDelivery:
+      title: CertificateDelivery
+      description: Object describing how and where the Anonymous Elector Document should be delivered
+      type: object
+      properties:
+        deliveryClass:
+          $ref: '#/components/schemas/DeliveryClass'
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
+        addressee:
+          type: string
+          maxLength: 255
+          description: The addressee to be printed in addition to the delivery address
+        address:
+          $ref: '#/components/schemas/Address'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
+      required:
+        - deliveryClass
+        - deliveryAddressType
+        - addressee
+        - address
+        - addressFormat
+
+    DeliveryClass:
+      title: DeliveryClass
+      description: The delivery class for the Anonymous Elector Document
+      type: string
+      enum:
+        - standard
+
+    DeliveryAddressType:
+      title: DeliveryAddressType
+      description: The delivery address type for the Anonymous Elector Document
+      type: string
+      enum:
+        - registered
+        - ero-collection
+        - alternative
+
+    AddressFormat:
+      title: AddressFormat
+      description: Enumeration of address formats
+      type: string
+      enum:
+        - uk
+        - overseas
+        - bfpo
 
     Address:
       title: Address
@@ -1094,6 +1142,9 @@ components:
           example: 01234 567890
         address:
           $ref: '#/components/schemas/Address'
+        delivery:
+          # TODO make delivery as mandatory (EIP1-4668) once changes in VCA (EIP1-4665) are completed. TODO
+          $ref: '#/components/schemas/CertificateDelivery'
       required:
         - gssCode
         - sourceType
