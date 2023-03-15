@@ -18,7 +18,7 @@ import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApplicationRemovedMessage
+import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildApplicationRemovedMessage
 import java.time.LocalDate
 import java.time.Month.JANUARY
 import java.time.Month.JULY
