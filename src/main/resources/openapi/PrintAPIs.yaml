@@ -819,7 +819,7 @@ components:
         - standard
     CertificateDelivery:
       title: CertificateDelivery
-      description: Object describing how and where the Anonymous Elector document should be delivered
+      description: Object describing how and where the Anonymous Elector Document should be delivered
       type: object
       properties:
         deliveryClass:
@@ -843,14 +843,14 @@ components:
 
     DeliveryClass:
       title: DeliveryClass
-      description: The delivery class for the Voter Authority Certificate
+      description: The delivery class for the Anonymous Elector Document
       type: string
       enum:
         - standard
 
     DeliveryAddressType:
       title: DeliveryAddressType
-      description: The delivery address type for the Voter Authority Certificate
+      description: The delivery address type for the Anonymous Elector Document
       type: string
       enum:
         - registered
