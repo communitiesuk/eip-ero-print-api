@@ -20,7 +20,7 @@ class TemporaryCertificateDataRetentionService(
 ) {
 
     /**
-     * Sets the initialRetentionRemovalDate on a [uk.gov.dluhc.printapi.database.entity.TemporaryCertificate], after the
+     * Sets the finalRetentionRemovalDate on a [uk.gov.dluhc.printapi.database.entity.TemporaryCertificate], after the
      * originating application is removed from the source system (e.g. VCA).
      *
      * @param message An [ApplicationRemovedMessage] sent from the source system.
