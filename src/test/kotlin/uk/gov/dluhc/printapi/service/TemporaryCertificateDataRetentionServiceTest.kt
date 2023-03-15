@@ -58,7 +58,7 @@ internal class TemporaryCertificateDataRetentionServiceTest {
         }
 
         @Test
-        fun `should throw exception when temporary certificate doesn't exist`() {
+        fun `should log error when temporary certificate doesn't exist`() {
             // Given
             val message = buildApplicationRemovedMessage(
                 sourceReference = "63774ff4bb4e7049b67182d9"

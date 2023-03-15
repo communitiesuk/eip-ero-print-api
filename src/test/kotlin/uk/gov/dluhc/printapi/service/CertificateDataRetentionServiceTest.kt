@@ -92,7 +92,7 @@ internal class CertificateDataRetentionServiceTest {
         }
 
         @Test
-        fun `should throw exception when certificate doesn't exist`() {
+        fun `should log error when certificate doesn't exist`() {
             // Given
             val message = buildApplicationRemovedMessage(
                 sourceReference = "63774ff4bb4e7049b67182d9",
