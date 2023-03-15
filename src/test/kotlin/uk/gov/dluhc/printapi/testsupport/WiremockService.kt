@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.ok
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
@@ -86,5 +87,9 @@ class WiremockService(private val wireMockServer: WireMockServer) {
 
     fun verifyEroManagementGetEro(gssCode: String) {
         wireMockServer.verify(1, getRequestedFor(urlEqualTo("/ero-management-api/eros?gssCode=$gssCode")))
+    }
+
+    fun verifyEroManagementGetEroByEroIdWithCorrelationId(eroId: String, correlationIdMatcher: StringValuePattern) {
+        wireMockServer.verify(1, getRequestedFor(urlEqualTo("/ero-management-api/eros/$eroId")).withHeader("x-correlation-id", correlationIdMatcher))
     }
 }

@@ -27,6 +27,12 @@ paths:
           type: string
         in: path
         required: true
+      - name: x-correlation-id
+        description: The correlation id for the the request
+        schema:
+          type: string
+        in: header
+        required: false
     options:
       summary: CORS support
       description: |
@@ -74,6 +80,12 @@ paths:
             type: string
           in: query
           required: true
+        - name: x-correlation-id
+          description: The correlation id for the the request
+          schema:
+            type: string
+          in: header
+          required: false
       tags:
         - Voter Authority Certificates (VAC)
       responses:
@@ -111,6 +123,12 @@ paths:
           type: string
         in: path
         required: true
+      - name: x-correlation-id
+        description: The correlation id for the the request
+        schema:
+          type: string
+        in: header
+        required: false
     options:
       deprecated: true
       summary: CORS support
@@ -195,6 +213,12 @@ paths:
           type: string
         in: path
         required: true
+      - name: x-correlation-id
+        description: The correlation id for the the request
+        schema:
+          type: string
+        in: header
+        required: false
     options:
       deprecated: true
       summary: CORS support
@@ -270,6 +294,12 @@ paths:
           type: string
         in: path
         required: true
+      - name: x-correlation-id
+        description: The correlation id for the the request
+        schema:
+          type: string
+        in: header
+        required: false
     options:
       summary: CORS support
       description: |
@@ -396,6 +426,12 @@ paths:
           example: 'E09000007'
         in: path
         required: true
+      - name: x-correlation-id
+        description: The correlation id for the the request
+        schema:
+          type: string
+        in: header
+        required: false
     options:
       summary: CORS support
       description: |
@@ -480,6 +516,12 @@ paths:
           type: string
         in: path
         required: true
+      - name: x-correlation-id
+        description: The correlation id for the the request
+        schema:
+          type: string
+        in: header
+        required: false
     options:
       summary: CORS support
       description: |
@@ -608,6 +650,12 @@ paths:
           example: 'E09000007'
         in: path
         required: true
+      - name: x-correlation-id
+        description: The correlation id for the the request
+        schema:
+          type: string
+        in: header
+        required: false
     options:
       summary: CORS support
       description: |
@@ -1174,6 +1222,9 @@ components:
         Access-Control-Allow-Headers:
           schema:
             type: string
+        x-correlation-id:
+          schema:
+            type: string
       content:
         application/json:
           schema:
@@ -1190,6 +1241,9 @@ components:
         Access-Control-Allow-Headers:
           schema:
             type: string
+        x-correlation-id:
+          schema:
+            type: string
       content:
         application/json:
           schema:
@@ -1204,6 +1258,9 @@ components:
           schema:
             type: string
         Access-Control-Allow-Headers:
+          schema:
+            type: string
+        x-correlation-id:
           schema:
             type: string
       content:

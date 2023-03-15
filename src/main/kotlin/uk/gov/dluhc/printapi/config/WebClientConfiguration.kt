@@ -9,8 +9,9 @@ import org.springframework.web.reactive.function.client.WebClient
 class WebClientConfiguration {
 
     @Bean
-    fun eroManagementWebClient(@Value("\${api.ero-management.url}") eroManagementApiUrl: String): WebClient =
+    fun eroManagementWebClient(@Value("\${api.ero-management.url}") eroManagementApiUrl: String, correlationIdExchangeFilter: CorrelationIdMdcExchangeFilter): WebClient =
         WebClient.builder()
             .baseUrl(eroManagementApiUrl)
+            .filter(correlationIdExchangeFilter)
             .build()
 }
