@@ -54,7 +54,7 @@ fun buildGenerateAnonymousElectorDocumentRequest(
     )
 
 fun buildValidAddress(
-    fakeAddress: net.datafaker.Address = DataFaker.faker.address(),
+    fakeAddress: net.datafaker.providers.base.Address = DataFaker.faker.address(),
     property: String? = fakeAddress.buildingNumber(),
     street: String = fakeAddress.streetName(),
     locality: String? = fakeAddress.streetName(),

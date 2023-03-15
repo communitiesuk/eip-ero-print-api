@@ -7,14 +7,14 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 plugins {
     id("org.springframework.boot") version "2.7.7"
     id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.7.20"
-    kotlin("kapt") version "1.7.20"
-    kotlin("plugin.spring") version "1.7.0"
-    kotlin("plugin.jpa") version "1.7.20"
-    kotlin("plugin.allopen") version "1.7.20"
-    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
-    id("org.jlleitschuh.gradle.ktlint-idea") version "10.3.0"
-    id("org.openapi.generator") version "6.2.0"
+    kotlin("jvm") version "1.8.10"
+    kotlin("kapt") version "1.8.10"
+    kotlin("plugin.spring") version "1.8.10"
+    kotlin("plugin.jpa") version "1.8.10"
+    kotlin("plugin.allopen") version "1.8.10"
+    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+    id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
+    id("org.openapi.generator") version "6.2.1"
     id("org.owasp.dependencycheck") version "8.1.2"
     id("org.jsonschema2dataclass") version "4.5.0"
 }
@@ -58,9 +58,9 @@ dependencies {
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.15")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.opencsv:opencsv:5.7.0") {
+    implementation("com.opencsv:opencsv:5.7.1") {
         exclude("commons-collections", "commons-collections")
         exclude("org.apache.commons", "commons-text")
     }
@@ -102,15 +102,15 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.17.5")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
-    testImplementation("org.testcontainers:testcontainers:1.17.5")
-    testImplementation("org.testcontainers:mysql:1.17.5")
+    testImplementation("org.testcontainers:testcontainers:1.17.6")
+    testImplementation("org.testcontainers:mysql:1.17.6")
 
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.34.0")
-    testImplementation("net.datafaker:datafaker:1.6.0")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
+    testImplementation("net.datafaker:datafaker:1.8.0")
 
     // Libraries to support creating JWTs in tests
     testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
@@ -149,7 +149,7 @@ tasks.withType<GenerateTask> {
         mapOf(
             "apis" to "false",
             "invokers" to "false",
-            "models" to "",
+            "models" to ""
         )
     )
     configOptions.set(
@@ -157,7 +157,7 @@ tasks.withType<GenerateTask> {
             "dateLibrary" to "java8",
             "serializationLibrary" to "jackson",
             "enumPropertyNaming" to "UPPERCASE",
-            "useBeanValidation" to "true",
+            "useBeanValidation" to "true"
         )
     )
 }
@@ -230,7 +230,7 @@ tasks.withType<BootBuildImage> {
     environment = mapOf("BP_HEALTH_CHECKER_ENABLED" to "true")
     buildpacks = listOf(
         "urn:cnb:builder:paketo-buildpacks/java",
-        "gcr.io/paketo-buildpacks/health-checker",
+        "gcr.io/paketo-buildpacks/health-checker"
     )
 }
 
