@@ -8,15 +8,14 @@ import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepositoryExtensions.findPendingRemoval
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
-import java.time.LocalDate
-import java.time.Month
 
 private val logger = KotlinLogging.logger {}
 
 @Service
 class TemporaryCertificateDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
-    private val temporaryCertificateRepository: TemporaryCertificateRepository
+    private val temporaryCertificateRepository: TemporaryCertificateRepository,
+    private val electorDocumentRemovalDateResolver: ElectorDocumentRemovalDateResolver
 ) {
 
     /**
@@ -34,7 +33,7 @@ class TemporaryCertificateDataRetentionService(
                 sourceType = sourceType,
                 sourceReference = sourceReference
             )?.also {
-                it.finalRetentionRemovalDate = getFinalRetentionPeriodRemovalDate(it.issueDate)
+                it.finalRetentionRemovalDate = electorDocumentRemovalDateResolver.getTempCertFinalRetentionPeriodRemovalDate(it.issueDate)
                 temporaryCertificateRepository.save(it)
             } ?: logger.error { "Temporary certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }
         }
@@ -46,15 +45,5 @@ class TemporaryCertificateDataRetentionService(
             logger.info { "Found $size temporary certificates with sourceType $sourceType to remove" }
             forEach { temporaryCertificateRepository.deleteById(it.id!!) }
         }
-    }
-
-    private fun getFinalRetentionPeriodRemovalDate(issueDate: LocalDate): LocalDate? {
-        val firstJuly = LocalDate.of(issueDate.year, Month.JULY, 1)
-        val numberOfYears =
-            when (issueDate.isBefore(firstJuly)) {
-                true -> 1L
-                false -> 2L
-            }
-        return firstJuly.plusYears(numberOfYears)
     }
 }

@@ -11,11 +11,11 @@ import java.time.Month
 import java.time.temporal.ChronoUnit
 
 /**
- * Responsible for determining the removal date for a Certificate's data. The removal date varies, depending on the
- * category of data and the type of Certificate concerned.
+ * Responsible for determining the removal date for an Elector Document's data. The removal date varies, depending on
+ * the category of data and the type of Elector Document concerned.
  */
 @Component
-class CertificateRemovalDateResolver(
+class ElectorDocumentRemovalDateResolver(
     private val dataRetentionConfig: DataRetentionConfiguration,
     private val bankHolidayDataClient: BankHolidayDataClient
 ) {
@@ -48,8 +48,7 @@ class CertificateRemovalDateResolver(
      * "Elector Document" here means either a [uk.gov.dluhc.printapi.database.entity.Certificate] or a
      * [uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument]). but does not include
      * [uk.gov.dluhc.printapi.database.entity.TemporaryCertificate], which has a different retention period.
-     *
-     * TODO - EIP1-3556 - add a separate calculation for Temporary Certificates.
+     * @see getTempCertFinalRetentionPeriodRemovalDate
      *
      * @param issueDate The date the Elector Document was issued.
      * @return A [LocalDate] representing when the data should be removed
@@ -60,6 +59,22 @@ class CertificateRemovalDateResolver(
             when (issueDate.isBefore(firstJuly)) {
                 true -> 9L
                 false -> 10L
+            }
+        return firstJuly.plusYears(numberOfYears)
+    }
+
+    /**
+     * Calculates the date that a [uk.gov.dluhc.printapi.database.entity.TemporaryCertificate] should be removed, which
+     * the legislation specifies as the second 1st July following the temporary certificate's issue date.
+     *
+     * @param issueDate The date the [uk.gov.dluhc.printapi.database.entity.TemporaryCertificate] was issued.
+     * @return A [LocalDate] representing when the data should be removed
+     */ fun getTempCertFinalRetentionPeriodRemovalDate(issueDate: LocalDate): LocalDate? {
+        val firstJuly = LocalDate.of(issueDate.year, Month.JULY, 1)
+        val numberOfYears =
+            when (issueDate.isBefore(firstJuly)) {
+                true -> 1L
+                false -> 2L
             }
         return firstJuly.plusYears(numberOfYears)
     }

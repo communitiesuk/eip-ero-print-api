@@ -14,6 +14,8 @@ import uk.gov.dluhc.printapi.dto.SourceType as SourceTypeDto
 
 fun aValidSourceType() = SourceTypeEntity.VOTER_CARD
 
+fun anAnonymousElectorDocumentSourceType() = SourceTypeEntity.ANONYMOUS_ELECTOR_DOCUMENT
+
 fun aValidCertificateStatus() = Status.PENDING_ASSIGNMENT_TO_BATCH
 
 fun aDifferentValidCertificateStatus() = Status.DISPATCHED

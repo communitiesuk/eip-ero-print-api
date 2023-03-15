@@ -22,7 +22,7 @@ class CertificateDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val certificateRepository: CertificateRepository,
     private val deliveryRepository: DeliveryRepository,
-    private val certificateRemovalDateResolver: CertificateRemovalDateResolver,
+    private val removalDateResolver: ElectorDocumentRemovalDateResolver,
     private val s3CertificatePhotoService: S3PhotoService,
     private val removeCertificateQueue: MessageQueue<RemoveCertificateMessage>,
     private val dataRetentionConfiguration: DataRetentionConfiguration
@@ -43,8 +43,8 @@ class CertificateDataRetentionService(
                 sourceType = sourceType,
                 sourceReference = sourceReference
             )?.also {
-                it.initialRetentionRemovalDate = certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
-                it.finalRetentionRemovalDate = certificateRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
+                it.initialRetentionRemovalDate = removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
+                it.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
                 certificateRepository.save(it)
             }
                 ?: logger.error { "Certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }

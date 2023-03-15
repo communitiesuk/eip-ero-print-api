@@ -17,10 +17,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssueDate
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestStatusEventDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.anAnonymousElectorDocumentSourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.time.LocalDate
@@ -29,7 +29,7 @@ import java.util.UUID
 fun buildAnonymousElectorDocument(
     id: UUID? = UUID.randomUUID(),
     gssCode: String = aGssCode(),
-    sourceType: SourceType = aValidSourceType(),
+    sourceType: SourceType = anAnonymousElectorDocumentSourceType(),
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     certificateNumber: String = aValidVacNumber(),

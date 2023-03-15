@@ -4,7 +4,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.messaging.models.SourceType.ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
@@ -69,6 +71,32 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
             val response = temporaryCertificateRepository.findAll()
+            assertThat(response).hasSize(1)
+            val saved = response[0]
+            assertThat(saved).hasFinalRetentionRemovalDate(expectedFinalRemovalDate)
+        }
+    }
+
+    @Test
+    fun `should process application removed message and set final removal date on anonymous elector document`() {
+        // Given
+        val anonymousElectorDocument = buildAnonymousElectorDocument(
+            issueDate = LocalDate.of(2023, APRIL, 1)
+        )
+        anonymousElectorDocumentRepository.save(anonymousElectorDocument)
+        val payload = buildApplicationRemovedMessage(
+            sourceType = ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT,
+            sourceReference = anonymousElectorDocument.sourceReference!!,
+            gssCode = anonymousElectorDocument.gssCode!!
+        )
+        val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
+
+        // When
+        sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
+
+        // Then
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            val response = anonymousElectorDocumentRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
             assertThat(saved).hasFinalRetentionRemovalDate(expectedFinalRemovalDate)

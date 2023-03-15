@@ -74,6 +74,11 @@ jobs:
     # Runs at 01:40
     # Running outside business hours to avoid certificate data suddenly disappearing.
     cron: "0 40 1 * * *"
+  remove-aed-final-retention-period-data:
+    name: "RemoveAedFinalRetentionPeriodData"
+    # Runs at 01:30
+    # Running outside business hours to avoid AED data suddenly disappearing.
+    cron: "0 30 1 * * *"
 temporary-certificate:
   certificate-pdf:
     english:
