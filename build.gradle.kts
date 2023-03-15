@@ -149,7 +149,7 @@ tasks.withType<GenerateTask> {
         mapOf(
             "apis" to "false",
             "invokers" to "false",
-            "models" to ""
+            "models" to "",
         )
     )
     configOptions.set(
@@ -157,7 +157,7 @@ tasks.withType<GenerateTask> {
             "dateLibrary" to "java8",
             "serializationLibrary" to "jackson",
             "enumPropertyNaming" to "UPPERCASE",
-            "useBeanValidation" to "true"
+            "useBeanValidation" to "true",
         )
     )
 }
@@ -230,7 +230,7 @@ tasks.withType<BootBuildImage> {
     environment = mapOf("BP_HEALTH_CHECKER_ENABLED" to "true")
     buildpacks = listOf(
         "urn:cnb:builder:paketo-buildpacks/java",
-        "gcr.io/paketo-buildpacks/health-checker"
+        "gcr.io/paketo-buildpacks/health-checker",
     )
 }
 
