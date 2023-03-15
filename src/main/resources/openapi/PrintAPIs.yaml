@@ -830,7 +830,7 @@ components:
           type: string
           maxLength: 255
           description: The addressee to be printed in addition to the delivery address
-        address:
+        deliveryAddress:
           $ref: '#/components/schemas/Address'
         addressFormat:
           $ref: '#/components/schemas/AddressFormat'
@@ -838,7 +838,7 @@ components:
         - deliveryClass
         - deliveryAddressType
         - addressee
-        - address
+        - deliveryAddress
         - addressFormat
 
     DeliveryClass:
