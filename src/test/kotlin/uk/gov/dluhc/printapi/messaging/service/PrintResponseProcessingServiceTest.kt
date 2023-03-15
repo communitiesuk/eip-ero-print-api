@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service
+package uk.gov.dluhc.printapi.messaging.service
 
 import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
@@ -30,6 +30,7 @@ import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
+import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate

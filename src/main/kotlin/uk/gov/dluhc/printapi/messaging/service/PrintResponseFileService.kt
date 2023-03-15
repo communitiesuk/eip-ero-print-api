@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service
+package uk.gov.dluhc.printapi.messaging.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jcraft.jsch.ChannelSftp
@@ -7,6 +7,7 @@ import mu.KotlinLogging
 import org.springframework.messaging.MessagingException
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
+import uk.gov.dluhc.printapi.service.SftpService
 import java.io.IOException
 
 private val logger = KotlinLogging.logger {}

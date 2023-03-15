@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service
+package uk.gov.dluhc.printapi.messaging.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -13,6 +13,10 @@ import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.service.FilenameFactory
+import uk.gov.dluhc.printapi.service.PrintFileDetailsFactory
+import uk.gov.dluhc.printapi.service.SftpInputStreamProvider
+import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidInputStream
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSftpPath

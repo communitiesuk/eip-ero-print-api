@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
-import uk.gov.dluhc.printapi.service.ProcessPrintBatchService
+import uk.gov.dluhc.printapi.messaging.service.ProcessPrintBatchService
 import javax.validation.Valid
 
 private val logger = KotlinLogging.logger { }

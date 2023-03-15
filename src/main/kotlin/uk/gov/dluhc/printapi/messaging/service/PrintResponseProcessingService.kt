@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service
+package uk.gov.dluhc.printapi.messaging.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -14,6 +14,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
+import uk.gov.dluhc.printapi.service.IdFactory
 import javax.transaction.Transactional
 
 private val logger = KotlinLogging.logger {}
