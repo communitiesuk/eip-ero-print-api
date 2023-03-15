@@ -43,11 +43,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         val userGroupEroId = anotherValidEroId(ERO_ID)
 
         webTestClient.post()
-            .uri(
-                URI_TEMPLATE,
-                ERO_ID,
-                GSS_CODE
-            )
+            .uri(URI_TEMPLATE, ERO_ID, GSS_CODE)
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = userGroupEroId))
             .contentType(MediaType.APPLICATION_JSON)
             .withBody(buildGenerateAnonymousElectorDocumentRequest())
@@ -165,7 +161,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         val request = buildGenerateAnonymousElectorDocumentRequest(
             photoLocation = photoLocationArn,
             email = null, phoneNumber = null,
-            address = buildValidAddress(
+            registeredAddress = buildValidAddress(
                 property = null, locality = null, town = null, area = null, uprn = null
             )
         )

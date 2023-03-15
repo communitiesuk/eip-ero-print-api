@@ -21,10 +21,10 @@ class AnonymousElectorDocumentService(
 ) {
 
     @Transactional
-    fun generateAnonymousElectorDocument(eroId: String, request: GenerateAnonymousElectorDocumentDto): PdfFile {
-        verifyGssCodeIsValidForEro(eroId, request.gssCode)
-        val filename = pdfTemplateDetailsFactory.getTemplateFilename(request.gssCode)
-        with(anonymousElectorDocumentMapper.toAnonymousElectorDocument(request, filename)) {
+    fun generateAnonymousElectorDocument(eroId: String, dto: GenerateAnonymousElectorDocumentDto): PdfFile {
+        verifyGssCodeIsValidForEro(eroId, dto.gssCode)
+        val filename = pdfTemplateDetailsFactory.getTemplateFilename(dto.gssCode)
+        with(anonymousElectorDocumentMapper.toAnonymousElectorDocument(dto, filename)) {
             val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)
             val contents = pdfFactory.createPdfContents(templateDetails)
             anonymousElectorDocumentRepository.save(this)

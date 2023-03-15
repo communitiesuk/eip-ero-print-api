@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.mapper
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
@@ -42,6 +43,9 @@ abstract class AnonymousElectorDocumentMapper {
         aedRequest: GenerateAnonymousElectorDocumentDto,
         aedTemplateFilename: String
     ): AnonymousElectorDocument
+
+    @Mapping(target = "address", source = "registeredAddress")
+    protected abstract fun toAedContactDetailsEntity(aedRequest: GenerateAnonymousElectorDocumentDto): AedContactDetails
 
     protected fun issueDate(): LocalDate = LocalDate.now(clock)
 

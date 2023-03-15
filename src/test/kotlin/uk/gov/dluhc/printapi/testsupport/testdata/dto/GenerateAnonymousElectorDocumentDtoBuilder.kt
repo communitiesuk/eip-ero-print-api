@@ -34,7 +34,7 @@ fun buildGenerateAnonymousElectorDocumentDto(
     surname: String = aValidSurname(),
     email: String = aValidEmailAddress(),
     phoneNumber: String = aValidPhoneNumber(),
-    address: AddressDto = buildValidAddressDto(),
+    registeredAddress: AddressDto = buildValidAddressDto(),
     userId: String = aValidUserId(),
 ): GenerateAnonymousElectorDocumentDto =
     GenerateAnonymousElectorDocumentDto(
@@ -51,7 +51,7 @@ fun buildGenerateAnonymousElectorDocumentDto(
         surname = surname,
         email = email,
         phoneNumber = phoneNumber,
-        address = address,
+        registeredAddress = registeredAddress,
         userId = userId
     )
 

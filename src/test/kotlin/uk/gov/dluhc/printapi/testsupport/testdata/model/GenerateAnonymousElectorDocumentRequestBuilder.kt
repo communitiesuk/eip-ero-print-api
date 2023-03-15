@@ -32,7 +32,7 @@ fun buildGenerateAnonymousElectorDocumentRequest(
     surname: String = aValidSurname(),
     email: String? = aValidEmailAddress(),
     phoneNumber: String? = aValidPhoneNumber(),
-    address: Address = buildValidAddress(),
+    registeredAddress: Address = buildValidAddress(),
     delivery: CertificateDelivery? = null // TODO EIP-4668 makes this `delivery` field as mandatory
 ): GenerateAnonymousElectorDocumentRequest =
     GenerateAnonymousElectorDocumentRequest(
@@ -49,7 +49,7 @@ fun buildGenerateAnonymousElectorDocumentRequest(
         surname = surname,
         email = email,
         phoneNumber = phoneNumber,
-        address = address,
+        registeredAddress = registeredAddress,
         delivery = delivery
     )
 
