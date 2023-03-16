@@ -10,7 +10,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
-import org.mockito.kotlin.times
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
@@ -62,7 +62,6 @@ internal class AedDataRetentionServiceTest {
             aedDataRetentionService.handleSourceApplicationRemoved(message)
 
             // Then
-            assertThat(anonymousElectorDocument.finalRetentionRemovalDate).isEqualTo(expectedFinalRetentionRemovalDate)
             assertThat(anonymousElectorDocument).hasFinalRetentionRemovalDate(expectedFinalRetentionRemovalDate)
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(anonymousElectorDocumentRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
@@ -86,7 +85,7 @@ internal class AedDataRetentionServiceTest {
             // Then
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(anonymousElectorDocumentRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
-            verify(anonymousElectorDocumentRepository, times(0)).save(any())
+            verify(anonymousElectorDocumentRepository, never()).save(any())
             verifyNoInteractions(removalDateResolver)
             assertThat(
                 TestLogAppender.hasLog(

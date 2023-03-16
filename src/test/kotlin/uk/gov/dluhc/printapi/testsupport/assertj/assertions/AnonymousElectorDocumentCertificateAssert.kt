@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.assertj.assertions
 
 import org.assertj.core.api.AbstractObjectAssert
-import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import java.time.LocalDate
 import java.util.Objects
@@ -39,19 +38,5 @@ class AnonymousElectorDocumentCertificateAssert
         }
 
         return this
-    }
-
-    companion object {
-        /**
-         * An entry point for CertificateAssert to follow AssertJ standard `assertThat()` statements.<br></br>
-         * With a static import, one can write directly: `assertThat(myAnonymousElectorDocument)` and get specific assertion
-         * with code completion.
-         * @param actual the AnonymousElectorDocument we want to make assertions on.
-         * @return a new `[AnonymousElectorDocumentCertificateAssert]`
-         */
-        @CheckReturnValue
-        fun assertThat(actual: AnonymousElectorDocument?): AnonymousElectorDocumentCertificateAssert {
-            return AnonymousElectorDocumentCertificateAssert(actual)
-        }
     }
 }
