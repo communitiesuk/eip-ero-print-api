@@ -14,6 +14,6 @@ data class GenerateAnonymousElectorDocumentDto(
     val surname: String,
     val email: String? = null,
     val phoneNumber: String? = null,
-    val address: AddressDto,
+    val registeredAddress: AddressDto,
     val userId: String,
 )

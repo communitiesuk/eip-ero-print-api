@@ -96,7 +96,7 @@ class AnonymousElectorDocumentMapperTest {
                         surname = surname,
                         email = email,
                         phoneNumber = phoneNumber,
-                        address = with(address) {
+                        address = with(registeredAddress) {
                             Address(
                                 street = street,
                                 postcode = postcode,
@@ -131,6 +131,42 @@ class AnonymousElectorDocumentMapperTest {
     }
 
     @Nested
+    inner class ToAedContactDetailsEntity {
+
+        @Test
+        fun `should map to AedContactDetails entity given GenerateAnonymousElectorDocumentDto`() {
+            // Given
+            val request = buildGenerateAnonymousElectorDocumentDto()
+            val expected = with(request) {
+                AedContactDetails(
+                    firstName = firstName,
+                    middleNames = middleNames,
+                    surname = surname,
+                    email = email,
+                    phoneNumber = phoneNumber,
+                    address = with(registeredAddress) {
+                        Address(
+                            street = street,
+                            postcode = postcode,
+                            property = property,
+                            locality = locality,
+                            town = town,
+                            area = area,
+                            uprn = uprn
+                        )
+                    },
+                )
+            }
+
+            // When
+            val actual = mapper.toAedContactDetailsEntity(request)
+
+            // Then
+            assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+        }
+    }
+
+    @Nested
     inner class ToGenerateAnonymousElectorDocumentDto {
         @Test
         fun `should map to GenerateAnonymousElectorDocumentDto DTO given API Request`() {
@@ -160,7 +196,7 @@ class AnonymousElectorDocumentMapperTest {
                 surname = apiRequest.surname,
                 email = apiRequest.email,
                 phoneNumber = apiRequest.phoneNumber,
-                address = with(apiRequest.address) {
+                registeredAddress = with(apiRequest.registeredAddress) {
                     AddressDto(
                         property = property,
                         street = street,

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.10.0'
+  version: '1.11.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -830,7 +830,7 @@ components:
           type: string
           maxLength: 255
           description: The addressee to be printed in addition to the delivery address
-        address:
+        deliveryAddress:
           $ref: '#/components/schemas/Address'
         addressFormat:
           $ref: '#/components/schemas/AddressFormat'
@@ -838,7 +838,7 @@ components:
         - deliveryClass
         - deliveryAddressType
         - addressee
-        - address
+        - deliveryAddress
         - addressFormat
 
     DeliveryClass:
@@ -1140,7 +1140,7 @@ components:
           maxLength: 50
           description: The applicant's phone number. Null if not known
           example: 01234 567890
-        address:
+        registeredAddress:
           $ref: '#/components/schemas/Address'
         delivery:
           # TODO make delivery as mandatory (EIP1-4668) once changes in VCA (EIP1-4665) are completed. TODO
@@ -1156,7 +1156,7 @@ components:
         - photoLocation
         - firstName
         - surname
-        - address
+        - registeredAddress
 
   #
   # Response Body Definitions

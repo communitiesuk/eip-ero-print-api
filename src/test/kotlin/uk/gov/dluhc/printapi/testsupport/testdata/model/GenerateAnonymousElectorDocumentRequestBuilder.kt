@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
+import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildGenerateAnonymousElectorDocumentRequest(
     gssCode: String = aGssCode(),
@@ -32,7 +33,7 @@ fun buildGenerateAnonymousElectorDocumentRequest(
     surname: String = aValidSurname(),
     email: String? = aValidEmailAddress(),
     phoneNumber: String? = aValidPhoneNumber(),
-    address: Address = buildValidAddress(),
+    registeredAddress: Address = buildValidAddress(),
     delivery: CertificateDelivery? = null // TODO EIP-4668 makes this `delivery` field as mandatory
 ): GenerateAnonymousElectorDocumentRequest =
     GenerateAnonymousElectorDocumentRequest(
@@ -49,12 +50,12 @@ fun buildGenerateAnonymousElectorDocumentRequest(
         surname = surname,
         email = email,
         phoneNumber = phoneNumber,
-        address = address,
+        registeredAddress = registeredAddress,
         delivery = delivery
     )
 
 fun buildValidAddress(
-    fakeAddress: net.datafaker.providers.base.Address = DataFaker.faker.address(),
+    fakeAddress: DataFakerAddress = DataFaker.faker.address(),
     property: String? = fakeAddress.buildingNumber(),
     street: String = fakeAddress.streetName(),
     locality: String? = fakeAddress.streetName(),
@@ -62,7 +63,7 @@ fun buildValidAddress(
     area: String? = fakeAddress.state(),
     postcode: String = fakeAddress.postcode(),
     uprn: String? = RandomStringUtils.randomNumeric(12),
-): Address =
+) =
     Address(
         property = property,
         street = street,

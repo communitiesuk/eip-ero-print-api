@@ -19,6 +19,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceTypeDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
+import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildGenerateAnonymousElectorDocumentDto(
     gssCode: String = aGssCode(),
@@ -34,7 +35,7 @@ fun buildGenerateAnonymousElectorDocumentDto(
     surname: String = aValidSurname(),
     email: String = aValidEmailAddress(),
     phoneNumber: String = aValidPhoneNumber(),
-    address: AddressDto = buildValidAddressDto(),
+    registeredAddress: AddressDto = buildValidAddressDto(),
     userId: String = aValidUserId(),
 ): GenerateAnonymousElectorDocumentDto =
     GenerateAnonymousElectorDocumentDto(
@@ -51,12 +52,12 @@ fun buildGenerateAnonymousElectorDocumentDto(
         surname = surname,
         email = email,
         phoneNumber = phoneNumber,
-        address = address,
+        registeredAddress = registeredAddress,
         userId = userId
     )
 
 fun buildValidAddressDto(
-    fakeAddress: net.datafaker.providers.base.Address = DataFaker.faker.address(),
+    fakeAddress: DataFakerAddress = DataFaker.faker.address(),
     property: String? = fakeAddress.buildingNumber(),
     street: String = fakeAddress.streetName(),
     locality: String? = fakeAddress.streetName(),
