@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.testsupport.assertj.assertions
 import org.assertj.core.api.Assertions
 import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
@@ -46,6 +47,17 @@ object Assertions : Assertions() {
     @CheckReturnValue
     fun assertThat(actual: TemporaryCertificate?): TemporaryCertificateAssert {
         return TemporaryCertificateAssert(actual)
+    }
+
+    /**
+     * Creates a new instance of `[AnonymousElectorDocumentCertificateAssert]`.
+     *
+     * @param actual the actual value.
+     * @return the created assertion object.
+     */
+    @CheckReturnValue
+    fun assertThat(actual: AnonymousElectorDocument?): AnonymousElectorDocumentCertificateAssert {
+        return AnonymousElectorDocumentCertificateAssert(actual)
     }
 
     /**

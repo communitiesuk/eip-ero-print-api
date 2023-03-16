@@ -13,6 +13,7 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.addCertificatePhotoToS3
 import uk.gov.dluhc.printapi.testsupport.certificatePhotoExists
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
@@ -77,6 +78,43 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
 
             assertThat(TestLogAppender.hasLog("Found 2 temporary certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
             assertThat(TestLogAppender.hasLog("Found 2 certificates with sourceType VOTER_CARD to remove", Level.INFO)).isTrue
+        }
+    }
+
+    @Test
+    fun `should remove anonymous elector document final retention period data`() {
+        // Given
+        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val s3PathAedPhoto1 = aPhotoBucketPath()
+        val anonymousElectorDocument1 = buildAnonymousElectorDocument(
+            sourceReference = "6407b6158f529a11713a1e5c",
+            photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathAedPhoto1",
+            finalRetentionRemovalDate = LocalDate.now().minusDays(1)
+        )
+        val s3PathAedPhoto2 = anotherPhotoBucketPath()
+        val anonymousElectorDocument2 = buildAnonymousElectorDocument(
+            sourceReference = "2304v5134f529a11713a1e6a",
+            photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3PathAedPhoto2",
+            finalRetentionRemovalDate = LocalDate.now().minusDays(1)
+        )
+        val anonymousElectorDocument3 = buildAnonymousElectorDocument(finalRetentionRemovalDate = LocalDate.now().plusDays(1))
+        anonymousElectorDocumentRepository.saveAll(listOf(anonymousElectorDocument1, anonymousElectorDocument2, anonymousElectorDocument3))
+
+        s3Client.addCertificatePhotoToS3(s3Bucket, s3PathAedPhoto1)
+        s3Client.addCertificatePhotoToS3(s3Bucket, s3PathAedPhoto2)
+        TestLogAppender.reset()
+
+        // When
+        finalRetentionPeriodDataRemovalJob.removeAedFinalRetentionPeriodData()
+
+        // Then
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertThat(anonymousElectorDocumentRepository.findById(anonymousElectorDocument1.id!!)).isEmpty
+            assertThat(anonymousElectorDocumentRepository.findById(anonymousElectorDocument2.id!!)).isEmpty
+            assertThat(anonymousElectorDocumentRepository.findById(anonymousElectorDocument3.id!!)).isNotEmpty
+            assertThat(s3Client.certificatePhotoExists(s3Bucket, s3PathAedPhoto1)).isFalse
+            assertThat(s3Client.certificatePhotoExists(s3Bucket, s3PathAedPhoto2)).isFalse
+            assertThat(TestLogAppender.hasLog("Found 2 Anonymous Elector Documents with sourceType ANONYMOUS_ELECTOR_DOCUMENT to remove", Level.INFO)).isTrue
         }
     }
 }

@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.Period
 
 @ExtendWith(MockitoExtension::class)
-internal class CertificateRemovalDateResolverTest {
+internal class ElectorDocumentRemovalDateResolverTest {
     @Mock
     private lateinit var dataRetentionConfig: DataRetentionConfiguration
 
@@ -27,7 +27,7 @@ internal class CertificateRemovalDateResolverTest {
     private lateinit var bankHolidayDataClient: BankHolidayDataClient
 
     @InjectMocks
-    private lateinit var certificateRemovalDateResolver: CertificateRemovalDateResolver
+    private lateinit var electorDocumentRemovalDateResolver: ElectorDocumentRemovalDateResolver
 
     @Nested
     inner class CertificateInitialRetentionPeriod {
@@ -42,7 +42,7 @@ internal class CertificateRemovalDateResolverTest {
             given(bankHolidayDataClient.getBankHolidayDates(any(), any(), any())).willReturn(listOf(upcomingBankHoliday))
 
             // When
-            val actual = certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
+            val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
 
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
@@ -60,7 +60,7 @@ internal class CertificateRemovalDateResolverTest {
             given(bankHolidayDataClient.getBankHolidayDates(any(), any(), any())).willReturn(emptyList())
 
             // When
-            val actual = certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
+            val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
 
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
@@ -84,7 +84,29 @@ internal class CertificateRemovalDateResolverTest {
             // Given
 
             // When
-            val actualTargetDate = certificateRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
+            val actualTargetDate = electorDocumentRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
+
+            // Then
+            assertThat(actualTargetDate).isEqualTo(expectedTargetDate)
+        }
+    }
+
+    @Nested
+    inner class TemporaryCertificateFinalRetentionPeriod {
+        @ParameterizedTest
+        @CsvSource(
+            "2023-01-01, 2024-07-01",
+            "2023-06-30, 2024-07-01",
+            "2023-07-01, 2025-07-01",
+            "2023-07-02, 2025-07-01",
+            "2024-01-01, 2025-07-01",
+            "2024-12-31, 2026-07-01"
+        )
+        fun `should get final retention period removal date for temporary certificate`(issueDate: LocalDate, expectedTargetDate: LocalDate) {
+            // Given
+
+            // When
+            val actualTargetDate = electorDocumentRemovalDateResolver.getTempCertFinalRetentionPeriodRemovalDate(issueDate)
 
             // Then
             assertThat(actualTargetDate).isEqualTo(expectedTargetDate)

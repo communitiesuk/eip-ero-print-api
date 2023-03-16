@@ -5,6 +5,9 @@ import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
+import uk.gov.dluhc.printapi.messaging.models.SourceType.ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT
+import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
+import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.TemporaryCertificateDataRetentionService
 import javax.validation.Valid
@@ -16,20 +19,22 @@ private val logger = KotlinLogging.logger { }
  */
 @Component
 class ApplicationRemovedMessageListener(
-    val certificateDataRetentionService: CertificateDataRetentionService,
-    val temporaryCertificateDataRetentionService: TemporaryCertificateDataRetentionService
+    private val certificateDataRetentionService: CertificateDataRetentionService,
+    private val temporaryCertificateDataRetentionService: TemporaryCertificateDataRetentionService,
+    private val aedDataRetentionService: AedDataRetentionService
 ) : MessageListener<ApplicationRemovedMessage> {
 
     @SqsListener("\${sqs.application-removed-queue-name}")
     override fun handleMessage(@Valid @Payload payload: ApplicationRemovedMessage) {
         with(payload) {
-            logger.info {
-                "ApplicationRemovedMessage for application with source type [$sourceType] " +
-                    "and source reference [$sourceReference] " +
-                    "and gssCode [$gssCode]"
+            logger.info { "ApplicationRemovedMessage for application with source type [$sourceType] and source reference [$sourceReference] and gssCode [$gssCode]" }
+            when (sourceType) {
+                ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT -> aedDataRetentionService.handleSourceApplicationRemoved(payload)
+                VOTER_MINUS_CARD -> {
+                    temporaryCertificateDataRetentionService.handleSourceApplicationRemoved(payload)
+                    certificateDataRetentionService.handleSourceApplicationRemoved(payload)
+                }
             }
-            certificateDataRetentionService.handleSourceApplicationRemoved(payload)
-            temporaryCertificateDataRetentionService.handleSourceApplicationRemoved(payload)
         }
     }
 }

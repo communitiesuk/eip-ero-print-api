@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
+import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
@@ -36,7 +36,7 @@ internal class AnonymousElectorDocumentRepositoryIntegrationTest : IntegrationTe
             anonymousElectorDocumentRepository.saveAll(listOf(other1, expected1, other2, expected2))
 
             // When
-            val actual = anonymousElectorDocumentRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)
+            val actual = anonymousElectorDocumentRepository.findPendingRemovalOfInitialRetentionData(ANONYMOUS_ELECTOR_DOCUMENT)
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)
@@ -61,7 +61,7 @@ internal class AnonymousElectorDocumentRepositoryIntegrationTest : IntegrationTe
             anonymousElectorDocumentRepository.saveAll(listOf(expected1, expected2, other))
 
             // When
-            val actual = anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD)
+            val actual = anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(ANONYMOUS_ELECTOR_DOCUMENT)
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)

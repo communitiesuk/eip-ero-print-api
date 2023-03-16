@@ -41,7 +41,7 @@ import java.util.UUID
 internal class CertificateDataRetentionServiceTest {
 
     @Mock
-    private lateinit var certificateRemovalDateResolver: CertificateRemovalDateResolver
+    private lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
 
     @Mock
     private lateinit var sourceTypeMapper: SourceTypeMapper
@@ -75,8 +75,8 @@ internal class CertificateDataRetentionServiceTest {
             val expectedFinalRetentionRemovalDate = LocalDate.of(2032, JULY, 1)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
             given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(certificate)
-            given(certificateRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any())).willReturn(expectedInitialRetentionRemovalDate)
-            given(certificateRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
+            given(removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any())).willReturn(expectedInitialRetentionRemovalDate)
+            given(removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
 
             // When
             certificateDataRetentionService.handleSourceApplicationRemoved(message)
@@ -86,8 +86,8 @@ internal class CertificateDataRetentionServiceTest {
             assertThat(certificate).hasFinalRetentionRemovalDate(expectedFinalRetentionRemovalDate)
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
-            verify(certificateRemovalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate, message.gssCode)
-            verify(certificateRemovalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(certificate.issueDate)
+            verify(removalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate, message.gssCode)
+            verify(removalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(certificate.issueDate)
             verify(certificateRepository).save(certificate)
         }
 
@@ -109,7 +109,7 @@ internal class CertificateDataRetentionServiceTest {
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
             verify(certificateRepository, times(0)).save(any())
-            verifyNoInteractions(certificateRemovalDateResolver)
+            verifyNoInteractions(removalDateResolver)
             assertThat(
                 TestLogAppender.hasLog(
                     "Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found",

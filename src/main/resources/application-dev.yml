@@ -12,3 +12,6 @@ jobs:
   remove-vca-final-retention-period-data:
     name: "RemoveVcaFinalRetentionPeriodData"
     cron: "0 5/10 * ? * *" # every 10 minutes starting at :05
+  remove-aed-final-retention-period-data:
+    name: "RemoveAedFinalRetentionPeriodData"
+    cron: "0 5/10 * ? * *" # every 10 minutes starting at :05

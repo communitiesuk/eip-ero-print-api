@@ -12,6 +12,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
@@ -32,6 +33,9 @@ internal class TemporaryCertificateDataRetentionServiceTest {
     @Mock
     private lateinit var temporaryCertificateRepository: TemporaryCertificateRepository
 
+    @Mock
+    private lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
+
     @InjectMocks
     private lateinit var temporaryCertificateDataRetentionService: TemporaryCertificateDataRetentionService
 
@@ -41,10 +45,12 @@ internal class TemporaryCertificateDataRetentionServiceTest {
         fun `should handle source application removed`() {
             // Given
             val message = buildApplicationRemovedMessage()
-            val temporaryCertificate = buildTemporaryCertificate(issueDate = LocalDate.of(2023, JANUARY, 1))
+            val issueDate = LocalDate.of(2023, JANUARY, 1)
+            val temporaryCertificate = buildTemporaryCertificate(issueDate = issueDate)
             val expectedFinalRetentionRemovalDate = LocalDate.of(2024, JULY, 1)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
             given(temporaryCertificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(temporaryCertificate)
+            given(removalDateResolver.getTempCertFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
 
             // When
             temporaryCertificateDataRetentionService.handleSourceApplicationRemoved(message)
@@ -54,6 +60,7 @@ internal class TemporaryCertificateDataRetentionServiceTest {
             assertThat(temporaryCertificate).hasFinalRetentionRemovalDate(expectedFinalRetentionRemovalDate)
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(temporaryCertificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
+            verify(removalDateResolver).getTempCertFinalRetentionPeriodRemovalDate(issueDate)
             verify(temporaryCertificateRepository).save(temporaryCertificate)
         }
 
@@ -74,6 +81,7 @@ internal class TemporaryCertificateDataRetentionServiceTest {
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(temporaryCertificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
             verify(temporaryCertificateRepository, times(0)).save(any())
+            verifyNoInteractions(removalDateResolver)
             assertThat(
                 TestLogAppender.hasLog(
                     "Temporary certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found",
