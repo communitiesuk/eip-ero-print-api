@@ -21,7 +21,6 @@ properties:
     enum:
       - PROCESSED
       - IN-PRODUCTION
-      - PRINTED
       - DISPATCHED
       - NOT-DELIVERED
   status:
@@ -34,14 +33,14 @@ properties:
     type: string
     format: date
     description: |-
-      Only returned when the statusStep is PRINTED for the initial print. This is the legal issuedDate.
+      Only returned when the statusStep is IN-PRODUCTION for the initial print. This is the legal issuedDate.
       If the issueDate was supplied as a re-print. This will not be returned.
     example: '2022-06-01'    
   suggestedExpiryDate:
     type: string
     format: date
     description: |-
-      Only returned when the statusStep is PRINTED for the initial print. This is the legal issuedDate + 10 years.
+      Only returned when the statusStep is IN-PRODUCTION for the initial print. This is the legal issuedDate + 10 years.
       If the suggestedExpiryDate was supplied as a re-print. This will not be returned.
     example: '2032-06-01'  
   message:
