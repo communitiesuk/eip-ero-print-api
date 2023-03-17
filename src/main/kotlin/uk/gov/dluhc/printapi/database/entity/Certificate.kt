@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.database.entity
 
+import liquibase.pro.packaged.it
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
@@ -139,7 +140,7 @@ class Certificate(
             printRequest.addPrintRequestStatus(
                 PrintRequestStatus(
                     status = PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
-                    eventDateTime = Instant.now(),
+                    eventDateTime = printRequest.getNextEventDateTime(),
                     message = null
                 )
             )
@@ -153,7 +154,7 @@ class Certificate(
                 it.addPrintRequestStatus(
                     PrintRequestStatus(
                         status = PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER,
-                        eventDateTime = Instant.now(),
+                        eventDateTime = it.getNextEventDateTime(),
                         message = null
                     )
                 )

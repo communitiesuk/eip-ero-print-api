@@ -107,6 +107,16 @@ class PrintRequest(
         }
     }
 
+    // Although events are processed separately, it's possible for two separate events
+    // to be added within the same second, for deterministic ordering, ensure later
+    // event has later timestamp
+    fun getNextEventDateTime(): Instant {
+        if (statusHistory.isEmpty()) {
+            return Instant.now()
+        }
+        return maxOf(Instant.now(), statusHistory.maxOf { status -> status.eventDateTime!! }.plusSeconds(1))
+    }
+
     fun addPrintRequestStatus(newPrintRequestStatus: PrintRequestStatus): PrintRequest {
         statusHistory += newPrintRequestStatus
         return this
