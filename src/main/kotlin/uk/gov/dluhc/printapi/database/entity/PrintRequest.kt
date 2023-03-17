@@ -113,7 +113,8 @@ class PrintRequest(
     }
 
     fun getCurrentStatus(): PrintRequestStatus {
-        statusHistory.sortByDescending { it.eventDateTime }
+        statusHistory.sortWith(
+            compareByDescending<PrintRequestStatus> { it.eventDateTime }.thenDescending(compareBy { it.status }))
         return statusHistory.first()
     }
 
