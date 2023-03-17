@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.testsupport.testdata.dto
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.dto.AddressDto
+import uk.gov.dluhc.printapi.dto.CertificateDelivery
 import uk.gov.dluhc.printapi.dto.CertificateLanguage
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.SourceType
@@ -37,6 +38,7 @@ fun buildGenerateAnonymousElectorDocumentDto(
     phoneNumber: String = aValidPhoneNumber(),
     registeredAddress: AddressDto = buildValidAddressDto(),
     userId: String = aValidUserId(),
+    delivery: CertificateDelivery = buildDtoCertificateDelivery()
 ): GenerateAnonymousElectorDocumentDto =
     GenerateAnonymousElectorDocumentDto(
         gssCode = gssCode,
@@ -53,7 +55,8 @@ fun buildGenerateAnonymousElectorDocumentDto(
         email = email,
         phoneNumber = phoneNumber,
         registeredAddress = registeredAddress,
-        userId = userId
+        userId = userId,
+        delivery = delivery,
     )
 
 fun buildValidAddressDto(

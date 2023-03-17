@@ -164,12 +164,12 @@ fun buildDelivery(
     addressee: String = aValidDeliveryName(),
     address: Address = buildAddress(),
     deliveryClass: DeliveryClass = aValidDeliveryClass(),
-    addressType: DeliveryAddressType = aValidDeliveryAddressType(),
+    deliveryAddressType: DeliveryAddressType = aValidDeliveryAddressType(),
     addressFormat: AddressFormat = aValidAddressFormat(),
 ): Delivery = Delivery(
     addressee = addressee,
     address = address,
     deliveryClass = deliveryClass,
-    deliveryAddressType = addressType,
+    deliveryAddressType = deliveryAddressType,
     addressFormat = addressFormat,
 )

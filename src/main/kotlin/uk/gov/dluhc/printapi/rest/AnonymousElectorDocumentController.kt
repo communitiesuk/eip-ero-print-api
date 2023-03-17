@@ -45,10 +45,9 @@ class AnonymousElectorDocumentController(
         @RequestBody @Valid generateAnonymousElectorDocumentRequest: GenerateAnonymousElectorDocumentRequest,
         authentication: Authentication
     ): ResponseEntity<InputStreamResource> {
-        val userId = authentication.name
         val dto = anonymousElectorDocumentMapper.toGenerateAnonymousElectorDocumentDto(
-            generateAnonymousElectorDocumentRequest,
-            userId
+            apiRequest = generateAnonymousElectorDocumentRequest,
+            userId = authentication.name
         )
         return anonymousElectorDocumentService.generateAnonymousElectorDocument(eroId, dto).let { pdfFile ->
             ResponseEntity.status(CREATED)

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.11.0'
+  version: '1.11.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1143,7 +1143,6 @@ components:
         registeredAddress:
           $ref: '#/components/schemas/Address'
         delivery:
-          # TODO make delivery as mandatory (EIP1-4668) once changes in VCA (EIP1-4665) are completed. TODO
           $ref: '#/components/schemas/CertificateDelivery'
       required:
         - gssCode
@@ -1157,6 +1156,7 @@ components:
         - firstName
         - surname
         - registeredAddress
+        - delivery
 
   #
   # Response Body Definitions

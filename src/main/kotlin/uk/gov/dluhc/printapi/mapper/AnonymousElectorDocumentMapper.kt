@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
+import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.dto.CertificateDelivery
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.service.IdFactory
@@ -17,7 +19,8 @@ import java.time.LocalDate
     uses = [
         SourceTypeMapper::class,
         CertificateLanguageMapper::class,
-        SupportingInformationFormatMapper::class
+        SupportingInformationFormatMapper::class,
+        DeliveryAddressTypeMapper::class
     ]
 )
 abstract class AnonymousElectorDocumentMapper {
@@ -33,19 +36,23 @@ abstract class AnonymousElectorDocumentMapper {
         userId: String
     ): GenerateAnonymousElectorDocumentDto
 
-    @Mapping(target = "photoLocationArn", source = "aedRequest.photoLocation")
+    @Mapping(target = "photoLocationArn", source = "aedDto.photoLocation")
     @Mapping(target = "certificateNumber", expression = "java( idFactory.vacNumber() )")
     @Mapping(target = "issueDate", expression = "java( issueDate() )")
     @Mapping(target = "requestDateTime", expression = "java( requestDateTime() )")
-    @Mapping(target = "contactDetails", source = "aedRequest")
+    @Mapping(target = "contactDetails", source = "aedDto")
     @Mapping(target = "statusHistory", expression = "java( markStatusAsPrinted() )")
+    // @Mapping(target = "delivery", source = "aedDto.delivery") // TODO EIP1-4574 subtasks handles populating this new column which will use below [fromDeliveryDtoToDeliveryEntity] function
     abstract fun toAnonymousElectorDocument(
-        aedRequest: GenerateAnonymousElectorDocumentDto,
+        aedDto: GenerateAnonymousElectorDocumentDto,
         aedTemplateFilename: String
     ): AnonymousElectorDocument
 
     @Mapping(target = "address", source = "registeredAddress")
-    protected abstract fun toAedContactDetailsEntity(aedRequest: GenerateAnonymousElectorDocumentDto): AedContactDetails
+    protected abstract fun toAedContactDetailsEntity(aedDto: GenerateAnonymousElectorDocumentDto): AedContactDetails
+
+    @Mapping(target = "address", source = "deliveryAddress")
+    protected abstract fun fromDeliveryDtoToDeliveryEntity(deliveryDto: CertificateDelivery): Delivery
 
     protected fun issueDate(): LocalDate = LocalDate.now(clock)
 
