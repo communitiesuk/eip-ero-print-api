@@ -34,7 +34,7 @@ fun buildGenerateAnonymousElectorDocumentRequest(
     email: String? = aValidEmailAddress(),
     phoneNumber: String? = aValidPhoneNumber(),
     registeredAddress: Address = buildValidAddress(),
-    delivery: CertificateDelivery? = null // TODO EIP-4668 makes this `delivery` field as mandatory
+    delivery: CertificateDelivery = buildApiCertificateDelivery()
 ): GenerateAnonymousElectorDocumentRequest =
     GenerateAnonymousElectorDocumentRequest(
         gssCode = gssCode,

@@ -165,7 +165,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val printRequests = listOf(
             buildPrintRequest(
                 printRequestStatuses = listOf(buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER)),
-                delivery = buildDelivery(addressType = ERO_COLLECTION, addressee = "ERO OFFICER", address = eroAddress)
+                delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION, addressee = "ERO OFFICER", address = eroAddress)
             )
         )
 

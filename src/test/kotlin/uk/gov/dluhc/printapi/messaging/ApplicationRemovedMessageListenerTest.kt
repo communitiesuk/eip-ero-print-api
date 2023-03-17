@@ -86,8 +86,8 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         anonymousElectorDocumentRepository.save(anonymousElectorDocument)
         val payload = buildApplicationRemovedMessage(
             sourceType = ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT,
-            sourceReference = anonymousElectorDocument.sourceReference!!,
-            gssCode = anonymousElectorDocument.gssCode!!
+            sourceReference = anonymousElectorDocument.sourceReference,
+            gssCode = anonymousElectorDocument.gssCode
         )
         val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
 

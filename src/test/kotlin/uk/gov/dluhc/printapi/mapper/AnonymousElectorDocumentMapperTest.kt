@@ -11,20 +11,31 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import uk.gov.dluhc.printapi.database.entity.Address
+import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
-import uk.gov.dluhc.printapi.dto.AddressDto
+import uk.gov.dluhc.printapi.dto.AddressFormat
+import uk.gov.dluhc.printapi.dto.DeliveryAddressType.ERO_COLLECTION
+import uk.gov.dluhc.printapi.dto.DeliveryClass
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.SourceType.VOTER_CARD
+import uk.gov.dluhc.printapi.dto.SupportingInformationFormat.STANDARD
+import uk.gov.dluhc.printapi.models.DeliveryAddressType.ERO_MINUS_COLLECTION
 import uk.gov.dluhc.printapi.models.SourceType
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAnonymousElectorDocumentTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildDtoCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildGenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildValidAddressDto
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApiCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateAnonymousElectorDocumentRequest
 import java.time.Clock
 import java.time.Instant
@@ -33,6 +44,7 @@ import java.time.ZoneOffset
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
 import uk.gov.dluhc.printapi.database.entity.SourceType as SourceTypeEntity
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntity
+import uk.gov.dluhc.printapi.models.SupportingInformationFormat as SupportingInformationFormatApi
 
 @ExtendWith(MockitoExtension::class)
 class AnonymousElectorDocumentMapperTest {
@@ -59,6 +71,9 @@ class AnonymousElectorDocumentMapperTest {
     @Mock
     private lateinit var idFactory: IdFactory
 
+    @Mock
+    private lateinit var deliveryAddressTypeMapper: DeliveryAddressTypeMapper
+
     @Spy
     private val clock: Clock = FIXED_CLOCK
 
@@ -70,6 +85,7 @@ class AnonymousElectorDocumentMapperTest {
             val request = buildGenerateAnonymousElectorDocumentDto()
             val aedTemplateFilename = aValidAnonymousElectorDocumentTemplateFilename()
             val certificateNumber = aValidVacNumber()
+
             given(sourceTypeMapper.mapDtoToEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
             given(certificateLanguageMapper.mapDtoToEntity(any())).willReturn(CertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapDtoToEntity(any())).willReturn(SupportingInformationFormat.STANDARD)
@@ -97,7 +113,7 @@ class AnonymousElectorDocumentMapperTest {
                         email = email,
                         phoneNumber = phoneNumber,
                         address = with(registeredAddress) {
-                            Address(
+                            buildAddress(
                                 street = street,
                                 postcode = postcode,
                                 property = property,
@@ -145,7 +161,7 @@ class AnonymousElectorDocumentMapperTest {
                     email = email,
                     phoneNumber = phoneNumber,
                     address = with(registeredAddress) {
-                        Address(
+                        buildAddress(
                             street = street,
                             postcode = postcode,
                             property = property,
@@ -167,7 +183,46 @@ class AnonymousElectorDocumentMapperTest {
     }
 
     @Nested
+    inner class FromDeliveryDtoToDeliveryEntity {
+
+        @Test
+        fun `should map to Delivery entity given CertificateDelivery Dto`() {
+            // Given
+            val dto = buildDtoCertificateDelivery(deliveryAddressType = ERO_COLLECTION)
+            given(deliveryAddressTypeMapper.fromDtoToEntityDeliveryAddressType(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
+
+            val expected = with(dto) {
+                buildDelivery(
+                    addressee = addressee,
+                    addressFormat = uk.gov.dluhc.printapi.database.entity.AddressFormat.UK,
+                    deliveryClass = uk.gov.dluhc.printapi.database.entity.DeliveryClass.STANDARD,
+                    deliveryAddressType = DeliveryAddressType.ERO_COLLECTION,
+                    address = with(deliveryAddress) {
+                        buildAddress(
+                            street = street,
+                            postcode = postcode,
+                            property = property,
+                            locality = locality,
+                            town = town,
+                            area = area,
+                            uprn = uprn
+                        )
+                    },
+                )
+            }
+
+            // When
+            val actual = mapper.fromDeliveryDtoToDeliveryEntity(dto)
+
+            // Then
+            assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+            verify(deliveryAddressTypeMapper).fromDtoToEntityDeliveryAddressType(ERO_COLLECTION)
+        }
+    }
+
+    @Nested
     inner class ToGenerateAnonymousElectorDocumentDto {
+
         @Test
         fun `should map to GenerateAnonymousElectorDocumentDto DTO given API Request`() {
             // Given
@@ -175,29 +230,31 @@ class AnonymousElectorDocumentMapperTest {
             val apiRequest = buildGenerateAnonymousElectorDocumentRequest(
                 sourceType = SourceType.VOTER_MINUS_CARD,
                 certificateLanguage = uk.gov.dluhc.printapi.models.CertificateLanguage.EN,
-                supportingInformationFormat = uk.gov.dluhc.printapi.models.SupportingInformationFormat.STANDARD
+                supportingInformationFormat = SupportingInformationFormatApi.STANDARD,
+                delivery = buildApiCertificateDelivery(deliveryAddressType = ERO_MINUS_COLLECTION)
             )
 
-            given(sourceTypeMapper.mapApiToDto(any())).willReturn(uk.gov.dluhc.printapi.dto.SourceType.VOTER_CARD)
+            given(sourceTypeMapper.mapApiToDto(any())).willReturn(VOTER_CARD)
             given(certificateLanguageMapper.mapApiToDto(any())).willReturn(uk.gov.dluhc.printapi.dto.CertificateLanguage.EN)
-            given(supportingInformationFormatMapper.mapApiToDto(any())).willReturn(uk.gov.dluhc.printapi.dto.SupportingInformationFormat.STANDARD)
+            given(supportingInformationFormatMapper.mapApiToDto(any())).willReturn(STANDARD)
+            given(deliveryAddressTypeMapper.fromApiToDtoDeliveryAddressType(any())).willReturn(ERO_COLLECTION)
 
             val expected = GenerateAnonymousElectorDocumentDto(
                 gssCode = apiRequest.gssCode,
-                sourceType = uk.gov.dluhc.printapi.dto.SourceType.VOTER_CARD,
+                sourceType = VOTER_CARD,
                 sourceReference = apiRequest.sourceReference,
                 applicationReference = apiRequest.applicationReference,
                 electoralRollNumber = apiRequest.electoralRollNumber,
                 photoLocation = apiRequest.photoLocation,
                 certificateLanguage = uk.gov.dluhc.printapi.dto.CertificateLanguage.EN,
-                supportingInformationFormat = uk.gov.dluhc.printapi.dto.SupportingInformationFormat.STANDARD,
+                supportingInformationFormat = STANDARD,
                 firstName = apiRequest.firstName,
                 middleNames = apiRequest.middleNames,
                 surname = apiRequest.surname,
                 email = apiRequest.email,
                 phoneNumber = apiRequest.phoneNumber,
                 registeredAddress = with(apiRequest.registeredAddress) {
-                    AddressDto(
+                    buildValidAddressDto(
                         property = property,
                         street = street,
                         town = town,
@@ -207,17 +264,36 @@ class AnonymousElectorDocumentMapperTest {
                         postcode = postcode
                     )
                 },
-                userId = userId
+                userId = userId,
+                delivery = buildDtoCertificateDelivery(
+                    deliveryClass = DeliveryClass.STANDARD,
+                    deliveryAddressType = ERO_COLLECTION,
+                    addressee = apiRequest.delivery.addressee,
+                    addressFormat = AddressFormat.UK,
+                    deliveryAddress = with(apiRequest.delivery.deliveryAddress) {
+                        buildValidAddressDto(
+                            property = property,
+                            street = street,
+                            town = town,
+                            area = area,
+                            locality = locality,
+                            uprn = uprn,
+                            postcode = postcode
+                        )
+                    }
+                )
             )
 
             // When
             val actual = mapper.toGenerateAnonymousElectorDocumentDto(apiRequest, userId)
 
             // Then
+            assertThat(actual).isEqualTo(expected)
             verify(sourceTypeMapper).mapApiToDto(SourceType.VOTER_MINUS_CARD)
             verify(certificateLanguageMapper).mapApiToDto(uk.gov.dluhc.printapi.models.CertificateLanguage.EN)
-            verify(supportingInformationFormatMapper).mapApiToDto(uk.gov.dluhc.printapi.models.SupportingInformationFormat.STANDARD)
-            assertThat(actual).isEqualTo(expected)
+            verify(supportingInformationFormatMapper).mapApiToDto(SupportingInformationFormatApi.STANDARD)
+            verify(deliveryAddressTypeMapper).fromApiToDtoDeliveryAddressType(ERO_MINUS_COLLECTION)
+            verifyNoMoreInteractions(sourceTypeMapper, certificateLanguageMapper, supportingInformationFormatMapper, deliveryAddressTypeMapper)
         }
     }
 }
