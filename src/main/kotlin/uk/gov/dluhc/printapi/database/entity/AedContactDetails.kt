@@ -51,7 +51,7 @@ class AedContactDetails(
     var phoneNumber: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
-    var address: Address,
+    var address: Address? = null,
 
     @CreationTimestamp
     var dateCreated: Instant? = null,

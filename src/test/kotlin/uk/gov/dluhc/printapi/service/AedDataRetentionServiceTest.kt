@@ -66,6 +66,7 @@ internal class AedDataRetentionServiceTest {
             val expectedFinalRetentionRemovalDate = LocalDate.of(2032, Month.JULY, 1)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
             given(anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(anonymousElectorDocument)
+            given(removalDateResolver.getAedInitialRetentionPeriodRemovalDate(any())).willReturn(expectedInitialRetentionRemovalDate)
             given(removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
 
             // When
@@ -117,12 +118,20 @@ internal class AedDataRetentionServiceTest {
             val aed2 = buildAnonymousElectorDocument(photoLocationArn = anotherPhotoArn())
             val sourceType = ANONYMOUS_ELECTOR_DOCUMENT
             given(anonymousElectorDocumentRepository.findPendingRemovalOfInitialRetentionData(sourceType)).willReturn(listOf(aed1, aed2))
+            val addressId1 = aed1.contactDetails!!.address!!.id!!
+            val addressId2 = aed2.contactDetails!!.address!!.id!!
+            val deliveryId1 = aed1.delivery!!.id!!
+            val deliveryId2 = aed2.delivery!!.id!!
 
             // When
             aedDataRetentionService.removeInitialRetentionPeriodData(sourceType)
 
             // Then
             verify(anonymousElectorDocumentRepository).findPendingRemovalOfInitialRetentionData(sourceType)
+            verify(addressRepository).deleteById(addressId1)
+            verify(addressRepository).deleteById(addressId2)
+            verify(deliveryRepository).deleteById(deliveryId1)
+            verify(deliveryRepository).deleteById(deliveryId2)
             assertThat(aed1).initialRetentionPeriodDataIsRemoved()
             assertThat(aed2).initialRetentionPeriodDataIsRemoved()
         }

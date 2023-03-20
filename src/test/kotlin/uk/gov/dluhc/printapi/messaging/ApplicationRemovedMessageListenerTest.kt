@@ -15,6 +15,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildApplicati
 import java.time.LocalDate
 import java.time.Month.APRIL
 import java.time.Month.JULY
+import java.time.Month.JUNE
+import java.time.Month.MARCH
 import java.time.Month.MAY
 import java.util.concurrent.TimeUnit
 
@@ -81,7 +83,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
     fun `should process application removed message and set initial and final removal date on anonymous elector document`() {
         // Given
         val anonymousElectorDocument = buildAnonymousElectorDocument(
-            issueDate = LocalDate.of(2023, APRIL, 1)
+            issueDate = LocalDate.of(2023, MARCH, 10)
         )
         anonymousElectorDocumentRepository.save(anonymousElectorDocument)
         val payload = buildApplicationRemovedMessage(
@@ -89,7 +91,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             sourceReference = anonymousElectorDocument.sourceReference,
             gssCode = anonymousElectorDocument.gssCode
         )
-        val expectedInitialRemovalDate = LocalDate.of(2024, APRIL, 1)
+        val expectedInitialRemovalDate = LocalDate.of(2024, JUNE, 10)
         val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
 
         // When

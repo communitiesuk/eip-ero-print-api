@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.service
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.AddressRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
@@ -51,11 +52,7 @@ class AedDataRetentionService(
         logger.info { "Finding anonymous elector documents with sourceType $sourceType to remove initial retention period data from" }
         with(anonymousElectorDocumentRepository.findPendingRemovalOfInitialRetentionData(sourceType = sourceType)) {
             forEach {
-                it.contactDetails?.email = null
-                it.contactDetails?.phoneNumber = null
-                addressRepository.deleteById(it.contactDetails?.address?.id!!)
-                deliveryRepository.deleteById(it.delivery?.id!!)
-                it.initialRetentionDataRemoved = true
+                it.removeInitialRetentionPeriodData()
                 anonymousElectorDocumentRepository.save(it)
                 logger.info { "Removed initial retention period data from anonymous elector document with sourceReference ${it.sourceReference}" }
             }
@@ -71,5 +68,17 @@ class AedDataRetentionService(
                 anonymousElectorDocumentRepository.deleteById(it.id!!)
             }
         }
+    }
+
+    fun AnonymousElectorDocument.removeInitialRetentionPeriodData() {
+        contactDetails?.email = null
+        contactDetails?.phoneNumber = null
+        addressRepository.deleteById(contactDetails?.address?.id!!)
+        contactDetails?.address = null
+
+        deliveryRepository.deleteById(delivery?.id!!)
+        delivery = null
+        supportingInformationFormat = null
+        initialRetentionDataRemoved = true
     }
 }

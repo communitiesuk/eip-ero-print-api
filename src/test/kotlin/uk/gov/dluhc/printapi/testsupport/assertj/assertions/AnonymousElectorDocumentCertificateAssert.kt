@@ -97,9 +97,10 @@ class AnonymousElectorDocumentCertificateAssert
         if (this.actual?.supportingInformationFormat != null ||
             this.actual?.contactDetails?.address != null ||
             this.actual?.contactDetails?.email != null ||
-            this.actual?.contactDetails?.phoneNumber != null
+            this.actual?.contactDetails?.phoneNumber != null ||
+            this.actual?.delivery != null
         ) {
-            failWithMessage("Expecting initial retention data to be removed (null).")
+            failWithMessage("Expecting initial retention data to be removed.")
         }
 
         return this

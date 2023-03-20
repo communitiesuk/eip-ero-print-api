@@ -61,7 +61,7 @@ internal class InitialRetentionPeriodDataRemovalJobIntegrationTest : Integration
         TestLogAppender.reset()
 
         // When
-        initialRetentionPeriodDataRemovalJob.removeVoterCardInitialRetentionPeriodData()
+        initialRetentionPeriodDataRemovalJob.removeAedInitialRetentionPeriodData()
 
         // Then
         assertThat(anonymousElectorDocumentRepository.findById(aed1.id!!).get()).initialRetentionPeriodDataIsRemoved()
