@@ -45,6 +45,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
+import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildCertificate(
     id: UUID? = UUID.randomUUID(),
@@ -143,12 +144,13 @@ fun buildElectoralRegistrationOffice(
 }
 
 fun buildAddress(
-    street: String = faker.address().streetName(),
-    postcode: String = faker.address().postcode(),
-    property: String? = faker.address().buildingNumber(),
-    locality: String? = faker.address().streetName(),
-    town: String? = faker.address().city(),
-    area: String? = faker.address().state(),
+    fakeAddress: DataFakerAddress = faker.address(),
+    street: String = fakeAddress.streetName(),
+    postcode: String = fakeAddress.postcode(),
+    property: String? = fakeAddress.buildingNumber(),
+    locality: String? = fakeAddress.streetName(),
+    town: String? = fakeAddress.city(),
+    area: String? = fakeAddress.state(),
     uprn: String? = RandomStringUtils.randomNumeric(12)
 ) = Address(
     street = street,

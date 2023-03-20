@@ -61,16 +61,16 @@ class AnonymousElectorDocumentCertificateAssert
         return this
     }
 
-    fun hasDelivery(delivery: Delivery): AnonymousElectorDocumentCertificateAssert {
+    fun hasDelivery(expectedDelivery: Delivery): AnonymousElectorDocumentCertificateAssert {
         isNotNull
 
         DeliveryAssert(actual!!.delivery)
             .hasId()
-            .hasAddressee(delivery.addressee)
-            .hasAddress(delivery.address)
-            .hasAddressFormat(delivery.addressFormat)
-            .hasDeliveryClass(delivery.deliveryClass)
-            .hasDeliveryAddressType(delivery.deliveryAddressType)
+            .hasAddressee(expectedDelivery.addressee)
+            .hasAddress(expectedDelivery.address)
+            .hasAddressFormat(expectedDelivery.addressFormat)
+            .hasDeliveryClass(expectedDelivery.deliveryClass)
+            .hasDeliveryAddressType(expectedDelivery.deliveryAddressType)
             .hasDateCreated()
             .hasCreatedBy()
             .hasVersion()
