@@ -16,7 +16,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidFirstName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceTypeDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
@@ -24,7 +23,7 @@ import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildGenerateAnonymousElectorDocumentDto(
     gssCode: String = aGssCode(),
-    sourceType: SourceType = aValidSourceTypeDto(),
+    sourceType: SourceType = SourceType.ANONYMOUS_ELECTOR_DOCUMENT,
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     electoralRollNumber: String = aValidElectoralRollNumber(),

@@ -5,6 +5,7 @@ import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
+import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
@@ -43,6 +44,7 @@ fun buildAnonymousElectorDocument(
     aedStatuses: List<AnonymousElectorDocumentStatus> = listOf(buildAnonymousElectorDocumentStatus()),
     requestDateTime: Instant = aValidRequestDateTime(),
     userId: String = aValidUserId(),
+    delivery: Delivery = buildDelivery(),
     initialRetentionRemovalDate: LocalDate? = null,
     initialRetentionDataRemoved: Boolean = false,
     finalRetentionRemovalDate: LocalDate? = null,
@@ -66,6 +68,7 @@ fun buildAnonymousElectorDocument(
         issueDate = issueDate,
         requestDateTime = requestDateTime,
         userId = userId,
+        delivery = delivery,
     ).also {
         aedStatuses.forEach { electorDocumentStatus -> it.addStatus(electorDocumentStatus) }
     }

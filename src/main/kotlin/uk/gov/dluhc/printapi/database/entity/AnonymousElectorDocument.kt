@@ -91,6 +91,9 @@ class AnonymousElectorDocument(
     @field:Size(max = 255)
     var userId: String,
 
+    @OneToOne(cascade = [CascadeType.ALL])
+    var delivery: Delivery? = null,
+
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "aed_id", nullable = false)
     var statusHistory: MutableList<AnonymousElectorDocumentStatus> = mutableListOf(),
