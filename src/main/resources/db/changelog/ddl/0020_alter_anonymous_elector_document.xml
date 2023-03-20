@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="vishal.gupta@valtech.com" id="0020_EIP-4669_anonymous_elector_document add delivery info column for data retention" context="ddl">
+
+        <addColumn tableName="anonymous_elector_document">
+            <column name="delivery_id" type="uuid" afterColumn="request_date_time" remarks="This nullable column is required for AED certificate data retention">
+                <constraints nullable="true"
+                             foreignKeyName="fk_aed_certificate_delivery"
+                             references="delivery(id)"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="anonymous_elector_document" columnName="delivery_id"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

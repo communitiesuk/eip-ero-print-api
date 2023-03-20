@@ -42,7 +42,7 @@ abstract class AnonymousElectorDocumentMapper {
     @Mapping(target = "requestDateTime", expression = "java( requestDateTime() )")
     @Mapping(target = "contactDetails", source = "aedDto")
     @Mapping(target = "statusHistory", expression = "java( markStatusAsPrinted() )")
-    // @Mapping(target = "delivery", source = "aedDto.delivery") // TODO EIP1-4574 subtasks handles populating this new column which will use below [fromDeliveryDtoToDeliveryEntity] function
+    @Mapping(target = "delivery", source = "aedDto.delivery")
     abstract fun toAnonymousElectorDocument(
         aedDto: GenerateAnonymousElectorDocumentDto,
         aedTemplateFilename: String

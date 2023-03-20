@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
-import org.apache.commons.lang3.RandomStringUtils
+import org.apache.commons.lang3.RandomStringUtils.randomAlphabetic
 import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.apache.commons.lang3.RandomStringUtils.randomNumeric
 import org.bson.types.ObjectId
@@ -45,9 +45,9 @@ fun aValidVacVersion(): String = randomAlphanumeric(20)
 
 fun aValidSourceReference(): String = getAMongoDbId()
 
-fun aValidApplicationReference(): String = "V${RandomStringUtils.randomAlphabetic(9).uppercase()}"
+fun aValidApplicationReference(): String = "V${randomAlphabetic(9).uppercase()}"
 
-fun aValidElectoralRollNumber(): String = "${RandomStringUtils.randomAlphabetic(2)}${RandomStringUtils.randomNumeric(4)}"
+fun aValidElectoralRollNumber(): String = "${randomAlphabetic(2)}${randomNumeric(4)}"
 
 fun aValidApplicationReceivedDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 

@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
+import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
@@ -143,12 +143,12 @@ fun buildElectoralRegistrationOffice(
 }
 
 fun buildAddress(
-    street: String = DataFaker.faker.address().streetName(),
-    postcode: String = DataFaker.faker.address().postcode(),
-    property: String? = DataFaker.faker.address().buildingNumber(),
-    locality: String? = DataFaker.faker.address().streetName(),
-    town: String? = DataFaker.faker.address().city(),
-    area: String? = DataFaker.faker.address().state(),
+    street: String = faker.address().streetName(),
+    postcode: String = faker.address().postcode(),
+    property: String? = faker.address().buildingNumber(),
+    locality: String? = faker.address().streetName(),
+    town: String? = faker.address().city(),
+    area: String? = faker.address().state(),
     uprn: String? = RandomStringUtils.randomNumeric(12)
 ) = Address(
     street = street,

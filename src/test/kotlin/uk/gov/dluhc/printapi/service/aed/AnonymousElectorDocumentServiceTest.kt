@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.service.aed
 
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -51,16 +52,15 @@ internal class AnonymousElectorDocumentServiceTest {
         val request = buildGenerateAnonymousElectorDocumentDto()
         val certificateNumber = "ZlxBCBxpjseZU5i3ccyL"
         val eroDetails = buildEroDto(eroId = eroId)
-        given(eroClient.getEro(any())).willReturn(eroDetails)
         val templateFilename = aTemplateFilename()
-        given(pdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
-        val anonymousElectorDocument = buildAnonymousElectorDocument(certificateNumber = certificateNumber)
-        given(anonymousElectorDocumentMapper.toAnonymousElectorDocument(any(), any())).willReturn(
-            anonymousElectorDocument
-        )
         val templateDetails = buildTemplateDetails()
-        given(pdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
+        val anonymousElectorDocument = buildAnonymousElectorDocument(certificateNumber = certificateNumber)
         val contents = Random.Default.nextBytes(10)
+
+        given(eroClient.getEro(any())).willReturn(eroDetails)
+        given(pdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
+        given(anonymousElectorDocumentMapper.toAnonymousElectorDocument(any(), any())).willReturn(anonymousElectorDocument)
+        given(pdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
         given(pdfFactory.createPdfContents(any())).willReturn(contents)
 
         // When
@@ -73,8 +73,8 @@ internal class AnonymousElectorDocumentServiceTest {
         verify(pdfTemplateDetailsFactory).getTemplateDetails(anonymousElectorDocument)
         verify(pdfFactory).createPdfContents(templateDetails)
         verify(anonymousElectorDocumentRepository).save(anonymousElectorDocument)
-        Assertions.assertThat(actual.filename).isEqualTo("anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf")
-        Assertions.assertThat(actual.contents).isSameAs(contents)
+        assertThat(actual.filename).isEqualTo("anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf")
+        assertThat(actual.contents).isSameAs(contents)
     }
 
     @Test
@@ -99,7 +99,7 @@ internal class AnonymousElectorDocumentServiceTest {
             pdfFactory,
             anonymousElectorDocumentRepository
         )
-        Assertions.assertThat(exception).hasMessage("Anonymous Elector Document gssCode 'N06000012' does not exist")
+        assertThat(exception).hasMessage("Anonymous Elector Document gssCode 'N06000012' does not exist")
     }
 
     @Test
@@ -126,7 +126,7 @@ internal class AnonymousElectorDocumentServiceTest {
             pdfFactory,
             anonymousElectorDocumentRepository
         )
-        Assertions.assertThat(exception)
+        assertThat(exception)
             .hasMessage("Anonymous Elector Document gssCode 'W06000023' is not valid for eroId 'bath-and-north-east-somerset-council'")
     }
 }
