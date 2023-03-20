@@ -26,6 +26,6 @@ class FinalRetentionPeriodDataRemovalJob(
     @Scheduled(cron = "\${jobs.remove-aed-final-retention-period-data.cron}")
     @SchedulerLock(name = "\${jobs.remove-aed-final-retention-period-data.name}")
     fun removeAedFinalRetentionPeriodData() {
-        aedDataRetentionService.removeAnonymousElectorDocumentData(sourceType = ANONYMOUS_ELECTOR_DOCUMENT)
+        aedDataRetentionService.removeFinalRetentionPeriodData(sourceType = ANONYMOUS_ELECTOR_DOCUMENT)
     }
 }

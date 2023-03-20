@@ -9,6 +9,9 @@ jobs:
   remove-vca-initial-retention-period-data:
     name: "RemoveVcaInitialRetentionPeriodData"
     cron: "0 1/10 * ? * *" # every 10 minutes starting at :01
+  remove-aed-initial-retention-period-data:
+    name: "RemoveAedInitialRetentionPeriodData"
+    cron: "0 2/10 * ? * *" # every 10 minutes starting at :02
   remove-vca-final-retention-period-data:
     name: "RemoveVcaFinalRetentionPeriodData"
     cron: "0 5/10 * ? * *" # every 10 minutes starting at :05

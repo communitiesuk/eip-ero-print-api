@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
+import uk.gov.dluhc.printapi.database.repository.AddressRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
@@ -136,6 +137,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var deliveryRepository: DeliveryRepository
+
+    @Autowired
+    protected lateinit var addressRepository: AddressRepository
 
     @Autowired
     protected lateinit var temporaryCertificateRepository: TemporaryCertificateRepository

@@ -41,6 +41,27 @@ class AnonymousElectorDocumentCertificateAssert
     }
 
     /**
+     * Verifies that the actual AnonymousElectorDocument's initialRetentionRemovalDate is equal to the given one.
+     * @param initialRetentionRemovalDate the given initialRetentionRemovalDate to compare the actual AnonymousElectorDocument's one.
+     * @return this assertion object.
+     * @throws AssertionError - if the actual AnonymousElectorDocument's initialRetentionRemovalDate is not equal to the given one.
+     */
+    fun hasInitialRetentionRemovalDate(initialRetentionRemovalDate: LocalDate?): AnonymousElectorDocumentCertificateAssert {
+        isNotNull
+
+        // overrides the default error message with a more explicit one
+        val assertjErrorMessage = "\nExpecting initialRetentionRemovalDate of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+
+        // null safe check
+        val actualInitialRetentionRemovalDate = actual!!.initialRetentionRemovalDate
+        if (!Objects.deepEquals(actualInitialRetentionRemovalDate, initialRetentionRemovalDate)) {
+            failWithMessage(assertjErrorMessage, actual, initialRetentionRemovalDate, actualInitialRetentionRemovalDate)
+        }
+
+        return this
+    }
+
+    /**
      * Verifies that the actual AnonymousElectorDocument's finalRetentionRemovalDate is equal to the given one.
      * @param finalRetentionRemovalDate the given finalRetentionRemovalDate to compare the actual AnonymousElectorDocument's one.
      * @return this assertion object.
@@ -56,6 +77,50 @@ class AnonymousElectorDocumentCertificateAssert
         val actualFinalRetentionRemovalDate = actual!!.finalRetentionRemovalDate
         if (!Objects.deepEquals(actualFinalRetentionRemovalDate, finalRetentionRemovalDate)) {
             failWithMessage(assertjErrorMessage, actual, finalRetentionRemovalDate, actualFinalRetentionRemovalDate)
+        }
+
+        return this
+    }
+
+    /**
+     * Verifies that the data which needs to be removed after the initial retention period is null.
+     * @return this assertion object.
+     * @throws AssertionError if the data is not null.
+     */
+    fun initialRetentionPeriodDataIsRemoved(): AnonymousElectorDocumentCertificateAssert {
+        isNotNull
+
+        if (this.actual?.initialRetentionDataRemoved == false) {
+            failWithMessage("Expecting initialRetentionDataRemoved to be true.")
+        }
+
+        if (this.actual?.supportingInformationFormat != null ||
+            this.actual?.contactDetails?.address != null ||
+            this.actual?.contactDetails?.email != null ||
+            this.actual?.contactDetails?.phoneNumber != null
+        ) {
+            failWithMessage("Expecting initial retention data to be removed (null).")
+        }
+
+        return this
+    }
+
+    /**
+     * Verifies that the data which needs to be removed after the initial retention period still exists.
+     * @return this assertion object.
+     * @throws AssertionError if the data is null.
+     */
+    fun hasInitialRetentionPeriodData(): AnonymousElectorDocumentCertificateAssert {
+        isNotNull
+
+        if (this.actual?.initialRetentionDataRemoved == true) {
+            failWithMessage("Expecting initialRetentionDataRemoved to be false.")
+        }
+
+        if (this.actual?.supportingInformationFormat == null ||
+            this.actual?.contactDetails?.address == null
+        ) {
+            failWithMessage("Expecting initial retention data not to be removed (null).")
         }
 
         return this
