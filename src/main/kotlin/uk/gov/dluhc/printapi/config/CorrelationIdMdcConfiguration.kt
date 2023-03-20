@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.config
 
-import mu.KotlinLogging
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -19,8 +18,6 @@ import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-private val logger = KotlinLogging.logger {}
-
 /**
  * MVC Interceptor and AOP beans that set the correlation ID MDC variable for inclusion in all log statements.
  */
@@ -31,7 +28,7 @@ const val CORRELATION_ID_HEADER = "x-correlation-id"
 /**
  * MVC Interceptor that sets the correlation ID MDC variable of either a new value, or the value found in the
  * HTTP header `x-correlation-id` if set. This allows for passing and logging a consistent correlation ID between
- * disparate systems or processes.
+ * disparate systems or processes. This interceptor is used in beans annotated with @RestController.
  */
 
 @Component
@@ -55,12 +52,22 @@ class CorrelationIdMdcInterceptor : HandlerInterceptor {
 }
 
 /**
- * Webclient exchange filter that sets the correlation ID MDC variable of either a new value, or the
+ * WebClient exchange filter that sets the correlation ID MDC variable of either a new value, or the
  * current value found in the MDC context. This allows for passing and logging a consistent correlation ID between
- * disparate systems or processes using the spring Webclient.
+ * disparate systems or processes using the spring WebClient.
+ * Example of usage:
+ * ```
+ *   @Configuration
+ *   @Bean
+ *     fun someWebclient(correlationIdExchangeFilter: CorrelationIdMdcExchangeFilter): WebClient =
+ *         WebClient.builder()
+ *             // Other WebClient config
+ *             .filter(correlationIdExchangeFilter)
+ *             .build()
+ *```
  */
 @Component
-class CorrelationIdMdcExchangeFilter(private val mdcExchangeFilter: MDCExchangeFilter) : ExchangeFilterFunction {
+class CorrelationIdWebClientMdcExchangeFilter : ExchangeFilterFunction {
 
     /*
         This is modelled as a set in case we need to talk to another system within the gov space that doesn't use 'x-correlation-id'.
@@ -72,7 +79,7 @@ class CorrelationIdMdcExchangeFilter(private val mdcExchangeFilter: MDCExchangeF
         val currentCorrelationId = getCurrentCorrelationId()
         val clientRequestModified = setCorrelationIdInRequest(request, currentCorrelationId)
 
-        return next.filter(mdcExchangeFilter).exchange(clientRequestModified)
+        return next.filter(::mdcExchangeFilter).exchange(clientRequestModified)
     }
 
     private fun setCorrelationIdInRequest(request: ClientRequest, correlationId: String): ClientRequest {
@@ -81,14 +88,19 @@ class CorrelationIdMdcExchangeFilter(private val mdcExchangeFilter: MDCExchangeF
             .build()
     }
 
-    @Component
-    class MDCExchangeFilter : ExchangeFilterFunction {
-        override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
-            val contextMap = MDC.getCopyOfContextMap()
-            return next.exchange(request).doOnEach { _ ->
-                if (contextMap != null) {
-                    MDC.setContextMap(contextMap)
-                }
+    /**
+     * MDC uses thread bound values. In the reactive non-blocking world, a single request could be processed by multiple
+     * threads. This means that setting the MDC context at the beginning of the request is not an option. Since WebClient
+     * uses reactor-netty under the hood, it runs on different threads.
+     *
+     * In order to continue using the MDC feature in the reactive Spring application, we need to make sure that whenever a
+     * thread starts processing a request it has to update the state of the MDC context.
+     */
+    private fun mdcExchangeFilter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
+        val contextMap = MDC.getCopyOfContextMap()
+        return next.exchange(request).doOnEach { _ ->
+            if (contextMap != null) {
+                MDC.setContextMap(contextMap)
             }
         }
     }

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.9.4'
+  version: '1.9.5'
   description: |-
     Print API SQS Message Types
     
@@ -12,6 +12,9 @@ info:
     
     The `paths` element is only being used in order to maintain the structure of the openApi spec, as `paths` are required 
     elements.
+    
+    The SQS listeners and producers in this API also consume/produce an optional x-correlation-id header that can be used
+    to trace requests.
 #
 # --------------------------------------------------------------------------------
 #
