@@ -91,7 +91,7 @@ class AnonymousElectorDocument(
     @field:Size(max = 255)
     var userId: String,
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var delivery: Delivery? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
@@ -131,6 +131,15 @@ class AnonymousElectorDocument(
     fun addStatus(newStatus: AnonymousElectorDocumentStatus): AnonymousElectorDocument {
         statusHistory += newStatus
         return this
+    }
+
+    fun removeInitialRetentionPeriodData() {
+        contactDetails?.email = null
+        contactDetails?.phoneNumber = null
+        contactDetails?.address = null
+        delivery = null
+        supportingInformationFormat = null
+        initialRetentionDataRemoved = true
     }
 
     override fun equals(other: Any?): Boolean {

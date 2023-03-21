@@ -36,7 +36,7 @@ class Delivery(
     @field:Size(max = 255)
     var addressee: String,
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var address: Address,
 
     @Enumerated(EnumType.STRING)

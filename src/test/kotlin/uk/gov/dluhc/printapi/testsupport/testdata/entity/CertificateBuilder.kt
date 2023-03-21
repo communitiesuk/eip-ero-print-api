@@ -45,10 +45,11 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
+import java.util.UUID.randomUUID
 import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildCertificate(
-    id: UUID? = UUID.randomUUID(),
+    id: UUID? = randomUUID(),
     vacNumber: String = aValidVacNumber(),
     status: Status = aValidCertificateStatus(),
     batchId: String = aValidBatchId(),
@@ -144,6 +145,7 @@ fun buildElectoralRegistrationOffice(
 }
 
 fun buildAddress(
+    id: UUID? = randomUUID(),
     fakeAddress: DataFakerAddress = faker.address(),
     street: String = fakeAddress.streetName(),
     postcode: String = fakeAddress.postcode(),
@@ -153,6 +155,7 @@ fun buildAddress(
     area: String? = fakeAddress.state(),
     uprn: String? = RandomStringUtils.randomNumeric(12)
 ) = Address(
+    id = id,
     street = street,
     postcode = postcode,
     property = property,
@@ -163,12 +166,14 @@ fun buildAddress(
 )
 
 fun buildDelivery(
+    id: UUID? = randomUUID(),
     addressee: String = aValidDeliveryName(),
     address: Address = buildAddress(),
     deliveryClass: DeliveryClass = aValidDeliveryClass(),
     deliveryAddressType: DeliveryAddressType = aValidDeliveryAddressType(),
     addressFormat: AddressFormat = aValidAddressFormat(),
 ): Delivery = Delivery(
+    id = id,
     addressee = addressee,
     address = address,
     deliveryClass = deliveryClass,

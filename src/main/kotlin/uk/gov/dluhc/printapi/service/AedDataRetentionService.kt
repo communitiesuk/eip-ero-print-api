@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfFinalRetentionData
+import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 
@@ -34,6 +35,7 @@ class AedDataRetentionService(
                 sourceType = sourceType,
                 sourceReference = sourceReference
             )?.also {
+                it.initialRetentionRemovalDate = removalDateResolver.getAedInitialRetentionPeriodRemovalDate(it.issueDate)
                 it.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
                 anonymousElectorDocumentRepository.save(it)
             } ?: logger.error { "Anonymous Elector Document with sourceType = $sourceType and sourceReference = $sourceReference not found" }
@@ -41,7 +43,19 @@ class AedDataRetentionService(
     }
 
     @Transactional
-    fun removeAnonymousElectorDocumentData(sourceType: SourceType) {
+    fun removeInitialRetentionPeriodData(sourceType: SourceType) {
+        logger.info { "Finding anonymous elector documents with sourceType $sourceType to remove initial retention period data from" }
+        with(anonymousElectorDocumentRepository.findPendingRemovalOfInitialRetentionData(sourceType = sourceType)) {
+            forEach {
+                it.removeInitialRetentionPeriodData()
+                anonymousElectorDocumentRepository.save(it)
+                logger.info { "Removed initial retention period data from anonymous elector document with sourceReference ${it.sourceReference}" }
+            }
+        }
+    }
+
+    @Transactional
+    fun removeFinalRetentionPeriodData(sourceType: SourceType) {
         with(anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType)) {
             logger.info { "Found $size Anonymous Elector Documents with sourceType $sourceType to remove" }
             forEach {

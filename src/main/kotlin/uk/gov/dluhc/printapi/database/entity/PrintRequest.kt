@@ -66,7 +66,7 @@ class PrintRequest(
     @Enumerated(EnumType.STRING)
     var supportingInformationFormat: SupportingInformationFormat? = null,
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var delivery: Delivery? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])

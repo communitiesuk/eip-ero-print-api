@@ -4,12 +4,8 @@ import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.stereotype.Repository
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
-import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.addCertificatePhotoToS3
 import uk.gov.dluhc.printapi.testsupport.certificatePhotoExists
@@ -19,13 +15,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertifica
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.anotherPhotoBucketPath
 import java.time.LocalDate
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTest() {
-
-    @Autowired
-    private lateinit var testPrintRequestRepository: TestPrintRequestRepository
 
     @Test
     fun `should remove voter card certificate final retention period data`() {
@@ -118,6 +110,3 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
         }
     }
 }
-
-@Repository
-interface TestPrintRequestRepository : JpaRepository<PrintRequest, UUID>

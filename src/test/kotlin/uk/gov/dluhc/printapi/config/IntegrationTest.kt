@@ -33,7 +33,6 @@ import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_R
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
-import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
 import uk.gov.dluhc.printapi.jobs.FinalRetentionPeriodDataRemovalJob
@@ -135,13 +134,19 @@ internal abstract class IntegrationTest {
     protected lateinit var certificateRepository: CertificateRepository
 
     @Autowired
-    protected lateinit var deliveryRepository: DeliveryRepository
-
-    @Autowired
     protected lateinit var temporaryCertificateRepository: TemporaryCertificateRepository
 
     @Autowired
     protected lateinit var anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository
+
+    @Autowired
+    protected lateinit var testDeliveryRepository: TestDeliveryRepository
+
+    @Autowired
+    protected lateinit var testAddressRepository: TestAddressRepository
+
+    @Autowired
+    protected lateinit var testPrintRequestRepository: TestPrintRequestRepository
 
     @BeforeEach
     fun clearLogAppender() {

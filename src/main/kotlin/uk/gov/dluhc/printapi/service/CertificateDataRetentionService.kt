@@ -9,7 +9,6 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
-import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
@@ -21,7 +20,6 @@ private val logger = KotlinLogging.logger {}
 class CertificateDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val certificateRepository: CertificateRepository,
-    private val deliveryRepository: DeliveryRepository,
     private val removalDateResolver: ElectorDocumentRemovalDateResolver,
     private val s3CertificatePhotoService: S3PhotoService,
     private val removeCertificateQueue: MessageQueue<RemoveCertificateMessage>,
@@ -108,7 +106,6 @@ class CertificateDataRetentionService(
 
     private fun removeInitialRetentionPeriodData(printRequests: List<PrintRequest>) {
         printRequests.forEach {
-            it.delivery?.let { delivery -> deliveryRepository.delete(delivery) }
             it.delivery = null
             it.supportingInformationFormat = null
         }

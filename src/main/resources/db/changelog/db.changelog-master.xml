@@ -28,4 +28,5 @@
     <include relativeToChangelogFile="true" file="migration/0002_EIP1-4616_update_aed_status.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0019_final_retention_date_removed_column.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0020_alter_anonymous_elector_document.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0021_alter_aed_contact_details.xml"/>
 </databaseChangeLog>

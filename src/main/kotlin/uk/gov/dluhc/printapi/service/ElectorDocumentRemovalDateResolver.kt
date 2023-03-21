@@ -41,6 +41,18 @@ class ElectorDocumentRemovalDateResolver(
         }
 
     /**
+     * Calculates the date that certain [uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument] related data
+     * should be removed following the first retention period. The legislation stipulates that PII data which is not on
+     * the printed document should be removed 15 months after it's issue date.
+     *
+     * @param issueDate The date the Anonymous Elector Document was generated (and assumed to be printed).
+     * @return A [LocalDate] representing when the data should be removed.
+     */
+    fun getAedInitialRetentionPeriodRemovalDate(issueDate: LocalDate): LocalDate {
+        return issueDate.plusMonths(15)
+    }
+
+    /**
      * Calculates the date that any remaining "Elector Document" data should be removed following the final retention
      * period. The legislation stipulates that all remaining data should be removed on the tenth 1st July following the
      * date the VAC's issue date.

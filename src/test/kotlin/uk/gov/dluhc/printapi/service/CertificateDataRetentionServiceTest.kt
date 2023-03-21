@@ -21,7 +21,6 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
-import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
@@ -48,9 +47,6 @@ internal class CertificateDataRetentionServiceTest {
 
     @Mock
     private lateinit var certificateRepository: CertificateRepository
-
-    @Mock
-    private lateinit var deliveryRepository: DeliveryRepository
 
     @Mock
     private lateinit var s3CertificatePhotoService: S3PhotoService
@@ -137,8 +133,6 @@ internal class CertificateDataRetentionServiceTest {
             assertThat(certificate1).initialRetentionPeriodDataIsRemoved()
             assertThat(certificate2).initialRetentionPeriodDataIsRemoved()
             verify(certificateRepository).findPendingRemovalOfInitialRetentionData(VOTER_CARD)
-            verify(deliveryRepository).delete(delivery1)
-            verify(deliveryRepository).delete(delivery2)
         }
 
         @Test
@@ -155,7 +149,6 @@ internal class CertificateDataRetentionServiceTest {
             // Then
             assertThat(certificate).hasInitialRetentionPeriodData()
             verify(certificateRepository).findPendingRemovalOfInitialRetentionData(VOTER_CARD)
-            verifyNoInteractions(deliveryRepository)
         }
     }
 

@@ -53,6 +53,7 @@ class AnonymousElectorDocumentMapperTest {
         private val FIXED_DATE = LocalDate.parse(FIXED_DATE_STRING)
         private val FIXED_TIME = Instant.parse("${FIXED_DATE_STRING}T11:22:32.123Z")
         private val FIXED_CLOCK = Clock.fixed(FIXED_TIME, ZoneOffset.UTC)
+        private val ID_FIELDS_REGEX = ".*id"
     }
 
     @InjectMocks
@@ -160,7 +161,7 @@ class AnonymousElectorDocumentMapperTest {
             val actual = mapper.toAnonymousElectorDocument(dtoRequest, aedTemplateFilename)
 
             // Then
-            assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
             verify(sourceTypeMapper).mapDtoToEntity(dtoRequest.sourceType)
             verify(certificateLanguageMapper).mapDtoToEntity(dtoRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapDtoToEntity(dtoRequest.supportingInformationFormat!!)
@@ -202,7 +203,7 @@ class AnonymousElectorDocumentMapperTest {
             val actual = mapper.toAedContactDetailsEntity(request)
 
             // Then
-            assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
         }
     }
 
@@ -239,7 +240,7 @@ class AnonymousElectorDocumentMapperTest {
             val actual = mapper.fromDeliveryDtoToDeliveryEntity(dto)
 
             // Then
-            assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
             verify(deliveryAddressTypeMapper).fromDtoToEntityDeliveryAddressType(ERO_COLLECTION)
         }
     }
