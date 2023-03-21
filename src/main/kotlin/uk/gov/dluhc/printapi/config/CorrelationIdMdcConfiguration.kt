@@ -4,11 +4,16 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.slf4j.MDC
+import org.springframework.http.HttpHeaders
 import org.springframework.messaging.Message
 import org.springframework.messaging.support.GenericMessage
 import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.ClientRequest
+import org.springframework.web.reactive.function.client.ClientResponse
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.servlet.HandlerInterceptor
-import java.lang.Exception
+import reactor.core.publisher.Mono
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -23,13 +28,16 @@ const val CORRELATION_ID_HEADER = "x-correlation-id"
 /**
  * MVC Interceptor that sets the correlation ID MDC variable of either a new value, or the value found in the
  * HTTP header `x-correlation-id` if set. This allows for passing and logging a consistent correlation ID between
- * disparate systems or processes.
+ * disparate systems or processes. This interceptor is used in beans annotated with @RestController.
  */
+
 @Component
 class CorrelationIdMdcInterceptor : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        MDC.put(CORRELATION_ID, request.getHeader(CORRELATION_ID_HEADER) ?: generateCorrelationId())
+        val correlationId = request.getHeader(CORRELATION_ID_HEADER) ?: generateCorrelationId()
+        MDC.put(CORRELATION_ID, correlationId)
+        response.setHeader(CORRELATION_ID_HEADER, correlationId)
         return true
     }
 
@@ -40,6 +48,61 @@ class CorrelationIdMdcInterceptor : HandlerInterceptor {
         ex: Exception?
     ) {
         MDC.remove(CORRELATION_ID)
+    }
+}
+
+/**
+ * WebClient exchange filter that sets the correlation ID MDC variable of either a new value, or the
+ * current value found in the MDC context. This allows for passing and logging a consistent correlation ID between
+ * disparate systems or processes using the spring WebClient.
+ * Example of usage:
+ * ```
+ *   @Configuration
+ *   @Bean
+ *     fun someWebclient(correlationIdExchangeFilter: CorrelationIdMdcExchangeFilter): WebClient =
+ *         WebClient.builder()
+ *             // Other WebClient config
+ *             .filter(correlationIdExchangeFilter)
+ *             .build()
+ *```
+ */
+@Component
+class CorrelationIdWebClientMdcExchangeFilter : ExchangeFilterFunction {
+
+    /*
+        This is modelled as a set in case we need to talk to another system within the gov space that doesn't use 'x-correlation-id'.
+        Another commonly used identifier is 'X-Request-Id'. This allows us to send our 'x-correlation-id' as well as their specified one.
+    */
+    private val correlationHeaderNames: Set<String> = setOf(CORRELATION_ID_HEADER)
+
+    override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
+        val currentCorrelationId = getCurrentCorrelationId()
+        val clientRequestModified = setCorrelationIdInRequest(request, currentCorrelationId)
+
+        return next.filter(::mdcExchangeFilter).exchange(clientRequestModified)
+    }
+
+    private fun setCorrelationIdInRequest(request: ClientRequest, correlationId: String): ClientRequest {
+        return ClientRequest.from(request)
+            .headers { headers: HttpHeaders -> correlationHeaderNames.forEach { correlationHeaderName -> headers[correlationHeaderName] = correlationId } }
+            .build()
+    }
+
+    /**
+     * MDC uses thread bound values. In the reactive non-blocking world, a single request could be processed by multiple
+     * threads. This means that setting the MDC context at the beginning of the request is not an option. Since WebClient
+     * uses reactor-netty under the hood, it runs on different threads.
+     *
+     * In order to continue using the MDC feature in the reactive Spring application, we need to make sure that whenever a
+     * thread starts processing a request it has to update the state of the MDC context.
+     */
+    private fun mdcExchangeFilter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
+        val contextMap = MDC.getCopyOfContextMap()
+        return next.exchange(request).doOnEach { _ ->
+            if (contextMap != null) {
+                MDC.setContextMap(contextMap)
+            }
+        }
     }
 }
 

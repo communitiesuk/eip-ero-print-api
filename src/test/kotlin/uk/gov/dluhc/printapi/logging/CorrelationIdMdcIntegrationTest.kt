@@ -1,6 +1,8 @@
 package uk.gov.dluhc.printapi.logging
 
 import ch.qos.logback.classic.Level
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +29,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
 import java.io.ByteArrayInputStream
 import java.util.UUID
+import java.util.UUID.randomUUID
 import java.util.concurrent.TimeUnit
 
 /**
@@ -61,6 +64,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
                 .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
+                .expectHeader().exists("x-correlation-id")
 
             // Then
             await.atMost(3, TimeUnit.SECONDS).untilAsserted {
@@ -71,13 +75,22 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
                         Level.WARN
                     )
                 ).hasAnyCorrelationId()
+                assertThat(
+                    TestLogAppender.getLogEventMatchingRegex(
+                        "Finished retrieving gss codes for ero $ERO_ID",
+                        Level.INFO
+                    )
+                ).hasAnyCorrelationId()
             }
+
+            // ensure a correlation id was also captured on outbound webclient request.
+            wireMockService.verifyEroManagementGetEroByEroIdWithCorrelationId(ERO_ID, WireMock.matching("^[a-z0-9]+$"))
         }
 
         @Test
         fun `should service REST API call given correlation-id header`() {
             // Given
-            val expectedCorrelationId = UUID.randomUUID().toString().replace("-", "")
+            val expectedCorrelationId = randomUUID().toString().replace("-", "")
 
             // When
             webTestClient.get()
@@ -86,14 +99,24 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("x-correlation-id", expectedCorrelationId)
                 .exchange()
+                .expectHeader().valueEquals("x-correlation-id", expectedCorrelationId)
 
             // Then
+            // ensure correlation id was also captured on outbound webclient request.
+            wireMockService.verifyEroManagementGetEroByEroIdWithCorrelationId(ERO_ID, equalTo(expectedCorrelationId))
+
             await.atMost(3, TimeUnit.SECONDS).untilAsserted {
                 // We don't care that the log message is because the certificate was not found. We care that the log message has a correlation ID
                 assertThat(
                     TestLogAppender.getLogEventMatchingRegex(
                         "Certificate for eroId = $ERO_ID with sourceType = $VOTER_CARD and sourceReference = $APPLICATION_ID not found",
                         Level.WARN
+                    )
+                ).hasCorrelationId(expectedCorrelationId)
+                assertThat(
+                    TestLogAppender.getLogEventMatchingRegex(
+                        "Finished retrieving gss codes for ero $ERO_ID",
+                        Level.INFO
                     )
                 ).hasCorrelationId(expectedCorrelationId)
             }
@@ -127,7 +150,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
         fun `should run batch job and log consistent correlation id`() {
             // Given
             TestLogAppender.reset()
-            val certificateId = UUID.randomUUID()
+            val certificateId = randomUUID()
             saveCertificate(certificateId)
 
             // When
@@ -185,7 +208,7 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
         @Test
         fun `should run batch job and log consistent correlation id`() {
             // Given
-            val certificateId = UUID.randomUUID()
+            val certificateId = randomUUID()
             val certificate = saveCertificate(certificateId)
             val expectedRequestId = certificate.printRequests[0].requestId!!
 
