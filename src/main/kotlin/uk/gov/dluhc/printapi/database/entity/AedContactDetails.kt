@@ -50,7 +50,7 @@ class AedContactDetails(
     @Size(max = 50)
     var phoneNumber: String? = null,
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var address: Address? = null,
 
     @CreationTimestamp

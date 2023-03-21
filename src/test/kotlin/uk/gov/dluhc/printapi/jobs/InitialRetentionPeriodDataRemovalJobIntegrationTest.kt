@@ -34,10 +34,10 @@ internal class InitialRetentionPeriodDataRemovalJobIntegrationTest : Integration
         assertThat(certificateRepository.findById(certificate2.id!!).get()).initialRetentionPeriodDataIsRemoved()
         assertThat(certificateRepository.findById(certificate3.id!!).get()).hasInitialRetentionPeriodData()
         assertThat(certificateRepository.findById(certificate4.id!!).get()).hasInitialRetentionPeriodData()
-        assertThat(deliveryRepository.findById(deliveryId1)).isEmpty
-        assertThat(deliveryRepository.findById(deliveryId2)).isEmpty
-        assertThat(deliveryRepository.findById(deliveryId3)).isNotEmpty
-        assertThat(deliveryRepository.findById(deliveryId4)).isNotEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId1)).isEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId2)).isEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId3)).isNotEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId4)).isNotEmpty
         assertThat(TestLogAppender.hasLog("Removed initial retention period data from certificate with sourceReference ${certificate1.sourceReference}", Level.INFO)).isTrue
         assertThat(TestLogAppender.hasLog("Removed initial retention period data from certificate with sourceReference ${certificate2.sourceReference}", Level.INFO)).isTrue
     }
@@ -68,14 +68,14 @@ internal class InitialRetentionPeriodDataRemovalJobIntegrationTest : Integration
         assertThat(anonymousElectorDocumentRepository.findById(aed2.id!!).get()).initialRetentionPeriodDataIsRemoved()
         assertThat(anonymousElectorDocumentRepository.findById(aed3.id!!).get()).hasInitialRetentionPeriodData()
         assertThat(anonymousElectorDocumentRepository.findById(aed4.id!!).get()).hasInitialRetentionPeriodData()
-        assertThat(deliveryRepository.findById(deliveryId1)).isEmpty
-        assertThat(deliveryRepository.findById(deliveryId2)).isEmpty
-        assertThat(deliveryRepository.findById(deliveryId3)).isNotEmpty
-        assertThat(deliveryRepository.findById(deliveryId4)).isNotEmpty
-        assertThat(addressRepository.findById(addressId1)).isEmpty
-        assertThat(addressRepository.findById(addressId2)).isEmpty
-        assertThat(addressRepository.findById(addressId3)).isNotEmpty
-        assertThat(addressRepository.findById(addressId4)).isNotEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId1)).isEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId2)).isEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId3)).isNotEmpty
+        assertThat(testDeliveryRepository.findById(deliveryId4)).isNotEmpty
+        assertThat(testAddressRepository.findById(addressId1)).isEmpty
+        assertThat(testAddressRepository.findById(addressId2)).isEmpty
+        assertThat(testAddressRepository.findById(addressId3)).isNotEmpty
+        assertThat(testAddressRepository.findById(addressId4)).isNotEmpty
         assertThat(TestLogAppender.hasLog("Removed initial retention period data from anonymous elector document with sourceReference ${aed1.sourceReference}", Level.INFO)).isTrue
         assertThat(TestLogAppender.hasLog("Removed initial retention period data from anonymous elector document with sourceReference ${aed2.sourceReference}", Level.INFO)).isTrue
     }

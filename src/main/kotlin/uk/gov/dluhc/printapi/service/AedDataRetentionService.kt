@@ -3,13 +3,10 @@ package uk.gov.dluhc.printapi.service
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.repository.AddressRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfInitialRetentionData
-import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 
@@ -19,8 +16,6 @@ private val logger = KotlinLogging.logger {}
 class AedDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository,
-    private val deliveryRepository: DeliveryRepository,
-    private val addressRepository: AddressRepository,
     private val removalDateResolver: ElectorDocumentRemovalDateResolver,
     private val s3PhotoService: S3PhotoService,
 ) {
@@ -68,17 +63,5 @@ class AedDataRetentionService(
                 anonymousElectorDocumentRepository.deleteById(it.id!!)
             }
         }
-    }
-
-    fun AnonymousElectorDocument.removeInitialRetentionPeriodData() {
-        contactDetails?.email = null
-        contactDetails?.phoneNumber = null
-        addressRepository.deleteById(contactDetails?.address?.id!!)
-        contactDetails?.address = null
-
-        deliveryRepository.deleteById(delivery?.id!!)
-        delivery = null
-        supportingInformationFormat = null
-        initialRetentionDataRemoved = true
     }
 }

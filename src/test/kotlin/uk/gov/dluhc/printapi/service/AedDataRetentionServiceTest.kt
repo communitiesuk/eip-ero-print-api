@@ -15,11 +15,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
-import uk.gov.dluhc.printapi.database.repository.AddressRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfInitialRetentionData
-import uk.gov.dluhc.printapi.database.repository.DeliveryRepository
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
@@ -38,12 +36,6 @@ internal class AedDataRetentionServiceTest {
 
     @Mock
     private lateinit var anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository
-
-    @Mock
-    private lateinit var addressRepository: AddressRepository
-
-    @Mock
-    private lateinit var deliveryRepository: DeliveryRepository
 
     @Mock
     private lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
@@ -128,10 +120,6 @@ internal class AedDataRetentionServiceTest {
 
             // Then
             verify(anonymousElectorDocumentRepository).findPendingRemovalOfInitialRetentionData(sourceType)
-            verify(addressRepository).deleteById(addressId1)
-            verify(addressRepository).deleteById(addressId2)
-            verify(deliveryRepository).deleteById(deliveryId1)
-            verify(deliveryRepository).deleteById(deliveryId2)
             assertThat(aed1).initialRetentionPeriodDataIsRemoved()
             assertThat(aed2).initialRetentionPeriodDataIsRemoved()
         }
