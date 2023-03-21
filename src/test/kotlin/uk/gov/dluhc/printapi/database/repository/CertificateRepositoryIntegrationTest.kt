@@ -11,7 +11,7 @@ import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.DISPATCHED
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
@@ -214,6 +214,34 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
         }
 
         @Test
+        fun `should get the current print request status for events occurring at different millisecond`() {
+            // Given
+            val batchId = aValidBatchId()
+            val status = ASSIGNED_TO_BATCH
+            val now = Instant.now()
+            val certificate = buildCertificate(
+                status = status,
+                printRequests = listOf(
+                    buildPrintRequest(
+                        batchId = batchId,
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH, eventDateTime = now),
+                            buildPrintRequestStatus(status = ASSIGNED_TO_BATCH, eventDateTime = now.plusMillis(1))
+                        )
+                    )
+                )
+            )
+            certificateRepository.save(certificate)
+            val expected = ASSIGNED_TO_BATCH
+
+            // When
+            val actual = certificateRepository.findDistinctByPrintRequestStatusAndBatchId(status, batchId)
+
+            // Given
+            assertThat(actual[0].status).isEqualTo(expected)
+        }
+
+        @Test
         fun `should get an empty list as no matching Certificates`() {
             // Given
             val batchId = aValidBatchId()
@@ -330,7 +358,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                                 eventDateTime = startOfDay
                             ),
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = endOfDay
                             )
                         )
@@ -351,7 +379,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = startOfDay
                             )
                         )
@@ -377,11 +405,11 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = startOfDay.minusSeconds(1)
                             ),
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = endOfDay.plusSeconds(1)
                             )
                         )
@@ -393,7 +421,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
             // When
             val actual =
-                certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, Status.ASSIGNED_TO_BATCH)
+                certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, ASSIGNED_TO_BATCH)
 
             // Then
             assertThat(actual).isEqualTo(2)

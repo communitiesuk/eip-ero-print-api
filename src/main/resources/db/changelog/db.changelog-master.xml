@@ -29,4 +29,5 @@
     <include relativeToChangelogFile="true" file="ddl/0019_final_retention_date_removed_column.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0020_alter_anonymous_elector_document.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0021_alter_aed_contact_details.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0022_alter_certificate_status_event_timestamp_precision.xml"/>
 </databaseChangeLog>

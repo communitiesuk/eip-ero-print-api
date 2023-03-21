@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="neil.massey@valtech.com" id="0021-EIP1-4776-alter-print-request-status-event-precision" context="ddl">
+        <modifyDataType tableName="print_request_status" columnName="event_date_time" newDataType="timestamp(6)"/>
+        <rollback>
+            <modifyDataType tableName="print_request_status" columnName="event_date_time" newDataType="timestamp"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
