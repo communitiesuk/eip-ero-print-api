@@ -36,7 +36,7 @@ fun aValidAnonymousElectorDocumentTemplateFilename(): String = "anonymous-electo
 
 fun aValidTemporaryCertificateStatus() = TemporaryCertificateStatus.Status.GENERATED
 
-fun aValidAnonymousElectorDocumentStatus() = AnonymousElectorDocumentStatus.Status.GENERATED
+fun aValidAnonymousElectorDocumentStatus() = AnonymousElectorDocumentStatus.Status.PRINTED
 
 fun aValidSourceTypeDto() = SourceTypeDto.VOTER_CARD
 
