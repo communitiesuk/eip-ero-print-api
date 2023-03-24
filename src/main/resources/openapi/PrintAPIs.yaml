@@ -1115,6 +1115,7 @@ components:
       description: Status of an Anonymous Elector document
       type: string
       enum:
+        - generated
         - printed
 
     GenerateAnonymousElectorDocumentRequest:
