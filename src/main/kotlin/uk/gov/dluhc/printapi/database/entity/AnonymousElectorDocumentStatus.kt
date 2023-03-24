@@ -65,7 +65,6 @@ class AnonymousElectorDocumentStatus(
     }
 
     enum class Status {
-        GENERATED,
         PRINTED,
     }
 }

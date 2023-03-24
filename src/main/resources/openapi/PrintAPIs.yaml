@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.11.2'
+  version: '1.12.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1040,6 +1040,7 @@ components:
             $ref: '#/components/schemas/AnonymousElectorDocumentSummary'
       required:
         - anonymousElectorDocuments
+
     AnonymousElectorDocumentSummary:
       title: AnonymousElectorDocumentSummary
       description: An object summarising the current state of an Anonymous Elector Document (AED)
@@ -1049,32 +1050,71 @@ components:
       properties:
         certificateNumber:
           type: string
-          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
           description: The unique identifier of the Anonymous Electoral Document. A 20 character alphanumeric string.
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
           example: DEV1W0XDH1368LWE1J40
-        status:
-          $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
         electoralRollNumber:
           type: string
           description: Electoral roll number printed on the AED
           example: GN3233
+        gssCode:
+          type: string
+          description: GSS code of the ERO responsible for the application
+          example: E12345678
+        certificateLanguage:
+          $ref: '#/components/schemas/CertificateLanguage'
+        supportingInformationFormat:
+          $ref: '#/components/schemas/SupportingInformationFormat'
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
+        elector:
+          $ref: '#/components/schemas/AnonymousElector'
+        status:
+          $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
+        photoLocation:
+          type: string
+          description: |
+            The location of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the Certificate by the `vc-anonymous-admin`, rather than the photo that the applicant uploaded as part of their original application. 
+            Typically an S3 ARN
+          maxLength: 1024
         issueDate:
           type: string
           format: date
           description: The date on which the AED was issued
-          example: '2022-11-17'
+          example: '2023-01-15'
       required:
         - certificateNumber
-        - status
         - electoralRollNumber
+        - gssCode
+        - certificateLanguage
+        - supportingInformationFormat
+        - deliveryAddressType
+        - elector
+        - status
+        - photoLocation
         - issueDate
+
+    AnonymousElector:
+      title: AnonymousElector
+      description: An object containing the details for an anonymous elector on the AED certificate
+      type: object
+      properties:
+        addressee:
+          type: string
+          description: Usually the `firstName middleNames surname` of an elector
+          example: "Wayne Christopher Smith"
+        registeredAddress:
+          $ref: '#/components/schemas/Address'
+      required:
+        - addressee
+        - registeredAddress
 
     AnonymousElectorDocumentStatus:
       title: AnonymousElectorDocumentStatus
       description: Status of an Anonymous Elector document
       type: string
       enum:
-        - generated
         - printed
 
     GenerateAnonymousElectorDocumentRequest:
@@ -1111,7 +1151,7 @@ components:
           type: string
           description: |
             The location of the Elector's Certificate photo. 
-            This is the photo that has been prepared and approved for the AED by the vc-anonymous-admin, rather than the photo that the applicant uploaded as part of their original application. 
+            This is the photo that has been prepared and approved for the AED by the `vc-anonymous-admin`, rather than the photo that the applicant uploaded as part of their original application. 
             Typically an S3 ARN
           maxLength: 1024
         firstName:
