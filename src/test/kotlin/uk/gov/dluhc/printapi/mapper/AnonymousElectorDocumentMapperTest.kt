@@ -91,7 +91,7 @@ class AnonymousElectorDocumentMapperTest {
             given(sourceTypeMapper.mapDtoToEntity(any())).willReturn(ANONYMOUS_ELECTOR_DOCUMENT)
             given(certificateLanguageMapper.mapDtoToEntity(any())).willReturn(CertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapDtoToEntity(any())).willReturn(SupportingInformationFormat.STANDARD)
-            given(deliveryAddressTypeMapper.fromDtoToEntityDeliveryAddressType(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
+            given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
             given(idFactory.vacNumber()).willReturn(certificateNumber)
 
             val expected = with(dtoRequest) {
@@ -166,7 +166,7 @@ class AnonymousElectorDocumentMapperTest {
             verify(certificateLanguageMapper).mapDtoToEntity(dtoRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapDtoToEntity(dtoRequest.supportingInformationFormat!!)
             verify(idFactory).vacNumber()
-            verify(deliveryAddressTypeMapper).fromDtoToEntityDeliveryAddressType(ERO_COLLECTION)
+            verify(deliveryAddressTypeMapper).mapDtoToEntity(ERO_COLLECTION)
             verifyNoMoreInteractions(sourceTypeMapper, certificateLanguageMapper, supportingInformationFormatMapper, idFactory, deliveryAddressTypeMapper)
         }
     }
@@ -214,7 +214,7 @@ class AnonymousElectorDocumentMapperTest {
         fun `should map to Delivery entity given CertificateDelivery Dto`() {
             // Given
             val dto = buildDtoCertificateDelivery(deliveryAddressType = ERO_COLLECTION)
-            given(deliveryAddressTypeMapper.fromDtoToEntityDeliveryAddressType(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
+            given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
 
             val expected = with(dto) {
                 buildDelivery(
@@ -241,7 +241,7 @@ class AnonymousElectorDocumentMapperTest {
 
             // Then
             assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
-            verify(deliveryAddressTypeMapper).fromDtoToEntityDeliveryAddressType(ERO_COLLECTION)
+            verify(deliveryAddressTypeMapper).mapDtoToEntity(ERO_COLLECTION)
         }
     }
 
@@ -262,7 +262,7 @@ class AnonymousElectorDocumentMapperTest {
             given(sourceTypeMapper.mapApiToDto(any())).willReturn(uk.gov.dluhc.printapi.dto.SourceType.ANONYMOUS_ELECTOR_DOCUMENT)
             given(certificateLanguageMapper.mapApiToDto(any())).willReturn(uk.gov.dluhc.printapi.dto.CertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapApiToDto(any())).willReturn(STANDARD)
-            given(deliveryAddressTypeMapper.fromApiToDtoDeliveryAddressType(any())).willReturn(ERO_COLLECTION)
+            given(deliveryAddressTypeMapper.mapApiToDto(any())).willReturn(ERO_COLLECTION)
 
             val expected = GenerateAnonymousElectorDocumentDto(
                 gssCode = apiRequest.gssCode,
@@ -317,7 +317,7 @@ class AnonymousElectorDocumentMapperTest {
             verify(sourceTypeMapper).mapApiToDto(ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT)
             verify(certificateLanguageMapper).mapApiToDto(uk.gov.dluhc.printapi.models.CertificateLanguage.EN)
             verify(supportingInformationFormatMapper).mapApiToDto(SupportingInformationFormatApi.STANDARD)
-            verify(deliveryAddressTypeMapper).fromApiToDtoDeliveryAddressType(ERO_MINUS_COLLECTION)
+            verify(deliveryAddressTypeMapper).mapApiToDto(ERO_MINUS_COLLECTION)
             verifyNoMoreInteractions(sourceTypeMapper, certificateLanguageMapper, supportingInformationFormatMapper, deliveryAddressTypeMapper)
         }
     }

@@ -59,6 +59,46 @@ class CertificateLanguageMapperTest {
             "CY, CY",
         ]
     )
+    fun `should map CertificateLanguage Entity enum to CertificateLanguage DTO enum`(
+        source: CertificateLanguageEntity,
+        expected: CertificateLanguageDto
+    ) {
+        // Given
+
+        // When
+        val actual = mapper.mapEntityToDto(source)
+
+        // Then
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "EN, EN",
+            "CY, CY",
+        ]
+    )
+    fun `should map CertificateLanguage DTO enum to CertificateLanguage API enum`(
+        source: CertificateLanguageDto,
+        expected: CertificateLanguageApi
+    ) {
+        // Given
+
+        // When
+        val actual = mapper.mapDtoToApi(source)
+
+        // Then
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "EN, EN",
+            "CY, CY",
+        ]
+    )
     fun `should map CertificateLanguage DTO enum to CertificateLanguage Entity enum`(
         source: CertificateLanguageDto,
         expected: CertificateLanguageEntity

@@ -110,10 +110,6 @@ internal class AedDataRetentionServiceTest {
             val aed2 = buildAnonymousElectorDocument(photoLocationArn = anotherPhotoArn())
             val sourceType = ANONYMOUS_ELECTOR_DOCUMENT
             given(anonymousElectorDocumentRepository.findPendingRemovalOfInitialRetentionData(sourceType)).willReturn(listOf(aed1, aed2))
-            val addressId1 = aed1.contactDetails!!.address!!.id!!
-            val addressId2 = aed2.contactDetails!!.address!!.id!!
-            val deliveryId1 = aed1.delivery!!.id!!
-            val deliveryId2 = aed2.delivery!!.id!!
 
             // When
             aedDataRetentionService.removeInitialRetentionPeriodData(sourceType)
