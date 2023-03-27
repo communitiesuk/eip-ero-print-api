@@ -24,6 +24,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidGeneratedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildAnonymousElectorDocumentSummaryDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildAnonymousElectorDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildValidAddressDto
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
@@ -178,7 +179,7 @@ class AnonymousElectorSummaryMapperTest {
     inner class MapFromContactDetailsToElectorDto {
 
         @Test
-        fun `should map AedContactDetails entity to AnonymousElectorDto for all names present`() {
+        fun `should map AedContactDetails entity to AnonymousElectorDto given all names present`() {
             // Given
             val aedContactDetailsEntity =
                 buildAedContactDetails(firstName = "Joe", middleNames = "John", surname = "Bloggs")
@@ -204,6 +205,29 @@ class AnonymousElectorSummaryMapperTest {
 
             // Then
             assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+        }
+
+        @Test
+        fun `should map AedContactDetails entity to registeredAddress of AnonymousElectorDto given only mandatory address fields present`() {
+            // Given
+            val aedContactDetailsEntity = buildAedContactDetails(
+                address = buildAddress(
+                    property = null, locality = null, town = null, area = null, uprn = null,
+                )
+            )
+            val expectedAddressDto = with(aedContactDetailsEntity.address!!) {
+                buildValidAddressDto(
+                    street = street!!,
+                    postcode = postcode!!,
+                    property = null, locality = null, town = null, area = null, uprn = null,
+                )
+            }
+
+            // When
+            val actual = mapper.mapFromContactDetailsToElectorDto(aedContactDetailsEntity)
+
+            // Then
+            assertThat(actual.registeredAddress).usingRecursiveComparison().isEqualTo(expectedAddressDto)
         }
 
         @ParameterizedTest
