@@ -4,9 +4,12 @@ import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.MediaType
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.models.ErrorResponse
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
@@ -49,11 +52,16 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
             .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
+            .expectStatus()
+            .isEqualTo(NOT_FOUND)
+            .returnResult(ErrorResponse::class.java)
 
         // Then
-        response.expectStatus().isNotFound
-        val actual = response.returnResult(String::class.java).responseBody.blockFirst()
-        assertThat(actual).isEqualTo("Temporary certificate explainer document not found for eroId $ERO_ID and gssCode $GSS_CODE")
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual)
+            .hasStatus(NOT_FOUND.value())
+            .hasError("Not Found")
+            .hasMessage("Temporary certificate explainer document not found for eroId $ERO_ID and gssCode $GSS_CODE")
     }
 
     @Test
@@ -73,11 +81,16 @@ internal class GenerateTemporaryCertificateExplainerDocumentIntegrationTest : In
             .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
+            .expectStatus()
+            .isEqualTo(NOT_FOUND)
+            .returnResult(ErrorResponse::class.java)
 
         // Then
-        response.expectStatus().isNotFound
-        val actual = response.returnResult(String::class.java).responseBody.blockFirst()
-        assertThat(actual).isEqualTo("Temporary certificate explainer document not found for eroId $ERO_ID and gssCode $GSS_CODE")
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual)
+            .hasStatus(NOT_FOUND.value())
+            .hasError("Not Found")
+            .hasMessage("Temporary certificate explainer document not found for eroId $ERO_ID and gssCode $GSS_CODE")
     }
 
     @Test
