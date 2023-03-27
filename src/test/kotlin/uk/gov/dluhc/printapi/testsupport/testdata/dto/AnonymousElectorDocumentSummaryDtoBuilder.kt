@@ -28,7 +28,7 @@ fun buildAnonymousElectorDocumentSummaryDto(
     deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
     elector: AnonymousElectorDto = buildAnonymousElectorDto(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,
-    photoLocation: String = aPhotoArn(),
+    photoLocationArn: String = aPhotoArn(),
     issueDate: LocalDate = aValidIssueDate(),
     userId: String = aValidUserId(),
     requestDateTime: Instant = aValidApplicationReceivedDateTime()
@@ -41,7 +41,7 @@ fun buildAnonymousElectorDocumentSummaryDto(
     deliveryAddressType = deliveryAddressType,
     elector = elector,
     status = status,
-    photoLocation = photoLocation,
+    photoLocationArn = photoLocationArn,
     issueDate = issueDate,
     userId = userId,
     requestDateTime = requestDateTime,

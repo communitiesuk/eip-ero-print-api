@@ -90,7 +90,7 @@ class AnonymousElectorSummaryMapperTest {
                             }
                         )
                     },
-                    photoLocation = photoLocation,
+                    photoLocation = photoLocationArn,
                     issueDate = issueDate,
                     status = AnonymousElectorDocumentStatus.PRINTED,
                     userId = userId,
@@ -154,7 +154,7 @@ class AnonymousElectorSummaryMapperTest {
                             }
                         )
                     },
-                    photoLocation = photoLocationArn,
+                    photoLocationArn = photoLocationArn,
                     issueDate = issueDate,
                     status = DtoAnonymousElectorDocumentStatus.PRINTED,
                     userId = userId,

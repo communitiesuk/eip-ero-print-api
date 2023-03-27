@@ -12,7 +12,7 @@ class AnonymousElectorDocumentSummaryDto(
     val deliveryAddressType: DeliveryAddressType,
     val elector: AnonymousElectorDto,
     val status: AnonymousElectorDocumentStatus,
-    val photoLocation: String,
+    val photoLocationArn: String,
     val issueDate: LocalDate,
     val userId: String,
     val requestDateTime: Instant,
