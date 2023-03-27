@@ -18,13 +18,13 @@ import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummary
 )
 abstract class AnonymousElectorSummaryMapper {
 
+    @Mapping(target = "dateTime", source = "requestDateTime")
     abstract fun mapToApiAnonymousElectorDocumentSummary(aedSummaryDto: AnonymousElectorDocumentSummaryDto): AnonymousElectorDocumentSummary
 
     @Mapping(target = "elector", source = "aedEntity.contactDetails")
     @Mapping(target = "status", constant = "PRINTED")
     @Mapping(target = "deliveryAddressType", source = "aedEntity.delivery.deliveryAddressType")
     @Mapping(target = "photoLocation", source = "photoLocationArn")
-    @Mapping(target = "dateTime", source = "requestDateTime")
     abstract fun mapToAnonymousElectorDocumentSummaryDto(aedEntity: AnonymousElectorDocument): AnonymousElectorDocumentSummaryDto
 
     @Mapping(target = "addressee", expression = "java(getAssigneeName(aedContactDetailsEntity))")

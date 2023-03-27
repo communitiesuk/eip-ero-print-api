@@ -59,12 +59,12 @@ class AnonymousElectorSummaryMapperTest {
         fun `should map AnonymousElectorDocumentSummaryDto to an AnonymousElectorDocumentSummary API model`() {
             // Given
             val dtoRequest = buildAnonymousElectorDocumentSummaryDto()
-            val documentGeneratedTime = aValidGeneratedDateTime()
+            val requestDateTime = aValidGeneratedDateTime()
 
             given(certificateLanguageMapper.mapDtoToApi(any())).willReturn(CertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapDtoToApi(any())).willReturn(SupportingInformationFormat.STANDARD)
             given(deliveryAddressTypeMapper.mapDtoToApi(any())).willReturn(DeliveryAddressType.REGISTERED)
-            given(instantMapper.toOffsetDateTime(any())).willReturn(documentGeneratedTime)
+            given(instantMapper.toOffsetDateTime(any())).willReturn(requestDateTime)
 
             val expected = with(dtoRequest) {
                 buildAnonymousElectorDocumentSummary(
@@ -94,7 +94,7 @@ class AnonymousElectorSummaryMapperTest {
                     issueDate = issueDate,
                     status = AnonymousElectorDocumentStatus.PRINTED,
                     userId = userId,
-                    dateTime = documentGeneratedTime,
+                    dateTime = requestDateTime,
                 )
             }
 
@@ -106,7 +106,7 @@ class AnonymousElectorSummaryMapperTest {
             verify(certificateLanguageMapper).mapDtoToApi(dtoRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapDtoToApi(dtoRequest.supportingInformationFormat)
             verify(deliveryAddressTypeMapper).mapDtoToApi(DtoDeliveryAddressType.REGISTERED)
-            verify(instantMapper).toOffsetDateTime(dtoRequest.dateTime)
+            verify(instantMapper).toOffsetDateTime(dtoRequest.requestDateTime)
             verifyNoMoreInteractions(
                 certificateLanguageMapper, supportingInformationFormatMapper,
                 deliveryAddressTypeMapper, instantMapper
@@ -158,7 +158,7 @@ class AnonymousElectorSummaryMapperTest {
                     issueDate = issueDate,
                     status = DtoAnonymousElectorDocumentStatus.PRINTED,
                     userId = userId,
-                    dateTime = requestDateTime,
+                    requestDateTime = requestDateTime,
                 )
             }
 

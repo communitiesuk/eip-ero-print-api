@@ -15,7 +15,7 @@ class AnonymousElectorDocumentSummaryDto(
     val photoLocation: String,
     val issueDate: LocalDate,
     val userId: String,
-    val dateTime: Instant,
+    val requestDateTime: Instant,
 )
 
 class AnonymousElectorDto(

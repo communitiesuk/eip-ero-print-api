@@ -31,7 +31,7 @@ fun buildAnonymousElectorDocumentSummaryDto(
     photoLocation: String = aPhotoArn(),
     issueDate: LocalDate = aValidIssueDate(),
     userId: String = aValidUserId(),
-    dateTime: Instant = aValidApplicationReceivedDateTime()
+    requestDateTime: Instant = aValidApplicationReceivedDateTime()
 ): AnonymousElectorDocumentSummaryDto = AnonymousElectorDocumentSummaryDto(
     certificateNumber = certificateNumber,
     electoralRollNumber = electoralRollNumber,
@@ -44,7 +44,7 @@ fun buildAnonymousElectorDocumentSummaryDto(
     photoLocation = photoLocation,
     issueDate = issueDate,
     userId = userId,
-    dateTime = dateTime,
+    requestDateTime = requestDateTime,
 )
 
 fun buildAnonymousElectorDto(
