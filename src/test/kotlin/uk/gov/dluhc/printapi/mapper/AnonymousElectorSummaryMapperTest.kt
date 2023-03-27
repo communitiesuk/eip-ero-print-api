@@ -209,7 +209,7 @@ class AnonymousElectorSummaryMapperTest {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = ["  "])
-        fun `should map AedContactDetails entity names to correct address of AnonymousElectorDto`(
+        fun `should map AedContactDetails entity names to Assignee for empty or null middleNames`(
             middleNames: String?
         ) {
             // Given
