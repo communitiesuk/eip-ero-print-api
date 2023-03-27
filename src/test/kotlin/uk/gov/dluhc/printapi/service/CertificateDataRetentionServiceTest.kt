@@ -122,8 +122,6 @@ internal class CertificateDataRetentionServiceTest {
             // Given
             val certificate1 = buildCertificate()
             val certificate2 = buildCertificate()
-            val delivery1 = certificate1.printRequests[0].delivery!!
-            val delivery2 = certificate2.printRequests[0].delivery!!
             given(certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)).willReturn(listOf(certificate1, certificate2))
 
             // When

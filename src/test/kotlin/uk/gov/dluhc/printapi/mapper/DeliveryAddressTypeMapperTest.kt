@@ -24,7 +24,7 @@ class DeliveryAddressTypeMapperTest {
         // Given
 
         // When
-        val actual = mapper.fromSqsToEntityDeliveryAddressType(source)
+        val actual = mapper.mapSqsToEntity(source)
 
         // Then
         assertThat(actual).isEqualTo(expected)
@@ -42,7 +42,25 @@ class DeliveryAddressTypeMapperTest {
         // Given
 
         // When
-        val actual = mapper.fromApiToDtoDeliveryAddressType(source)
+        val actual = mapper.mapApiToDto(source)
+
+        // Then
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "REGISTERED, REGISTERED",
+            "ERO_COLLECTION, ERO_MINUS_COLLECTION",
+            "ALTERNATIVE, ALTERNATIVE",
+        ]
+    )
+    fun `should map dto to api`(source: DtoDeliveryAddressType, expected: ApiDeliveryAddressType) {
+        // Given
+
+        // When
+        val actual = mapper.mapDtoToApi(source)
 
         // Then
         assertThat(actual).isEqualTo(expected)
@@ -60,7 +78,25 @@ class DeliveryAddressTypeMapperTest {
         // Given
 
         // When
-        val actual = mapper.fromDtoToEntityDeliveryAddressType(source)
+        val actual = mapper.mapDtoToEntity(source)
+
+        // Then
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "REGISTERED, REGISTERED",
+            "ERO_COLLECTION, ERO_COLLECTION",
+            "ALTERNATIVE, ALTERNATIVE",
+        ]
+    )
+    fun `should map entity to dto`(source: DeliveryAddressTypeEntity, expected: DtoDeliveryAddressType) {
+        // Given
+
+        // When
+        val actual = mapper.mapEntityToDto(source)
 
         // Then
         assertThat(actual).isEqualTo(expected)

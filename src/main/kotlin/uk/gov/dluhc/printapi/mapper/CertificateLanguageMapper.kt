@@ -9,9 +9,13 @@ import uk.gov.dluhc.printapi.models.CertificateLanguage as CertificateLanguageAp
 @Mapper
 interface CertificateLanguageMapper {
 
-    fun mapEntityToPrintRequest(certificateLanguage: CertificateLanguageEntity): PrintRequest.CertificateLanguage
+    fun mapEntityToPrintRequest(entityLanguage: CertificateLanguageEntity): PrintRequest.CertificateLanguage
 
-    fun mapApiToDto(certificateLanguage: CertificateLanguageApi): CertificateLanguageDto
+    fun mapApiToDto(apiLanguage: CertificateLanguageApi): CertificateLanguageDto
 
-    fun mapDtoToEntity(certificateLanguage: CertificateLanguageDto): CertificateLanguageEntity
+    fun mapEntityToDto(entityLanguage: CertificateLanguageEntity): CertificateLanguageDto
+
+    fun mapDtoToApi(dtoLanguage: CertificateLanguageDto): CertificateLanguageApi
+
+    fun mapDtoToEntity(dtoLanguage: CertificateLanguageDto): CertificateLanguageEntity
 }

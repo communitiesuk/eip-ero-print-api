@@ -86,10 +86,12 @@ fun buildAnonymousElectorDocumentStatus(
 
 fun buildAedContactDetails(
     firstName: String = aValidFirstName(),
+    middleNames: String? = null,
     surname: String = aValidSurname(),
     address: Address = buildAddress(),
 ): AedContactDetails = AedContactDetails(
     firstName = firstName,
+    middleNames = middleNames,
     surname = surname,
     address = address,
 )
