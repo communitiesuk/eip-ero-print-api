@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.12.1'
+  version: '1.12.2'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1028,8 +1028,8 @@ components:
           example: DEV1W0XDH1368LWE1J40
         electoralRollNumber:
           type: string
-          description: Electoral roll number printed on the AED
-          example: GN3233
+          description: Electoral roll number printed on the AED. There is no specific format and they can vary across EROs.
+          maxLength: 30
         gssCode:
           type: string
           description: GSS code of the ERO responsible for the application
@@ -1114,9 +1114,8 @@ components:
           description: The application reference as known by the citizen. Not guaranteed to be unique.
         electoralRollNumber:
           type: string
-          pattern: '^[a-zA-Z]{2,3}\d{1,4}$'
-          example: gf5154
-          description: The electoral roll number allocated by the Local Authority to the elector.
+          description: The electoral roll number allocated by the Local Authority to the elector. There is no specific format and they can vary across EROs.
+          maxLength: 30
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
         supportingInformationFormat:

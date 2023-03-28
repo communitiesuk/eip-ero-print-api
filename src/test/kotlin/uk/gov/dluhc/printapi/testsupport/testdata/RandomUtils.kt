@@ -47,7 +47,7 @@ fun aValidSourceReference(): String = getAMongoDbId()
 
 fun aValidApplicationReference(): String = "V${randomAlphabetic(9).uppercase()}"
 
-fun aValidElectoralRollNumber(): String = "${randomAlphabetic(2)}${randomNumeric(4)}"
+fun aValidElectoralRollNumber(): String = "${randomAlphabetic(4)}-${randomNumeric(8)}" // no specific format. "Special" characters allowed
 
 fun aValidApplicationReceivedDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
