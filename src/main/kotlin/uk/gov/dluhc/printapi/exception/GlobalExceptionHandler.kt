@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.exception
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_GATEWAY
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.ResponseEntity
@@ -15,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiException
 import uk.gov.dluhc.printapi.config.ApiRequestErrorAttributes
 import uk.gov.dluhc.printapi.models.ErrorResponse
-import javax.servlet.RequestDispatcher
+import javax.servlet.RequestDispatcher.ERROR_MESSAGE
 import javax.servlet.RequestDispatcher.ERROR_STATUS_CODE
 
 /**
@@ -56,15 +57,15 @@ class GlobalExceptionHandler(
         /*
         The message property of ElectoralRegistrationOfficeManagementApiException
         contains too much detail of the nature of the error, and we would be exposing details of the internals of the
-        system. Therefore we manually set the error message request attribute to something more suitable before using
+        system. Therefore, we manually set the error message request attribute to something more suitable before using
         it to create the ErrorResponse which is rendered through the REST API.
         The actual exception detail is logged at the service/client layer.
          */
         when (e) {
             is ElectoralRegistrationOfficeManagementApiException ->
-                request.setAttribute(RequestDispatcher.ERROR_MESSAGE, "Error retrieving GSS codes", SCOPE_REQUEST)
+                request.setAttribute(ERROR_MESSAGE, "Error retrieving GSS codes", SCOPE_REQUEST)
         }
-        return populateErrorResponseAndHandleExceptionInternal(e, HttpStatus.BAD_GATEWAY, request)
+        return populateErrorResponseAndHandleExceptionInternal(e, BAD_GATEWAY, request)
     }
 
     /**
