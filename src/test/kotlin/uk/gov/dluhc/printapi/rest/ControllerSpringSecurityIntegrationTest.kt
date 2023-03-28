@@ -51,12 +51,25 @@ internal class ControllerSpringSecurityIntegrationTest : IntegrationTest() {
     }
 
     @Test
-    fun `should return forbidden given user with valid bearer token belonging to a different group`() {
+    fun `should return forbidden given user with valid bearer token not belonging to vc-admin group`() {
         wireMockService.stubCognitoJwtIssuerResponse()
 
         webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
             .bearerToken(getBearerTokenWithAllRolesExcept(eroId = ERO_ID, excludedRoles = listOf("ero-vc-admin")))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden given user with valid bearer token not belonging to vc-anonymous-admin group`() {
+        wireMockService.stubCognitoJwtIssuerResponse()
+
+        webTestClient.get()
+            .uri("/eros/{ERO_ID}/anonymous-elector-documents?applicationId={APPLICATION_ID}", ERO_ID, APPLICATION_ID)
+            .bearerToken(getBearerTokenWithAllRolesExcept(eroId = ERO_ID, excludedRoles = listOf("ero-vc-anonymous-admin")))
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus()
