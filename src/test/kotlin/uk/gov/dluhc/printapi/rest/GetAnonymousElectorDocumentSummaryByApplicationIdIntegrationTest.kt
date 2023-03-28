@@ -8,11 +8,8 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
-import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus.PRINTED
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
-import uk.gov.dluhc.printapi.models.CertificateLanguage.EN
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
-import uk.gov.dluhc.printapi.models.SupportingInformationFormat.STANDARD
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
@@ -98,72 +95,47 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
         )
         anonymousElectorDocumentRepository.saveAll(
             listOf(
-                aedMatchingDocument2,
-                aedDocumentWithDifferentApplicationId,
-                aedDocumentWithDifferentGssCode,
-                aedDocumentWithDifferentSourceType
+                aedMatchingDocument2, aedDocumentWithDifferentApplicationId,
+                aedDocumentWithDifferentGssCode, aedDocumentWithDifferentSourceType
             )
         )
 
         val expectedRecord1 = with(aedMatchingDocument1) {
             buildAnonymousElectorDocumentSummary(
-                certificateNumber = certificateNumber,
-                electoralRollNumber = electoralRollNumber,
-                gssCode = gssCode,
-                certificateLanguage = EN,
-                supportingInformationFormat = STANDARD,
-                deliveryAddressType = DeliveryAddressType.REGISTERED,
+                certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber, gssCode = gssCode,
                 elector = with(contactDetails!!) {
                     buildAnonymousElector(
                         addressee = "John Jacob",
                         registeredAddress = with(address!!) {
                             buildValidAddress(
-                                property = property,
-                                street = street!!,
-                                town = town,
-                                area = area,
-                                locality = locality,
-                                uprn = uprn,
-                                postcode = postcode!!
+                                property = property, street = street!!,
+                                town = town, area = area, locality = locality,
+                                uprn = uprn, postcode = postcode!!
                             )
                         }
                     )
                 },
-                status = PRINTED,
-                photoLocation = photoLocationArn,
-                issueDate = issueDate,
-                userId = userId,
-                dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
+                photoLocation = photoLocationArn, issueDate = issueDate,
+                userId = userId, dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
             )
         }
         val expectedRecord2 = with(aedMatchingDocument2) {
             buildAnonymousElectorDocumentSummary(
-                certificateNumber = certificateNumber,
-                electoralRollNumber = electoralRollNumber,
-                gssCode = gssCode,
-                certificateLanguage = EN,
-                supportingInformationFormat = STANDARD,
-                deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
+                certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
+                gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
                 elector = with(contactDetails!!) {
                     buildAnonymousElector(
                         addressee = "Mike William Brown Johnson",
                         registeredAddress = with(address!!) {
                             buildValidAddress(
-                                property = property,
-                                street = street!!,
-                                town = town,
-                                area = area,
-                                locality = locality,
-                                uprn = uprn,
-                                postcode = postcode!!
+                                property = property, street = street!!,
+                                town = town, area = area, locality = locality,
+                                uprn = uprn, postcode = postcode!!
                             )
                         }
                     )
                 },
-                status = PRINTED,
-                photoLocation = photoLocationArn,
-                issueDate = issueDate,
-                userId = userId,
+                photoLocation = photoLocationArn, issueDate = issueDate, userId = userId,
                 dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
             )
         }
