@@ -2,20 +2,24 @@ package uk.gov.dluhc.printapi.service.aed
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
+import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
+import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentSummaryDto
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
 import uk.gov.dluhc.printapi.mapper.AnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.AnonymousElectorSummaryMapper
+import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 
 @Service
 class AnonymousElectorDocumentService(
-    private val eroClient: ElectoralRegistrationOfficeManagementApiClient,
+    private val eroService: EroService,
     private val anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository,
     private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
+    private val anonymousElectorSummaryMapper: AnonymousElectorSummaryMapper,
     private val pdfTemplateDetailsFactory: AedPdfTemplateDetailsFactory,
     private val pdfFactory: PdfFactory
 ) {
@@ -32,12 +36,23 @@ class AnonymousElectorDocumentService(
         }
     }
 
+    fun getAnonymousElectorDocumentSummaries(
+        eroId: String,
+        applicationId: String
+    ): List<AnonymousElectorDocumentSummaryDto> {
+        val gssCodes = eroService.lookupGssCodesForEro(eroId)
+        return anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+            gssCodes = gssCodes,
+            sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+            sourceReference = applicationId
+        ).sortedByDescending { it.dateCreated }
+            .map { anonymousElectorSummaryMapper.mapToAnonymousElectorDocumentSummaryDto(it) }
+    }
+
     private fun verifyGssCodeIsValidForEro(eroId: String, gssCode: String) {
         try {
-            eroClient.getEro(gssCode).also {
-                if (it.eroId != eroId) {
-                    throw GenerateAnonymousElectorDocumentValidationException("Anonymous Elector Document gssCode '$gssCode' is not valid for eroId '$eroId'")
-                }
+            if (!eroService.isGssCodeValidForEro(gssCode = gssCode, eroIdToMatch = eroId)) {
+                throw GenerateAnonymousElectorDocumentValidationException("Anonymous Elector Document gssCode '$gssCode' is not valid for eroId '$eroId'")
             }
         } catch (error: ElectoralRegistrationOfficeNotFoundException) {
             throw GenerateAnonymousElectorDocumentValidationException("Anonymous Elector Document gssCode '$gssCode' does not exist")

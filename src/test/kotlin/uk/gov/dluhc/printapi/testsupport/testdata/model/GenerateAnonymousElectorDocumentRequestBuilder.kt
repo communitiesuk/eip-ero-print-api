@@ -63,13 +63,12 @@ fun buildValidAddress(
     area: String? = fakeAddress.state(),
     postcode: String = fakeAddress.postcode(),
     uprn: String? = RandomStringUtils.randomNumeric(12),
-) =
-    Address(
-        property = property,
-        street = street,
-        town = town,
-        area = area,
-        locality = locality,
-        uprn = uprn,
-        postcode = postcode
-    )
+) = Address(
+    property = property,
+    street = street,
+    town = town,
+    area = area,
+    locality = locality,
+    uprn = uprn,
+    postcode = postcode
+)

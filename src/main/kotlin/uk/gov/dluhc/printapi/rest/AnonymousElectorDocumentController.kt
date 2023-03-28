@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.AnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.AnonymousElectorSummaryMapper
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
@@ -33,9 +34,11 @@ import javax.validation.Valid
 @CrossOrigin
 @RequestMapping("/eros/{eroId}/anonymous-elector-documents")
 class AnonymousElectorDocumentController(
-    @Qualifier("anonymousElectorDocumentExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
-    private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
+    @Qualifier("anonymousElectorDocumentExplainerPdfService")
+    private val explainerPdfService: ExplainerPdfService,
     private val anonymousElectorDocumentService: AnonymousElectorDocumentService,
+    private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
+    private val anonymousElectorSummaryMapper: AnonymousElectorSummaryMapper,
 ) {
 
     @PostMapping
@@ -62,8 +65,11 @@ class AnonymousElectorDocumentController(
     fun getAnonymousElectorDocumentSummaries(
         @PathVariable eroId: String,
         @RequestParam applicationId: String,
-    ): ResponseEntity<AnonymousElectorDocumentSummariesResponse> {
-        TODO("Not yet implemented, Will be implemented by EIP1-4145")
+    ): AnonymousElectorDocumentSummariesResponse {
+        val anonymousElectorDocuments = anonymousElectorDocumentService
+            .getAnonymousElectorDocumentSummaries(eroId, applicationId)
+            .map { anonymousElectorSummaryMapper.mapToApiAnonymousElectorDocumentSummary(it) }
+        return AnonymousElectorDocumentSummariesResponse(anonymousElectorDocuments = anonymousElectorDocuments)
     }
 
     @PostMapping(value = ["{gssCode}/explainer-document"], produces = [APPLICATION_PDF_VALUE])

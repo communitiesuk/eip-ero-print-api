@@ -85,6 +85,16 @@ class WiremockService(private val wireMockServer: WireMockServer) {
         )
     }
 
+    fun stubEroManagementGetEroThrowsInternalServerError() {
+        wireMockServer.stubFor(
+            get(urlPathMatching("/ero-management-api/eros/.*"))
+                .willReturn(
+                    ResponseDefinitionBuilder.responseDefinition()
+                        .withStatus(500)
+                )
+        )
+    }
+
     fun verifyEroManagementGetEro(gssCode: String) {
         wireMockServer.verify(1, getRequestedFor(urlEqualTo("/ero-management-api/eros?gssCode=$gssCode")))
     }

@@ -1,11 +1,15 @@
 package uk.gov.dluhc.printapi.rest
 
 import org.junit.jupiter.api.Test
-import org.springframework.http.MediaType
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.APPLICATION_JSON
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.models.ErrorResponse
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.UNAUTHORIZED_BEARER_TOKEN
-import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.getBearerTokenWithAllRolesExcept
+import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 
 /**
  * Integration test that tests the basic spring security configuration concerns that are common across all API endpoints.
@@ -40,22 +44,59 @@ internal class ControllerSpringSecurityIntegrationTest : IntegrationTest() {
         webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
             .bearerToken(UNAUTHORIZED_BEARER_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus()
             .isUnauthorized
     }
 
     @Test
-    fun `should return forbidden given user with valid bearer token belonging to a different group`() {
+    fun `should return forbidden given user with valid bearer token not belonging to vc-admin group`() {
         wireMockService.stubCognitoJwtIssuerResponse()
 
         webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-admin-$ERO_ID")))
-            .contentType(MediaType.APPLICATION_JSON)
+            .bearerToken(getBearerTokenWithAllRolesExcept(eroId = ERO_ID, excludedRoles = listOf("ero-vc-admin")))
+            .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus()
             .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden given user with valid bearer token not belonging to vc-anonymous-admin group`() {
+        wireMockService.stubCognitoJwtIssuerResponse()
+
+        webTestClient.get()
+            .uri("/eros/{ERO_ID}/anonymous-elector-documents?applicationId={APPLICATION_ID}", ERO_ID, APPLICATION_ID)
+            .bearerToken(getBearerTokenWithAllRolesExcept(eroId = ERO_ID, excludedRoles = listOf("ero-vc-anonymous-admin")))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden
+    }
+
+    @Test
+    fun `should return bad gateway error when ero service throws exception given valid user`() {
+        // Given
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroThrowsInternalServerError()
+
+        // When
+        val response = webTestClient.get()
+            .uri("/eros/{ERO_ID}/anonymous-elector-documents?applicationId={APPLICATION_ID}", ERO_ID, APPLICATION_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(HttpStatus.BAD_GATEWAY)
+            .returnResult(ErrorResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        ErrorResponseAssert.assertThat(actual)
+            .hasStatus(502)
+            .hasError("Bad Gateway")
+            .hasMessageContaining("Error retrieving GSS codes")
     }
 }
