@@ -28,7 +28,7 @@ fun getVCAnonymousAdminBearerToken(eroId: String = ERO_ID, userName: String = "a
 
 fun getBearerTokenWithAllRolesExcept(
     eroId: String = aValidRandomEroId(),
-    email: String = "an-ero-user@$eroId.gov.uk",
+    email: String = "an-ero-user3@$eroId.gov.uk",
     excludedRoles: List<String> = listOf("ero-vc-admin")
 ): String {
     val excludedGroups = excludedRoles.map { "$it-$eroId" }.toSet()
