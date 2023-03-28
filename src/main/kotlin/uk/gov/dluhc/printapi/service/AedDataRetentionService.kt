@@ -30,15 +30,21 @@ class AedDataRetentionService(
     fun handleSourceApplicationRemoved(message: ApplicationRemovedMessage) {
         with(message) {
             val sourceType = sourceTypeMapper.mapSqsToEntity(sourceType)
-            anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
-                gssCode = gssCode,
-                sourceType = sourceType,
-                sourceReference = sourceReference
-            )?.also {
-                it.initialRetentionRemovalDate = removalDateResolver.getAedInitialRetentionPeriodRemovalDate(it.issueDate)
-                it.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
-                anonymousElectorDocumentRepository.save(it)
-            } ?: logger.error { "Anonymous Elector Document with sourceType = $sourceType and sourceReference = $sourceReference not found" }
+            val documents =
+                anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
+                    gssCode = gssCode,
+                    sourceType = sourceType,
+                    sourceReference = sourceReference
+                )
+            if (documents.isEmpty()) {
+                logger.warn { "No Anonymous Elector Documents with sourceType = $sourceType and sourceReference = $sourceReference found" }
+            } else {
+                documents.forEach {
+                    it.initialRetentionRemovalDate = removalDateResolver.getAedInitialRetentionPeriodRemovalDate(it.issueDate)
+                    it.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
+                    anonymousElectorDocumentRepository.save(it)
+                }
+            }
         }
     }
 

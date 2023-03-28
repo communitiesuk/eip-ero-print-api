@@ -10,7 +10,7 @@ import java.util.UUID
 @Repository
 interface AnonymousElectorDocumentRepository : JpaRepository<AnonymousElectorDocument, UUID> {
 
-    fun findByGssCodeAndSourceTypeAndSourceReference(gssCode: String, sourceType: SourceType, sourceReference: String): AnonymousElectorDocument?
+    fun findByGssCodeAndSourceTypeAndSourceReference(gssCode: String, sourceType: SourceType, sourceReference: String): List<AnonymousElectorDocument>
 
     fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): List<AnonymousElectorDocument>
 

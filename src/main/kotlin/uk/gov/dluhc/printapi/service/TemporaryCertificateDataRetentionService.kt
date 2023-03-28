@@ -28,14 +28,20 @@ class TemporaryCertificateDataRetentionService(
     fun handleSourceApplicationRemoved(message: ApplicationRemovedMessage) {
         with(message) {
             val sourceType = sourceTypeMapper.mapSqsToEntity(sourceType)
-            temporaryCertificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
-                gssCode = gssCode,
-                sourceType = sourceType,
-                sourceReference = sourceReference
-            )?.also {
-                it.finalRetentionRemovalDate = electorDocumentRemovalDateResolver.getTempCertFinalRetentionPeriodRemovalDate(it.issueDate)
-                temporaryCertificateRepository.save(it)
-            } ?: logger.error { "Temporary certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }
+            val temporaryCerts =
+                temporaryCertificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
+                    gssCode = gssCode,
+                    sourceType = sourceType,
+                    sourceReference = sourceReference
+                )
+            if (temporaryCerts.isEmpty()) {
+                logger.warn { "No Temporary Certificate with sourceType = $sourceType and sourceReference = $sourceReference found" }
+            } else {
+                temporaryCerts.forEach {
+                    it.finalRetentionRemovalDate = electorDocumentRemovalDateResolver.getTempCertFinalRetentionPeriodRemovalDate(it.issueDate)
+                    temporaryCertificateRepository.save(it)
+                }
+            }
         }
     }
 
