@@ -1115,6 +1115,7 @@ components:
         electoralRollNumber:
           type: string
           description: The electoral roll number allocated by the Local Authority to the elector. There is no specific format and they can vary across EROs.
+          minLength: 1
           maxLength: 30
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
