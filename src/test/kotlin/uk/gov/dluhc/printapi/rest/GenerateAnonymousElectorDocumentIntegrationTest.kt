@@ -225,30 +225,30 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             .returnResult()
 
         // Then
-        val electorDocument = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
+        val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             request.gssCode,
             ANONYMOUS_ELECTOR_DOCUMENT,
             request.sourceReference
         )
 
-        assertThat(electorDocument).isNotNull
-        with(electorDocument!!) {
-            assertThat(statusHistory.size).isOne
-            assertThat(statusHistory.first().status).isEqualTo(AnonymousElectorDocumentStatus.Status.PRINTED)
+        assertThat(electorDocuments).isNotNull
+        electorDocuments.forEach {
+            assertThat(it.statusHistory.size).isOne
+            assertThat(it.statusHistory.first().status).isEqualTo(AnonymousElectorDocumentStatus.Status.PRINTED)
 
-            AnonymousElectorDocumentCertificateAssert(electorDocument)
+            AnonymousElectorDocumentCertificateAssert(it)
                 .hasId()
                 .hasDelivery(expectedDelivery)
                 .hasDateCreated()
 
             val contentDisposition = response.responseHeaders.contentDisposition
-            assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-$certificateNumber.pdf")
+            assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${it.certificateNumber}.pdf")
 
             val pdfContent = response.responseBody
             assertThat(pdfContent).isNotNull
             PdfReader(pdfContent).use { reader ->
                 val text = PdfTextExtractor(reader).getTextFromPage(1)
-                assertThat(text).contains(certificateNumber)
+                assertThat(text).contains(it.certificateNumber)
                 assertThat(text).doesNotContainIgnoringCase(request.surname)
             }
         }

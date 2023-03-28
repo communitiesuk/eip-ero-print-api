@@ -10,7 +10,7 @@ import java.util.UUID
 @Repository
 interface TemporaryCertificateRepository : JpaRepository<TemporaryCertificate, UUID> {
 
-    fun findByGssCodeAndSourceTypeAndSourceReference(gssCode: String, sourceType: SourceType, sourceReference: String): TemporaryCertificate?
+    fun findByGssCodeAndSourceTypeAndSourceReference(gssCode: String, sourceType: SourceType, sourceReference: String): List<TemporaryCertificate>
 
     fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): List<TemporaryCertificate>
 

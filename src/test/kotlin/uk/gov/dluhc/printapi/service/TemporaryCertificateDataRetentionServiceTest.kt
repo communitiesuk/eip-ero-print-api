@@ -49,7 +49,7 @@ internal class TemporaryCertificateDataRetentionServiceTest {
             val temporaryCertificate = buildTemporaryCertificate(issueDate = issueDate)
             val expectedFinalRetentionRemovalDate = LocalDate.of(2024, JULY, 1)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
-            given(temporaryCertificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(temporaryCertificate)
+            given(temporaryCertificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(listOf(temporaryCertificate))
             given(removalDateResolver.getTempCertFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
 
             // When
@@ -71,7 +71,7 @@ internal class TemporaryCertificateDataRetentionServiceTest {
                 sourceReference = "63774ff4bb4e7049b67182d9"
             )
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
-            given(temporaryCertificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(null)
+            given(temporaryCertificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(emptyList())
             TestLogAppender.reset()
 
             // When
@@ -84,8 +84,8 @@ internal class TemporaryCertificateDataRetentionServiceTest {
             verifyNoInteractions(removalDateResolver)
             assertThat(
                 TestLogAppender.hasLog(
-                    "Temporary certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found",
-                    Level.ERROR
+                    "No Temporary Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 found",
+                    Level.WARN
                 )
             ).isTrue
         }

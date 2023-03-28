@@ -57,7 +57,7 @@ internal class AedDataRetentionServiceTest {
             val expectedInitialRetentionRemovalDate = LocalDate.of(2024, Month.APRIL, 1)
             val expectedFinalRetentionRemovalDate = LocalDate.of(2032, Month.JULY, 1)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
-            given(anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(anonymousElectorDocument)
+            given(anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(listOf(anonymousElectorDocument))
             given(removalDateResolver.getAedInitialRetentionPeriodRemovalDate(any())).willReturn(expectedInitialRetentionRemovalDate)
             given(removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
 
@@ -80,7 +80,7 @@ internal class AedDataRetentionServiceTest {
                 sourceReference = "63774ff4bb4e7049b67182d9"
             )
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
-            given(anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(null)
+            given(anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(emptyList())
             TestLogAppender.reset()
 
             // When
@@ -93,8 +93,8 @@ internal class AedDataRetentionServiceTest {
             verifyNoInteractions(removalDateResolver)
             assertThat(
                 TestLogAppender.hasLog(
-                    "Anonymous Elector Document with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found",
-                    Level.ERROR
+                    "No Anonymous Elector Documents with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 found",
+                    Level.WARN
                 )
             ).isTrue
         }
