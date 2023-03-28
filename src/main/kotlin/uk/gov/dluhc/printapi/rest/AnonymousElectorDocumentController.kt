@@ -34,7 +34,8 @@ import javax.validation.Valid
 @CrossOrigin
 @RequestMapping("/eros/{eroId}/anonymous-elector-documents")
 class AnonymousElectorDocumentController(
-    @Qualifier("anonymousElectorDocumentExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
+    @Qualifier("anonymousElectorDocumentExplainerPdfService")
+    private val explainerPdfService: ExplainerPdfService,
     private val anonymousElectorDocumentService: AnonymousElectorDocumentService,
     private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
     private val anonymousElectorSummaryMapper: AnonymousElectorSummaryMapper,
