@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.12.2'
+  version: '1.12.3'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1029,7 +1029,7 @@ components:
         electoralRollNumber:
           type: string
           description: Electoral roll number printed on the AED. There is no specific format and they can vary across EROs.
-          maxLength: 30
+          maxLength: 25
         gssCode:
           type: string
           description: GSS code of the ERO responsible for the application
@@ -1116,7 +1116,7 @@ components:
           type: string
           description: The electoral roll number allocated by the Local Authority to the elector. There is no specific format and they can vary across EROs.
           minLength: 1
-          maxLength: 30
+          maxLength: 25
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
         supportingInformationFormat:
