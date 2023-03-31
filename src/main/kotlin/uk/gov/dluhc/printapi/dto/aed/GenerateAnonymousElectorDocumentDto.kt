@@ -1,4 +1,9 @@
-package uk.gov.dluhc.printapi.dto
+package uk.gov.dluhc.printapi.dto.aed
+
+import uk.gov.dluhc.printapi.dto.AddressDto
+import uk.gov.dluhc.printapi.dto.CertificateDelivery
+import uk.gov.dluhc.printapi.dto.CertificateLanguage
+import uk.gov.dluhc.printapi.dto.SourceType
 
 data class GenerateAnonymousElectorDocumentDto(
     val gssCode: String,

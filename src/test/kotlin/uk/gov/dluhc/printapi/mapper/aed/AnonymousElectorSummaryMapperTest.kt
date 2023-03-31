@@ -17,7 +17,6 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
-import uk.gov.dluhc.printapi.dto.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.mapper.InstantMapper
@@ -25,19 +24,19 @@ import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.models.CertificateLanguage
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidGeneratedDateTime
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildAnonymousElectorDocumentSummaryDto
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildAnonymousElectorDto
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildValidAddressDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDocumentSummaryDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentSummary
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
-import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentStatus as DtoAnonymousElectorDocumentStatus
-import uk.gov.dluhc.printapi.dto.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatDtoEnum
 import uk.gov.dluhc.printapi.dto.CertificateLanguage as DtoCertificateLanguage
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType as DtoDeliveryAddressType
+import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentStatus as DtoAnonymousElectorDocumentStatus
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatDtoEnum
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatApiEnum
 
 @ExtendWith(MockitoExtension::class)
@@ -63,7 +62,7 @@ class AnonymousElectorSummaryMapperTest {
         @Test
         fun `should map AnonymousElectorDocumentSummaryDto to an AnonymousElectorDocumentSummary API model`() {
             // Given
-            val dtoRequest = buildAnonymousElectorDocumentSummaryDto(supportingInformationFormat = AnonymousSupportingInformationFormat.EASY_READ)
+            val dtoRequest = buildAnonymousElectorDocumentSummaryDto(supportingInformationFormat = AnonymousSupportingInformationFormatDtoEnum.EASY_READ)
             val requestDateTime = aValidGeneratedDateTime()
 
             given(certificateLanguageMapper.mapDtoToApi(any())).willReturn(CertificateLanguage.EN)

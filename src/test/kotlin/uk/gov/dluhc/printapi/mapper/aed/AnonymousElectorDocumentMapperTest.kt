@@ -21,7 +21,8 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUME
 import uk.gov.dluhc.printapi.dto.AddressFormat
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.dto.DeliveryClass
-import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.SourceType
+import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
@@ -31,9 +32,9 @@ import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAnonymousElectorDocumentTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildGenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildDtoCertificateDelivery
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildGenerateAnonymousElectorDocumentDto
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApiCertificateDelivery
@@ -44,7 +45,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntity
-import uk.gov.dluhc.printapi.dto.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatDto
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatDto
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatApi
 
 @ExtendWith(MockitoExtension::class)
@@ -268,7 +269,7 @@ class AnonymousElectorDocumentMapperTest {
 
             val expected = GenerateAnonymousElectorDocumentDto(
                 gssCode = apiRequest.gssCode,
-                sourceType = uk.gov.dluhc.printapi.dto.SourceType.ANONYMOUS_ELECTOR_DOCUMENT,
+                sourceType = SourceType.ANONYMOUS_ELECTOR_DOCUMENT,
                 sourceReference = apiRequest.sourceReference,
                 applicationReference = apiRequest.applicationReference,
                 electoralRollNumber = apiRequest.electoralRollNumber,

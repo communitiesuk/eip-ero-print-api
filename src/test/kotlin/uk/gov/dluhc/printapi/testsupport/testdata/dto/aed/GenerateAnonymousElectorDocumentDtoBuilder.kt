@@ -1,12 +1,12 @@
-package uk.gov.dluhc.printapi.testsupport.testdata.dto
+package uk.gov.dluhc.printapi.testsupport.testdata.dto.aed
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.dto.AddressDto
-import uk.gov.dluhc.printapi.dto.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.dto.CertificateDelivery
 import uk.gov.dluhc.printapi.dto.CertificateLanguage
-import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.SourceType
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSupportingInformationFormat
+import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
@@ -18,6 +18,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildDtoCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import net.datafaker.providers.base.Address as DataFakerAddress
 

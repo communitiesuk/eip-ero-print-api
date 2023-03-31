@@ -8,7 +8,7 @@ import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.dto.CertificateDelivery
-import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
@@ -20,10 +20,10 @@ import java.time.LocalDate
 
 @Mapper(
     uses = [
-        SourceTypeMapper::class,
-        CertificateLanguageMapper::class,
         AnonymousSupportingInformationFormatMapper::class,
-        DeliveryAddressTypeMapper::class
+        CertificateLanguageMapper::class,
+        DeliveryAddressTypeMapper::class,
+        SourceTypeMapper::class,
     ]
 )
 abstract class AnonymousElectorDocumentMapper {

@@ -5,9 +5,9 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
-import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentSummaryDto
-import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.PdfFile
+import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentSummaryDto
+import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorSummaryMapper

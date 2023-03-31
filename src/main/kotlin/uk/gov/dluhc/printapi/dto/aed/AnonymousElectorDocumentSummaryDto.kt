@@ -1,5 +1,8 @@
-package uk.gov.dluhc.printapi.dto
+package uk.gov.dluhc.printapi.dto.aed
 
+import uk.gov.dluhc.printapi.dto.AddressDto
+import uk.gov.dluhc.printapi.dto.CertificateLanguage
+import uk.gov.dluhc.printapi.dto.DeliveryAddressType
 import java.time.Instant
 import java.time.LocalDate
 
@@ -26,4 +29,11 @@ class AnonymousElectorDto(
 enum class AnonymousElectorDocumentStatus {
     GENERATED,
     PRINTED,
+}
+
+enum class AnonymousSupportingInformationFormat {
+    STANDARD,
+    BRAILLE,
+    LARGE_PRINT,
+    EASY_READ,
 }
