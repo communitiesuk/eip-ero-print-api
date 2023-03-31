@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.mapper
+package uk.gov.dluhc.printapi.mapper.aed
 
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
@@ -6,12 +6,15 @@ import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentSummaryDto
 import uk.gov.dluhc.printapi.dto.AnonymousElectorDto
+import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
+import uk.gov.dluhc.printapi.mapper.InstantMapper
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummary
 
 @Mapper(
     uses = [
         CertificateLanguageMapper::class,
-        SupportingInformationFormatMapper::class,
+        AnonymousSupportingInformationFormatMapper::class,
         DeliveryAddressTypeMapper::class,
         InstantMapper::class
     ]

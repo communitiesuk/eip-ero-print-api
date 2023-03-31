@@ -19,8 +19,8 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
-import uk.gov.dluhc.printapi.mapper.AnonymousElectorDocumentMapper
-import uk.gov.dluhc.printapi.mapper.AnonymousElectorSummaryMapper
+import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorSummaryMapper
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode

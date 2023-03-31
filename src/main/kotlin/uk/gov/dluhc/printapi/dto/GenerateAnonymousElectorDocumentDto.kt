@@ -8,7 +8,7 @@ data class GenerateAnonymousElectorDocumentDto(
     val electoralRollNumber: String,
     val photoLocation: String,
     val certificateLanguage: CertificateLanguage,
-    val supportingInformationFormat: SupportingInformationFormat?,
+    val supportingInformationFormat: AnonymousSupportingInformationFormat,
     val firstName: String,
     val middleNames: String? = null,
     val surname: String,

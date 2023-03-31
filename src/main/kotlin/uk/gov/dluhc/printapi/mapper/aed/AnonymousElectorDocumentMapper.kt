@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.mapper
+package uk.gov.dluhc.printapi.mapper.aed
 
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
@@ -9,6 +9,9 @@ import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.dto.CertificateDelivery
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
+import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.Clock
@@ -19,7 +22,7 @@ import java.time.LocalDate
     uses = [
         SourceTypeMapper::class,
         CertificateLanguageMapper::class,
-        SupportingInformationFormatMapper::class,
+        AnonymousSupportingInformationFormatMapper::class,
         DeliveryAddressTypeMapper::class
     ]
 )

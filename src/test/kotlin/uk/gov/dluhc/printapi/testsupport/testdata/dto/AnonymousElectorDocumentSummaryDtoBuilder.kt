@@ -4,9 +4,9 @@ import uk.gov.dluhc.printapi.dto.AddressDto
 import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentSummaryDto
 import uk.gov.dluhc.printapi.dto.AnonymousElectorDto
+import uk.gov.dluhc.printapi.dto.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.dto.CertificateLanguage
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType
-import uk.gov.dluhc.printapi.dto.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguageDto
@@ -24,7 +24,7 @@ fun buildAnonymousElectorDocumentSummaryDto(
     electoralRollNumber: String = aValidElectoralRollNumber(),
     gssCode: String = aGssCode(),
     certificateLanguage: CertificateLanguage = aValidCertificateLanguageDto(),
-    supportingInformationFormat: SupportingInformationFormat = SupportingInformationFormat.STANDARD,
+    supportingInformationFormat: AnonymousSupportingInformationFormat = AnonymousSupportingInformationFormat.STANDARD,
     deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
     elector: AnonymousElectorDto = buildAnonymousElectorDto(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,

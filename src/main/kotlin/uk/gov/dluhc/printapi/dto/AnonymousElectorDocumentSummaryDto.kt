@@ -8,7 +8,7 @@ class AnonymousElectorDocumentSummaryDto(
     val electoralRollNumber: String,
     val gssCode: String,
     val certificateLanguage: CertificateLanguage,
-    val supportingInformationFormat: SupportingInformationFormat,
+    val supportingInformationFormat: AnonymousSupportingInformationFormat,
     val deliveryAddressType: DeliveryAddressType,
     val elector: AnonymousElectorDto,
     val status: AnonymousElectorDocumentStatus,

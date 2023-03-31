@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.InheritInverseConfiguration
 import org.mapstruct.Mapper
-import org.mapstruct.MappingConstants
 import org.mapstruct.ValueMapping
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntityEnum
@@ -27,12 +26,6 @@ interface SupportingInformationFormatMapper {
     @ValueMapping(source = "LARGE_MINUS_PRINT", target = "LARGE_PRINT")
     @ValueMapping(source = "EASY_MINUS_READ", target = "EASY_READ")
     fun toPrintRequestEntityEnum(sqsFormat: SupportingInformationFormatSqsEnum): SupportingInformationFormatEntityEnum
-
-    fun mapDtoToEntity(dtoFormat: SupportingInformationFormatDtoEnum): SupportingInformationFormatEntityEnum
-
-    @ValueMapping(source = "STANDARD", target = "STANDARD")
-    @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.THROW_EXCEPTION)
-    fun mapEntityToDto(entityFormat: SupportingInformationFormatEntityEnum): SupportingInformationFormatDtoEnum
 
     fun mapApiToDto(apiFormat: SupportingInformationFormatApiEnum): SupportingInformationFormatDtoEnum
 

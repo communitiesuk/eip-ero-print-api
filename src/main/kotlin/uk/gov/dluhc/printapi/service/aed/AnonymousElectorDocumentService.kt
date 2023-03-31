@@ -9,8 +9,8 @@ import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentSummaryDto
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
-import uk.gov.dluhc.printapi.mapper.AnonymousElectorDocumentMapper
-import uk.gov.dluhc.printapi.mapper.AnonymousElectorSummaryMapper
+import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorSummaryMapper
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 

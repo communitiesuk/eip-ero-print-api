@@ -2,11 +2,11 @@ package uk.gov.dluhc.printapi.testsupport.testdata.dto
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.dto.AddressDto
+import uk.gov.dluhc.printapi.dto.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.dto.CertificateDelivery
 import uk.gov.dluhc.printapi.dto.CertificateLanguage
 import uk.gov.dluhc.printapi.dto.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.SourceType
-import uk.gov.dluhc.printapi.dto.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
@@ -29,7 +29,7 @@ fun buildGenerateAnonymousElectorDocumentDto(
     electoralRollNumber: String = aValidElectoralRollNumber(),
     photoLocation: String = aPhotoArn(),
     certificateLanguage: CertificateLanguage = aValidCertificateLanguageDto(),
-    supportingInformationFormat: SupportingInformationFormat = SupportingInformationFormat.STANDARD,
+    supportingInformationFormat: AnonymousSupportingInformationFormat = AnonymousSupportingInformationFormat.STANDARD,
     firstName: String = aValidFirstName(),
     middleNames: String? = null,
     surname: String = aValidSurname(),
