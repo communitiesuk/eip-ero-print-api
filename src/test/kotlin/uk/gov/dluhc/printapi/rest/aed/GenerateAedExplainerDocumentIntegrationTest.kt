@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rest
+package uk.gov.dluhc.printapi.rest.aed
 
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor

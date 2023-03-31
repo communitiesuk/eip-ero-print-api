@@ -4,6 +4,7 @@ import org.assertj.core.api.AbstractObjectAssert
 import org.assertj.core.api.Assertions
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import java.time.LocalDate
 import java.util.Objects
 
@@ -37,6 +38,19 @@ class AnonymousElectorDocumentCertificateAssert
             .isNotNull
 
         // return the current assertion for method chaining
+        return this
+    }
+
+    fun hasSupportingInformationFormat(expected: SupportingInformationFormat): AnonymousElectorDocumentCertificateAssert {
+        isNotNull
+
+        val assertjErrorMessage = "\nExpecting supportingInformationFormat of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+
+        val actualSupportingInformationFormat = actual!!.supportingInformationFormat
+        if (!Objects.deepEquals(actualSupportingInformationFormat, expected)) {
+            failWithMessage(assertjErrorMessage, actual, actualSupportingInformationFormat, expected)
+        }
+
         return this
     }
 

@@ -4,9 +4,9 @@ import uk.gov.dluhc.printapi.models.Address
 import uk.gov.dluhc.printapi.models.AnonymousElector
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummary
+import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.models.CertificateLanguage
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
-import uk.gov.dluhc.printapi.models.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidElectoralRollNumber
@@ -23,7 +23,7 @@ fun buildAnonymousElectorDocumentSummary(
     electoralRollNumber: String = aValidElectoralRollNumber(),
     gssCode: String = aGssCode(),
     certificateLanguage: CertificateLanguage = CertificateLanguage.EN,
-    supportingInformationFormat: SupportingInformationFormat = SupportingInformationFormat.STANDARD,
+    supportingInformationFormat: AnonymousSupportingInformationFormat = AnonymousSupportingInformationFormat.STANDARD,
     deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
     elector: AnonymousElector = buildAnonymousElector(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,

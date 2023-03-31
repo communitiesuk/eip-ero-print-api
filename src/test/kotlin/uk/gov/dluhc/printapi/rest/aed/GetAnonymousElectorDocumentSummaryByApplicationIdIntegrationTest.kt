@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rest
+package uk.gov.dluhc.printapi.rest.aed
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -7,8 +7,10 @@ import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
+import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.LARGE_MINUS_PRINT
+import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.STANDARD
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
@@ -70,7 +72,7 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
         val aedMatchingDocument1 = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE, sourceType = ANONYMOUS_ELECTOR_DOCUMENT, sourceReference = APPLICATION_ID,
+            gssCode = GSS_CODE, sourceReference = APPLICATION_ID, supportingInformationFormat = SupportingInformationFormat.LARGE_PRINT,
             contactDetails = buildAedContactDetails(firstName = "John", middleNames = null, surname = "Jacob"),
             delivery = buildDelivery(deliveryAddressType = REGISTERED)
         )
@@ -80,15 +82,15 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
         Thread.sleep(1000)
 
         val aedMatchingDocument2 = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE, sourceType = ANONYMOUS_ELECTOR_DOCUMENT, sourceReference = APPLICATION_ID,
+            gssCode = GSS_CODE, sourceReference = APPLICATION_ID, supportingInformationFormat = SupportingInformationFormat.STANDARD,
             contactDetails = buildAedContactDetails(firstName = "Mike", middleNames = "William Brown", surname = "Johnson"),
             delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION)
         )
         val aedDocumentWithDifferentApplicationId = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE, sourceType = ANONYMOUS_ELECTOR_DOCUMENT, sourceReference = aValidSourceReference()
+            gssCode = GSS_CODE, sourceReference = aValidSourceReference()
         )
         val aedDocumentWithDifferentGssCode = buildAnonymousElectorDocument(
-            gssCode = getRandomGssCode(), sourceType = ANONYMOUS_ELECTOR_DOCUMENT, sourceReference = APPLICATION_ID
+            gssCode = getRandomGssCode(), sourceReference = APPLICATION_ID
         )
         val aedDocumentWithDifferentSourceType = buildAnonymousElectorDocument(
             gssCode = GSS_CODE, sourceType = SourceType.VOTER_CARD, sourceReference = APPLICATION_ID
@@ -100,26 +102,7 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
             )
         )
 
-        val expectedRecord1 = with(aedMatchingDocument1) {
-            buildAnonymousElectorDocumentSummary(
-                certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber, gssCode = gssCode,
-                elector = with(contactDetails!!) {
-                    buildAnonymousElector(
-                        addressee = "John Jacob",
-                        registeredAddress = with(address!!) {
-                            buildValidAddress(
-                                property = property, street = street!!,
-                                town = town, area = area, locality = locality,
-                                uprn = uprn, postcode = postcode!!
-                            )
-                        }
-                    )
-                },
-                photoLocation = photoLocationArn, issueDate = issueDate,
-                userId = userId, dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
-            )
-        }
-        val expectedRecord2 = with(aedMatchingDocument2) {
+        val expectedFirstRecord = with(aedMatchingDocument2) {
             buildAnonymousElectorDocumentSummary(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
@@ -136,7 +119,27 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
                     )
                 },
                 photoLocation = photoLocationArn, issueDate = issueDate, userId = userId,
-                dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
+                dateTime = requestDateTime.atOffset(ZoneOffset.UTC), supportingInformationFormat = STANDARD
+            )
+        }
+        val expectedSecondRecord = with(aedMatchingDocument1) {
+            buildAnonymousElectorDocumentSummary(
+                certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
+                gssCode = gssCode, deliveryAddressType = DeliveryAddressType.REGISTERED,
+                elector = with(contactDetails!!) {
+                    buildAnonymousElector(
+                        addressee = "John Jacob",
+                        registeredAddress = with(address!!) {
+                            buildValidAddress(
+                                property = property, street = street!!,
+                                town = town, area = area, locality = locality,
+                                uprn = uprn, postcode = postcode!!
+                            )
+                        }
+                    )
+                },
+                photoLocation = photoLocationArn, issueDate = issueDate, userId = userId,
+                dateTime = requestDateTime.atOffset(ZoneOffset.UTC), supportingInformationFormat = LARGE_MINUS_PRINT
             )
         }
 
@@ -154,6 +157,6 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
         assertThat(actual).isNotNull
         assertThat(actual!!.anonymousElectorDocuments).isNotNull.isNotEmpty
             .usingRecursiveComparison()
-            .isEqualTo(listOf(expectedRecord2, expectedRecord1))
+            .isEqualTo(listOf(expectedFirstRecord, expectedSecondRecord))
     }
 }

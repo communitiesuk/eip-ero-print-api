@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.12.3'
+  version: '1.12.4'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -786,10 +786,20 @@ components:
         - dateTime
 
     SupportingInformationFormat:
+      title: SupportingInformationFormat
       type: string
       description: The format of the supporting information sent with the document.
       enum:
         - standard
+    AnonymousSupportingInformationFormat:
+      title: AnonymousSupportingInformationFormat
+      type: string
+      description: Special format of the supporting information sent with the Anonymous Elector Document certificate when standard format is not suitable.
+      enum:
+        - standard
+        - braille
+        - large-print
+        - easy-read
     CertificateDelivery:
       title: CertificateDelivery
       description: Object describing how and where the Anonymous Elector Document should be delivered
@@ -1037,7 +1047,7 @@ components:
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
         supportingInformationFormat:
-          $ref: '#/components/schemas/SupportingInformationFormat'
+          $ref: '#/components/schemas/AnonymousSupportingInformationFormat'
         deliveryAddressType:
           $ref: '#/components/schemas/DeliveryAddressType'
         elector:
@@ -1120,7 +1130,7 @@ components:
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
         supportingInformationFormat:
-          $ref: '#/components/schemas/SupportingInformationFormat'
+          $ref: '#/components/schemas/AnonymousSupportingInformationFormat'
         photoLocation:
           type: string
           description: |

@@ -1,11 +1,9 @@
 package uk.gov.dluhc.printapi.mapper
 
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntityEnum
 import uk.gov.dluhc.printapi.dto.SupportingInformationFormat as SupportingInformationFormatDto
@@ -63,55 +61,6 @@ class SupportingInformationFormatMapperTest {
             // Then
             assertThat(actual).isEqualTo(expected)
         }
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = ["STANDARD, STANDARD"])
-    fun `should map SupportingInformationFormat DTO enum to entity enum`(
-        supportingInformationFormatModelEnum: SupportingInformationFormatDto,
-        expected: SupportingInformationFormatEntityEnum
-    ) {
-        // Given
-        // When
-        val actual = mapper.mapDtoToEntity(supportingInformationFormatModelEnum)
-
-        // Then
-        assertThat(actual).isEqualTo(expected)
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = ["STANDARD, STANDARD"])
-    fun `should map SupportingInformationFormat entity enum to DTO enum`(
-        supportingInformationFormatModelEnum: SupportingInformationFormatEntityEnum,
-        expected: SupportingInformationFormatDto
-    ) {
-        // Given
-        // When
-        val actual = mapper.mapEntityToDto(supportingInformationFormatModelEnum)
-
-        // Then
-        assertThat(actual).isEqualTo(expected)
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        value = SupportingInformationFormatEntityEnum::class,
-        names = ["STANDARD"],
-        mode = EnumSource.Mode.EXCLUDE
-    )
-    fun `should throw exception for unsupported entity enum to DTO enum`(
-        value: SupportingInformationFormatEntityEnum
-    ) {
-        // Given
-        // When
-        val ex = Assertions.catchThrowableOfType(
-            { mapper.mapEntityToDto(value) },
-            IllegalArgumentException::class.java
-        )
-
-        // Then
-        assertThat(ex).isNotNull
-        assertThat(ex.message).isEqualTo("Unexpected enum constant: $value")
     }
 
     @ParameterizedTest

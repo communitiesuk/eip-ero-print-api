@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.mapper
+package uk.gov.dluhc.printapi.mapper.aed
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -16,24 +16,28 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.REGISTERED
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
+import uk.gov.dluhc.printapi.mapper.InstantMapper
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.models.CertificateLanguage
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
-import uk.gov.dluhc.printapi.models.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidGeneratedDateTime
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildAnonymousElectorDocumentSummaryDto
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildAnonymousElectorDto
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildValidAddressDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDocumentSummaryDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentSummary
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
-import uk.gov.dluhc.printapi.dto.AnonymousElectorDocumentStatus as DtoAnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.CertificateLanguage as DtoCertificateLanguage
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType as DtoDeliveryAddressType
-import uk.gov.dluhc.printapi.dto.SupportingInformationFormat as DtoSupportingInformationFormat
+import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentStatus as DtoAnonymousElectorDocumentStatus
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatDtoEnum
+import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatApiEnum
 
 @ExtendWith(MockitoExtension::class)
 class AnonymousElectorSummaryMapperTest {
@@ -45,7 +49,7 @@ class AnonymousElectorSummaryMapperTest {
     private lateinit var certificateLanguageMapper: CertificateLanguageMapper
 
     @Mock
-    private lateinit var supportingInformationFormatMapper: SupportingInformationFormatMapper
+    private lateinit var supportingInformationFormatMapper: AnonymousSupportingInformationFormatMapper
 
     @Mock
     private lateinit var deliveryAddressTypeMapper: DeliveryAddressTypeMapper
@@ -58,11 +62,11 @@ class AnonymousElectorSummaryMapperTest {
         @Test
         fun `should map AnonymousElectorDocumentSummaryDto to an AnonymousElectorDocumentSummary API model`() {
             // Given
-            val dtoRequest = buildAnonymousElectorDocumentSummaryDto()
+            val dtoRequest = buildAnonymousElectorDocumentSummaryDto(supportingInformationFormat = AnonymousSupportingInformationFormatDtoEnum.EASY_READ)
             val requestDateTime = aValidGeneratedDateTime()
 
             given(certificateLanguageMapper.mapDtoToApi(any())).willReturn(CertificateLanguage.EN)
-            given(supportingInformationFormatMapper.mapDtoToApi(any())).willReturn(SupportingInformationFormat.STANDARD)
+            given(supportingInformationFormatMapper.mapDtoToApi(any())).willReturn(AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ)
             given(deliveryAddressTypeMapper.mapDtoToApi(any())).willReturn(DeliveryAddressType.REGISTERED)
             given(instantMapper.toOffsetDateTime(any())).willReturn(requestDateTime)
 
@@ -72,7 +76,7 @@ class AnonymousElectorSummaryMapperTest {
                     electoralRollNumber = electoralRollNumber,
                     gssCode = gssCode,
                     certificateLanguage = CertificateLanguage.EN,
-                    supportingInformationFormat = SupportingInformationFormat.STANDARD,
+                    supportingInformationFormat = AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ,
                     deliveryAddressType = DeliveryAddressType.REGISTERED,
                     elector = with(elector) {
                         buildAnonymousElector(
@@ -120,6 +124,7 @@ class AnonymousElectorSummaryMapperTest {
         fun `should map AnonymousElectorDocument entity to an AnonymousElectorDocumentSummaryDto`() {
             // Given
             val entityRequest = buildAnonymousElectorDocument(
+                supportingInformationFormat = SupportingInformationFormat.BRAILLE,
                 contactDetails = buildAedContactDetails(
                     firstName = "John",
                     middleNames = "J",
@@ -127,7 +132,7 @@ class AnonymousElectorSummaryMapperTest {
                 )
             )
             given(certificateLanguageMapper.mapEntityToDto(any())).willReturn(DtoCertificateLanguage.EN)
-            given(supportingInformationFormatMapper.mapEntityToDto(any())).willReturn(DtoSupportingInformationFormat.STANDARD)
+            given(supportingInformationFormatMapper.mapEntityToDto(any())).willReturn(AnonymousSupportingInformationFormatDtoEnum.BRAILLE)
             given(deliveryAddressTypeMapper.mapEntityToDto(any())).willReturn(DtoDeliveryAddressType.REGISTERED)
 
             val expected = with(entityRequest) {
@@ -136,7 +141,7 @@ class AnonymousElectorSummaryMapperTest {
                     electoralRollNumber = electoralRollNumber,
                     gssCode = gssCode,
                     certificateLanguage = DtoCertificateLanguage.EN,
-                    supportingInformationFormat = DtoSupportingInformationFormat.STANDARD,
+                    supportingInformationFormat = AnonymousSupportingInformationFormatDtoEnum.BRAILLE,
                     deliveryAddressType = DtoDeliveryAddressType.REGISTERED,
                     elector = with(contactDetails!!) {
                         buildAnonymousElectorDto(

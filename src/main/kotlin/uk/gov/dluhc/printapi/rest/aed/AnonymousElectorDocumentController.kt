@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rest
+package uk.gov.dluhc.printapi.rest.aed
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
@@ -21,10 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
-import uk.gov.dluhc.printapi.mapper.AnonymousElectorDocumentMapper
-import uk.gov.dluhc.printapi.mapper.AnonymousElectorSummaryMapper
+import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorSummaryMapper
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.rest.HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import java.io.ByteArrayInputStream

@@ -6,6 +6,7 @@ import uk.gov.dluhc.printapi.dto.CertificateDelivery
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType
 import uk.gov.dluhc.printapi.dto.DeliveryClass
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 
 fun buildDtoCertificateDelivery(
     addressee: String = DataFaker.faker.name().fullName(),

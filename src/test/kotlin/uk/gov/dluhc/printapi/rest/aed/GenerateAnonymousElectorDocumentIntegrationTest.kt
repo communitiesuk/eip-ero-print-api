@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.rest
+package uk.gov.dluhc.printapi.rest.aed
 
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
@@ -17,6 +17,8 @@ import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.AnonymousElectorDocumentCertificateAssert
@@ -150,6 +152,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         // Given
         val photoLocationArn = addPhotoToS3()
         val request = buildGenerateAnonymousElectorDocumentRequest(
+            supportingInformationFormat = AnonymousSupportingInformationFormat.LARGE_MINUS_PRINT,
             photoLocation = photoLocationArn,
             delivery = buildApiCertificateDelivery(
                 deliveryClass = uk.gov.dluhc.printapi.models.DeliveryClass.STANDARD,
@@ -157,7 +160,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                 addressFormat = uk.gov.dluhc.printapi.models.AddressFormat.UK
             )
         )
-        processValidRequest(request)
+        processValidRequest(request = request, expectedSupportingFormat = SupportingInformationFormat.LARGE_PRINT)
     }
 
     @Test
@@ -176,10 +179,13 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                 addressFormat = uk.gov.dluhc.printapi.models.AddressFormat.UK
             )
         )
-        processValidRequest(request)
+        processValidRequest(request = request, expectedSupportingFormat = SupportingInformationFormat.STANDARD)
     }
 
-    private fun processValidRequest(request: GenerateAnonymousElectorDocumentRequest) {
+    private fun processValidRequest(
+        request: GenerateAnonymousElectorDocumentRequest,
+        expectedSupportingFormat: SupportingInformationFormat,
+    ) {
         // Given
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
             buildLocalAuthorityResponse(
@@ -238,6 +244,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
 
             AnonymousElectorDocumentCertificateAssert(it)
                 .hasId()
+                .hasSupportingInformationFormat(expectedSupportingFormat)
                 .hasDelivery(expectedDelivery)
                 .hasDateCreated()
 
