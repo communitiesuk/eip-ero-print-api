@@ -5,6 +5,10 @@ import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.slf4j.MDC
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpRequest
+import org.springframework.http.client.ClientHttpRequestExecution
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.ClientHttpResponse
 import org.springframework.messaging.Message
 import org.springframework.messaging.support.GenericMessage
 import org.springframework.stereotype.Component
@@ -52,7 +56,7 @@ class CorrelationIdMdcInterceptor : HandlerInterceptor {
 }
 
 /**
- * WebClient exchange filter that sets the correlation ID MDC variable of either a new value, or the
+ * WebClient exchange filter that sets the correlation ID header to either a new value, or the
  * current value found in the MDC context. This allows for passing and logging a consistent correlation ID between
  * disparate systems or processes using the spring WebClient.
  * Example of usage:
@@ -84,7 +88,11 @@ class CorrelationIdWebClientMdcExchangeFilter : ExchangeFilterFunction {
 
     private fun setCorrelationIdInRequest(request: ClientRequest, correlationId: String): ClientRequest {
         return ClientRequest.from(request)
-            .headers { headers: HttpHeaders -> correlationHeaderNames.forEach { correlationHeaderName -> headers[correlationHeaderName] = correlationId } }
+            .headers { headers: HttpHeaders ->
+                correlationHeaderNames.forEach { correlationHeaderName ->
+                    headers[correlationHeaderName] = correlationId
+                }
+            }
             .build()
     }
 
@@ -103,6 +111,42 @@ class CorrelationIdWebClientMdcExchangeFilter : ExchangeFilterFunction {
                 MDC.setContextMap(contextMap)
             }
         }
+    }
+}
+
+/**
+ * RestTemplate ClientHttpRequestInterceptor that sets the correlation ID header to either a new value, or the
+ * current value found in the MDC context. This allows for passing and logging a consistent correlation ID between
+ * disparate systems or processes using the spring RestTemplate].
+ * Example of usage:
+ * ```
+ *   @Configuration
+ *   @Bean
+ *     fun someRestTemplate(correlationIdRestTemplateClientHttpRequestInterceptor: CorrelationIdRestTemplateClientHttpRequestInterceptor): RestTemplate =
+ *         RestTemplateBuilder()
+ *             .interceptors(correlationIdRestTemplateClientHttpRequestInterceptor)
+ *             .build()
+ *```
+ */
+@Component
+class CorrelationIdRestTemplateClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
+
+    /*
+        This is modelled as a set in case we need to talk to another system within the gov space that doesn't use 'x-correlation-id'.
+        Another commonly used identifier is 'X-Request-Id'. This allows us to send our 'x-correlation-id' as well as their specified one.
+    */
+    private val correlationHeaderNames: Set<String> = setOf(CORRELATION_ID_HEADER)
+
+    override fun intercept(
+        request: HttpRequest,
+        body: ByteArray,
+        execution: ClientHttpRequestExecution,
+    ): ClientHttpResponse {
+        val correlationId = getCurrentCorrelationId()
+        correlationHeaderNames.forEach { correlationHeaderName ->
+            request.headers[correlationHeaderName] = correlationId
+        }
+        return execution.execute(request, body)
     }
 }
 
