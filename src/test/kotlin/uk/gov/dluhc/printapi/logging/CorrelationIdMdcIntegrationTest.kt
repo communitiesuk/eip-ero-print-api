@@ -1,22 +1,32 @@
 package uk.gov.dluhc.printapi.logging
 
 import ch.qos.logback.classic.Level
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.http.MediaType
+import org.slf4j.MDC
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.CORRELATION_ID
+import uk.gov.dluhc.printapi.config.CorrelationIdRestTemplateClientHttpRequestInterceptor
+import uk.gov.dluhc.printapi.config.CorrelationIdWebClientMdcExchangeFilter
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
-import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.logs
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ILoggingEventAssert.Companion.assertThat
@@ -24,7 +34,6 @@ import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
 import java.io.ByteArrayInputStream
@@ -41,50 +50,44 @@ import java.util.concurrent.TimeUnit
  */
 internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
 
+    @Autowired
+    private lateinit var correlationIdExchangeFilter: CorrelationIdWebClientMdcExchangeFilter
+
+    @Autowired
+    private lateinit var correlationIdRestTemplateClientHttpRequestInterceptor: CorrelationIdRestTemplateClientHttpRequestInterceptor
+
+    @Autowired
+    private lateinit var wireMockServer: WireMockServer
+
     @Nested
-    inner class GetCertificateSummary {
-        private val URI_TEMPLATE = "/eros/{ERO_ID}/certificates/applications/{APPLICATION_ID}"
-        private val ERO_ID = "some-city-council"
-        private val APPLICATION_ID = "7762ccac7c056046b75d4aa3"
+    inner class RestControllerCorrelationIdMdcInterceptor {
+        private val URI_TEMPLATE = "/correlation-id-test-api"
 
         @BeforeEach
         fun setupWiremockStubs() {
-            val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID)
             wireMockService.stubCognitoJwtIssuerResponse()
-            wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
         }
 
         @Test
-        fun `should service REST API call given no correlation-id header`() {
+        fun `should add correlation-id to request and MDC given REST API is called with no correlation-id header`() {
             // Given
 
             // When
             webTestClient.get()
-                .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-                .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
-                .contentType(MediaType.APPLICATION_JSON)
+                .uri(URI_TEMPLATE)
+                .bearerToken(getVCAdminBearerToken())
                 .exchange()
                 .expectHeader().exists("x-correlation-id")
 
             // Then
             await.atMost(3, TimeUnit.SECONDS).untilAsserted {
-                // We don't care that the log message is because the certificate was not found. We care that the log message has a correlation ID
                 assertThat(
                     TestLogAppender.getLogEventMatchingRegex(
-                        "Certificate for eroId = $ERO_ID with sourceType = $VOTER_CARD and sourceReference = $APPLICATION_ID not found",
-                        Level.WARN
-                    )
-                ).hasAnyCorrelationId()
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Finished retrieving gss codes for ero $ERO_ID",
+                        "Test API successfully called",
                         Level.INFO
                     )
                 ).hasAnyCorrelationId()
             }
-
-            // ensure a correlation id was also captured on outbound webclient request.
-            wireMockService.verifyEroManagementGetEroByEroIdWithCorrelationId(ERO_ID, WireMock.matching("^[a-z0-9]+$"))
         }
 
         @Test
@@ -94,32 +97,99 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
 
             // When
             webTestClient.get()
-                .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-                .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
-                .contentType(MediaType.APPLICATION_JSON)
+                .uri(URI_TEMPLATE)
+                .bearerToken(getVCAdminBearerToken())
                 .header("x-correlation-id", expectedCorrelationId)
                 .exchange()
                 .expectHeader().valueEquals("x-correlation-id", expectedCorrelationId)
 
             // Then
-            // ensure correlation id was also captured on outbound webclient request.
-            wireMockService.verifyEroManagementGetEroByEroIdWithCorrelationId(ERO_ID, equalTo(expectedCorrelationId))
-
             await.atMost(3, TimeUnit.SECONDS).untilAsserted {
-                // We don't care that the log message is because the certificate was not found. We care that the log message has a correlation ID
                 assertThat(
                     TestLogAppender.getLogEventMatchingRegex(
-                        "Certificate for eroId = $ERO_ID with sourceType = $VOTER_CARD and sourceReference = $APPLICATION_ID not found",
-                        Level.WARN
-                    )
-                ).hasCorrelationId(expectedCorrelationId)
-                assertThat(
-                    TestLogAppender.getLogEventMatchingRegex(
-                        "Finished retrieving gss codes for ero $ERO_ID",
+                        "Test API successfully called",
                         Level.INFO
                     )
                 ).hasCorrelationId(expectedCorrelationId)
             }
+        }
+    }
+
+    @Nested
+    inner class WebClientCorrelationIdExchangeFilter {
+
+        private val webClient = WebTestClient
+            .bindToServer()
+            .baseUrl(wireMockService.wiremockBaseUrl())
+            .filter(correlationIdExchangeFilter)
+            .build()
+
+        @Test
+        fun `should add correlation-id to http request given WebClient request with no correlationId in MDC`() {
+            // Given
+            stubExternalRestApi()
+            MDC.clear()
+
+            // When
+            webClient.get()
+                .uri("/external-rest-api")
+                .exchange()
+
+            // Then
+            verifyExternalRestApiCalledWithCorrelationId(WireMock.matching("^[a-z0-9]+$"))
+        }
+
+        @Test
+        fun `should add correlation-id to http request given WebClient request with correlationId set in MDC`() {
+            // Given
+            stubExternalRestApi()
+            val expectedCorrelationId = randomUUID().toString().replace("-", "")
+            MDC.put("correlationId", expectedCorrelationId)
+
+            // When
+            webClient.get()
+                .uri("/external-rest-api")
+                .exchange()
+
+            // Then
+            verifyExternalRestApiCalledWithCorrelationId(equalTo(expectedCorrelationId))
+        }
+    }
+
+    @Nested
+    inner class RestTemplateCorrelationIdInterceptor {
+
+        private val restTemplate = TestRestTemplate(
+            RestTemplateBuilder()
+                .rootUri(wireMockService.wiremockBaseUrl())
+                .interceptors(correlationIdRestTemplateClientHttpRequestInterceptor)
+        )
+
+        @Test
+        fun `should add correlation-id to http request given WebClient request with no correlationId in MDC`() {
+            // Given
+            stubExternalRestApi()
+            MDC.clear()
+
+            // When
+            restTemplate.getForObject("/external-rest-api", Void::class.java)
+
+            // Then
+            verifyExternalRestApiCalledWithCorrelationId(WireMock.matching("^[a-z0-9]+$"))
+        }
+
+        @Test
+        fun `should add correlation-id to http request given WebClient request with correlationId set in MDC`() {
+            // Given
+            stubExternalRestApi()
+            val expectedCorrelationId = randomUUID().toString().replace("-", "")
+            MDC.put("correlationId", expectedCorrelationId)
+
+            // When
+            restTemplate.getForObject("/external-rest-api", Void::class.java)
+
+            // Then
+            verifyExternalRestApiCalledWithCorrelationId(equalTo(expectedCorrelationId))
         }
     }
 
@@ -274,5 +344,23 @@ internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
             printRequests = listOf(buildPrintRequest())
         )
         return certificateRepository.save(certificate)
+    }
+
+    fun stubExternalRestApi() {
+        wireMockServer.stubFor(
+            WireMock.get(WireMock.urlPathMatching("/external-rest-api"))
+                .willReturn(
+                    ResponseDefinitionBuilder.responseDefinition()
+                        .withStatus(200)
+                )
+        )
+    }
+
+    fun verifyExternalRestApiCalledWithCorrelationId(correlationIdMatcher: StringValuePattern) {
+        wireMockServer.verify(
+            1,
+            getRequestedFor(urlEqualTo("/external-rest-api"))
+                .withHeader("x-correlation-id", correlationIdMatcher)
+        )
     }
 }
