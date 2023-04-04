@@ -120,6 +120,8 @@ class LocalStackContainerConfiguration {
         val queueUrlProcessPrintResponses = localStackContainer.createSqsQueue(processPrintResponsesQueueName)
         val queueUrlApplicationRemoved = localStackContainer.createSqsQueue(applicationRemovedQueueName)
         val queueUrlRemoveCertificate = localStackContainer.createSqsQueue(removeCertificateQueueName)
+        localStackContainer.createSqsQueue("correlation-id-test-queue")
+
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
 
         TestPropertyValues.of(
