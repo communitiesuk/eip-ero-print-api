@@ -198,7 +198,7 @@ thread-pool:
 
 logging:
   pattern:
-    level: "%X{correlationId}%5p"
+    level: "%X{correlationId} %5p"
   level:
     com:
       jcraft:
