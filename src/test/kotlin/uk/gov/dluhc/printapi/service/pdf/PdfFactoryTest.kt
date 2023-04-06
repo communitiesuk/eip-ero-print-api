@@ -24,9 +24,9 @@ internal class PdfFactoryTest {
 
         // AED templates
         private const val AED_PDF_TEMPLATE_ENGLISH =
-            "classpath:anonymous-elector-document-template/AED Document (English) v1.pdf"
+            "classpath:anonymous-elector-document-template/AED Document (English) v2.pdf"
         private const val AED_PDF_TEMPLATE_WELSH =
-            "classpath:anonymous-elector-document-template/AED Document (Bilingual) v1.pdf"
+            "classpath:anonymous-elector-document-template/AED Document (Bilingual) v2.pdf"
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
     }
@@ -139,7 +139,7 @@ internal class PdfFactoryTest {
         )
         val imageBytes = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
         val imageDetails =
-            ImageDetails(absoluteX = 21.6f, absoluteY = 201.6f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
+            ImageDetails(absoluteX = 17.9f, absoluteY = 186.3f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
         val templateDetails = TemplateDetails(AED_PDF_TEMPLATE_ENGLISH, placeholders, listOf(imageDetails))
 
         // When
@@ -147,6 +147,7 @@ internal class PdfFactoryTest {
 
         // Then
         verifyGeneratedPdfPlaceholders(contents, placeholders)
+        // FileOutputStream(File("Example_AED_English.pdf")).use { it.write(contents) }
     }
 
     @Test
@@ -159,7 +160,7 @@ internal class PdfFactoryTest {
         )
         val imageBytes = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
         val imageDetails =
-            ImageDetails(absoluteX = 21.6f, absoluteY = 194.6f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
+            ImageDetails(absoluteX = 17.9f, absoluteY = 186.3f, fitWidth = 35f, fitHeight = 45f, bytes = imageBytes)
         val templateDetails = TemplateDetails(AED_PDF_TEMPLATE_WELSH, placeholders, listOf(imageDetails))
 
         // When
@@ -167,6 +168,7 @@ internal class PdfFactoryTest {
 
         // Then
         verifyGeneratedPdfPlaceholders(contents, placeholders)
+        // FileOutputStream(File("Example_AED_Bilingual.pdf")).use { it.write(contents) }
     }
 
     private fun verifyGeneratedPdfPlaceholders(contents: ByteArray, placeholders: Map<String, String>) {

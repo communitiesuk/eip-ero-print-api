@@ -143,27 +143,27 @@ temporary-certificate:
 anonymous-elector-document:
   certificate-pdf:
     english:
-      path: "classpath:anonymous-elector-document-template/AED Document (English) v1.pdf"
+      path: "classpath:anonymous-elector-document-template/AED Document (English) v2.pdf"
       placeholder:
         electoral-roll-number: "electoral-number"
         date-of-issue: "date-issued"
         certificate-number: "certificate-number"
       images:
         voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
-          absolute-x-mm: 21.6
-          absolute-y-mm: 201.6
+          absolute-x-mm: 17.9
+          absolute-y-mm: 186.3
           fit-width-mm: 35
           fit-height-mm: 45
     welsh:
-      path: "classpath:anonymous-elector-document-template/AED Document (Bilingual) v1.pdf"
+      path: "classpath:anonymous-elector-document-template/AED Document (Bilingual) v2.pdf"
       placeholder:
         electoral-roll-number: "electoral-number"
         date-of-issue: "date-issued"
         certificate-number: "certificate-number"
       images:
         voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
-          absolute-x-mm: 21.6
-          absolute-y-mm: 194.6
+          absolute-x-mm: 17.9
+          absolute-y-mm: 186.3
           fit-width-mm: 35
           fit-height-mm: 45
   explainer-pdf:
