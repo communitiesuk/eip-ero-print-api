@@ -47,7 +47,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
             verify(dataRetentionConfig).certificateInitialRetentionPeriod
-            verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES)
+            verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES, issueDate)
         }
 
         @Test
@@ -65,7 +65,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
             verify(dataRetentionConfig).certificateInitialRetentionPeriod
-            verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES)
+            verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES, issueDate)
         }
     }
 
