@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.config
+package uk.gov.dluhc.logging.config
 
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
@@ -34,8 +34,6 @@ const val CORRELATION_ID_HEADER = "x-correlation-id"
  * HTTP header `x-correlation-id` if set. This allows for passing and logging a consistent correlation ID between
  * disparate systems or processes. This interceptor is used in beans annotated with @RestController.
  */
-
-@Component
 class CorrelationIdMdcInterceptor : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
@@ -155,7 +153,6 @@ class CorrelationIdRestTemplateClientHttpRequestInterceptor : ClientHttpRequestI
  * This allows for passing and logging a consistent correlation ID between disparate systems or processes.
  */
 @Aspect
-@Component
 class CorrelationIdMdcMessageListenerAspect {
 
     /**
@@ -197,7 +194,6 @@ class CorrelationIdMdcMessageListenerAspect {
  * AOP Aspect for Scheduled tasks (ie. cron tasks) that sets the correlation ID MDC variable.
  */
 @Aspect
-@Component
 class CorrelationIdMdcScheduledAspect {
 
     /**

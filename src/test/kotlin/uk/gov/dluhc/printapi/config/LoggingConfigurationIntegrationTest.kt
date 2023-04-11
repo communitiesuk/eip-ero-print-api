@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.logging
+package uk.gov.dluhc.printapi.config
 
 import ch.qos.logback.classic.Level
 import com.github.tomakehurst.wiremock.WireMockServer
@@ -13,17 +13,23 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.http.MediaType
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import uk.gov.dluhc.logging.config.CORRELATION_ID
+import uk.gov.dluhc.logging.testsupport.assertj.assertions.ILoggingEventAssert.Companion.assertThat
+import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
+import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.dluhc.printapi.config.CorrelationIdRestTemplateClientHttpRequestInterceptor
-import uk.gov.dluhc.printapi.config.CorrelationIdWebClientMdcExchangeFilter
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
-import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ILoggingEventAssert.Companion.assertThat
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.logs
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import java.util.UUID.randomUUID
@@ -31,12 +37,12 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Integration tests that assert the correlation ID is correctly applied to log statements via the Interceptors and Aspects
- * in CorrelationIdMdcConfiguration
+ * in LoggingConfiguration
  *
  * The tests in this class assert the cross-cutting logging behaviour. They do not assert the behaviour or output of any
  * bean or code that is used to tests.
  */
-internal class CorrelationIdMdcIntegrationTest : IntegrationTest() {
+internal class LoggingConfigurationIntegrationTest : IntegrationTest() {
 
     @Autowired
     private lateinit var correlationIdExchangeFilter: CorrelationIdWebClientMdcExchangeFilter
