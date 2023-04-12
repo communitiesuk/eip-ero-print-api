@@ -3,6 +3,7 @@ import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 import org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
+import java.lang.ProcessBuilder.Redirect
 
 plugins {
     id("org.springframework.boot") version "2.7.10"
@@ -31,8 +32,18 @@ allOpen {
     annotations("javax.persistence.Entity", "javax.persistence.MappedSuperclass", "javax.persistence.Embedabble")
 }
 
+val codeArtifactToken = System.getenv("CODEARTIFACT_PAT")
+    ?: "aws codeartifact get-authorization-token --domain erop-artifacts --domain-owner 063998039290 --query authorizationToken --output text --profile code-artifact".runCommand()
+
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://erop-artifacts-063998039290.d.codeartifact.eu-west-2.amazonaws.com/maven/api-repo/")
+        credentials {
+            username = "aws"
+            password = codeArtifactToken
+        }
+    }
 }
 
 apply(plugin = "org.jlleitschuh.gradle.ktlint")
@@ -54,6 +65,9 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     kapt("org.mapstruct:mapstruct-processor:1.5.3.Final")
+
+    // internal libs
+    implementation("uk.gov.dluhc:logging-lib:0.0.0")
 
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -246,6 +260,15 @@ kapt {
         arg("mapstruct.defaultComponentModel", "spring")
         arg("mapstruct.unmappedTargetPolicy", "IGNORE")
     }
+}
+
+fun String.runCommand(): String {
+    val parts = this.split("\\s".toRegex())
+    val process = ProcessBuilder(*parts.toTypedArray())
+        .redirectOutput(Redirect.PIPE)
+        .start()
+    process.waitFor()
+    return process.inputStream.bufferedReader().readText().trim()
 }
 
 /* Configuration for the OWASP dependency check */
