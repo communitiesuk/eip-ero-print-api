@@ -32,6 +32,7 @@ jobs:
 
       - name: Get AWS CodeArtifact PAT
         run: |
+          echo $(aws configure list-profiles)
           echo "CODEARTIFACT_PAT=$(aws codeartifact get-authorization-token --domain erop-artifacts --domain-owner 063998039290 --query 'authorizationToken' --output text --profile default)" >> $GITHUB_ENV
 
       - name: Run gradle `check` to lint source code and run tests
