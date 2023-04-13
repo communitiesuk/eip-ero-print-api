@@ -28,10 +28,6 @@ import org.springframework.integration.support.MessageBuilder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.s3.S3Client
-import uk.gov.dluhc.logging.config.TestScheduledJob
-import uk.gov.dluhc.logging.config.TestSqsListener
-import uk.gov.dluhc.logging.rest.TestRestController
-import uk.gov.dluhc.printapi.PrintApiApplication
 import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
@@ -60,11 +56,7 @@ private val logger = KotlinLogging.logger {}
  */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = [
-        PrintApiApplication::class,
-        TestRestController::class, TestScheduledJob::class, TestSqsListener::class,
-        IntegrationTest.IntegrationTestConfiguration::class
-    ],
+    classes = [IntegrationTest.IntegrationTestConfiguration::class],
 )
 @ActiveProfiles("integration-test")
 @AutoConfigureWebTestClient(timeout = "PT5M")
