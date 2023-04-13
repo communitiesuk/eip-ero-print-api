@@ -6,6 +6,7 @@ import com.jcraft.jsch.ChannelSftp.LsEntry
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,6 +46,8 @@ import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
+import uk.gov.dluhc.printapi.testsupport.emails.LocalstackEmailMessage
+import uk.gov.dluhc.printapi.testsupport.emails.LocalstackEmailMessagesSentClient
 import java.io.File
 import java.nio.charset.Charset
 import java.time.Clock
@@ -67,6 +70,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var wireMockService: WiremockService
+
+    @Autowired
+    protected lateinit var localstackEmailMessagesSentClient: LocalstackEmailMessagesSentClient
 
     @Autowired
     protected lateinit var sqsMessagingTemplate: QueueMessagingTemplate
@@ -234,6 +240,23 @@ internal abstract class IntegrationTest {
                 .setHeader(FILENAME, fileName)
                 .build()
         )
+    }
+
+    protected fun assertEmailSent(expected: LocalstackEmailMessage) {
+        val expectedEmailBodyRegex = Regex(expected.body.htmlPart!!)
+        with(localstackEmailMessagesSentClient.getEmailMessagesSent()) {
+            val foundMessage = messages.any {
+                !it.timestamp.isBefore(expected.timestamp) &&
+                    it.destination.toAddresses.toSet() == expected.destination.toAddresses.toSet() &&
+                    it.subject == expected.subject &&
+                    expectedEmailBodyRegex.matches(it.body.htmlPart!!) &&
+                    it.body.textPart == expected.body.textPart &&
+                    it.source == expected.source
+            }
+            Assertions.assertThat(foundMessage)
+                .`as` { "failed to find expectedEmailMessage[$expected], in list of messages[$messages]" }
+                .isTrue
+        }
     }
 
     private fun getSftpInboundDirectoryFileNames() =

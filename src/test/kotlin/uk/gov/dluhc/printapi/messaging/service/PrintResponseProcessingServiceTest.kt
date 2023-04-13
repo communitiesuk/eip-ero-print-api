@@ -18,12 +18,17 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
+import uk.gov.dluhc.emailnotifications.EmailNotSentException
+import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.dto.SendCertificateNotDeliveredEmailRequest
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -33,6 +38,8 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
@@ -62,6 +69,12 @@ class PrintResponseProcessingServiceTest {
     @Captor
     private lateinit var processPrintResponseMessageCaptor: ArgumentCaptor<ProcessPrintResponseMessage>
 
+    @Mock
+    private lateinit var emailService: EmailService
+
+    @Mock
+    private lateinit var electoralRegistrationOfficeManagementApiClient: ElectoralRegistrationOfficeManagementApiClient
+
     @BeforeEach
     fun setup() {
         service = PrintResponseProcessingService(
@@ -69,7 +82,9 @@ class PrintResponseProcessingServiceTest {
             idFactory,
             statusMapper,
             processPrintResponseMessageMapper,
-            processPrintResponseQueue
+            processPrintResponseQueue,
+            emailService,
+            electoralRegistrationOfficeManagementApiClient,
         )
     }
 
@@ -213,6 +228,142 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
+            verifyNoInteractions(emailService, electoralRegistrationOfficeManagementApiClient)
+        }
+
+        @Test
+        fun `should update print request status to Not Delivered and send email`() {
+            // Given
+            val requestId = aValidRequestId()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                status = ProcessPrintResponseMessage.Status.FAILED,
+                statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+            )
+            val requestingUserEmailAddress = "ero.group@@camden.gov.uk"
+            val localAuthorityEmailAddress = "vc-admin@camden.gov.uk"
+
+            val expectedStatus = NOT_DELIVERED
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
+
+            val certificate = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        requestId = requestId,
+                        userId = localAuthorityEmailAddress,
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = SENT_TO_PRINT_PROVIDER,
+                                eventDateTime = response.timestamp.toInstant().minusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+
+            val expectedGssCode = certificate.gssCode!!
+            val eroDto = buildEroDto(englishContactDetails = anEnglishEroContactDetails(emailAddress = requestingUserEmailAddress))
+            given(electoralRegistrationOfficeManagementApiClient.getEro(any())).willReturn(eroDto)
+
+            val expectedSendCertificateNotDeliveredEmailRequest = SendCertificateNotDeliveredEmailRequest(
+                sourceReference = certificate.sourceReference!!,
+                applicationReference = certificate.applicationReference!!,
+                localAuthorityEmailAddresses = setOf(requestingUserEmailAddress),
+                requestingUserEmailAddress = localAuthorityEmailAddress
+            )
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
+            verify(certificateRepository).getByPrintRequestsRequestId(requestId)
+            verify(certificateRepository).save(certificate)
+            verify(electoralRegistrationOfficeManagementApiClient).getEro(expectedGssCode)
+            verify(emailService).sendCertificateNotDeliveredEmail(expectedSendCertificateNotDeliveredEmailRequest)
+
+            assertThat(certificate.status).isEqualTo(expectedStatus)
+            assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
+                .usingRecursiveComparison().isEqualTo(
+                    PrintRequestStatus(
+                        status = expectedStatus,
+                        eventDateTime = response.timestamp.toInstant(),
+                        message = response.message
+                    )
+                )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, emailService, electoralRegistrationOfficeManagementApiClient)
+        }
+
+        @Test
+        fun `should update print request status to Not Delivered and log error when send email fails`() {
+            // Given
+            val requestId = aValidRequestId()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                status = ProcessPrintResponseMessage.Status.FAILED,
+                statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+            )
+            val requestingUserEmailAddress = "vc-admin@camden.gov.uk"
+            val localAuthorityEmailAddress = "ero.group@@camden.gov.uk"
+
+            val expectedStatus = NOT_DELIVERED
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
+
+            val certificate = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        requestId = requestId,
+                        userId = requestingUserEmailAddress,
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = SENT_TO_PRINT_PROVIDER,
+                                eventDateTime = response.timestamp.toInstant().minusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+
+            val expectedGssCode = certificate.gssCode!!
+            val eroDto = buildEroDto(englishContactDetails = anEnglishEroContactDetails(emailAddress = localAuthorityEmailAddress))
+            given(electoralRegistrationOfficeManagementApiClient.getEro(any())).willReturn(eroDto)
+
+            val expectedSendCertificateNotDeliveredEmailRequest = SendCertificateNotDeliveredEmailRequest(
+                sourceReference = certificate.sourceReference!!,
+                applicationReference = certificate.applicationReference!!,
+                localAuthorityEmailAddresses = setOf(localAuthorityEmailAddress),
+                requestingUserEmailAddress = requestingUserEmailAddress
+            )
+            given(emailService.sendCertificateNotDeliveredEmail(any())).willThrow(
+                EmailNotSentException("Failed to send email due to AWS error")
+            )
+            val expectedLogMessage =
+                "failed to send Not Delivered email when processing a new application photo for " +
+                    "certificate [${certificate.id}] with requestId [$requestId]: Failed to send email due to AWS error"
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
+            verify(certificateRepository).getByPrintRequestsRequestId(requestId)
+            verify(certificateRepository).save(certificate)
+            verify(electoralRegistrationOfficeManagementApiClient).getEro(expectedGssCode)
+            verify(emailService).sendCertificateNotDeliveredEmail(expectedSendCertificateNotDeliveredEmailRequest)
+            assertThat(TestLogAppender.hasLog(expectedLogMessage, Level.ERROR)).isTrue
+
+            assertThat(certificate.status).isEqualTo(expectedStatus)
+            assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
+                .usingRecursiveComparison().isEqualTo(
+                    PrintRequestStatus(
+                        status = expectedStatus,
+                        eventDateTime = response.timestamp.toInstant(),
+                        message = response.message
+                    )
+                )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, emailService, electoralRegistrationOfficeManagementApiClient)
         }
 
         @Test
