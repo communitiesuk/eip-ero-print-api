@@ -8,7 +8,6 @@ email:
       - levellingup.gov.uk
       - softwire.com
   content:
-    portal-base-url: https://ero.test.erop.ierds.uk
     certificate-returned:
-      email-body-template: email-templates/certificate-returned-la-emails.html
+      email-body-template: email-templates/non-prod/certificate-returned-la-emails.html
       send-to-requesting-user: true

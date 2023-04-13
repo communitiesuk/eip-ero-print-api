@@ -215,5 +215,5 @@ email:
     aed-context-root: anonymous-elector-document
     certificate-returned:
       subject: Electoral Registration Office Portal - certificate returned - application ${applicationReference}
-      email-body-template: email-templates/certificate-returned.html
+      email-body-template: email-templates/prod/certificate-returned.html
       send-to-requesting-user: false
