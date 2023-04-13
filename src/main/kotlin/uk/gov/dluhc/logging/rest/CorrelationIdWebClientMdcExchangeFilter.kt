@@ -24,6 +24,8 @@ import uk.gov.dluhc.logging.config.getCurrentCorrelationId
  *             .filter(correlationIdExchangeFilter)
  *             .build()
  *```
+ *
+ * Copy of https://github.com/cabinetoffice/eip-ero-portal/blob/main/logging-lib/src/main/kotlin/uk/gov/dluhc/logging/rest/CorrelationIdWebClientMdcExchangeFilter.kt
  */
 class CorrelationIdWebClientMdcExchangeFilter : ExchangeFilterFunction {
 

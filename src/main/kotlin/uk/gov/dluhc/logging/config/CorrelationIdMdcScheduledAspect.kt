@@ -7,6 +7,8 @@ import org.slf4j.MDC
 
 /**
  * AOP Aspect for Scheduled tasks (ie. cron tasks) that sets the correlation ID MDC variable.
+ *
+ * Copy of https://github.com/cabinetoffice/eip-ero-portal/blob/main/logging-lib/src/main/kotlin/uk/gov/dluhc/logging/config/CorrelationIdMdcScheduledAspect.kt
  */
 @Aspect
 class CorrelationIdMdcScheduledAspect {

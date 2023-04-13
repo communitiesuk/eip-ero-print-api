@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletResponse
  * MVC Interceptor that sets the correlation ID MDC variable of either a new value, or the value found in the
  * HTTP header `x-correlation-id` if set. This allows for passing and logging a consistent correlation ID between
  * disparate systems or processes. This interceptor is used in beans annotated with @RestController.
+ *
+ * Copy of https://github.com/cabinetoffice/eip-ero-portal/blob/main/logging-lib/src/main/kotlin/uk/gov/dluhc/logging/rest/CorrelationIdMdcInterceptor.kt
  */
 class CorrelationIdMdcInterceptor : HandlerInterceptor {
 

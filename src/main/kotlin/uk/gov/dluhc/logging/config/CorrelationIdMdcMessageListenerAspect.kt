@@ -10,6 +10,8 @@ import org.springframework.messaging.support.GenericMessage
 /**
  * AOP Aspect to read and set the correlation ID on inbound (received) and outbound SQS [Message]s respectively.
  * This allows for passing and logging a consistent correlation ID between disparate systems or processes.
+ *
+ * Copy of https://github.com/cabinetoffice/eip-ero-portal/blob/main/logging-lib/src/main/kotlin/uk/gov/dluhc/logging/config/CorrelationIdMdcMessageListenerAspect.kt
  */
 @Aspect
 class CorrelationIdMdcMessageListenerAspect {

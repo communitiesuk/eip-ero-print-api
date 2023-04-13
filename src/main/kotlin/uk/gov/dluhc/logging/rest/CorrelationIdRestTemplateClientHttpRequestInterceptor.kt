@@ -20,6 +20,8 @@ import uk.gov.dluhc.logging.config.getCurrentCorrelationId
  *             .interceptors(correlationIdRestTemplateClientHttpRequestInterceptor)
  *             .build()
  *```
+ *
+ * Copy of https://github.com/cabinetoffice/eip-ero-portal/blob/main/logging-lib/src/main/kotlin/uk/gov/dluhc/logging/rest/CorrelationIdRestTemplateClientHttpRequestInterceptor.kt
  */
 class CorrelationIdRestTemplateClientHttpRequestInterceptor : ClientHttpRequestInterceptor {
 
