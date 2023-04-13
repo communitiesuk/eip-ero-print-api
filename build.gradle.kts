@@ -32,8 +32,8 @@ allOpen {
     annotations("javax.persistence.Entity", "javax.persistence.MappedSuperclass", "javax.persistence.Embedabble")
 }
 
-val codeArtifactToken = System.getenv("CODEARTIFACT_PAT")
-    ?: "aws codeartifact get-authorization-token --domain erop-artifacts --domain-owner 063998039290 --query authorizationToken --output text --profile code-artifact".runCommand()
+val awsProfile = System.getenv("AWS_PROFILE") ?: "code-artifact"
+val codeArtifactToken = "aws codeartifact get-authorization-token --domain erop-artifacts --domain-owner 063998039290 --query authorizationToken --output text --profile $awsProfile".runCommand()
 
 repositories {
     mavenCentral()
