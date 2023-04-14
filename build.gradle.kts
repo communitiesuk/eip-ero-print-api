@@ -15,7 +15,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
     id("org.openapi.generator") version "6.2.1"
-    id("org.owasp.dependencycheck") version "8.1.2"
+    id("org.owasp.dependencycheck") version "8.2.1"
     id("org.jsonschema2dataclass") version "4.5.0"
 }
 
@@ -24,6 +24,7 @@ version = "latest"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 ext["snakeyaml.version"] = "1.33"
+ext["spring-framework.version"] = "5.3.27" // Spring Boot 2.7.11 will include this when released on 20/04/23
 extra["springCloudVersion"] = "2.4.2"
 extra["awsSdkVersion"] = "2.18.9"
 
@@ -73,6 +74,8 @@ dependencies {
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    // later version of nimbus-jose-jwt than brought in transitively by spring security - earlier version triggers CVE-2023-1370
+    implementation("com.nimbusds:nimbus-jose-jwt:9.31")
 
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
