@@ -115,10 +115,10 @@ class PrintResponseProcessingService(
 
         certificateRepository.save(certificate)
 
-        sendEmailIfNotDelivered(newStatus, certificate, printResponse.requestId)
+        sendEmailIfCertificateNotDelivered(newStatus, certificate, printResponse.requestId)
     }
 
-    private fun sendEmailIfNotDelivered(newStatus: Status, certificate: Certificate, printResponseRequestId: String) {
+    private fun sendEmailIfCertificateNotDelivered(newStatus: Status, certificate: Certificate, printResponseRequestId: String) {
         if (newStatus == NOT_DELIVERED) {
             try {
                 val request = with(certificate) {
@@ -132,7 +132,7 @@ class PrintResponseProcessingService(
                 emailService.sendCertificateNotDeliveredEmail(request)
             } catch (e: EmailNotSentException) {
                 logger.error(
-                    "failed to send Not Delivered email when processing a new application photo for " +
+                    "failed to send Certificate Not Delivered email when processing ProcessPrintResponseMessage for " +
                         "certificate [${certificate.id}] with requestId [$printResponseRequestId]: ${e.message}"
                 )
             }

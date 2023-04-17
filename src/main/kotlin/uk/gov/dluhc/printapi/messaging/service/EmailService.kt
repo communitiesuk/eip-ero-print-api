@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.messaging.service
 
 import liquibase.repackaged.org.apache.commons.text.StringSubstitutor.replace
+import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.emailnotifications.EmailClient
 import uk.gov.dluhc.printapi.config.EmailContentConfiguration
@@ -33,8 +34,8 @@ class EmailService(
     }
 
     private fun EmailContentProperties.getEmailCcRecipients(requestingUserEmailAddress: String?) =
-        if (sendToRequestingUser && requestingUserEmailAddress?.isNotBlank() == true) {
-            setOf(requestingUserEmailAddress)
+        if (sendToRequestingUser && StringUtils.isNotBlank(requestingUserEmailAddress)) {
+            setOf(requestingUserEmailAddress!!)
         } else {
             emptySet()
         }

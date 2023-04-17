@@ -340,7 +340,7 @@ class PrintResponseProcessingServiceTest {
                 EmailNotSentException("Failed to send email due to AWS error")
             )
             val expectedLogMessage =
-                "failed to send Not Delivered email when processing a new application photo for " +
+                "failed to send Certificate Not Delivered email when processing ProcessPrintResponseMessage for " +
                     "certificate [${certificate.id}] with requestId [$requestId]: Failed to send email due to AWS error"
 
             // When
