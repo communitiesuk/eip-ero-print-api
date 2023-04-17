@@ -219,3 +219,7 @@ email:
       subject: Electoral Registration Office Portal - certificate returned - application ${applicationReference}
       email-body-template: email-templates/prod/certificate-returned.html
       send-to-requesting-user: false
+    certificate-failed-to-print:
+      subject: Electoral Registration Office Portal - printing failed - application ${applicationReference}
+      email-body-template: email-templates/prod/certificate-failed-to-print.html
+      send-to-requesting-user: false

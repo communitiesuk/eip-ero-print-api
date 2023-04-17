@@ -15,7 +15,8 @@ class EmailContentConfiguration(
     portalBaseUrl: URI,
     vacContextRoot: String,
     aedContextRoot: String,
-    val certificateReturned: EmailContentProperties
+    val certificateReturned: EmailContentProperties,
+    val certificateFailedToPrint: EmailContentProperties,
 ) {
     val vacBaseUrl: String
     val aedBaseUrl: String

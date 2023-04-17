@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service
 import uk.gov.dluhc.emailnotifications.EmailClient
 import uk.gov.dluhc.printapi.config.EmailContentConfiguration
 import uk.gov.dluhc.printapi.config.EmailContentProperties
+import uk.gov.dluhc.printapi.dto.SendCertificateFailedToPrintEmailRequest
 import uk.gov.dluhc.printapi.dto.SendCertificateNotDeliveredEmailRequest
+import uk.gov.dluhc.printapi.dto.SendEmailRequest
 
 @Service
 class EmailService(
@@ -14,6 +16,19 @@ class EmailService(
     private val emailContentConfiguration: EmailContentConfiguration,
 ) {
     fun sendCertificateNotDeliveredEmail(request: SendCertificateNotDeliveredEmailRequest) {
+        val emailConfig = emailContentConfiguration.certificateReturned
+        sendEmail(request, emailConfig)
+    }
+
+    fun sendCertificateFailedToPrintEmail(request: SendCertificateFailedToPrintEmailRequest) {
+        val emailConfig = emailContentConfiguration.certificateFailedToPrint
+        sendEmail(request, emailConfig)
+    }
+
+    private fun EmailService.sendEmail(
+        request: SendEmailRequest,
+        emailConfig: EmailContentProperties
+    ) {
         val substitutionVariables = with(request) {
             mapOf(
                 "sourceReference" to sourceReference,
@@ -23,7 +38,7 @@ class EmailService(
             )
         }
 
-        with(emailContentConfiguration.certificateReturned) {
+        with(emailConfig) {
             emailClient.send(
                 emailToRecipients = request.localAuthorityEmailAddresses,
                 emailCcRecipients = getEmailCcRecipients(request.requestingUserEmailAddress),

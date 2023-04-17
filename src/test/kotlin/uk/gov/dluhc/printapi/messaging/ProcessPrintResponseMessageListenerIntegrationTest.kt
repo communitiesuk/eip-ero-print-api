@@ -99,6 +99,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             status = ProcessPrintResponseMessage.Status.FAILED,
             statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
         )
+        val expectedStatus = Status.NOT_DELIVERED
 
         val expectedGssCode = certificate.gssCode!!
         val ero = buildElectoralRegistrationOfficeResponse(
@@ -138,7 +139,80 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
             val saved = certificateRepository.getByPrintRequestsRequestId(requestId)
             assertThat(saved).isNotNull
-            assertThat(saved!!.status).isEqualTo(Status.NOT_DELIVERED)
+            assertThat(saved!!.status).isEqualTo(expectedStatus)
+            wireMockService.verifyEroManagementGetEro(expectedGssCode)
+            assertEmailSent(expectedEmailMessage)
+        }
+    }
+
+    @Test
+    fun `should process print response message and send Certificate Failed To Print email`() {
+        // Given
+        val requestId = aValidRequestId()
+        val batchId = aValidBatchId()
+        val certificate = buildCertificate(
+            status = Status.ASSIGNED_TO_BATCH,
+            printRequests = mutableListOf(
+                buildPrintRequest(
+                    batchId = batchId,
+                    requestId = requestId,
+                    printRequestStatuses = listOf(
+                        buildPrintRequestStatus(
+                            status = Status.ASSIGNED_TO_BATCH,
+                            eventDateTime = Instant.now().minusSeconds(10)
+                        )
+                    )
+                )
+            )
+        )
+        certificateRepository.save(certificate)
+
+        val message = buildProcessPrintResponseMessage(
+            requestId = requestId,
+            status = ProcessPrintResponseMessage.Status.FAILED,
+            statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
+        )
+        val expectedStatus = Status.PRINT_PROVIDER_PRODUCTION_FAILED
+
+        val expectedGssCode = certificate.gssCode!!
+        val ero = buildElectoralRegistrationOfficeResponse(
+            localAuthorities = listOf(
+                buildLocalAuthorityResponse(
+                    gssCode = expectedGssCode,
+                    contactDetailsEnglish = buildContactDetails(emailAddress = "a-user@valtech.com")
+                ),
+            )
+        )
+        wireMockService.stubEroManagementGetEroByGssCode(ero, expectedGssCode)
+
+        val expectedEmailMessage = buildLocalstackEmailMessage(
+            timestamp = OffsetDateTime.now(UTC).toLocalDateTime().truncatedTo(SECONDS),
+            emailSender = "noreply_erouser@erop.ierds.uk",
+            toAddresses = setOf("a-user@valtech.com"),
+            subject = "Electoral Registration Office Portal - printing failed - application ${certificate.applicationReference}",
+            htmlBody = """
+                <html>
+                  <body>
+                    <p>Printing has failed for the application ${certificate.applicationReference}</p>
+                    <p>You can access the application here:</p>
+                    <p><a href="https://erop.ierds.uk/voter-authority-certificate/${certificate.applicationReference}">
+                                https://erop.ierds.uk/voter-authority-certificate/${certificate.applicationReference}</a>
+                    </p>
+                    <br>
+                    <p>This is an automated message from the ERO Portal.  You will not be able to reply to this email.</p>
+                  </body>
+                </html>
+            """.lines().joinToString(separator = "\\s*") { it.trim() }
+        )
+
+        // When
+        processPrintResponseMessageQueue.submit(message)
+
+        // Then
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            val saved = certificateRepository.getByPrintRequestsRequestId(requestId)
+            assertThat(saved).isNotNull
+            assertThat(saved!!.status).isEqualTo(expectedStatus)
             wireMockService.verifyEroManagementGetEro(expectedGssCode)
             assertEmailSent(expectedEmailMessage)
         }
