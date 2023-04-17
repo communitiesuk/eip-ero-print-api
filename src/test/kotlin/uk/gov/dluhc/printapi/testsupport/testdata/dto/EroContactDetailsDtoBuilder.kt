@@ -5,12 +5,13 @@ import uk.gov.dluhc.printapi.dto.EroContactDetailsDto
 
 fun anEnglishEroContactDetails(
     address: AddressDto = anEnglishEroAddress(),
+    emailAddress: String = "TrethCyngor@gwynedd.llyw.cymru",
 ): EroContactDetailsDto =
     EroContactDetailsDto(
         name = "Gwynedd Council Elections",
         phoneNumber = "01766 771000",
         website = "https://www.gwynedd.llyw.cymru/en/Council/Contact-us/Contact-us.aspx",
-        emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
+        emailAddress = emailAddress,
         address = address
     )
 
