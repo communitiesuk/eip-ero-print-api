@@ -27,6 +27,8 @@ At the prompts configure the `code-artifact` profile as follows:
 * Default region name, `eu-west-2`
 * Default output format, `json`
 
+Note: AWS CLI must be installed on the developer workstation as a pre-requisite.
+
 #### Running Tests
 ```
 $ ./gradlew check
