@@ -67,6 +67,9 @@ dependencies {
     }
     implementation("org.springframework.integration:spring-integration-sftp")
 
+    // Logging
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.3")
+
     // webclient
     implementation("org.springframework:spring-webflux")
     implementation("io.projectreactor.netty:reactor-netty-http")
