@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.dto
 
-data class SendCertificateNotDeliveredEmailRequest(
+data class SendCertificateFailedToPrintEmailRequest(
     override val sourceReference: String,
     override val applicationReference: String,
     override val localAuthorityEmailAddresses: Set<String>,

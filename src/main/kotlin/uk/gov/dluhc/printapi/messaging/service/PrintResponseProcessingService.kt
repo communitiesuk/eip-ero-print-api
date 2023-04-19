@@ -2,16 +2,11 @@ package uk.gov.dluhc.printapi.messaging.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
-import uk.gov.dluhc.emailnotifications.EmailNotSentException
-import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
-import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
-import uk.gov.dluhc.printapi.dto.SendCertificateNotDeliveredEmailRequest
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -31,8 +26,8 @@ class PrintResponseProcessingService(
     private val statusMapper: StatusMapper,
     private val processPrintResponseMessageMapper: ProcessPrintResponseMessageMapper,
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>,
-    private val emailService: EmailService,
-    private val electoralRegistrationOfficeManagementApiClient: ElectoralRegistrationOfficeManagementApiClient,
+    private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
+    private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
 ) {
 
     fun processPrintResponses(printResponses: List<PrintResponse>) {
@@ -115,37 +110,10 @@ class PrintResponseProcessingService(
 
         certificateRepository.save(certificate)
 
-        sendEmailIfCertificateNotDelivered(newStatus, certificate, printResponse.requestId)
-    }
-
-    private fun sendEmailIfCertificateNotDelivered(newStatus: Status, certificate: Certificate, printResponseRequestId: String) {
-        if (newStatus == NOT_DELIVERED) {
-            try {
-                val request = with(certificate) {
-                    SendCertificateNotDeliveredEmailRequest(
-                        sourceReference = sourceReference!!,
-                        applicationReference = applicationReference!!,
-                        localAuthorityEmailAddresses = getLocalAuthorityEmailAddresses(gssCode!!),
-                        requestingUserEmailAddress = getRequestingUserEmailAddress(printRequests, printResponseRequestId)
-                    )
-                }
-                emailService.sendCertificateNotDeliveredEmail(request)
-            } catch (e: EmailNotSentException) {
-                logger.error(
-                    "failed to send Certificate Not Delivered email when processing ProcessPrintResponseMessage for " +
-                        "certificate [${certificate.id}] with requestId [$printResponseRequestId]: ${e.message}"
-                )
-            }
+        if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
+            certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
+        } else if (printResponse.status == ProcessPrintResponseMessage.Status.FAILED) {
+            certificateFailedToPrintEmailSenderService.send(printResponse, certificate)
         }
     }
-
-    private fun getLocalAuthorityEmailAddresses(gssCode: String): Set<String> {
-        val ero = electoralRegistrationOfficeManagementApiClient.getEro(gssCode)
-        return setOf(ero.englishContactDetails.emailAddress)
-    }
-
-    private fun getRequestingUserEmailAddress(
-        printRequests: MutableList<PrintRequest>,
-        printResponseRequestId: String
-    ) = printRequests.find { it.requestId == printResponseRequestId }?.userId
 }

@@ -19,8 +19,6 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
-import uk.gov.dluhc.emailnotifications.EmailNotSentException
-import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
@@ -28,7 +26,6 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_A
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
-import uk.gov.dluhc.printapi.dto.SendCertificateNotDeliveredEmailRequest
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.MessageQueue
@@ -38,8 +35,6 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.anEnglishEroContactDetails
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
@@ -70,10 +65,10 @@ class PrintResponseProcessingServiceTest {
     private lateinit var processPrintResponseMessageCaptor: ArgumentCaptor<ProcessPrintResponseMessage>
 
     @Mock
-    private lateinit var emailService: EmailService
+    private lateinit var certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService
 
     @Mock
-    private lateinit var electoralRegistrationOfficeManagementApiClient: ElectoralRegistrationOfficeManagementApiClient
+    private lateinit var certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService
 
     @BeforeEach
     fun setup() {
@@ -83,8 +78,8 @@ class PrintResponseProcessingServiceTest {
             statusMapper,
             processPrintResponseMessageMapper,
             processPrintResponseQueue,
-            emailService,
-            electoralRegistrationOfficeManagementApiClient,
+            certificateNotDeliveredEmailSenderService,
+            certificateFailedToPrintEmailSenderService,
         )
     }
 
@@ -219,6 +214,8 @@ class PrintResponseProcessingServiceTest {
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
+            verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
+            verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
                 .usingRecursiveComparison().isEqualTo(
@@ -228,7 +225,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoInteractions(emailService, electoralRegistrationOfficeManagementApiClient)
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
@@ -240,8 +237,6 @@ class PrintResponseProcessingServiceTest {
                 status = ProcessPrintResponseMessage.Status.FAILED,
                 statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
             )
-            val requestingUserEmailAddress = "ero.group@@camden.gov.uk"
-            val localAuthorityEmailAddress = "vc-admin@camden.gov.uk"
 
             val expectedStatus = NOT_DELIVERED
             given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
@@ -250,7 +245,6 @@ class PrintResponseProcessingServiceTest {
                 printRequests = listOf(
                     buildPrintRequest(
                         requestId = requestId,
-                        userId = localAuthorityEmailAddress,
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
@@ -262,17 +256,6 @@ class PrintResponseProcessingServiceTest {
             )
             given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
 
-            val expectedGssCode = certificate.gssCode!!
-            val eroDto = buildEroDto(englishContactDetails = anEnglishEroContactDetails(emailAddress = requestingUserEmailAddress))
-            given(electoralRegistrationOfficeManagementApiClient.getEro(any())).willReturn(eroDto)
-
-            val expectedSendCertificateNotDeliveredEmailRequest = SendCertificateNotDeliveredEmailRequest(
-                sourceReference = certificate.sourceReference!!,
-                applicationReference = certificate.applicationReference!!,
-                localAuthorityEmailAddresses = setOf(requestingUserEmailAddress),
-                requestingUserEmailAddress = localAuthorityEmailAddress
-            )
-
             // When
             service.processPrintResponse(response)
 
@@ -280,8 +263,8 @@ class PrintResponseProcessingServiceTest {
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
-            verify(electoralRegistrationOfficeManagementApiClient).getEro(expectedGssCode)
-            verify(emailService).sendCertificateNotDeliveredEmail(expectedSendCertificateNotDeliveredEmailRequest)
+            verify(certificateNotDeliveredEmailSenderService).send(response, certificate)
+            verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
 
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
@@ -292,20 +275,18 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(statusMapper, certificateRepository, emailService, electoralRegistrationOfficeManagementApiClient)
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
-        fun `should update print request status to Not Delivered and log error when send email fails`() {
+        fun `should update print request status to Failed To Print and send email`() {
             // Given
             val requestId = aValidRequestId()
             val response = buildProcessPrintResponseMessage(
                 requestId = requestId,
                 status = ProcessPrintResponseMessage.Status.FAILED,
-                statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+                statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
             )
-            val requestingUserEmailAddress = "vc-admin@camden.gov.uk"
-            val localAuthorityEmailAddress = "ero.group@@camden.gov.uk"
 
             val expectedStatus = NOT_DELIVERED
             given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
@@ -314,7 +295,6 @@ class PrintResponseProcessingServiceTest {
                 printRequests = listOf(
                     buildPrintRequest(
                         requestId = requestId,
-                        userId = requestingUserEmailAddress,
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
                                 status = SENT_TO_PRINT_PROVIDER,
@@ -326,23 +306,6 @@ class PrintResponseProcessingServiceTest {
             )
             given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
 
-            val expectedGssCode = certificate.gssCode!!
-            val eroDto = buildEroDto(englishContactDetails = anEnglishEroContactDetails(emailAddress = localAuthorityEmailAddress))
-            given(electoralRegistrationOfficeManagementApiClient.getEro(any())).willReturn(eroDto)
-
-            val expectedSendCertificateNotDeliveredEmailRequest = SendCertificateNotDeliveredEmailRequest(
-                sourceReference = certificate.sourceReference!!,
-                applicationReference = certificate.applicationReference!!,
-                localAuthorityEmailAddresses = setOf(localAuthorityEmailAddress),
-                requestingUserEmailAddress = requestingUserEmailAddress
-            )
-            given(emailService.sendCertificateNotDeliveredEmail(any())).willThrow(
-                EmailNotSentException("Failed to send email due to AWS error")
-            )
-            val expectedLogMessage =
-                "failed to send Certificate Not Delivered email when processing ProcessPrintResponseMessage for " +
-                    "certificate [${certificate.id}] with requestId [$requestId]: Failed to send email due to AWS error"
-
             // When
             service.processPrintResponse(response)
 
@@ -350,9 +313,8 @@ class PrintResponseProcessingServiceTest {
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
-            verify(electoralRegistrationOfficeManagementApiClient).getEro(expectedGssCode)
-            verify(emailService).sendCertificateNotDeliveredEmail(expectedSendCertificateNotDeliveredEmailRequest)
-            assertThat(TestLogAppender.hasLog(expectedLogMessage, Level.ERROR)).isTrue
+            verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
+            verify(certificateFailedToPrintEmailSenderService).send(response, certificate)
 
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
@@ -363,7 +325,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(statusMapper, certificateRepository, emailService, electoralRegistrationOfficeManagementApiClient)
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
