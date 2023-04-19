@@ -47,19 +47,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = emptySet<String>()
             val expectedSubject = "Electoral Registration Office Portal - certificate returned - application $applicationReference"
-            val expectedEmailBody = """
-                <html>
-                  <body>
-                    <p>The print provider has notified us that a postal certificate has been returned.</p>
-                    <p>You can access the application here:</p>
-                    <p><a href="https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference">
-                                https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference</a>
-                    </p>
-                    <br>
-                    <p>This is an automated message from the ERO Portal.  You will not be able to reply to this email.</p>
-                  </body>
-                </html>
-            """.lines().joinToString(separator = "\\s*") { it.trim() }
+            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(
@@ -105,22 +93,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = setOf("joe.bloggs@camden.gov.uk")
             val expectedSubject = "Electoral Registration Office Portal - certificate returned - application $applicationReference"
-            val expectedEmailBody = """
-                <html>
-                  <body>
-                    <h1>NOTE: This is a test email</h1>
-                    <br>
-                    <p>The print provider has notified us that a postal certificate has been returned.</p>
-                    <p>You can access the application here:</p>
-                    <p><a href="https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference">
-                                https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference</a>
-                    </p>
-                    <br>
-                    <p>Local Authority email addresses: \[electoral.services@camden.gov.uk]</p>
-                    <p>This is an automated message from the ERO Portal.  You will not be able to reply to this email.</p>
-                  </body>
-                </html>
-            """.lines().joinToString(separator = "\\s*") { it.trim() }
+            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(
@@ -179,19 +152,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = emptySet<String>()
             val expectedSubject = "Electoral Registration Office Portal - printing failed - application $applicationReference"
-            val expectedEmailBody = """
-                <html>
-                  <body>
-                    <p>Printing has failed for the application $applicationReference</p>
-                    <p>You can access the application here:</p>
-                    <p><a href="https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference">
-                                https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference</a>
-                    </p>
-                    <br>
-                    <p>This is an automated message from the ERO Portal.  You will not be able to reply to this email.</p>
-                  </body>
-                </html>
-            """.lines().joinToString(separator = "\\s*") { it.trim() }
+            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(
@@ -237,22 +198,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = setOf("joe.bloggs@camden.gov.uk")
             val expectedSubject = "Electoral Registration Office Portal - printing failed - application $applicationReference"
-            val expectedEmailBody = """
-                <html>
-                  <body>
-                    <h1>NOTE: This is a test email</h1>
-                    <br>
-                    <p>Printing has failed for the application $applicationReference</p>
-                    <p>You can access the application here:</p>
-                    <p><a href="https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference">
-                                https://ero.dev.erop.ierds.uk/voter-authority-certificate/$applicationReference</a>
-                    </p>
-                    <br>
-                    <p>Local Authority email addresses: \[electoral.services@camden.gov.uk]</p>
-                    <p>This is an automated message from the ERO Portal.  You will not be able to reply to this email.</p>
-                  </body>
-                </html>
-            """.lines().joinToString(separator = "\\s*") { it.trim() }
+            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(

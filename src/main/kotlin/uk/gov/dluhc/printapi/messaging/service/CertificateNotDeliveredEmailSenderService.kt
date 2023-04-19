@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.messaging.service
 
 import mu.KotlinLogging
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.dto.SendCertificateNotDeliveredEmailRequest
@@ -9,17 +9,13 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 
 private val logger = KotlinLogging.logger {}
 
-@Component
-class CertificateNotDeliveredEmailSender(
+@Service
+class CertificateNotDeliveredEmailSenderService(
     electoralRegistrationOfficeManagementApiClient: ElectoralRegistrationOfficeManagementApiClient,
     private val emailService: EmailService,
 ) : AbstractEmailSender(electoralRegistrationOfficeManagementApiClient) {
 
-    override fun testAndSend(printResponse: ProcessPrintResponseMessage, certificate: Certificate): Boolean {
-        if (printResponse.statusStep != ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
-            return false
-        }
-
+    override fun send(printResponse: ProcessPrintResponseMessage, certificate: Certificate) {
         try {
             val request = with(certificate) {
                 SendCertificateNotDeliveredEmailRequest(
@@ -32,10 +28,9 @@ class CertificateNotDeliveredEmailSender(
             emailService.sendCertificateNotDeliveredEmail(request)
         } catch (e: Exception) {
             logger.error(
-                "failed to send Certificate Not Delivered email when processing ProcessPrintResponseMessage for " +
+                "failed to send [Certificate Not Delivered] email when processing ProcessPrintResponseMessage for " +
                     "certificate [${certificate.id}] with requestId [${printResponse.requestId}]: ${e.message}"
             )
         }
-        return true
     }
 }

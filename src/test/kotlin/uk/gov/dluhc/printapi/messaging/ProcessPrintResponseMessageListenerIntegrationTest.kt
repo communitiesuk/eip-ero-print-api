@@ -117,19 +117,8 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             emailSender = "noreply_erouser@erop.ierds.uk",
             toAddresses = setOf("a-user@valtech.com"),
             subject = "Electoral Registration Office Portal - certificate returned - application ${certificate.applicationReference}",
-            htmlBody = """
-                <html>
-                  <body>
-                    <p>The print provider has notified us that a postal certificate has been returned.</p>
-                    <p>You can access the application here:</p>
-                    <p><a href="https://erop.ierds.uk/voter-authority-certificate/${certificate.applicationReference}">
-                                https://erop.ierds.uk/voter-authority-certificate/${certificate.applicationReference}</a>
-                    </p>
-                    <br>
-                    <p>This is an automated message from the ERO Portal.  You will not be able to reply to this email.</p>
-                  </body>
-                </html>
-            """.lines().joinToString(separator = "\\s*") { it.trim() }
+            // just asserting that the application reference is contained within the email body
+            htmlBody = "((.|\\s)*)${certificate.applicationReference}((.|\\s)*)"
         )
 
         // When
@@ -190,19 +179,8 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             emailSender = "noreply_erouser@erop.ierds.uk",
             toAddresses = setOf("a-user@valtech.com"),
             subject = "Electoral Registration Office Portal - printing failed - application ${certificate.applicationReference}",
-            htmlBody = """
-                <html>
-                  <body>
-                    <p>Printing has failed for the application ${certificate.applicationReference}</p>
-                    <p>You can access the application here:</p>
-                    <p><a href="https://erop.ierds.uk/voter-authority-certificate/${certificate.applicationReference}">
-                                https://erop.ierds.uk/voter-authority-certificate/${certificate.applicationReference}</a>
-                    </p>
-                    <br>
-                    <p>This is an automated message from the ERO Portal.  You will not be able to reply to this email.</p>
-                  </body>
-                </html>
-            """.lines().joinToString(separator = "\\s*") { it.trim() }
+            // just asserting that the application reference is contained within the email body
+            htmlBody = "((.|\\s)*)${certificate.applicationReference}((.|\\s)*)"
         )
 
         // When

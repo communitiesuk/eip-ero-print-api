@@ -26,8 +26,8 @@ class PrintResponseProcessingService(
     private val statusMapper: StatusMapper,
     private val processPrintResponseMessageMapper: ProcessPrintResponseMessageMapper,
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>,
-    private val certificateNotDeliveredEmailSender: CertificateNotDeliveredEmailSender,
-    private val certificateFailedToPrintEmailSender: CertificateFailedToPrintEmailSender,
+    private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
+    private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
 ) {
 
     fun processPrintResponses(printResponses: List<PrintResponse>) {
@@ -110,13 +110,10 @@ class PrintResponseProcessingService(
 
         certificateRepository.save(certificate)
 
-        sendOnlyFirstMatchingEmail(
-            { certificateNotDeliveredEmailSender.testAndSend(printResponse, certificate) },
-            { certificateFailedToPrintEmailSender.testAndSend(printResponse, certificate) },
-        )
-    }
-
-    private fun sendOnlyFirstMatchingEmail(vararg emailSenders: () -> Boolean) {
-        emailSenders.firstOrNull { it.invoke() }
+        if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
+            certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
+        } else if (printResponse.status == ProcessPrintResponseMessage.Status.FAILED) {
+            certificateFailedToPrintEmailSenderService.send(printResponse, certificate)
+        }
     }
 }

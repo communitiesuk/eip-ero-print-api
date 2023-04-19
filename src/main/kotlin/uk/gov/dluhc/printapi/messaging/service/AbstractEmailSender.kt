@@ -8,15 +8,10 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 abstract class AbstractEmailSender(
     private val electoralRegistrationOfficeManagementApiClient: ElectoralRegistrationOfficeManagementApiClient,
 ) {
-    /**
-     * @param printResponse the printResponse that could trigger an email being sent
-     * @param certificate the certificate associated to the printResponse
-     * @return true if an email was sent otherwise false
-     */
-    abstract fun testAndSend(
+    abstract fun send(
         printResponse: ProcessPrintResponseMessage,
         certificate: Certificate
-    ): Boolean
+    )
 
     protected fun getLocalAuthorityEmailAddress(gssCode: String): String {
         val ero = electoralRegistrationOfficeManagementApiClient.getEro(gssCode)

@@ -10,7 +10,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.emailnotifications.EmailNotSentException
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
@@ -27,10 +26,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildProcessPrintResponseMessage
 
 @ExtendWith(MockitoExtension::class)
-class CertificateNotDeliveredEmailSenderTest {
+class CertificateNotDeliveredEmailSenderServiceTest {
 
     @InjectMocks
-    private lateinit var certificateNotDeliveredEmailSender: CertificateNotDeliveredEmailSender
+    private lateinit var certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService
 
     @Mock
     private lateinit var electoralRegistrationOfficeManagementApiClient: ElectoralRegistrationOfficeManagementApiClient
@@ -76,32 +75,12 @@ class CertificateNotDeliveredEmailSenderTest {
         )
 
         // When
-        val testAndSend = certificateNotDeliveredEmailSender.testAndSend(printResponse, certificate)
+        certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
 
         // Then
-        assertThat(testAndSend).isTrue
         verify(electoralRegistrationOfficeManagementApiClient).getEro(expectedGssCode)
         verify(emailService).sendCertificateNotDeliveredEmail(expectedSendCertificateNotDeliveredEmailRequest)
         verifyNoMoreInteractions(electoralRegistrationOfficeManagementApiClient, emailService)
-    }
-
-    @Test
-    fun `do not send email when print response is SUCCESS`() {
-        // Given
-        val requestId = aValidRequestId()
-        val printResponse = buildProcessPrintResponseMessage(
-            requestId = requestId,
-            status = ProcessPrintResponseMessage.Status.SUCCESS,
-            statusStep = ProcessPrintResponseMessage.StatusStep.PROCESSED,
-        )
-        val certificate = buildCertificate()
-
-        // When
-        val testAndSend = certificateNotDeliveredEmailSender.testAndSend(printResponse, certificate)
-
-        // Then
-        assertThat(testAndSend).isFalse()
-        verifyNoInteractions(electoralRegistrationOfficeManagementApiClient, emailService)
     }
 
     @Test
@@ -121,14 +100,13 @@ class CertificateNotDeliveredEmailSenderTest {
         given(emailService.sendCertificateNotDeliveredEmail(any()))
             .willThrow(EmailNotSentException("Failed to send email due to AWS error"))
         val expectedLogMessage =
-            "failed to send Certificate Not Delivered email when processing ProcessPrintResponseMessage for " +
+            "failed to send [Certificate Not Delivered] email when processing ProcessPrintResponseMessage for " +
                 "certificate [${certificate.id}] with requestId [$requestId]: Failed to send email due to AWS error"
 
         // When
-        val testAndSend = certificateNotDeliveredEmailSender.testAndSend(printResponse, certificate)
+        certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
 
         // Then
-        assertThat(testAndSend).isTrue
         assertThat(TestLogAppender.hasLog(expectedLogMessage, Level.ERROR)).isTrue
     }
 }

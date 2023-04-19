@@ -65,10 +65,10 @@ class PrintResponseProcessingServiceTest {
     private lateinit var processPrintResponseMessageCaptor: ArgumentCaptor<ProcessPrintResponseMessage>
 
     @Mock
-    private lateinit var certificateNotDeliveredEmailSender: CertificateNotDeliveredEmailSender
+    private lateinit var certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService
 
     @Mock
-    private lateinit var certificateFailedToPrintEmailSender: CertificateFailedToPrintEmailSender
+    private lateinit var certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService
 
     @BeforeEach
     fun setup() {
@@ -78,8 +78,8 @@ class PrintResponseProcessingServiceTest {
             statusMapper,
             processPrintResponseMessageMapper,
             processPrintResponseQueue,
-            certificateNotDeliveredEmailSender,
-            certificateFailedToPrintEmailSender,
+            certificateNotDeliveredEmailSenderService,
+            certificateFailedToPrintEmailSenderService,
         )
     }
 
@@ -206,8 +206,6 @@ class PrintResponseProcessingServiceTest {
                 )
             )
             given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
-            given(certificateNotDeliveredEmailSender.testAndSend(any(), any())).willReturn(false)
-            given(certificateFailedToPrintEmailSender.testAndSend(any(), any())).willReturn(false)
 
             // When
             service.processPrintResponse(response)
@@ -216,8 +214,8 @@ class PrintResponseProcessingServiceTest {
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
-            verify(certificateNotDeliveredEmailSender).testAndSend(response, certificate)
-            verify(certificateFailedToPrintEmailSender).testAndSend(response, certificate)
+            verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
+            verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
                 .usingRecursiveComparison().isEqualTo(
@@ -227,7 +225,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(certificateNotDeliveredEmailSender, certificateFailedToPrintEmailSender)
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
@@ -258,8 +256,6 @@ class PrintResponseProcessingServiceTest {
             )
             given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
 
-            given(certificateNotDeliveredEmailSender.testAndSend(any(), any())).willReturn(true)
-
             // When
             service.processPrintResponse(response)
 
@@ -267,8 +263,8 @@ class PrintResponseProcessingServiceTest {
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
-            verify(certificateNotDeliveredEmailSender).testAndSend(response, certificate)
-            verify(certificateFailedToPrintEmailSender, never()).testAndSend(response, certificate)
+            verify(certificateNotDeliveredEmailSenderService).send(response, certificate)
+            verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
 
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
@@ -279,7 +275,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSender, certificateFailedToPrintEmailSender)
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
@@ -310,9 +306,6 @@ class PrintResponseProcessingServiceTest {
             )
             given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
 
-            given(certificateNotDeliveredEmailSender.testAndSend(any(), any())).willReturn(false)
-            given(certificateFailedToPrintEmailSender.testAndSend(any(), any())).willReturn(true)
-
             // When
             service.processPrintResponse(response)
 
@@ -320,8 +313,8 @@ class PrintResponseProcessingServiceTest {
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
-            verify(certificateNotDeliveredEmailSender).testAndSend(response, certificate)
-            verify(certificateFailedToPrintEmailSender).testAndSend(response, certificate)
+            verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
+            verify(certificateFailedToPrintEmailSenderService).send(response, certificate)
 
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
@@ -332,7 +325,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSender, certificateFailedToPrintEmailSender)
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
