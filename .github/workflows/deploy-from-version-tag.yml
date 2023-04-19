@@ -17,6 +17,7 @@ on:
           - dev2
           - int2
           - test2
+          - beta
 
 jobs:
   deploy:
