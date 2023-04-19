@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: 'eip-ero-print-api'
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/print_application
     username: ${MYSQL_USER}
@@ -203,3 +205,17 @@ logging:
     com:
       jcraft:
         jsch: WARN
+
+email:
+  client:
+    sender: noreply_erouser@erop.ierds.uk
+    allow-list-enabled: false
+    allow-list-domains:
+  content:
+    portal-base-url: https://erop.ierds.uk
+    vac-context-root: voter-authority-certificate
+    aed-context-root: anonymous-elector-document
+    certificate-returned:
+      subject: Electoral Registration Office Portal - certificate returned - application ${applicationReference}
+      email-body-template: email-templates/prod/certificate-returned.html
+      send-to-requesting-user: false

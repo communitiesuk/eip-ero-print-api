@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ConfigurableApplicationContext
@@ -12,11 +13,15 @@ import org.testcontainers.utility.DockerImageName
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
+import software.amazon.awssdk.services.ses.SesClient
 import java.net.InetAddress
 import java.net.URI
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Configuration class exposing beans for the LocalStack (AWS) environment.
@@ -45,7 +50,7 @@ class LocalStackContainerConfiguration {
                     DockerImageName.parse("localstack/localstack:1.2.0")
                 ).withEnv(
                     mapOf(
-                        "SERVICES" to "sqs",
+                        "SERVICES" to "sqs, ses",
                         "AWS_DEFAULT_REGION" to DEFAULT_REGION,
                     )
                 )
@@ -96,6 +101,34 @@ class LocalStackContainerConfiguration {
             s3Client.createBucket(CreateBucketRequest.builder().bucket(S3_BUCKET_CONTAINING_PHOTOS).build())
         } catch (ex: S3Exception) {
             // ignore
+        }
+    }
+
+    @Bean
+    @Primary
+    fun configureEmailIdentityAndExposeSesClient(
+        awsBasicCredentialsProvider: AwsCredentialsProvider,
+        emailClientProperties: EmailClientProperties,
+    ): SesClient {
+        localStackContainer.verifyEmailIdentity(emailClientProperties.sender)
+
+        return SesClient.builder()
+            .region(Region.of(DEFAULT_REGION))
+            .credentialsProvider(awsBasicCredentialsProvider)
+            .applyMutation { builder -> builder.endpointOverride(localStackContainer.getEndpointOverride()) }
+            .build()
+    }
+
+    private fun GenericContainer<*>.verifyEmailIdentity(emailAddress: String) {
+        val execInContainer = execInContainer(
+            "awslocal", "ses", "verify-email-identity", "--email-address", emailAddress
+        )
+        if (execInContainer.exitCode == 0) {
+            logger.info { "verified email identity: $emailAddress" }
+        } else {
+            logger.error { "failed to create email identity: $emailAddress" }
+            logger.error { "failed to create email identity[stdout]: ${execInContainer.stdout}" }
+            logger.error { "failed to create email identity[stderr]: ${execInContainer.stderr}" }
         }
     }
 
@@ -157,7 +190,7 @@ class LocalStackContainerConfiguration {
         val queueUrlProcessPrintResponseFile: String,
         val queueUrlProcessPrintResponses: String,
         val queueUrlApplicationRemoved: String,
-        val queueUrlRemoveCertificate: String
+        val queueUrlRemoveCertificate: String,
     ) {
         val mappedQueueUrlSendApplicationToPrint: String = toMappedUrl(queueUrlSendApplicationToPrint, apiUrl)
         val mappedQueueUrlProcessPrintBatchRequest: String = toMappedUrl(queueUrlProcessPrintBatchRequest, apiUrl)
@@ -165,6 +198,7 @@ class LocalStackContainerConfiguration {
         val mappedQueueUrlProcessPrintResponses: String = toMappedUrl(queueUrlProcessPrintResponses, apiUrl)
         val mappedQueueUrlApplicationRemoved: String = toMappedUrl(queueUrlApplicationRemoved, apiUrl)
         val mappedQueueUrlRemoveCertificate: String = toMappedUrl(queueUrlRemoveCertificate, apiUrl)
+        val sesMessagesUrl = "$apiUrl/_localstack/ses"
 
         private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {
             val rawUrl = URI.create(rawUrlString)
