@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="vishal.gupta@valtech.com" id="0024_create_aed_summary_view" context="ddl">
+        <comment>Creating initial Anonymous Elector Document summary view</comment>
+        <createView viewName="v_anonymous_elector_document_summary" replaceIfExists = "true">
+            SELECT
+            aed.gss_code,
+            aed.electoral_roll_number,
+            aed.certificate_number,
+            aed.source_reference,
+            aed.application_reference,
+            aed.issue_date,
+            aed.date_created,
+            contact.first_name,
+            contact.surname,
+            contact.sanitized_surname,
+            addr.postcode
+            FROM anonymous_elector_document aed
+            JOIN aed_contact_details contact ON aed.aed_contact_details_id = contact.id
+            JOIN address addr on contact.address_id = addr.id
+            JOIN (
+                SELECT
+                    source_reference,
+                    max(request_date_time) as mostRecentRequestDateTime
+                    FROM anonymous_elector_document
+                    GROUP BY source_reference
+            ) latest_aed_source_references
+            ON aed.source_reference = latest_aed_source_references.source_reference
+            AND aed.request_date_time = latest_aed_source_references.mostRecentRequestDateTime
+        </createView>
+
+        <createIndex tableName="anonymous_elector_document" indexName="aed_electoral_roll_number_idx">
+            <column name="electoral_roll_number"/>
+        </createIndex>
+        <createIndex tableName="anonymous_elector_document" indexName="aed_app_reference_idx">
+            <column name="application_reference"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

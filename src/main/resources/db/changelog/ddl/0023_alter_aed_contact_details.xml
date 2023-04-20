@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="vishal.gupta@valtech.com" id="0023_alter_aed_contact_details - add sanitized_surname column and indexes" context="ddl">
+        <sql>
+            ALTER TABLE aed_contact_details ADD sanitized_surname VARCHAR(255) AS (TRIM(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(UPPER(surname),'-',' '),'\'',''),'[ ]{2,}',' '))) STORED AFTER surname;
+        </sql>
+
+        <createIndex tableName="anonymous_elector_document" indexName="aed_to_aed_contact_details_id_idx">
+            <column name="aed_contact_details_id"/>
+        </createIndex>
+        <createIndex tableName="aed_contact_details" indexName="aed_contact_details_sanitized_surname_idx">
+            <column name="sanitized_surname"/>
+        </createIndex>
+
+        <rollback>
+            <dropColumn tableName="aed_contact_details" columnName="sanitized_surname"/>
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_to_aed_contact_details_id_idx"/>
+            <dropIndex tableName="aed_contact_details" indexName="aed_contact_details_sanitized_surname_idx"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
