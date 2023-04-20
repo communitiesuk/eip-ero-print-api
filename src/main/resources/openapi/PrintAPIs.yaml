@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.12.4'
+  version: '1.13.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -465,6 +465,117 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
 
+
+  #
+  # Anonymous Elector Document Applications
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-applications':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application(s).
+        schema:
+          type: string
+        example: 'city-council'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Document Applications
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Search for Anonymous Elector Document Applications
+      description: 'Search for Anonymous Elector Document Applications based on querying parameters'
+      tags:
+        - Anonymous Elector Document Applications
+      responses:
+        '200':
+          $ref: '#/components/responses/SearchApplications'
+      operationId: search-anonymous-elector-document-applications
+      parameters:
+        - name: pageSize
+          description: The number of results to return in each page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+          example: 100
+          in: query
+          required: true
+        - name: page
+          description: The page number being requested (with the first page being 1)
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          in: query
+          required: true
+        - name: searchBy
+          description: |
+            The data field to apply the `searchValue` to. An empty value will return all AED applications.
+            This value must be provided when `searchValue` is present
+          schema:
+            $ref: '#/components/schemas/SearchBy'
+          example: surname
+          in: query
+          required: false
+        - name: searchValue
+          description: |
+            The value to search the field specified by the `searchBy` parameter. 
+            The search is a case insensitive match. We do not support fuzzy or wildcard matching.
+            This value must be provided when `searchBy` is present
+          schema:
+            type: string
+          in: query
+          example: Smith
+          required: false
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-applications'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
   #
   # Anonymous Elector Documents (AEDs)
   # --------------------------------------------------------------------------------
@@ -748,6 +859,15 @@ components:
         - print-failed
         - dispatched
         - not-delivered
+
+    SearchBy:
+      title: SearchBy
+      description: An enumeration of search by fields
+      type: string
+      enum:
+        - surname
+        - applicationReference
+        - electoralRollNumber
 
     SourceType:
       title: SourceType
@@ -1101,6 +1221,102 @@ components:
         - generated
         - printed
 
+    ApplicationsSearchResponse:
+      title: ApplicationsSearchResponse
+      description: Response containing the meta data and results of searching for Anonymous Elector document applications
+      type: object
+      properties:
+        page:
+          type: integer
+          description: The page number
+          example: 1
+        pageSize:
+          type: integer
+          description: The number of results per page
+          example: 1
+        totalPages:
+          type: integer
+          description: The total number of pages
+          example: 1
+        totalResults:
+          type: integer
+          description: The total number of results
+          example: 1
+        results:
+          type: array
+          description: Array of anonymous application search summaries that matches the search criteria
+          items:
+            $ref: '#/components/schemas/ApplicationSearchSummaryResponse'
+      required:
+        - page
+        - pageSize
+        - totalPages
+        - totalResults
+        - results
+
+    ApplicationSearchSummaryResponse:
+      title: ApplicationSearchSummaryResponse
+      description: A response containing summary information of an each Anonymous Elector document application
+      type: object
+      properties:
+        gssCode:
+          type: string
+          description: The relevant GSS code for the local authority.
+          example: 'E09000007'
+        sourceReference:
+          type: string
+          pattern: '^[a-fA-F\d]{24}$'
+          description: |
+            A 24 character hex string. 
+            The unique identifier of an application which should be used as the resource ID for all operations on that Anonymous elector document application.
+          example: 1f0f76a9a66f438b9bb33070
+        applicationReference:
+          type: string
+          description: The reference number of an application
+          example: A3JSZC4CRH
+        certificateNumber:
+          type: string
+          description: The unique identifier of the Anonymous Electoral Document. A 20 character alphanumeric string.
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          example: DEV1W0XDH1368LWE1J40
+        electoralRollNumber:
+          type: string
+          description: Electoral roll number printed on the AED. There is no specific format and they can vary across EROs.
+          maxLength: 25
+        firstName:
+          type: string
+          description: The applicant's first name
+          example: Fred
+        surname:
+          type: string
+          description: The applicant's surname
+          example: Blogs
+        postcode:
+          type: string
+          description: The applicant's postcode
+          example: AA1 1AA
+        issueDate:
+          type: string
+          format: date
+          description: The date on which the AED was issued
+          example: '2023-01-15'
+        dateTimeCreated:
+          type: string
+          format: date-time
+          description: The timestamp in ISO-8601 UTC that the application document was originally created
+          example: '2022-07-27T09:39:44Z'
+      required:
+        - gssCode
+        - sourceReference
+        - applicationReference
+        - certificateNumber
+        - electoralRollNumber
+        - firstName
+        - surname
+        - postcode
+        - issueDate
+        - dateTimeCreated
+
     GenerateAnonymousElectorDocumentRequest:
       title: GenerateAnonymousElectorDocumentRequest
       description: Request body to generate an Anonymous Elector Document (AED)
@@ -1302,6 +1518,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AnonymousElectorDocumentSummariesResponse'
+    SearchApplications:
+      description: Response containing the result of searching for Anonymous Elector document applications
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApplicationsSearchResponse'
   #
   # Request Body Definitions
   # --------------------------------------------------------------------------------
