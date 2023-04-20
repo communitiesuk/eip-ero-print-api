@@ -5,12 +5,14 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-    <changeSet author="vishal.gupta@valtech.com" id="0024_create_aed_summary_view" context="ddl">
+    <changeSet author="vishal.gupta@valtech.com" id="0024_create_aed_summary_view - Create AED summary view and adds indexes" context="ddl">
         <comment>Creating initial Anonymous Elector Document summary view</comment>
         <createView viewName="v_anonymous_elector_document_summary" replaceIfExists = "true">
             SELECT
             aed.gss_code,
+            aed.source_type,
             aed.electoral_roll_number,
+            aed.sanitized_electoral_roll_number,
             aed.certificate_number,
             aed.source_reference,
             aed.application_reference,
@@ -24,22 +26,43 @@
             JOIN aed_contact_details contact ON aed.aed_contact_details_id = contact.id
             JOIN address addr on contact.address_id = addr.id
             JOIN (
-                SELECT
-                    source_reference,
-                    max(request_date_time) as mostRecentRequestDateTime
+                    SELECT
+                        gss_code,
+                        source_type,
+                        source_reference,
+                        max(request_date_time) as mostRecentRequestDateTime
                     FROM anonymous_elector_document
-                    GROUP BY source_reference
-            ) latest_aed_source_references
-            ON aed.source_reference = latest_aed_source_references.source_reference
-            AND aed.request_date_time = latest_aed_source_references.mostRecentRequestDateTime
+                    GROUP BY gss_code, source_type, source_reference
+                ) latest_aed_records_per_source_reference
+            ON aed.gss_code = latest_aed_records_per_source_reference.gss_code
+            AND aed.source_type = latest_aed_records_per_source_reference.source_type
+            AND aed.source_reference = latest_aed_records_per_source_reference.source_reference
+            AND aed.request_date_time = latest_aed_records_per_source_reference.mostRecentRequestDateTime
         </createView>
 
-        <createIndex tableName="anonymous_elector_document" indexName="aed_electoral_roll_number_idx">
-            <column name="electoral_roll_number"/>
-        </createIndex>
-        <createIndex tableName="anonymous_elector_document" indexName="aed_app_reference_idx">
+        <createIndex tableName="anonymous_elector_document" indexName="aed_application_reference_idx">
             <column name="application_reference"/>
         </createIndex>
+
+        <dropIndex tableName="anonymous_elector_document" indexName="aed_source_details_idx"/>
+        <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document" unique="false">
+            <column name="gss_code"/>
+            <column name="source_type"/>
+            <column name="source_reference"/>
+            <column name="request_date_time"/>
+            <column name="aed_contact_details_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_application_reference_idx"/>
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_source_details_idx"/>
+            <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document" unique="false">
+                <column name="gss_code"/>
+                <column name="source_type"/>
+                <column name="source_reference"/>
+            </createIndex>
+            <dropView viewName="v_anonymous_elector_document_summary"/>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
