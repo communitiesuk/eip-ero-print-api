@@ -644,8 +644,8 @@ paths:
         httpMethod: POST
 
     get:
-      summary: Returns the Anonymous Elector Document summaries for an Anonymous application
-      description: Returns the Anonymous Elector Document summaries for an Anonymous application
+      summary: Returns the Anonymous Elector Documents for an Anonymous application
+      description: Returns the Anonymous Elector Documents for an Anonymous application
       tags:
         - Anonymous Elector Documents (AED)
       parameters:
@@ -657,10 +657,10 @@ paths:
           required: true
       responses:
         '200':
-          $ref: '#/components/responses/AnonymousElectorDocumentSummaries'
+          $ref: '#/components/responses/AnonymousElectorDocuments'
         '404':
           $ref: '#/components/responses/404ErrorResponse'
-      operationId: get-anonymous-elector-document-summaries-by-application-id
+      operationId: get-anonymous-elector-documents-by-application-id
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
@@ -1195,23 +1195,23 @@ components:
         - photoLocation
         - validOnDate
 
-    AnonymousElectorDocumentSummariesResponse:
-      title: AnonymousElectorDocumentSummariesResponse
-      description: A response containing a collection of Anonymous Elector Document summaries sorted with latest changes ordered first.
+    AnonymousElectorDocumentsResponse:
+      title: AnonymousElectorDocumentsResponse
+      description: A response containing a collection of Anonymous Elector Documents sorted with latest changes ordered first.
       type: object
       properties:
         anonymousElectorDocuments:
           title: AnonymousElectorDocuments
           type: array
-          description: List of Anonymous Elector Document summaries for the application.
+          description: List of Anonymous Elector Documents for the application.
           items:
-            $ref: '#/components/schemas/AnonymousElectorDocumentSummary'
+            $ref: '#/components/schemas/AnonymousElectorDocument'
       required:
         - anonymousElectorDocuments
 
-    AnonymousElectorDocumentSummary:
-      title: AnonymousElectorDocumentSummary
-      description: An object summarising the current state of an Anonymous Elector Document (AED)
+    AnonymousElectorDocument:
+      title: AnonymousElectorDocument
+      description: An object containing the details of an Anonymous Elector Document (AED)
       type: object
       allOf:
         - $ref: '#/components/schemas/UpdatedBy'
@@ -1229,6 +1229,17 @@ components:
           type: string
           description: GSS code of the ERO responsible for the application
           example: E12345678
+        sourceReference:
+          type: string
+          pattern: '^[a-fA-F\d]{24}$'
+          description: |
+            A 24 character hex string. 
+            The unique identifier of an Anonymous elector document application.
+          example: 1f0f76a9a66f438b9bb33070
+        applicationReference:
+          type: string
+          description: The reference number of an Anonymous elector document application
+          example: V3JSZC4CRH
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
         supportingInformationFormat:
@@ -1268,13 +1279,41 @@ components:
       description: An object containing the details for an anonymous elector on the AED certificate
       type: object
       properties:
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
         addressee:
           type: string
           description: Usually the `firstName middleNames surname` of an elector
           example: "Wayne Christopher Smith"
+        email:
+          type: string
+          maxLength: 1024
+          format: email
+          description: The applicant's email address. Null if not known
+          example: fred.blogs@some-domain.co.uk
+        phoneNumber:
+          type: string
+          maxLength: 50
+          description: The applicant's phone number. Null if not known
+          example: 01234 567890
         registeredAddress:
           $ref: '#/components/schemas/Address'
       required:
+        - firstName
+        - surname
         - addressee
         - registeredAddress
 
@@ -1568,8 +1607,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TemporaryCertificateSummariesResponse'
-    AnonymousElectorDocumentSummaries:
-      description: Response containing a collection of Anonymous Elector Document summaries
+    AnonymousElectorDocuments:
+      description: Response containing a collection of Anonymous Elector Documents
       headers:
         Access-Control-Allow-Origin:
           schema:
@@ -1583,7 +1622,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AnonymousElectorDocumentSummariesResponse'
+            $ref: '#/components/schemas/AnonymousElectorDocumentsResponse'
     AedSearchResults:
       description: Response containing the search result of Anonymous Elector document summaries
       headers:
