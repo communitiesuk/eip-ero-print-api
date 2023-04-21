@@ -469,7 +469,7 @@ paths:
   #
   # Anonymous Elector Document Summaries
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/anonymous-elector-document-summaries':
+  '/eros/{eroId}/anonymous-elector-documents/search':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the Anonymous Elector Documents.
@@ -548,7 +548,7 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/anonymous-elector-document-summaries'
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/search'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
         responseParameters:
@@ -1234,7 +1234,7 @@ components:
         applicationReference:
           type: string
           description: The reference number of an Anonymous elector document application
-          example: A3JSZC4CRH
+          example: V3JSZC4CRH
         certificateNumber:
           type: string
           description: The unique identifier of the Anonymous elector document. A 20 character alphanumeric string.
