@@ -467,12 +467,12 @@ paths:
 
 
   #
-  # Anonymous Elector Document Applications
+  # Anonymous Elector Document Summaries
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/anonymous-applications':
+  '/eros/{eroId}/anonymous-elector-document-summaries':
     parameters:
       - name: eroId
-        description: The ID of the Electoral Registration Office responsible for the application(s).
+        description: The ID of the Electoral Registration Office responsible for the Anonymous Elector Documents.
         schema:
           type: string
         example: 'city-council'
@@ -483,7 +483,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Anonymous Elector Document Applications
+        - Anonymous Elector Document Summaries
       responses:
         200:
           description: Default response for CORS method
@@ -516,38 +516,21 @@ paths:
               application/json: |
                 {}
     get:
-      summary: Search for Anonymous Elector Document Applications
-      description: 'Search for Anonymous Elector Document Applications based on querying parameters'
+      summary: Search for Anonymous Elector Document Summaries
+      description: 'Search for Anonymous Elector Document summaries based on querying parameters'
       tags:
-        - Anonymous Elector Document Applications
+        - Anonymous Elector Document Summaries
       responses:
         '200':
-          $ref: '#/components/responses/SearchApplications'
-      operationId: search-anonymous-elector-document-applications
+          $ref: '#/components/responses/AedSearchResults'
+      operationId: search-anonymous-elector-document-summaries
       parameters:
-        - name: pageSize
-          description: The number of results to return in each page
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 200
-          example: 100
-          in: query
-          required: true
-        - name: page
-          description: The page number being requested (with the first page being 1)
-          schema:
-            type: integer
-            minimum: 1
-          example: 1
-          in: query
-          required: true
         - name: searchBy
           description: |
-            The data field to apply the `searchValue` to. An empty value will return all AED applications.
+            The data field to apply the `searchValue` to. An empty value will return all AED documents.
             This value must be provided when `searchValue` is present
           schema:
-            $ref: '#/components/schemas/SearchBy'
+            $ref: '#/components/schemas/AedSearchBy'
           example: surname
           in: query
           required: false
@@ -565,7 +548,7 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/anonymous-applications'
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-document-summaries'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
         responseParameters:
@@ -860,14 +843,12 @@ components:
         - dispatched
         - not-delivered
 
-    SearchBy:
-      title: SearchBy
-      description: An enumeration of search by fields
+    AedSearchBy:
+      title: AedSearchBy
+      description: An enumeration of search by fields for searching AEDs
       type: string
       enum:
         - surname
-        - applicationReference
-        - electoralRollNumber
 
     SourceType:
       title: SourceType
@@ -1221,42 +1202,22 @@ components:
         - generated
         - printed
 
-    ApplicationsSearchResponse:
-      title: ApplicationsSearchResponse
-      description: Response containing the meta data and results of searching for Anonymous Elector document applications
+    AedSearchSummaryResponse:
+      title: AedSearchSummaryResponse
+      description: Response containing the meta data and results of searching for Anonymous Elector document summaries
       type: object
       properties:
-        page:
-          type: integer
-          description: The page number
-          example: 1
-        pageSize:
-          type: integer
-          description: The number of results per page
-          example: 1
-        totalPages:
-          type: integer
-          description: The total number of pages
-          example: 1
-        totalResults:
-          type: integer
-          description: The total number of results
-          example: 1
         results:
           type: array
-          description: Array of anonymous application search summaries that matches the search criteria
+          description: Array of anonymous elector document search summaries that matches the search criteria
           items:
-            $ref: '#/components/schemas/ApplicationSearchSummaryResponse'
+            $ref: '#/components/schemas/AedSearchSummary'
       required:
-        - page
-        - pageSize
-        - totalPages
-        - totalResults
         - results
 
-    ApplicationSearchSummaryResponse:
-      title: ApplicationSearchSummaryResponse
-      description: A response containing summary information of an each Anonymous Elector document application
+    AedSearchSummary:
+      title: AedSearchSummary
+      description: An object containing summary information of an each Anonymous Elector document summary
       type: object
       properties:
         gssCode:
@@ -1268,15 +1229,15 @@ components:
           pattern: '^[a-fA-F\d]{24}$'
           description: |
             A 24 character hex string. 
-            The unique identifier of an application which should be used as the resource ID for all operations on that Anonymous elector document application.
+            The unique identifier of an Anonymous elector document application.
           example: 1f0f76a9a66f438b9bb33070
         applicationReference:
           type: string
-          description: The reference number of an application
+          description: The reference number of an Anonymous elector document application
           example: A3JSZC4CRH
         certificateNumber:
           type: string
-          description: The unique identifier of the Anonymous Electoral Document. A 20 character alphanumeric string.
+          description: The unique identifier of the Anonymous elector document. A 20 character alphanumeric string.
           pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
           example: DEV1W0XDH1368LWE1J40
         electoralRollNumber:
@@ -1303,7 +1264,7 @@ components:
         dateTimeCreated:
           type: string
           format: date-time
-          description: The timestamp in ISO-8601 UTC that the application document was originally created
+          description: The timestamp in ISO-8601 UTC that the AED was originally created
           example: '2022-07-27T09:39:44Z'
       required:
         - gssCode
@@ -1518,8 +1479,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AnonymousElectorDocumentSummariesResponse'
-    SearchApplications:
-      description: Response containing the result of searching for Anonymous Elector document applications
+    AedSearchResults:
+      description: Response containing the search result of Anonymous Elector document summaries
       headers:
         Access-Control-Allow-Origin:
           schema:
@@ -1533,7 +1494,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApplicationsSearchResponse'
+            $ref: '#/components/schemas/AedSearchSummaryResponse'
   #
   # Request Body Definitions
   # --------------------------------------------------------------------------------
