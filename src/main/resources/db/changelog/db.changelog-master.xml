@@ -30,4 +30,6 @@
     <include relativeToChangelogFile="true" file="ddl/0020_alter_anonymous_elector_document.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0021_alter_aed_contact_details.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0022_alter_certificate_status_event_timestamp_precision.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0023_alter_aed_and_aed_contact_details.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0024_create_aed_summary_view.xml"/>
 </databaseChangeLog>
