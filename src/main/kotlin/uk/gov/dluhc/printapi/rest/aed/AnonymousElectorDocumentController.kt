@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rest.aed
 
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
@@ -23,13 +24,17 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorSummaryMapper
+import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.models.ReIssueAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.rest.HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import java.io.ByteArrayInputStream
 import javax.validation.Valid
+
+private val logger = KotlinLogging.logger {}
 
 @RestController
 @CrossOrigin
@@ -58,6 +63,26 @@ class AnonymousElectorDocumentController(
                 .headers(createPdfHttpHeaders(pdfFile))
                 .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
         }
+    }
+
+    @PostMapping("re-issue")
+    @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
+    fun reissueAnonymousElectorDocument(
+        @PathVariable eroId: String,
+        @RequestBody @Valid request: ReIssueAnonymousElectorDocumentRequest,
+        authentication: Authentication
+    ): ResponseEntity<InputStreamResource> {
+        logger.info { "Request received to reissue AED document for eroId [$eroId], request [$request]" }
+        TODO("Not yet implemented")
+    }
+    @GetMapping("/search")
+    @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
+    @ResponseStatus(OK)
+    fun getAnonymousElectorDocumentSearchSummaries(
+        @PathVariable eroId: String,
+    ): AedSearchSummaryResponse {
+        logger.info { "Searching AED document summaries for eroId [$eroId]" }
+        TODO("Not yet implemented")
     }
 
     @GetMapping
