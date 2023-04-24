@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="matt.wills@valtech.com" id="0025_EIP1-5662_alter_aed - application_ref not null" context="ddl">
+
+        <addNotNullConstraint tableName="anonymous_elector_document" columnName="application_reference" columnDataType="varchar(255)"/>
+
+        <rollback>
+            <dropNotNullConstraint tableName="anonymous_elector_document" columnName="application_reference" columnDataType="varchar(255)"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>

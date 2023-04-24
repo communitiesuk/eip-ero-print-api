@@ -21,7 +21,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocument
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
@@ -31,6 +31,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents?applicationId={APPLICATION_ID}"
         private const val APPLICATION_ID = "7762ccac7c056046b75d4bbc"
+        private const val APPLICATION_REFERENCE = "V3JSZC4CRH"
         private const val GSS_CODE = "W06000099"
     }
 
@@ -74,6 +75,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
         val aedMatchingDocument1 = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
             sourceReference = APPLICATION_ID,
+            applicationReference = APPLICATION_REFERENCE,
             supportingInformationFormat = SupportingInformationFormat.LARGE_PRINT,
             contactDetails = buildAedContactDetails(firstName = "John", middleNames = null, surname = "Jacob"),
             delivery = buildDelivery(deliveryAddressType = REGISTERED)
@@ -86,6 +88,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
         val aedMatchingDocument2 = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
             sourceReference = APPLICATION_ID,
+            applicationReference = APPLICATION_REFERENCE,
             supportingInformationFormat = SupportingInformationFormat.STANDARD,
             contactDetails = buildAedContactDetails(firstName = "Mike", middleNames = "William Brown", surname = "Johnson"),
             delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION)
@@ -107,14 +110,13 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
         )
 
         val expectedFirstRecord = with(aedMatchingDocument2) {
-            buildAnonymousElectorDocument(
+            buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
+                sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
                     buildAnonymousElector(
-                        firstName = firstName,
-                        middleNames = middleNames,
-                        surname = surname,
+                        firstName = firstName, middleNames = middleNames, surname = surname,
                         addressee = "Mike William Brown Johnson",
                         registeredAddress = with(address!!) {
                             buildValidAddress(
@@ -132,14 +134,13 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             )
         }
         val expectedSecondRecord = with(aedMatchingDocument1) {
-            buildAnonymousElectorDocument(
+            buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.REGISTERED,
+                sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
                     buildAnonymousElector(
-                        firstName = firstName,
-                        middleNames = middleNames,
-                        surname = surname,
+                        firstName = firstName, middleNames = middleNames, surname = surname,
                         addressee = "John Jacob",
                         registeredAddress = with(address!!) {
                             buildValidAddress(

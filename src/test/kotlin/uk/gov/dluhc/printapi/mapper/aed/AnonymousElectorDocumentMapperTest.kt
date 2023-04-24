@@ -31,7 +31,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocument
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
 import uk.gov.dluhc.printapi.dto.CertificateLanguage as DtoCertificateLanguage
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType as DtoDeliveryAddressType
@@ -71,10 +71,12 @@ class AnonymousElectorDocumentMapperTest {
             given(instantMapper.toOffsetDateTime(any())).willReturn(requestDateTime)
 
             val expected = with(dtoRequest) {
-                buildAnonymousElectorDocument(
+                buildAnonymousElectorDocumentApi(
                     certificateNumber = certificateNumber,
                     electoralRollNumber = electoralRollNumber,
                     gssCode = gssCode,
+                    sourceReference = sourceReference,
+                    applicationReference = applicationReference,
                     certificateLanguage = CertificateLanguage.EN,
                     supportingInformationFormat = AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ,
                     deliveryAddressType = DeliveryAddressType.REGISTERED,
@@ -145,6 +147,8 @@ class AnonymousElectorDocumentMapperTest {
                     certificateNumber = certificateNumber,
                     electoralRollNumber = electoralRollNumber,
                     gssCode = gssCode,
+                    sourceReference = sourceReference,
+                    applicationReference = applicationReference,
                     certificateLanguage = DtoCertificateLanguage.EN,
                     supportingInformationFormat = AnonymousSupportingInformationFormatDtoEnum.BRAILLE,
                     deliveryAddressType = DtoDeliveryAddressType.REGISTERED,
