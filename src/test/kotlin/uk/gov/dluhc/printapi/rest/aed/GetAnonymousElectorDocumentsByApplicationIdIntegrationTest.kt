@@ -196,8 +196,6 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual).isNotNull
-        assertThat(actual!!.anonymousElectorDocuments).isNotNull
-        assertThat(actual.anonymousElectorDocuments).isEmpty()
+        assertThat(actual!!.anonymousElectorDocuments).isEmpty()
     }
 }
