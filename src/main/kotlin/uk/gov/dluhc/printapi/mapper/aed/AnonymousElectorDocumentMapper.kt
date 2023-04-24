@@ -2,71 +2,45 @@ package uk.gov.dluhc.printapi.mapper.aed
 
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
-import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
-import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
-import uk.gov.dluhc.printapi.database.entity.Delivery
-import uk.gov.dluhc.printapi.dto.CertificateDelivery
-import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDto
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
-import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
-import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
-import uk.gov.dluhc.printapi.service.IdFactory
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDate
+import uk.gov.dluhc.printapi.mapper.InstantMapper
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocument as AnonymousElectorDocumentApi
 
 @Mapper(
     uses = [
         AnonymousSupportingInformationFormatMapper::class,
         CertificateLanguageMapper::class,
         DeliveryAddressTypeMapper::class,
-        SourceTypeMapper::class,
+        InstantMapper::class
     ]
 )
 abstract class AnonymousElectorDocumentMapper {
 
-    @Autowired
-    protected lateinit var idFactory: IdFactory
+    @Mapping(target = "dateTime", source = "requestDateTime")
+    @Mapping(target = "photoLocation", source = "photoLocationArn")
+    abstract fun mapToApiAnonymousElectorDocument(aedSummaryDto: AnonymousElectorDocumentDto): AnonymousElectorDocumentApi
 
-    @Autowired
-    protected lateinit var clock: Clock
+    @Mapping(target = "elector", source = "aedEntity.contactDetails")
+    @Mapping(target = "status", constant = "PRINTED")
+    @Mapping(target = "deliveryAddressType", source = "aedEntity.delivery.deliveryAddressType")
+    abstract fun mapToAnonymousElectorDocumentDto(aedEntity: AnonymousElectorDocument): AnonymousElectorDocumentDto
 
-    abstract fun toGenerateAnonymousElectorDocumentDto(
-        apiRequest: GenerateAnonymousElectorDocumentRequest,
-        userId: String
-    ): GenerateAnonymousElectorDocumentDto
+    @Mapping(target = "addressee", expression = "java(getAssigneeName(aedContactDetailsEntity))")
+    @Mapping(target = "registeredAddress", source = "aedContactDetailsEntity.address")
+    protected abstract fun mapFromContactDetailsToElectorDto(aedContactDetailsEntity: AedContactDetails): AnonymousElectorDto
 
-    @Mapping(target = "photoLocationArn", source = "aedDto.photoLocation")
-    @Mapping(target = "certificateNumber", expression = "java( idFactory.vacNumber() )")
-    @Mapping(target = "issueDate", expression = "java( issueDate() )")
-    @Mapping(target = "requestDateTime", expression = "java( requestDateTime() )")
-    @Mapping(target = "contactDetails", source = "aedDto")
-    @Mapping(target = "statusHistory", expression = "java( markStatusAsPrinted() )")
-    @Mapping(target = "delivery", source = "aedDto.delivery")
-    abstract fun toAnonymousElectorDocument(
-        aedDto: GenerateAnonymousElectorDocumentDto,
-        aedTemplateFilename: String
-    ): AnonymousElectorDocument
-
-    @Mapping(target = "address", source = "registeredAddress")
-    protected abstract fun toAedContactDetailsEntity(aedDto: GenerateAnonymousElectorDocumentDto): AedContactDetails
-
-    @Mapping(target = "address", source = "deliveryAddress")
-    protected abstract fun fromDeliveryDtoToDeliveryEntity(deliveryDto: CertificateDelivery): Delivery
-
-    protected fun issueDate(): LocalDate = LocalDate.now(clock)
-
-    protected fun requestDateTime(): Instant = Instant.now(clock)
-
-    protected fun markStatusAsPrinted(): List<AnonymousElectorDocumentStatus> {
-        return listOf(
-            AnonymousElectorDocumentStatus(
-                status = AnonymousElectorDocumentStatus.Status.PRINTED,
-                eventDateTime = Instant.now(clock)
-            )
-        )
+    protected fun getAssigneeName(aedContactDetailsEntity: AedContactDetails): String {
+        return with(aedContactDetailsEntity) {
+            if (middleNames.isNullOrBlank()) {
+                "$firstName $surname"
+            } else {
+                "$firstName $middleNames $surname"
+            }
+        }
     }
 }

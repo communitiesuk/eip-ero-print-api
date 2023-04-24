@@ -6,7 +6,7 @@ import uk.gov.dluhc.printapi.dto.DeliveryAddressType
 import java.time.Instant
 import java.time.LocalDate
 
-class AnonymousElectorDocumentSummaryDto(
+class AnonymousElectorDocumentDto(
     val certificateNumber: String,
     val electoralRollNumber: String,
     val gssCode: String,
@@ -22,8 +22,13 @@ class AnonymousElectorDocumentSummaryDto(
 )
 
 class AnonymousElectorDto(
+    val firstName: String,
+    val middleNames: String?,
+    val surname: String,
     val addressee: String,
     val registeredAddress: AddressDto,
+    val email: String?,
+    val phoneNumber: String?
 )
 
 enum class AnonymousElectorDocumentStatus {
