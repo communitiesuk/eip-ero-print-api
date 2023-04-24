@@ -8,6 +8,8 @@ import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentReposit
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
@@ -34,6 +36,20 @@ class AnonymousElectorDocumentService(
             anonymousElectorDocumentRepository.save(this)
             return PdfFile("anonymous-elector-document-$certificateNumber.pdf", contents)
         }
+    }
+
+    @Transactional
+    fun reIssueAnonymousElectorDocument(eroId: String, dto: ReIssueAnonymousElectorDocumentDto): PdfFile {
+        val gssCodes = eroService.lookupGssCodesForEro(eroId)
+        val mostRecentAed = anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+            gssCodes = gssCodes,
+            sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+            sourceReference = dto.sourceReference
+        )
+            .sortedByDescending { it.dateCreated }
+            .firstOrNull() ?: throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
+
+        TODO("not yet implemented")
     }
 
     @Transactional(readOnly = true)
