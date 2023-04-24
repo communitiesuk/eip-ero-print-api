@@ -36,6 +36,7 @@ class AnonymousElectorDocumentService(
         }
     }
 
+    @Transactional(readOnly = true)
     fun getAnonymousElectorDocuments(
         eroId: String,
         applicationId: String
