@@ -8,7 +8,7 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
-import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentsResponse
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.LARGE_MINUS_PRINT
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.STANDARD
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
@@ -20,17 +20,18 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDo
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentSummary
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
 import java.time.ZoneOffset
 
-internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest : IntegrationTest() {
+internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : IntegrationTest() {
     companion object {
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents?applicationId={APPLICATION_ID}"
         private const val APPLICATION_ID = "7762ccac7c056046b75d4bbc"
+        private const val APPLICATION_REFERENCE = "V3JSZC4CRH"
         private const val GSS_CODE = "W06000099"
     }
 
@@ -62,7 +63,7 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
     }
 
     @Test
-    fun `should return anonymous elector document summary`() {
+    fun `should return anonymous elector documents by application ID`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -72,7 +73,10 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
         val aedMatchingDocument1 = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE, sourceReference = APPLICATION_ID, supportingInformationFormat = SupportingInformationFormat.LARGE_PRINT,
+            gssCode = GSS_CODE,
+            sourceReference = APPLICATION_ID,
+            applicationReference = APPLICATION_REFERENCE,
+            supportingInformationFormat = SupportingInformationFormat.LARGE_PRINT,
             contactDetails = buildAedContactDetails(firstName = "John", middleNames = null, surname = "Jacob"),
             delivery = buildDelivery(deliveryAddressType = REGISTERED)
         )
@@ -82,7 +86,10 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
         Thread.sleep(1000)
 
         val aedMatchingDocument2 = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE, sourceReference = APPLICATION_ID, supportingInformationFormat = SupportingInformationFormat.STANDARD,
+            gssCode = GSS_CODE,
+            sourceReference = APPLICATION_ID,
+            applicationReference = APPLICATION_REFERENCE,
+            supportingInformationFormat = SupportingInformationFormat.STANDARD,
             contactDetails = buildAedContactDetails(firstName = "Mike", middleNames = "William Brown", surname = "Johnson"),
             delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION)
         )
@@ -103,11 +110,13 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
         )
 
         val expectedFirstRecord = with(aedMatchingDocument2) {
-            buildAnonymousElectorDocumentSummary(
+            buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
+                sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
-                    buildAnonymousElector(
+                    buildAnonymousElectorApi(
+                        firstName = firstName, middleNames = middleNames, surname = surname,
                         addressee = "Mike William Brown Johnson",
                         registeredAddress = with(address!!) {
                             buildValidAddress(
@@ -115,7 +124,9 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
                                 town = town, area = area, locality = locality,
                                 uprn = uprn, postcode = postcode!!
                             )
-                        }
+                        },
+                        email = email,
+                        phoneNumber = phoneNumber
                     )
                 },
                 photoLocation = photoLocationArn, issueDate = issueDate, userId = userId,
@@ -123,11 +134,13 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
             )
         }
         val expectedSecondRecord = with(aedMatchingDocument1) {
-            buildAnonymousElectorDocumentSummary(
+            buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.REGISTERED,
+                sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
-                    buildAnonymousElector(
+                    buildAnonymousElectorApi(
+                        firstName = firstName, middleNames = middleNames, surname = surname,
                         addressee = "John Jacob",
                         registeredAddress = with(address!!) {
                             buildValidAddress(
@@ -135,7 +148,9 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
                                 town = town, area = area, locality = locality,
                                 uprn = uprn, postcode = postcode!!
                             )
-                        }
+                        },
+                        email = email,
+                        phoneNumber = phoneNumber
                     )
                 },
                 photoLocation = photoLocationArn, issueDate = issueDate, userId = userId,
@@ -150,7 +165,7 @@ internal class GetAnonymousElectorDocumentSummaryByApplicationIdIntegrationTest 
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
-            .returnResult(AnonymousElectorDocumentSummariesResponse::class.java)
+            .returnResult(AnonymousElectorDocumentsResponse::class.java)
 
         // Then
         val actual = response.responseBody.blockFirst()

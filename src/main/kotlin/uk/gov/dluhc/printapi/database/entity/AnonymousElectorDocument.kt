@@ -51,8 +51,9 @@ class AnonymousElectorDocument(
     @field:Size(max = 255)
     var sourceReference: String,
 
+    @field:NotNull
     @field:Size(max = 255)
-    var applicationReference: String?,
+    var applicationReference: String,
 
     @field:NotNull
     @Enumerated(EnumType.STRING)

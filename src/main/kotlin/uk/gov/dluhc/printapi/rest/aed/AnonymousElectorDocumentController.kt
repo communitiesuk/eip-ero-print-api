@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
-import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorSummaryMapper
-import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentSummariesResponse
+import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentsResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.rest.HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
@@ -38,8 +38,8 @@ class AnonymousElectorDocumentController(
     @Qualifier("anonymousElectorDocumentExplainerPdfService")
     private val explainerPdfService: ExplainerPdfService,
     private val anonymousElectorDocumentService: AnonymousElectorDocumentService,
+    private val generateAnonymousElectorDocumentMapper: GenerateAnonymousElectorDocumentMapper,
     private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
-    private val anonymousElectorSummaryMapper: AnonymousElectorSummaryMapper,
 ) {
 
     @PostMapping
@@ -49,7 +49,7 @@ class AnonymousElectorDocumentController(
         @RequestBody @Valid generateAnonymousElectorDocumentRequest: GenerateAnonymousElectorDocumentRequest,
         authentication: Authentication
     ): ResponseEntity<InputStreamResource> {
-        val dto = anonymousElectorDocumentMapper.toGenerateAnonymousElectorDocumentDto(
+        val dto = generateAnonymousElectorDocumentMapper.toGenerateAnonymousElectorDocumentDto(
             apiRequest = generateAnonymousElectorDocumentRequest,
             userId = authentication.name
         )
@@ -63,14 +63,14 @@ class AnonymousElectorDocumentController(
     @GetMapping
     @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
     @ResponseStatus(OK)
-    fun getAnonymousElectorDocumentSummaries(
+    fun getAnonymousElectorDocuments(
         @PathVariable eroId: String,
         @RequestParam applicationId: String,
-    ): AnonymousElectorDocumentSummariesResponse {
+    ): AnonymousElectorDocumentsResponse {
         val anonymousElectorDocuments = anonymousElectorDocumentService
-            .getAnonymousElectorDocumentSummaries(eroId, applicationId)
-            .map { anonymousElectorSummaryMapper.mapToApiAnonymousElectorDocumentSummary(it) }
-        return AnonymousElectorDocumentSummariesResponse(anonymousElectorDocuments = anonymousElectorDocuments)
+            .getAnonymousElectorDocuments(eroId, applicationId)
+            .map { anonymousElectorDocumentMapper.mapToApiAnonymousElectorDocument(it) }
+        return AnonymousElectorDocumentsResponse(anonymousElectorDocuments = anonymousElectorDocuments)
     }
 
     @PostMapping(value = ["{gssCode}/explainer-document"], produces = [APPLICATION_PDF_VALUE])
