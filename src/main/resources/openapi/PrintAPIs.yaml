@@ -1266,6 +1266,8 @@ components:
         - certificateNumber
         - electoralRollNumber
         - gssCode
+        - sourceReference
+        - applicationReference
         - certificateLanguage
         - supportingInformationFormat
         - deliveryAddressType
