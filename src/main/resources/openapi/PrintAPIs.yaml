@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.13.0'
+  version: '1.14.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -675,6 +675,90 @@ paths:
         connectionType: VPC_LINK
         connectionId: '${vpc_connection_id}'
         httpMethod: GET
+
+  '/eros/{eroId}/anonymous-elector-documents/re-issue':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Re-issues and returns an Anonymous Elector Document (AED). The document status is marked as `PRINTED` upon successful re-issue of AED document.
+      description: |
+        Re-issues an Anonymous Elector Document (AED). This results in a new AED document based on the last AED of the specified application ID.
+        At present there is no business case or differentiation between an AED being generated and it being printed. It is assumed the ERO will
+        print the document once generated via this API. Therefore the status of the new AED will be set as `PRINTED`.
+      tags:
+        - Anonymous Elector Documents (AED)
+      requestBody:
+        $ref: '#/components/requestBodies/ReIssueAnonymousElectorDocument'
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="anonymous-elector-document-DGFF4E6420YHWPJYX560.pdf"
+        '400':
+          $ref: '#/components/responses/400ErrorResponse'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: re-issue-anonymous-elector-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
 
   #
   # Anonymous Elector Document (AED) Explainer Document
@@ -1359,6 +1443,30 @@ components:
         - registeredAddress
         - delivery
 
+    ReIssueAnonymousElectorDocumentRequest:
+      title: ReIssueAnonymousElectorDocumentRequest
+      description: Request body to re-issue an Anonymous Elector Document (AED)
+      type: object
+      properties:
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Anonymous Elector Document is for.
+        electoralRollNumber:
+          type: string
+          description: The electoral roll number allocated by the Local Authority to the elector. There is no specific format and they can vary across EROs.
+          minLength: 1
+          maxLength: 25
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
+      required:
+        - sourceType
+        - sourceReference
+        - electoralRollNumber
+        - deliveryAddressType
+
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
@@ -1511,6 +1619,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenerateAnonymousElectorDocumentRequest'
+    ReIssueAnonymousElectorDocument:
+      description: Request body to re-issue an Anonymous Elector Document (AED)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReIssueAnonymousElectorDocumentRequest'
 
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:
