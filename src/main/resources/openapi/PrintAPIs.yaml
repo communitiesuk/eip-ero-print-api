@@ -749,7 +749,7 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/re-issue'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
         responseParameters:
