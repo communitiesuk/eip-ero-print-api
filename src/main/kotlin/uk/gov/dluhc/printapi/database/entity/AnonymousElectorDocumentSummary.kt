@@ -18,34 +18,21 @@ class AnonymousElectorDocumentSummary(
 
     @Id
     @Type(type = UUIDCharType)
-    var id: UUID,
-
-    var gssCode: String,
-
+    val id: UUID,
+    val gssCode: String,
     @Enumerated(EnumType.STRING)
-    var sourceType: SourceType,
-
-    var electoralRollNumber: String,
-
-    var sanitizedElectoralRollNumber: String,
-
-    var certificateNumber: String,
-
-    var sourceReference: String,
-
-    var applicationReference: String,
-
-    var issueDate: LocalDate,
-
-    var dateCreated: Instant,
-
-    var firstName: String,
-
-    var surname: String,
-
-    var sanitizedSurname: String,
-
-    var postcode: String
+    val sourceType: SourceType,
+    val electoralRollNumber: String,
+    val sanitizedElectoralRollNumber: String,
+    val certificateNumber: String,
+    val sourceReference: String,
+    val applicationReference: String,
+    val issueDate: LocalDate,
+    val dateCreated: Instant,
+    val firstName: String,
+    val surname: String,
+    val sanitizedSurname: String,
+    val postcode: String
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -59,6 +46,6 @@ class AnonymousElectorDocumentSummary(
 
     @Override
     override fun toString(): String {
-        return this::class.simpleName + "(gssCode = $gssCode, sourceReference = $sourceReference, applicationReference = $applicationReference)"
+        return this::class.simpleName + "(id = $id, gssCode = $gssCode, sourceReference = $sourceReference, applicationReference = $applicationReference)"
     }
 }

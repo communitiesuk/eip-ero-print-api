@@ -61,7 +61,7 @@ fun buildAnonymousElectorDocumentSummaryViewFromAedEntity(
             gssCode = gssCode,
             sourceType = sourceType,
             sourceReference = sourceReference,
-            applicationReference = applicationReference!!,
+            applicationReference = applicationReference,
             certificateNumber = certificateNumber,
             electoralRollNumber = electoralRollNumber,
             sanitizedElectoralRollNumber = electoralRollNumber,

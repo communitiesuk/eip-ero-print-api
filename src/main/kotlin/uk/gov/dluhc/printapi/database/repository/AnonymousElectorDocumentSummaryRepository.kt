@@ -1,5 +1,7 @@
 package uk.gov.dluhc.printapi.database.repository
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentSummary
@@ -10,8 +12,9 @@ import java.util.UUID
 interface AnonymousElectorDocumentSummaryRepository :
     PagingAndSortingRepository<AnonymousElectorDocumentSummary, UUID> {
 
-    fun findByGssCodeInAndSourceTypeOrderByIssueDateDescSanitizedSurnameAsc(
+    fun findAllByGssCodeInAndSourceType(
         gssCodes: List<String>,
         sourceType: SourceType,
-    ): List<AnonymousElectorDocumentSummary>
+        pageRequest: Pageable
+    ): Page<AnonymousElectorDocumentSummary>
 }
