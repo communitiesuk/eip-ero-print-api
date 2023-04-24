@@ -20,7 +20,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDo
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
@@ -115,7 +115,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
                 sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
-                    buildAnonymousElector(
+                    buildAnonymousElectorApi(
                         firstName = firstName, middleNames = middleNames, surname = surname,
                         addressee = "Mike William Brown Johnson",
                         registeredAddress = with(address!!) {
@@ -139,7 +139,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.REGISTERED,
                 sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
-                    buildAnonymousElector(
+                    buildAnonymousElectorApi(
                         firstName = firstName, middleNames = middleNames, surname = surname,
                         addressee = "John Jacob",
                         registeredAddress = with(address!!) {

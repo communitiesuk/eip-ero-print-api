@@ -33,7 +33,7 @@ fun buildAnonymousElectorDocumentApi(
     certificateLanguage: CertificateLanguage = CertificateLanguage.EN,
     supportingInformationFormat: AnonymousSupportingInformationFormat = AnonymousSupportingInformationFormat.STANDARD,
     deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
-    elector: AnonymousElector = buildAnonymousElector(),
+    elector: AnonymousElector = buildAnonymousElectorApi(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,
     photoLocation: String = aPhotoArn(),
     issueDate: LocalDate = aValidIssueDate(),
@@ -56,7 +56,7 @@ fun buildAnonymousElectorDocumentApi(
     dateTime = dateTime,
 )
 
-fun buildAnonymousElector(
+fun buildAnonymousElectorApi(
     firstName: String = aValidFirstName(),
     middleNames: String? = null,
     surname: String = aValidSurname(),

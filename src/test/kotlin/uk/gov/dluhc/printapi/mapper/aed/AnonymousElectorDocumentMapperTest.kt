@@ -30,7 +30,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
-import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElector
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
 import uk.gov.dluhc.printapi.dto.CertificateLanguage as DtoCertificateLanguage
@@ -81,7 +81,7 @@ class AnonymousElectorDocumentMapperTest {
                     supportingInformationFormat = AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ,
                     deliveryAddressType = DeliveryAddressType.REGISTERED,
                     elector = with(elector) {
-                        buildAnonymousElector(
+                        buildAnonymousElectorApi(
                             firstName = firstName,
                             middleNames = middleNames,
                             surname = surname,
