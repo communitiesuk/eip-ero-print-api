@@ -174,4 +174,28 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             .usingRecursiveComparison()
             .isEqualTo(listOf(expectedFirstRecord, expectedSecondRecord))
     }
+
+    @Test
+    fun `should return empty list given no AEDs exist for application ID`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        // When
+        val response = webTestClient.get()
+            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult(AnonymousElectorDocumentsResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual!!.anonymousElectorDocuments).isEmpty()
+    }
 }
