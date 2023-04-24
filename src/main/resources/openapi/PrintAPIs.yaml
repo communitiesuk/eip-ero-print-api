@@ -1448,8 +1448,6 @@ components:
       description: Request body to re-issue an Anonymous Elector Document (AED)
       type: object
       properties:
-        sourceType:
-          $ref: '#/components/schemas/SourceType'
         sourceReference:
           type: string
           example: 1f0f76a9a66f438b9bb33070
@@ -1462,7 +1460,6 @@ components:
         deliveryAddressType:
           $ref: '#/components/schemas/DeliveryAddressType'
       required:
-        - sourceType
         - sourceReference
         - electoralRollNumber
         - deliveryAddressType
