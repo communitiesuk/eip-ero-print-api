@@ -171,6 +171,7 @@ fun buildDelivery(
     address: Address = buildAddress(),
     deliveryClass: DeliveryClass = aValidDeliveryClass(),
     deliveryAddressType: DeliveryAddressType = aValidDeliveryAddressType(),
+    collectionReason: String? = null,
     addressFormat: AddressFormat = aValidAddressFormat(),
 ): Delivery = Delivery(
     id = id,
@@ -178,5 +179,6 @@ fun buildDelivery(
     address = address,
     deliveryClass = deliveryClass,
     deliveryAddressType = deliveryAddressType,
+    collectionReason = collectionReason,
     addressFormat = addressFormat,
 )
