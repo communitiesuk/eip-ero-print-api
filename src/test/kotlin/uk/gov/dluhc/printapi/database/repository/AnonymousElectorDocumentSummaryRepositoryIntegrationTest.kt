@@ -23,7 +23,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
     inner class FindByGssCodeInAndSourceTypeOrderByDateCreatedDescSanitizedSurnameAsc {
 
         @Test
-        fun `should returns empty list when summary view has no records`() {
+        fun `should return empty list when summary view has no records`() {
             // Given
             val gssCode = aGssCode()
 
@@ -40,7 +40,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
         }
 
         @Test
-        fun `should returns empty list when no matching gssCode record exists`() {
+        fun `should return empty list when no matching gssCode record exists`() {
             // Given
             val gssCode = aGssCode()
             val otherAed = buildAnonymousElectorDocument(gssCode = anotherGssCode())
@@ -67,7 +67,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
             val aed1SourceReference = aValidSourceReference()
             val aed1ApplicationReference = aValidApplicationReference()
 
-            val aed1InitialDocument = buildAnonymousElectorDocument(
+            val application1InitialAed = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed1SourceReference,
                 applicationReference = aed1ApplicationReference,
@@ -75,26 +75,26 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 requestDateTime = currentDateTimeInstant.minusSeconds(10),
                 contactDetails = buildAedContactDetails(surname = "A")
             )
-            val aed1SecondDocument = buildAnonymousElectorDocument(
+            val application1SecondAed = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed1SourceReference,
                 applicationReference = aed1ApplicationReference,
                 issueDate = currentDate.minusDays(10),
                 requestDateTime = currentDateTimeInstant.minusSeconds(9),
-                contactDetails = aed1InitialDocument.contactDetails!!
+                contactDetails = application1InitialAed.contactDetails!!
             )
-            val aed1LatestDocument = buildAnonymousElectorDocument(
+            val application1LatestAed = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed1SourceReference,
                 applicationReference = aed1ApplicationReference,
                 issueDate = currentDate.minusDays(9),
                 requestDateTime = currentDateTimeInstant, // View will return this latest record
-                contactDetails = aed1InitialDocument.contactDetails!!
+                contactDetails = application1InitialAed.contactDetails!!
             )
 
             val aed2SourceReference = aValidSourceReference()
             val aed2ApplicationReference = aValidApplicationReference()
-            val aed2InitialDocument = buildAnonymousElectorDocument(
+            val application2InitialAed = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed2SourceReference,
                 applicationReference = aed2ApplicationReference,
@@ -102,39 +102,39 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 requestDateTime = currentDateTimeInstant.minusSeconds(10),
                 contactDetails = buildAedContactDetails(surname = "Z")
             )
-            val aed2SecondDocument = buildAnonymousElectorDocument(
+            val application2SecondAed = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed2SourceReference,
                 applicationReference = aed2ApplicationReference,
                 issueDate = currentDate.minusDays(9),
                 requestDateTime = currentDateTimeInstant.minusSeconds(8),
-                contactDetails = aed2InitialDocument.contactDetails!!
+                contactDetails = application2InitialAed.contactDetails!!
             )
-            val aed2LatestDocument = buildAnonymousElectorDocument(
+            val application2LatestAed = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed2SourceReference,
                 applicationReference = aed2ApplicationReference,
                 issueDate = currentDate.minusDays(9),
                 requestDateTime = currentDateTimeInstant, // View will return this latest record
-                contactDetails = aed2InitialDocument.contactDetails!!
+                contactDetails = application2InitialAed.contactDetails!!
             )
-            val aed3Document = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(10))
-            val aed4Document = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
-            val otherAedDocument = buildAnonymousElectorDocument(gssCode = anotherGssCode())
+            val application3AedDocument = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(10))
+            val application4AedDocument = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
+            val otherApplicationAed = buildAnonymousElectorDocument(gssCode = anotherGssCode())
 
             anonymousElectorDocumentRepository.saveAll(
                 listOf(
-                    aed1InitialDocument, aed1SecondDocument, aed1LatestDocument,
-                    aed2InitialDocument, aed2SecondDocument, aed2LatestDocument,
-                    aed3Document, aed4Document, otherAedDocument
+                    application1InitialAed, application1SecondAed, application1LatestAed,
+                    application2InitialAed, application2SecondAed, application2LatestAed,
+                    application3AedDocument, application4AedDocument, otherApplicationAed
                 )
             )
 
-            val expectedSummaryRecord1 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed3Document)
-            val expectedSummaryRecord2 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed4Document)
-            val expectedSummaryRecord3 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed1LatestDocument)
-            val expectedSummaryRecord4 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed2LatestDocument)
-            val otherAedSummaryRecord = buildAnonymousElectorDocumentSummaryViewFromAedEntity(otherAedDocument)
+            val expectedSummaryRecord1 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(application3AedDocument)
+            val expectedSummaryRecord2 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(application4AedDocument)
+            val expectedSummaryRecord3 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(application1LatestAed)
+            val expectedSummaryRecord4 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(application2LatestAed)
+            val otherAedSummaryRecord = buildAnonymousElectorDocumentSummaryViewFromAedEntity(otherApplicationAed)
 
             // When
             val actual = anonymousElectorDocumentSummaryRepository
@@ -161,17 +161,17 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
             val gssCode = aGssCode()
             val currentDate = LocalDate.now()
 
-            val aed1 = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
-            val aed2 = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
-            val aed3 = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(1))
-            val aed4 = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(2))
-            val otherAed = buildAnonymousElectorDocument(gssCode = anotherGssCode())
+            val application1Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
+            val application2Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
+            val application3Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(1))
+            val application4Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(2))
+            val otherApplicationAed = buildAnonymousElectorDocument(gssCode = anotherGssCode())
 
-            anonymousElectorDocumentRepository.saveAll(listOf(aed1, aed2, aed3, aed4, otherAed))
+            anonymousElectorDocumentRepository.saveAll(listOf(application1Aed, application2Aed, application3Aed, application4Aed, otherApplicationAed))
 
-            val expectedSummaryRecord1 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed3)
-            val expectedSummaryRecord2 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed4)
-            val otherAedSummaryRecord = buildAnonymousElectorDocumentSummaryViewFromAedEntity(otherAed)
+            val expectedSummaryRecord1 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(application3Aed)
+            val expectedSummaryRecord2 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(application4Aed)
+            val otherAedSummaryRecord = buildAnonymousElectorDocumentSummaryViewFromAedEntity(otherApplicationAed)
 
             // When
             val actual = anonymousElectorDocumentSummaryRepository
