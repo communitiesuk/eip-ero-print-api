@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.service.aed
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -18,9 +19,11 @@ import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
+import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.aed.ReIssueAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
@@ -28,11 +31,13 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildGenerateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.buildTemplateDetails
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
 @ExtendWith(MockitoExtension::class)
@@ -45,6 +50,9 @@ internal class AnonymousElectorDocumentServiceTest {
 
     @Mock
     private lateinit var generateAnonymousElectorDocumentMapper: GenerateAnonymousElectorDocumentMapper
+
+    @Mock
+    private lateinit var reIssueAnonymousElectorDocumentMapper: ReIssueAnonymousElectorDocumentMapper
 
     @Mock
     private lateinit var anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper
@@ -214,6 +222,93 @@ internal class AnonymousElectorDocumentServiceTest {
             verify(anonymousElectorDocumentMapper).mapToAnonymousElectorDocumentDto(secondAedEntity)
             verify(anonymousElectorDocumentMapper).mapToAnonymousElectorDocumentDto(aedEntityWithLatestDateCreated)
             verifyNoMoreInteractions(eroService, anonymousElectorDocumentRepository, anonymousElectorDocumentMapper)
+        }
+    }
+
+    @Nested
+    inner class ReIssueAnonymousElectorDocument {
+
+        @Test
+        fun `should re-issue AED given previous AEDs exist for application ID`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+            val sourceReference = aValidSourceReference()
+
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+
+            val firstIssuedAed = buildAnonymousElectorDocument(
+                gssCode = gssCodes.first(),
+                sourceReference = sourceReference
+            ).apply {
+                dateCreated = Instant.now().minus(10, ChronoUnit.DAYS)
+            }
+            val mostRecentIssueAed = buildAnonymousElectorDocument(
+                gssCode = gssCodes.first(),
+                sourceReference = sourceReference
+            ).apply {
+                dateCreated = Instant.now().minus(2, ChronoUnit.DAYS)
+            }
+            given(anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any()))
+                .willReturn(listOf(firstIssuedAed, mostRecentIssueAed))
+
+            val templateFilename = aTemplateFilename()
+            given(pdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
+            val templateDetails = buildTemplateDetails()
+            given(pdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
+            val contents = Random.Default.nextBytes(10)
+            given(pdfFactory.createPdfContents(any())).willReturn(contents)
+
+            val certificateNumber = "ZlxBCBxpjseZU5i3ccyL"
+            val newlyIssuedAed = buildAnonymousElectorDocument(
+                certificateNumber = certificateNumber
+            )
+            given(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(any(), any()))
+                .willReturn(newlyIssuedAed)
+
+            val dto = buildReIssueAnonymousElectorDocumentDto(
+                sourceReference = sourceReference
+            )
+
+            // When
+            val actual = anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto)
+
+            // Then
+            assertThat(actual.filename).isEqualTo("anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf")
+            assertThat(actual.contents).isSameAs(contents)
+            verify(pdfTemplateDetailsFactory).getTemplateFilename(gssCodes.first())
+            verify(pdfTemplateDetailsFactory).getTemplateDetails(newlyIssuedAed)
+            verify(pdfFactory).createPdfContents(templateDetails)
+            verify(eroService).lookupGssCodesForEro(eroId)
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
+            verify(reIssueAnonymousElectorDocumentMapper).toNewAnonymousElectorDocument(mostRecentIssueAed, templateFilename)
+            verify(anonymousElectorDocumentRepository).save(newlyIssuedAed)
+        }
+
+        @Test
+        fun `should not re-issue AED given no previous AED exists for application ID`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+
+            given(anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any()))
+                .willReturn(emptyList())
+
+            val dto = buildReIssueAnonymousElectorDocumentDto()
+
+            // When
+            val exception = catchThrowableOfType(
+                { anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto) },
+                CertificateNotFoundException::class.java
+            )
+
+            // Then
+            assertThat(exception)
+                .hasMessage("Certificate for eroId = $eroId with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${dto.sourceReference} not found")
+            verify(eroService).lookupGssCodesForEro(eroId)
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
         }
     }
 }

@@ -5,8 +5,10 @@ import org.assertj.core.api.Assertions
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import java.time.LocalDate
 import java.util.Objects
+import java.util.function.Consumer
 
 /**
  * [AnonymousElectorDocument] specific assertions.
@@ -169,6 +171,19 @@ class AnonymousElectorDocumentCertificateAssert
             .overridingErrorMessage(assertjErrorMessage, actual)
             .isNotNull
 
+        return this
+    }
+
+    /**
+     * Allows for assertion chaining into the child [AnonymousElectorDocumentStatus] entities. Takes a lambda as the method argument
+     * to call assertion methods provided by [AnonymousElectorDocumentStatusListAssert].
+     * Returns this [AnonymousElectorDocumentCertificateAssert] to allow further chained assertions on the parent [AnonymousElectorDocument]
+     */
+    fun statusHistory(consumer: Consumer<AnonymousElectorDocumentStatusListAssert>): AnonymousElectorDocumentCertificateAssert {
+        isNotNull
+        with(actual!!) {
+            consumer.accept(assertThat(statusHistory))
+        }
         return this
     }
 }

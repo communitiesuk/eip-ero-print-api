@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
@@ -36,10 +35,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApiCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateAnonymousElectorDocumentRequest
-import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddressTypeEntity
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntity
@@ -55,7 +52,6 @@ class GenerateAnonymousElectorDocumentMapperTest {
         private const val FIXED_DATE_STRING = "2022-10-18"
         private val FIXED_DATE = LocalDate.parse(FIXED_DATE_STRING)
         private val FIXED_TIME = Instant.parse("${FIXED_DATE_STRING}T11:22:32.123Z")
-        private val FIXED_CLOCK = Clock.fixed(FIXED_TIME, ZoneOffset.UTC)
         private val ID_FIELDS_REGEX = ".*id"
     }
 
@@ -77,8 +73,8 @@ class GenerateAnonymousElectorDocumentMapperTest {
     @Mock
     private lateinit var idFactory: IdFactory
 
-    @Spy
-    private val clock: Clock = FIXED_CLOCK
+    @Mock
+    private lateinit var aedMappingHelper: AedMappingHelper
 
     @Nested
     inner class ToAnonymousElectorDocument {
@@ -101,6 +97,16 @@ class GenerateAnonymousElectorDocumentMapperTest {
             given(supportingInformationFormatMapper.mapDtoToEntity(any())).willReturn(SupportingInformationFormatEntity.EASY_READ)
             given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.ERO_COLLECTION)
             given(idFactory.vacNumber()).willReturn(certificateNumber)
+            given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+            given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE)
+            given(aedMappingHelper.statusHistory(any())).willReturn(
+                listOf(
+                    AnonymousElectorDocumentStatus(
+                        status = AnonymousElectorDocumentStatus.Status.PRINTED,
+                        eventDateTime = FIXED_TIME
+                    )
+                )
+            )
 
             val expected = with(dtoRequest) {
                 AnonymousElectorDocument(
@@ -175,6 +181,9 @@ class GenerateAnonymousElectorDocumentMapperTest {
             verify(certificateLanguageMapper).mapDtoToEntity(dtoRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapDtoToEntity(dtoRequest.supportingInformationFormat)
             verify(idFactory).vacNumber()
+            verify(aedMappingHelper).issueDate()
+            verify(aedMappingHelper).requestDateTime()
+            verify(aedMappingHelper).statusHistory(AnonymousElectorDocumentStatus.Status.PRINTED)
             verify(deliveryAddressTypeMapper).mapDtoToEntity(DeliveryAddressTypeDto.ERO_COLLECTION)
             verifyNoMoreInteractions(sourceTypeMapper, certificateLanguageMapper, supportingInformationFormatMapper, idFactory, deliveryAddressTypeMapper)
         }

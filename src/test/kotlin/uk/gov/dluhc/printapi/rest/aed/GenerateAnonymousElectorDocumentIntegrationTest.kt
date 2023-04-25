@@ -21,7 +21,7 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
-import uk.gov.dluhc.printapi.testsupport.assertj.assertions.AnonymousElectorDocumentCertificateAssert
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
@@ -244,33 +244,33 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             .returnResult()
 
         // Then
+        val pdfContent = response.responseBody
+        val contentDisposition = response.responseHeaders.contentDisposition
+
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             request.gssCode,
             ANONYMOUS_ELECTOR_DOCUMENT,
             request.sourceReference
         )
+        assertThat(electorDocuments).hasSize(1)
+        val newlyCreatedAed = electorDocuments.first()
 
-        assertThat(electorDocuments).isNotNull
-        electorDocuments.forEach {
-            assertThat(it.statusHistory.size).isOne
-            assertThat(it.statusHistory.first().status).isEqualTo(AnonymousElectorDocumentStatus.Status.PRINTED)
-
-            AnonymousElectorDocumentCertificateAssert(it)
-                .hasId()
-                .hasSupportingInformationFormat(expectedSupportingFormat)
-                .hasDelivery(expectedDelivery)
-                .hasDateCreated()
-
-            val contentDisposition = response.responseHeaders.contentDisposition
-            assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${it.certificateNumber}.pdf")
-
-            val pdfContent = response.responseBody
-            assertThat(pdfContent).isNotNull
-            PdfReader(pdfContent).use { reader ->
-                val text = PdfTextExtractor(reader).getTextFromPage(1)
-                assertThat(text).contains(it.certificateNumber)
-                assertThat(text).doesNotContainIgnoringCase(request.surname)
+        assertThat(newlyCreatedAed)
+            .hasId()
+            .hasSupportingInformationFormat(expectedSupportingFormat)
+            .hasDelivery(expectedDelivery)
+            .hasDateCreated()
+            .statusHistory {
+                it.hasSize(1)
+                it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
             }
+
+        assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf")
+
+        PdfReader(pdfContent).use { reader ->
+            val text = PdfTextExtractor(reader).getTextFromPage(1)
+            assertThat(text).contains(newlyCreatedAed.certificateNumber)
+            assertThat(text).doesNotContainIgnoringCase(request.surname)
         }
     }
 

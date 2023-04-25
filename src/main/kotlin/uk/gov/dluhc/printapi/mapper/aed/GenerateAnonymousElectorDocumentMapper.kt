@@ -14,9 +14,6 @@ import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.service.IdFactory
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDate
 
 @Mapper(
     uses = [
@@ -24,6 +21,9 @@ import java.time.LocalDate
         CertificateLanguageMapper::class,
         DeliveryAddressTypeMapper::class,
         SourceTypeMapper::class,
+    ],
+    imports = [
+        AnonymousElectorDocumentStatus.Status::class,
     ]
 )
 abstract class GenerateAnonymousElectorDocumentMapper {
@@ -32,7 +32,7 @@ abstract class GenerateAnonymousElectorDocumentMapper {
     protected lateinit var idFactory: IdFactory
 
     @Autowired
-    protected lateinit var clock: Clock
+    protected lateinit var aedMappingHelper: AedMappingHelper
 
     abstract fun toGenerateAnonymousElectorDocumentDto(
         apiRequest: GenerateAnonymousElectorDocumentRequest,
@@ -41,10 +41,10 @@ abstract class GenerateAnonymousElectorDocumentMapper {
 
     @Mapping(target = "photoLocationArn", source = "aedDto.photoLocation")
     @Mapping(target = "certificateNumber", expression = "java( idFactory.vacNumber() )")
-    @Mapping(target = "issueDate", expression = "java( issueDate() )")
-    @Mapping(target = "requestDateTime", expression = "java( requestDateTime() )")
+    @Mapping(target = "issueDate", expression = "java( aedMappingHelper.issueDate() )")
+    @Mapping(target = "requestDateTime", expression = "java( aedMappingHelper.requestDateTime() )")
     @Mapping(target = "contactDetails", source = "aedDto")
-    @Mapping(target = "statusHistory", expression = "java( markStatusAsPrinted() )")
+    @Mapping(target = "statusHistory", expression = "java( aedMappingHelper.statusHistory(Status.PRINTED) )")
     @Mapping(target = "delivery", source = "aedDto.delivery")
     abstract fun toAnonymousElectorDocument(
         aedDto: GenerateAnonymousElectorDocumentDto,
@@ -56,17 +56,4 @@ abstract class GenerateAnonymousElectorDocumentMapper {
 
     @Mapping(target = "address", source = "deliveryAddress")
     protected abstract fun fromDeliveryDtoToDeliveryEntity(deliveryDto: CertificateDelivery): Delivery
-
-    protected fun issueDate(): LocalDate = LocalDate.now(clock)
-
-    protected fun requestDateTime(): Instant = Instant.now(clock)
-
-    protected fun markStatusAsPrinted(): List<AnonymousElectorDocumentStatus> {
-        return listOf(
-            AnonymousElectorDocumentStatus(
-                status = AnonymousElectorDocumentStatus.Status.PRINTED,
-                eventDateTime = Instant.now(clock)
-            )
-        )
-    }
 }
