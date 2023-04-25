@@ -93,6 +93,7 @@ class CertificateMapperTest {
                         },
                         deliveryClass = DeliveryClass.STANDARD,
                         deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        collectionReason = null,
                         addressFormat = AddressFormat.UK,
                     )
                 },
@@ -179,6 +180,7 @@ class CertificateMapperTest {
                         },
                         deliveryClass = DeliveryClass.STANDARD,
                         deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        collectionReason = null,
                         addressFormat = AddressFormat.UK,
                     )
                 },

@@ -33,4 +33,5 @@
     <include relativeToChangelogFile="true" file="ddl/0023_alter_aed_and_aed_contact_details.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0024_create_aed_summary_view.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0025_alter_aed_application_ref_not_null.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0026_alter_delivery_add_collection_reason.xml"/>
 </databaseChangeLog>
