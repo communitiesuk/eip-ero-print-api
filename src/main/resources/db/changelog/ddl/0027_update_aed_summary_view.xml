@@ -5,8 +5,8 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-    <changeSet author="vishal.gupta@valtech.com" id="0026_update_aed_summary_view - Adds id to AED summary view" context="ddl">
-        <comment>Adding id to Anonymous Elector Document summary view</comment>
+    <changeSet author="vishal.gupta@valtech.com" id="0027_update_aed_summary_view - Adds aed id to an existing AED summary view" context="ddl">
+        <comment>Adding anonymous_elector_document id to existing Anonymous Elector Document summary view</comment>
         <createView viewName="v_anonymous_elector_document_summary" replaceIfExists = "true">
             SELECT
             aed.id,
