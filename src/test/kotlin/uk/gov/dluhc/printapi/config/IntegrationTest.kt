@@ -33,6 +33,7 @@ import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
+import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
@@ -144,6 +145,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository
+
+    @Autowired
+    protected lateinit var anonymousElectorDocumentSummaryRepository: AnonymousElectorDocumentSummaryRepository
 
     @Autowired
     protected lateinit var testDeliveryRepository: TestDeliveryRepository
