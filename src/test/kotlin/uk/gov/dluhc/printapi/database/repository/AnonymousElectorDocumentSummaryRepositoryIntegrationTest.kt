@@ -59,7 +59,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
         }
 
         @Test
-        fun `should find all AEDs for a given gssCode and source type pages`() {
+        fun `should find all AEDs for a given gssCode and source type`() {
             // Given
             val gssCode = aGssCode()
             val currentDate = LocalDate.now()
@@ -67,7 +67,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
             val aed1SourceReference = aValidSourceReference()
             val aed1ApplicationReference = aValidApplicationReference()
 
-            val aed1FirstCertificate = buildAnonymousElectorDocument(
+            val aed1InitialDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed1SourceReference,
                 applicationReference = aed1ApplicationReference,
@@ -75,26 +75,26 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 requestDateTime = currentDateTimeInstant.minusSeconds(10),
                 contactDetails = buildAedContactDetails(surname = "A")
             )
-            val aed1SecondCertificate = buildAnonymousElectorDocument(
+            val aed1SecondDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed1SourceReference,
                 applicationReference = aed1ApplicationReference,
                 issueDate = currentDate.minusDays(10),
                 requestDateTime = currentDateTimeInstant.minusSeconds(9),
-                contactDetails = aed1FirstCertificate.contactDetails!!
+                contactDetails = aed1InitialDocument.contactDetails!!
             )
-            val aed1LatestCertificate = buildAnonymousElectorDocument(
+            val aed1LatestDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed1SourceReference,
                 applicationReference = aed1ApplicationReference,
                 issueDate = currentDate.minusDays(9),
                 requestDateTime = currentDateTimeInstant, // View will return this latest record
-                contactDetails = aed1FirstCertificate.contactDetails!!
+                contactDetails = aed1InitialDocument.contactDetails!!
             )
 
             val aed2SourceReference = aValidSourceReference()
             val aed2ApplicationReference = aValidApplicationReference()
-            val aed2FirstCertificate = buildAnonymousElectorDocument(
+            val aed2InitialDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed2SourceReference,
                 applicationReference = aed2ApplicationReference,
@@ -102,39 +102,39 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 requestDateTime = currentDateTimeInstant.minusSeconds(10),
                 contactDetails = buildAedContactDetails(surname = "Z")
             )
-            val aed2SecondCertificate = buildAnonymousElectorDocument(
+            val aed2SecondDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed2SourceReference,
                 applicationReference = aed2ApplicationReference,
                 issueDate = currentDate.minusDays(9),
                 requestDateTime = currentDateTimeInstant.minusSeconds(8),
-                contactDetails = aed2FirstCertificate.contactDetails!!
+                contactDetails = aed2InitialDocument.contactDetails!!
             )
-            val aed2LatestCertificate = buildAnonymousElectorDocument(
+            val aed2LatestDocument = buildAnonymousElectorDocument(
                 gssCode = gssCode,
                 sourceReference = aed2SourceReference,
                 applicationReference = aed2ApplicationReference,
                 issueDate = currentDate.minusDays(9),
                 requestDateTime = currentDateTimeInstant, // View will return this latest record
-                contactDetails = aed2FirstCertificate.contactDetails!!
+                contactDetails = aed2InitialDocument.contactDetails!!
             )
-            val aed3 = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(10))
-            val aed4 = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
-            val otherAed = buildAnonymousElectorDocument(gssCode = anotherGssCode())
+            val aed3Document = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(10))
+            val aed4Document = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
+            val otherAedDocument = buildAnonymousElectorDocument(gssCode = anotherGssCode())
 
             anonymousElectorDocumentRepository.saveAll(
                 listOf(
-                    aed1FirstCertificate, aed1SecondCertificate, aed1LatestCertificate,
-                    aed2FirstCertificate, aed2SecondCertificate, aed2LatestCertificate,
-                    aed3, aed4, otherAed
+                    aed1InitialDocument, aed1SecondDocument, aed1LatestDocument,
+                    aed2InitialDocument, aed2SecondDocument, aed2LatestDocument,
+                    aed3Document, aed4Document, otherAedDocument
                 )
             )
 
-            val expectedSummaryRecord1 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed3)
-            val expectedSummaryRecord2 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed4)
-            val expectedSummaryRecord3 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed1LatestCertificate)
-            val expectedSummaryRecord4 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed2LatestCertificate)
-            val otherAedSummaryRecord = buildAnonymousElectorDocumentSummaryViewFromAedEntity(otherAed)
+            val expectedSummaryRecord1 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed3Document)
+            val expectedSummaryRecord2 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed4Document)
+            val expectedSummaryRecord3 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed1LatestDocument)
+            val expectedSummaryRecord4 = buildAnonymousElectorDocumentSummaryViewFromAedEntity(aed2LatestDocument)
+            val otherAedSummaryRecord = buildAnonymousElectorDocumentSummaryViewFromAedEntity(otherAedDocument)
 
             // When
             val actual = anonymousElectorDocumentSummaryRepository
@@ -156,7 +156,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
         }
 
         @Test
-        fun `should find AEDs for a given gssCode and source type for matching page`() {
+        fun `should find AEDs for a given gssCode and source type for a matching page`() {
             // Given
             val gssCode = aGssCode()
             val currentDate = LocalDate.now()

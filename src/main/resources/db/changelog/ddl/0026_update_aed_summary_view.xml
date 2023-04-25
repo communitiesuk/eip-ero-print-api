@@ -31,14 +31,14 @@
                         gss_code,
                         source_type,
                         source_reference,
-                        max(request_date_time) as mostRecentRequestDateTime
+                        max(request_date_time) as most_recent_aed_request_date_time
                     FROM anonymous_elector_document
                     GROUP BY gss_code, source_type, source_reference
                 ) latest_aed_records_per_source_reference
             ON aed.gss_code = latest_aed_records_per_source_reference.gss_code
             AND aed.source_type = latest_aed_records_per_source_reference.source_type
             AND aed.source_reference = latest_aed_records_per_source_reference.source_reference
-            AND aed.request_date_time = latest_aed_records_per_source_reference.mostRecentRequestDateTime
+            AND aed.request_date_time = latest_aed_records_per_source_reference.most_recent_aed_request_date_time
         </createView>
 
         <rollback>
