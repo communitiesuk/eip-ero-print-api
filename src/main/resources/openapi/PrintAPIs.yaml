@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.15.0'
+  version: '1.15.1'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -994,6 +994,10 @@ components:
           $ref: '#/components/schemas/DeliveryClass'
         deliveryAddressType:
           $ref: '#/components/schemas/DeliveryAddressType'
+        collectionReason:
+          type: string
+          maxLength: 1024
+          description: The reason the elector gave for having to collect their voter ID (if applicable).
         addressee:
           type: string
           maxLength: 255
