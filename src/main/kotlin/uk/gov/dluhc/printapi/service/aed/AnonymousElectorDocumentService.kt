@@ -50,7 +50,7 @@ class AnonymousElectorDocumentService(
             .firstOrNull() ?: throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
 
         val templateFilename = pdfTemplateDetailsFactory.getTemplateFilename(mostRecentAed.gssCode)
-        with(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(mostRecentAed, templateFilename)) {
+        with(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(mostRecentAed, dto, templateFilename)) {
             return generatePdf()
                 .also { anonymousElectorDocumentRepository.save(this) }
         }
