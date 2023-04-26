@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.anotherGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocumentSummaryViewFromAedEntity
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.withPageRequestAndSortOrder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPageRequest
 import java.time.Instant
 import java.time.LocalDate
 
@@ -31,7 +31,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder()
+                    pageRequest = buildPageRequest()
                 )
 
             // Then
@@ -50,7 +50,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder()
+                    pageRequest = buildPageRequest()
                 )
 
             // Then
@@ -140,7 +140,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder()
+                    pageRequest = buildPageRequest()
                 )
 
             // Then
@@ -177,7 +177,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(1, 2)
+                    pageRequest = buildPageRequest(1, 2)
                 )
 
             // Then
@@ -205,7 +205,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(2, 5)
+                    pageRequest = buildPageRequest(2, 5)
                 )
 
             // Then

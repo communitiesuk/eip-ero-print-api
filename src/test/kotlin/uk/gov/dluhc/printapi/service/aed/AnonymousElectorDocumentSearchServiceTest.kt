@@ -22,7 +22,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocumentSummaryEntity
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.withPageRequestAndSortOrder
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPageRequest
 
 @ExtendWith(MockitoExtension::class)
 internal class AnonymousElectorDocumentSearchServiceTest {
@@ -57,7 +57,7 @@ internal class AnonymousElectorDocumentSearchServiceTest {
         assertThat(actualPagedRecords).isNotNull
         assertThat(actualPagedRecords.results).isNotNull.isEmpty()
         verify(eroService).lookupGssCodesForEro(eroId)
-        verify(anonymousElectorDocumentSummaryRepository).findAllByGssCodeInAndSourceType(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, withPageRequestAndSortOrder())
+        verify(anonymousElectorDocumentSummaryRepository).findAllByGssCodeInAndSourceType(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, buildPageRequest())
         verifyNoInteractions(anonymousSearchSummaryMapper)
     }
 
@@ -68,7 +68,7 @@ internal class AnonymousElectorDocumentSearchServiceTest {
         val gssCodes = listOf(aGssCode())
         val aedSummary = buildAnonymousElectorDocumentSummaryEntity()
         val expectedSummaryDto = buildAnonymousSearchSummaryDto()
-        val pageRequest = withPageRequestAndSortOrder(page = 2)
+        val pageRequest = buildPageRequest(page = 2)
         val searchCriteria = AedSearchQueryStringParameters(page = 2)
 
         given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
