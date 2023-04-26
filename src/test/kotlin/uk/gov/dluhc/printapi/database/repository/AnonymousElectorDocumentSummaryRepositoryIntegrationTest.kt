@@ -3,8 +3,6 @@ package uk.gov.dluhc.printapi.database.repository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
@@ -14,6 +12,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.anotherGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocumentSummaryViewFromAedEntity
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPageRequest
 import java.time.Instant
 import java.time.LocalDate
 
@@ -32,7 +31,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 100)
+                    pageRequest = buildPageRequest()
                 )
 
             // Then
@@ -51,7 +50,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 100)
+                    pageRequest = buildPageRequest()
                 )
 
             // Then
@@ -88,7 +87,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 sourceReference = aed1SourceReference,
                 applicationReference = aed1ApplicationReference,
                 issueDate = currentDate.minusDays(9),
-                requestDateTime = currentDateTimeInstant, // View will return this latest record
+                requestDateTime = currentDateTimeInstant, // View will return this latest record as it has latest requestDateTime
                 contactDetails = application1InitialAed.contactDetails!!
             )
 
@@ -115,7 +114,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 sourceReference = aed2SourceReference,
                 applicationReference = aed2ApplicationReference,
                 issueDate = currentDate.minusDays(9),
-                requestDateTime = currentDateTimeInstant, // View will return this latest record
+                requestDateTime = currentDateTimeInstant, // View will return this latest record as it has latest requestDateTime
                 contactDetails = application2InitialAed.contactDetails!!
             )
             val application3AedDocument = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(10))
@@ -141,13 +140,13 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 100)
+                    pageRequest = buildPageRequest()
                 )
 
             // Then
             assertThat(actual)
                 .doesNotContain(otherAedSummaryRecord)
-                .containsExactlyInAnyOrder(
+                .containsExactly(
                     expectedSummaryRecord1,
                     expectedSummaryRecord2,
                     expectedSummaryRecord3,
@@ -161,10 +160,10 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
             val gssCode = aGssCode()
             val currentDate = LocalDate.now()
 
-            val application1Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
-            val application2Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
+            val application1Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.minusDays(2))
+            val application2Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.minusDays(1))
             val application3Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(1))
-            val application4Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate.plusDays(2))
+            val application4Aed = buildAnonymousElectorDocument(gssCode = gssCode, issueDate = currentDate)
             val otherApplicationAed = buildAnonymousElectorDocument(gssCode = anotherGssCode())
 
             anonymousElectorDocumentRepository.saveAll(listOf(application1Aed, application2Aed, application3Aed, application4Aed, otherApplicationAed))
@@ -178,13 +177,13 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 2)
+                    pageRequest = buildPageRequest(1, 2)
                 )
 
             // Then
             assertThat(actual)
                 .doesNotContain(otherAedSummaryRecord)
-                .containsExactlyInAnyOrder(expectedSummaryRecord1, expectedSummaryRecord2)
+                .containsExactly(expectedSummaryRecord1, expectedSummaryRecord2)
         }
 
         @Test
@@ -206,17 +205,11 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(1, 5)
+                    pageRequest = buildPageRequest(2, 5)
                 )
 
             // Then
             assertThat(actual).isNotNull.isEmpty()
-        }
-
-        private fun withPageRequestAndSortOrder(page: Int, size: Int): PageRequest {
-            val sortByIssueDateDesc = Sort.by(Sort.Direction.DESC, "issueDate")
-            val sortBySurnameAsc = Sort.by(Sort.Direction.ASC, "surname")
-            return PageRequest.of(page, size, sortByIssueDateDesc.and(sortBySurnameAsc))
         }
     }
 }
