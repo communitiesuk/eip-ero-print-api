@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.15.1'
+  version: '1.15.2'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1373,6 +1373,8 @@ components:
           type: string
           description: Electoral roll number printed on the AED. There is no specific format and they can vary across EROs.
           maxLength: 25
+        status:
+          $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
         firstName:
           type: string
           description: The applicant's first name
@@ -1401,6 +1403,7 @@ components:
         - applicationReference
         - certificateNumber
         - electoralRollNumber
+        - status
         - firstName
         - surname
         - postcode

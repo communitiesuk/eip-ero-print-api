@@ -12,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.mapper.InstantMapper
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus.PRINTED
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocumentSummaryEntity
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAedSearchSummaryApi
@@ -68,6 +69,7 @@ class AnonymousSearchSummaryMapperTest {
                 applicationReference = applicationReference,
                 certificateNumber = certificateNumber,
                 electoralRollNumber = electoralRollNumber,
+                status = PRINTED,
                 firstName = firstName,
                 surname = surname,
                 postcode = postcode,

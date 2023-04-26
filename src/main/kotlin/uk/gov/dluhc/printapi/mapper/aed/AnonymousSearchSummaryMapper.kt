@@ -13,5 +13,6 @@ interface AnonymousSearchSummaryMapper {
     @Mapping(target = "dateTimeCreated", source = "dateCreated")
     fun toAnonymousSearchSummaryDto(entity: AnonymousElectorDocumentSummaryEntity): AnonymousSearchSummaryDto
 
+    @Mapping(target = "status", constant = "PRINTED")
     fun toAnonymousSearchSummaryApi(dto: AnonymousSearchSummaryDto): AedSearchSummaryApi
 }

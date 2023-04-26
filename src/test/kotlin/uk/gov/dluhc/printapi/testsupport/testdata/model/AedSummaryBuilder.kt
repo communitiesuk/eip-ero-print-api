@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.model
 
 import uk.gov.dluhc.printapi.models.AedSearchSummary
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
@@ -20,6 +21,7 @@ fun buildAedSearchSummaryApi(
     applicationReference: String = aValidApplicationReference(),
     certificateNumber: String = aValidVacNumber(),
     electoralRollNumber: String = aValidElectoralRollNumber(),
+    status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,
     issueDate: LocalDate = aValidIssueDate(),
     dateTimeCreated: OffsetDateTime = aValidGeneratedDateTime(),
     firstName: String = aValidFirstName(),
@@ -32,6 +34,7 @@ fun buildAedSearchSummaryApi(
         applicationReference = applicationReference,
         certificateNumber = certificateNumber,
         electoralRollNumber = electoralRollNumber,
+        status = status,
         issueDate = issueDate,
         dateTimeCreated = dateTimeCreated,
         firstName = firstName,
