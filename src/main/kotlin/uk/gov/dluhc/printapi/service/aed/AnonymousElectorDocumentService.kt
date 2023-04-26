@@ -29,15 +29,17 @@ class AnonymousElectorDocumentService(
     private val pdfFactory: PdfFactory
 ) {
 
+    companion object {
+        private const val PDF_FILE_NAME = "anonymous-elector-document-%s.pdf"
+    }
+
     @Transactional
     fun generateAnonymousElectorDocument(eroId: String, dto: GenerateAnonymousElectorDocumentDto): PdfFile {
         verifyGssCodeIsValidForEro(eroId, dto.gssCode)
         val templateFilename = pdfTemplateDetailsFactory.getTemplateFilename(dto.gssCode)
         with(generateAnonymousElectorDocumentMapper.toAnonymousElectorDocument(dto, templateFilename)) {
-            val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)
-            val contents = pdfFactory.createPdfContents(templateDetails)
-            anonymousElectorDocumentRepository.save(this)
-            return PdfFile("anonymous-elector-document-$certificateNumber.pdf", contents)
+            return generatePdf()
+                .also { anonymousElectorDocumentRepository.save(this) }
         }
     }
 
@@ -49,10 +51,8 @@ class AnonymousElectorDocumentService(
 
         val templateFilename = pdfTemplateDetailsFactory.getTemplateFilename(mostRecentAed.gssCode)
         with(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(mostRecentAed, templateFilename)) {
-            val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)
-            val contents = pdfFactory.createPdfContents(templateDetails)
-            anonymousElectorDocumentRepository.save(this)
-            return PdfFile("anonymous-elector-document-$certificateNumber.pdf", contents)
+            return generatePdf()
+                .also { anonymousElectorDocumentRepository.save(this) }
         }
     }
 
@@ -82,4 +82,10 @@ class AnonymousElectorDocumentService(
             sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
             sourceReference = sourceReference
         ).sortedByDescending { it.dateCreated }
+
+    private fun AnonymousElectorDocument.generatePdf(): PdfFile {
+        val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)
+        val contents = pdfFactory.createPdfContents(templateDetails)
+        return PdfFile(PDF_FILE_NAME.format(certificateNumber), contents)
+    }
 }
