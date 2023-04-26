@@ -91,7 +91,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             applicationReference = APPLICATION_REFERENCE,
             supportingInformationFormat = SupportingInformationFormat.STANDARD,
             contactDetails = buildAedContactDetails(firstName = "Mike", middleNames = "William Brown", surname = "Johnson"),
-            delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION)
+            delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
         )
         val aedDocumentWithDifferentApplicationId = buildAnonymousElectorDocument(
             gssCode = GSS_CODE, sourceReference = aValidSourceReference()
@@ -113,6 +113,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
+                collectionReason = delivery!!.collectionReason,
                 sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
                     buildAnonymousElectorApi(
@@ -137,6 +138,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
                 gssCode = gssCode, deliveryAddressType = DeliveryAddressType.REGISTERED,
+                collectionReason = null,
                 sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
                     buildAnonymousElectorApi(

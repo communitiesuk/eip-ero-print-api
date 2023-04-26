@@ -34,6 +34,7 @@ fun buildAnonymousElectorDocumentDto(
     certificateLanguage: CertificateLanguage = aValidCertificateLanguageDto(),
     supportingInformationFormat: AnonymousSupportingInformationFormat = AnonymousSupportingInformationFormat.STANDARD,
     deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
+    collectionReason: String? = null,
     elector: AnonymousElectorDto = buildAnonymousElectorDto(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,
     photoLocationArn: String = aPhotoArn(),
@@ -49,12 +50,13 @@ fun buildAnonymousElectorDocumentDto(
     certificateLanguage = certificateLanguage,
     supportingInformationFormat = supportingInformationFormat,
     deliveryAddressType = deliveryAddressType,
+    collectionReason = collectionReason,
     elector = elector,
     status = status,
     photoLocationArn = photoLocationArn,
     issueDate = issueDate,
     userId = userId,
-    requestDateTime = requestDateTime,
+    requestDateTime = requestDateTime
 )
 
 fun buildAnonymousElectorDto(

@@ -28,6 +28,7 @@ abstract class AnonymousElectorDocumentMapper {
     @Mapping(target = "elector", source = "aedEntity.contactDetails")
     @Mapping(target = "status", constant = "PRINTED")
     @Mapping(target = "deliveryAddressType", source = "aedEntity.delivery.deliveryAddressType")
+    @Mapping(target = "collectionReason", source = "aedEntity.delivery.collectionReason")
     abstract fun mapToAnonymousElectorDocumentDto(aedEntity: AnonymousElectorDocument): AnonymousElectorDocumentDto
 
     @Mapping(target = "addressee", expression = "java(getAssigneeName(aedContactDetailsEntity))")
