@@ -10,6 +10,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUME
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryDto
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
+import uk.gov.dluhc.printapi.rest.aed.AedSearchQueryStringParameters
 import uk.gov.dluhc.printapi.service.EroService
 
 @Service
@@ -19,11 +20,19 @@ class AnonymousElectorDocumentSearchService(
     private val anonymousSearchSummaryMapper: AnonymousSearchSummaryMapper,
 ) {
 
-    fun searchAnonymousElectorDocumentSummaries(eroId: String): Page<AnonymousSearchSummaryDto> {
+    fun searchAnonymousElectorDocumentSummaries(
+        eroId: String,
+        searchCriteria: AedSearchQueryStringParameters
+    ): Page<AnonymousSearchSummaryDto> {
         val gssCodes = eroService.lookupGssCodesForEro(eroId)
         val sortByIssueDateDesc = Sort.by(DESC, "issueDate")
         val sortBySurnameAsc = Sort.by(ASC, "surname")
-        val pageRequest = PageRequest.of(0, 100, sortByIssueDateDesc.and(sortBySurnameAsc))
+        val repositoryPageIndex = searchCriteria.page - 1
+        val pageRequest = PageRequest.of(
+            repositoryPageIndex,
+            searchCriteria.pageSize,
+            sortByIssueDateDesc.and(sortBySurnameAsc)
+        )
         return anonymousElectorDocumentSummaryRepository
             .findAllByGssCodeInAndSourceType(
                 gssCodes = gssCodes,

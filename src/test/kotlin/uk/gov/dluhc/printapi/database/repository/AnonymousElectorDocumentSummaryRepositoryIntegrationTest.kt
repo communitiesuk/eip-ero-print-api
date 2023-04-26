@@ -31,7 +31,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 100)
+                    pageRequest = withPageRequestAndSortOrder()
                 )
 
             // Then
@@ -50,7 +50,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 100)
+                    pageRequest = withPageRequestAndSortOrder()
                 )
 
             // Then
@@ -140,7 +140,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 100)
+                    pageRequest = withPageRequestAndSortOrder()
                 )
 
             // Then
@@ -177,7 +177,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(0, 2)
+                    pageRequest = withPageRequestAndSortOrder(1, 2)
                 )
 
             // Then
@@ -205,7 +205,7 @@ internal class AnonymousElectorDocumentSummaryRepositoryIntegrationTest : Integr
                 .findAllByGssCodeInAndSourceType(
                     gssCodes = listOf(gssCode),
                     sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = withPageRequestAndSortOrder(1, 5)
+                    pageRequest = withPageRequestAndSortOrder(2, 5)
                 )
 
             // Then

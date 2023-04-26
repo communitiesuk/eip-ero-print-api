@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
+import uk.gov.dluhc.printapi.rest.aed.AedSearchQueryStringParameters
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
@@ -42,12 +43,14 @@ internal class AnonymousElectorDocumentSearchServiceTest {
         // Given
         val eroId = aValidRandomEroId()
         val gssCodes = listOf(aGssCode())
+        val searchCriteria = AedSearchQueryStringParameters()
 
         given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
         given(anonymousElectorDocumentSummaryRepository.findAllByGssCodeInAndSourceType(any(), any(), any())).willReturn(Page.empty())
 
         // When
-        val actualPagedRecords = anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(eroId)
+        val actualPagedRecords =
+            anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(eroId, searchCriteria)
 
         // Then
         assertThat(actualPagedRecords).isNotNull.isEmpty()
@@ -63,7 +66,8 @@ internal class AnonymousElectorDocumentSearchServiceTest {
         val gssCodes = listOf(aGssCode())
         val aedSummary = buildAnonymousElectorDocumentSummaryEntity()
         val expectedSummaryDto = buildAnonymousSearchSummaryDto()
-        val pageRequest = withPageRequestAndSortOrder()
+        val pageRequest = withPageRequestAndSortOrder(page = 2)
+        val searchCriteria = AedSearchQueryStringParameters(page = 2)
 
         given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
         given(anonymousElectorDocumentSummaryRepository.findAllByGssCodeInAndSourceType(any(), any(), any()))
@@ -73,7 +77,8 @@ internal class AnonymousElectorDocumentSearchServiceTest {
         val expected = PageImpl(mutableListOf(expectedSummaryDto), pageRequest, 1)
 
         // When
-        val actualPagedRecords = anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(eroId)
+        val actualPagedRecords =
+            anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(eroId, searchCriteria)
 
         // Then
         assertThat(actualPagedRecords).usingRecursiveComparison().isEqualTo(expected)
