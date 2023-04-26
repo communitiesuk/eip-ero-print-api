@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.mapper.aed
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -10,17 +9,33 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.models.DeliveryAddressType.ERO_MINUS_COLLECTION
+import uk.gov.dluhc.printapi.service.IdFactory
+import uk.gov.dluhc.printapi.testsupport.deepCopy
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidElectoralRollNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildReIssueAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
+import java.time.Instant
+import java.time.LocalDate
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class ReIssueAnonymousElectorDocumentMapperTest {
+
+    companion object {
+        private const val FIXED_DATE_STRING = "2022-10-18"
+        private val FIXED_DATE = LocalDate.parse(FIXED_DATE_STRING)
+        private val FIXED_TIME = Instant.parse("${FIXED_DATE_STRING}T11:22:32.123Z")
+        private val ID_FIELDS_REGEX = ".*id"
+    }
 
     @InjectMocks
     private lateinit var mapper: ReIssueAnonymousElectorDocumentMapperImpl
@@ -28,38 +43,84 @@ class ReIssueAnonymousElectorDocumentMapperTest {
     @Mock
     private lateinit var deliveryAddressTypeMapper: DeliveryAddressTypeMapper
 
-    @Nested
-    inner class ToReIssueAnonymousElectorDocumentDto {
+    @Mock
+    private lateinit var idFactory: IdFactory
 
-        @Test
-        fun `should map to ReIssueAnonymousElectorDocumentDto DTO given API Request`() {
-            // Given
-            val userId = aValidUserId()
-            val sourceReference = aValidSourceReference()
-            val electoralRollNumber = aValidElectoralRollNumber()
-            val deliveryAddressType = ERO_MINUS_COLLECTION
+    @Mock
+    private lateinit var aedMappingHelper: AedMappingHelper
 
-            val apiRequest = buildReIssueAnonymousElectorDocumentRequest(
-                sourceReference = sourceReference,
-                electoralRollNumber = electoralRollNumber,
-                deliveryAddressType = deliveryAddressType
+    @Test
+    fun `should map to ReIssueAnonymousElectorDocumentDto DTO given API Request`() {
+        // Given
+        val userId = aValidUserId()
+        val sourceReference = aValidSourceReference()
+        val electoralRollNumber = aValidElectoralRollNumber()
+        val deliveryAddressType = ERO_MINUS_COLLECTION
+
+        val apiRequest = buildReIssueAnonymousElectorDocumentRequest(
+            sourceReference = sourceReference,
+            electoralRollNumber = electoralRollNumber,
+            deliveryAddressType = deliveryAddressType
+        )
+
+        given(deliveryAddressTypeMapper.mapApiToDto(any())).willReturn(ERO_COLLECTION)
+
+        val expected = ReIssueAnonymousElectorDocumentDto(
+            userId = userId,
+            sourceReference = sourceReference,
+            electoralRollNumber = electoralRollNumber,
+            deliveryAddressType = ERO_COLLECTION
+        )
+
+        // When
+        val actual = mapper.toReIssueAnonymousElectorDocumentDto(apiRequest, userId)
+
+        // Then
+        assertThat(actual).isEqualTo(expected)
+        verify(deliveryAddressTypeMapper).mapApiToDto(ERO_MINUS_COLLECTION)
+    }
+
+    @Test
+    fun `should map to new Anonymous Elector Document given`() {
+        // Given
+        val previousAed = buildAnonymousElectorDocument(
+            id = UUID.randomUUID(),
+            certificateNumber = aValidVacNumber()
+        )
+        val templateFilename = aTemplateFilename()
+
+        val newCertificateNumber = aValidVacNumber()
+        given(idFactory.vacNumber()).willReturn(newCertificateNumber)
+        given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE)
+        val expectedStatusHistory = listOf(
+            AnonymousElectorDocumentStatus(
+                status = AnonymousElectorDocumentStatus.Status.PRINTED,
+                eventDateTime = FIXED_TIME
             )
+        )
+        given(aedMappingHelper.statusHistory(any())).willReturn(expectedStatusHistory)
 
-            given(deliveryAddressTypeMapper.mapApiToDto(any())).willReturn(ERO_COLLECTION)
-
-            val expected = ReIssueAnonymousElectorDocumentDto(
-                userId = userId,
-                sourceReference = sourceReference,
-                electoralRollNumber = electoralRollNumber,
-                deliveryAddressType = ERO_COLLECTION
-            )
-
-            // When
-            val actual = mapper.toReIssueAnonymousElectorDocumentDto(apiRequest, userId)
-
-            // Then
-            assertThat(actual).isEqualTo(expected)
-            verify(deliveryAddressTypeMapper).mapApiToDto(ERO_MINUS_COLLECTION)
+        val expected = previousAed.deepCopy().apply {
+            certificateNumber = newCertificateNumber
+            requestDateTime = FIXED_TIME
+            issueDate = FIXED_DATE
+            statusHistory = expectedStatusHistory.toMutableList()
         }
+
+        // When
+        val actual = mapper.toNewAnonymousElectorDocument(previousAed, templateFilename)
+
+        // Then
+        assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
+        assertThat(actual.id).isNull()
+        assertThat(actual.delivery!!.id).isNull()
+        assertThat(actual.delivery!!.address.id).isNull()
+        assertThat(actual.contactDetails!!.id).isNull()
+        assertThat(actual.contactDetails!!.address!!.id).isNull()
+        verify(idFactory).vacNumber()
+        verify(aedMappingHelper).issueDate()
+        verify(aedMappingHelper).requestDateTime()
+        verify(aedMappingHelper).statusHistory(AnonymousElectorDocumentStatus.Status.PRINTED)
     }
 }
