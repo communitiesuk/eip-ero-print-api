@@ -8,7 +8,7 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
-import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryPageDto
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
 import uk.gov.dluhc.printapi.rest.aed.AedSearchQueryStringParameters
 import uk.gov.dluhc.printapi.service.EroService
@@ -23,7 +23,7 @@ class AnonymousElectorDocumentSearchService(
     fun searchAnonymousElectorDocumentSummaries(
         eroId: String,
         searchCriteria: AedSearchQueryStringParameters
-    ): AnonymousSearchSummaryPageDto {
+    ): AnonymousSearchSummaryResults {
         val gssCodes = eroService.lookupGssCodesForEro(eroId)
         val pagedSummaries = anonymousElectorDocumentSummaryRepository
             .findAllByGssCodeInAndSourceType(
@@ -32,7 +32,7 @@ class AnonymousElectorDocumentSearchService(
                 pageRequest = buildPageRequest(searchCriteria)
             ).map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(it) }
 
-        return AnonymousSearchSummaryPageDto(results = pagedSummaries.content)
+        return AnonymousSearchSummaryResults(results = pagedSummaries.content)
     }
 
     private fun buildPageRequest(searchCriteria: AedSearchQueryStringParameters): Pageable {

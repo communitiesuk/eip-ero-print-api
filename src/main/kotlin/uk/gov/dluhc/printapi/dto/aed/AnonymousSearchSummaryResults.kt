@@ -3,7 +3,7 @@ package uk.gov.dluhc.printapi.dto.aed
 import java.time.Instant
 import java.time.LocalDate
 
-data class AnonymousSearchSummaryPageDto(
+data class AnonymousSearchSummaryResults(
     val results: List<AnonymousSearchSummaryDto>,
 )
 

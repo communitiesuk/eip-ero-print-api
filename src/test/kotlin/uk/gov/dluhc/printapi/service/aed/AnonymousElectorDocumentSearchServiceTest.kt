@@ -14,7 +14,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
-import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryPageDto
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
 import uk.gov.dluhc.printapi.rest.aed.AedSearchQueryStringParameters
 import uk.gov.dluhc.printapi.service.EroService
@@ -76,7 +76,7 @@ internal class AnonymousElectorDocumentSearchServiceTest {
             .willReturn(PageImpl(listOf(aedSummary), pageRequest, 1))
         given(anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(any())).willReturn(expectedSummaryDto)
 
-        val expected = AnonymousSearchSummaryPageDto(results = listOf(expectedSummaryDto))
+        val expected = AnonymousSearchSummaryResults(results = listOf(expectedSummaryDto))
 
         // When
         val actualPagedRecords =
