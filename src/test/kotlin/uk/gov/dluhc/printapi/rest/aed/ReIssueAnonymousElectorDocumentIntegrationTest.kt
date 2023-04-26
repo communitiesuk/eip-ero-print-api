@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidElectoralRollNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
@@ -128,15 +129,19 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         val sourceReference = aValidSourceReference()
         val photoLocationArn = addPhotoToS3()
 
+        val originalElectoralRollNumber = "ORIGINAL ELECTORAL ROLL #"
         val previousAed = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
             sourceReference = sourceReference,
             photoLocationArn = photoLocationArn,
+            electoralRollNumber = originalElectoralRollNumber,
         )
         anonymousElectorDocumentRepository.save(previousAed)
 
+        val newElectoralRollNumber = aValidElectoralRollNumber()
         val requestBody = buildReIssueAnonymousElectorDocumentRequest(
-            sourceReference = sourceReference
+            sourceReference = sourceReference,
+            electoralRollNumber = newElectoralRollNumber,
         )
 
         // When
@@ -183,6 +188,8 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
+            assertThat(text).containsIgnoringCase(newElectoralRollNumber)
+            assertThat(text).doesNotContain(originalElectoralRollNumber)
         }
     }
 

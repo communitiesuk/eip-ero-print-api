@@ -10,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
@@ -20,6 +21,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidElectoralRollNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildReIssueAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
@@ -81,11 +83,15 @@ class ReIssueAnonymousElectorDocumentMapperTest {
     }
 
     @Test
-    fun `should map to new Anonymous Elector Document given`() {
+    fun `should map to new Anonymous Elector Document given a previous AED`() {
         // Given
+        val sourceReference = aValidSourceReference()
+        val originalElectoralRollNumber = "ORIGINAL ELECTORAL ROLL #"
         val previousAed = buildAnonymousElectorDocument(
             id = UUID.randomUUID(),
-            certificateNumber = aValidVacNumber()
+            sourceReference = sourceReference,
+            certificateNumber = aValidVacNumber(),
+            electoralRollNumber = originalElectoralRollNumber,
         )
         val templateFilename = aTemplateFilename()
 
@@ -101,15 +107,29 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         )
         given(aedMappingHelper.statusHistory(any())).willReturn(expectedStatusHistory)
 
+        val userId = aValidUserId()
+        val newElectoralRollNumber = aValidElectoralRollNumber()
+        val dto = buildReIssueAnonymousElectorDocumentDto(
+            sourceReference = sourceReference,
+            electoralRollNumber = newElectoralRollNumber,
+            deliveryAddressType = ERO_COLLECTION,
+            userId = userId
+        )
+
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
+
         val expected = previousAed.deepCopy().apply {
             certificateNumber = newCertificateNumber
             requestDateTime = FIXED_TIME
             issueDate = FIXED_DATE
             statusHistory = expectedStatusHistory.toMutableList()
+            electoralRollNumber = newElectoralRollNumber
+            delivery?.deliveryAddressType = DeliveryAddressType.ERO_COLLECTION
+            this.userId = userId
         }
 
         // When
-        val actual = mapper.toNewAnonymousElectorDocument(previousAed, templateFilename)
+        val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
 
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
@@ -122,5 +142,6 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         verify(aedMappingHelper).issueDate()
         verify(aedMappingHelper).requestDateTime()
         verify(aedMappingHelper).statusHistory(AnonymousElectorDocumentStatus.Status.PRINTED)
+        verify(deliveryAddressTypeMapper).mapDtoToEntity(ERO_COLLECTION)
     }
 }

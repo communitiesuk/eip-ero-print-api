@@ -263,7 +263,7 @@ internal class AnonymousElectorDocumentServiceTest {
             val newlyIssuedAed = buildAnonymousElectorDocument(
                 certificateNumber = certificateNumber
             )
-            given(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(any(), any()))
+            given(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(any(), any(), any()))
                 .willReturn(newlyIssuedAed)
 
             val dto = buildReIssueAnonymousElectorDocumentDto(
@@ -281,7 +281,7 @@ internal class AnonymousElectorDocumentServiceTest {
             verify(pdfFactory).createPdfContents(templateDetails)
             verify(eroService).lookupGssCodesForEro(eroId)
             verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
-            verify(reIssueAnonymousElectorDocumentMapper).toNewAnonymousElectorDocument(mostRecentIssueAed, templateFilename)
+            verify(reIssueAnonymousElectorDocumentMapper).toNewAnonymousElectorDocument(mostRecentIssueAed, dto, templateFilename)
             verify(anonymousElectorDocumentRepository).save(newlyIssuedAed)
         }
 
