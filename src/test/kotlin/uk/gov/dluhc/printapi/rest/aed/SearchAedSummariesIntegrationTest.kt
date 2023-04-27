@@ -70,13 +70,13 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
             id = ERO_ID,
             localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
         )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
         val currentDate = LocalDate.now()
         val currentDateTimeInstant = Instant.now()
         val aed1SourceReference = aValidSourceReference()
         val aed1ApplicationReference = aValidApplicationReference()
-        wireMockService.stubCognitoJwtIssuerResponse()
-        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
-
         val application1InitialAed = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
             sourceReference = aed1SourceReference,
