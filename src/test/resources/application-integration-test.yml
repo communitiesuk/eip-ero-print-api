@@ -6,7 +6,9 @@ cloud:
       access-key: test
       secret-key: test
     sqs:
-      endpoint: http://replaced-by-localStackContainerSqsSettings-bean
+      endpoint: http://replaced-by-localStackContainerSettings-bean
+    email:
+      endpoint: http://replaced-by-localStackContainerSettings-bean
 
 spring:
   datasource:

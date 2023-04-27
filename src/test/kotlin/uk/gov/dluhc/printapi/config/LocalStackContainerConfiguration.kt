@@ -138,7 +138,7 @@ class LocalStackContainerConfiguration {
      * @return a [LocalStackContainerSettings] bean encapsulating the various IDs etc of the configured container and services.
      */
     @Bean
-    fun localStackContainerSqsSettings(
+    fun localStackContainerSettings(
         applicationContext: ConfigurableApplicationContext,
         @Value("\${sqs.send-application-to-print-queue-name}") sendApplicationToPrintQueueName: String,
         @Value("\${sqs.process-print-request-batch-queue-name}") processPrintRequestBatchQueueName: String,
@@ -158,7 +158,8 @@ class LocalStackContainerConfiguration {
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
 
         TestPropertyValues.of(
-            "cloud.aws.sqs.endpoint=$apiUrl"
+            "cloud.aws.sqs.endpoint=$apiUrl",
+            "cloud.aws.email.endpoint=$apiUrl",
         ).applyTo(applicationContext)
 
         return LocalStackContainerSettings(

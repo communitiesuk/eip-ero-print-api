@@ -61,6 +61,9 @@ The following environment variables must be set in order to run the application:
 * `SFTP_PRIVATE_KEY` - SSH private key to use when securely connecting to the SFTP server
 * `SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY` - Directory on the remote host to write print request files
 * `SFTP_PRINT_RESPONSE_DOWNLOAD_DIRECTORY` - Directory on the remote host to read print response files
+* `CLOUD_AWS_MAIL_ENDPOINT` - The endpoint URI for AWS's email service, used to send emails via AWS SES
+* `JOBS_BATCH_PRINT_REQUESTS_CRON` - Optional. Overrides the cron schedule for when print requests are batched and sent to the Print Provider
+* `JOBS_PROCESS_PRINT_RESPONSES_CRON` - Optional. Overrides the cron schedule for when the Print Provider's OutBound folder is polled to find and process print responses
 
 #### MYSQL Configuration
 For local setup refer to src/main/resources/db/readme.

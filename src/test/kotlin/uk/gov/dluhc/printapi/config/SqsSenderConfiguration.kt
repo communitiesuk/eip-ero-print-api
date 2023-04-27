@@ -21,7 +21,7 @@ class SqsSenderConfiguration {
      * This ordering is achieved implicitly by the @DependsOn annotation below.
      */
     @Bean
-    @DependsOn("localStackContainerSqsSettings")
+    @DependsOn("localStackContainerSettings")
     fun sqsMessagingTemplate(
         amazonSQSAsync: AmazonSQSAsync,
         objectMapper: ObjectMapper
