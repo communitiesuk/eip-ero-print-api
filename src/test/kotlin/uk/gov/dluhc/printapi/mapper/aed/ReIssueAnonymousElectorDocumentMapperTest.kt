@@ -38,7 +38,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         private const val FIXED_DATE_STRING = "2022-10-18"
         private val FIXED_DATE = LocalDate.parse(FIXED_DATE_STRING)
         private val FIXED_TIME = Instant.parse("${FIXED_DATE_STRING}T11:22:32.123Z")
-        private val ID_FIELDS_REGEX = ".*id"
+        private val IGNORED_FIELDS = arrayOf(".*id", ".*dateCreated", ".*createdBy", ".*version")
     }
 
     @InjectMocks
@@ -139,12 +139,24 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
 
         // Then
-        assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
+        assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(*IGNORED_FIELDS).isEqualTo(expected)
         assertThat(actual.id).isNull()
         assertThat(actual.delivery!!.id).isNull()
+        assertThat(actual.delivery!!.createdBy).isNull()
+        assertThat(actual.delivery!!.dateCreated).isNull()
+        assertThat(actual.delivery!!.version).isNull()
         assertThat(actual.delivery!!.address.id).isNull()
+        assertThat(actual.delivery!!.address.dateCreated).isNull()
+        assertThat(actual.delivery!!.address.createdBy).isNull()
+        assertThat(actual.delivery!!.address.version).isNull()
         assertThat(actual.contactDetails!!.id).isNull()
+        assertThat(actual.contactDetails!!.dateCreated).isNull()
+        assertThat(actual.contactDetails!!.createdBy).isNull()
+        assertThat(actual.contactDetails!!.version).isNull()
         assertThat(actual.contactDetails!!.address!!.id).isNull()
+        assertThat(actual.contactDetails!!.address!!.dateCreated).isNull()
+        assertThat(actual.contactDetails!!.address!!.createdBy).isNull()
+        assertThat(actual.contactDetails!!.address!!.version).isNull()
         verify(idFactory).vacNumber()
         verify(aedMappingHelper).issueDate()
         verify(aedMappingHelper).requestDateTime()
