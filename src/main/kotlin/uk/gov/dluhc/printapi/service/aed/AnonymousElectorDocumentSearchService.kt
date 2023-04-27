@@ -8,9 +8,9 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchCriteriaDto
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
-import uk.gov.dluhc.printapi.rest.aed.AedSearchQueryStringParameters
 import uk.gov.dluhc.printapi.service.EroService
 
 @Service
@@ -21,24 +21,25 @@ class AnonymousElectorDocumentSearchService(
 ) {
 
     fun searchAnonymousElectorDocumentSummaries(
-        eroId: String,
-        searchCriteria: AedSearchQueryStringParameters
+        dto: AnonymousSearchCriteriaDto
     ): AnonymousSearchSummaryResults {
-        val gssCodes = eroService.lookupGssCodesForEro(eroId)
-        val pagedSummaries = anonymousElectorDocumentSummaryRepository
-            .findAllByGssCodeInAndSourceType(
-                gssCodes = gssCodes,
-                sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                pageRequest = buildPageRequest(searchCriteria)
-            ).map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(it) }
+        with(dto) {
+            val gssCodes = eroService.lookupGssCodesForEro(eroId)
+            val pagedSummaries = anonymousElectorDocumentSummaryRepository
+                .findAllByGssCodeInAndSourceType(
+                    gssCodes = gssCodes,
+                    sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+                    pageRequest = buildPageRequest(page = page, pageSize = pageSize)
+                ).map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(it) }
 
-        return AnonymousSearchSummaryResults(results = pagedSummaries.content)
+            return AnonymousSearchSummaryResults(results = pagedSummaries.content)
+        }
     }
 
-    private fun buildPageRequest(searchCriteria: AedSearchQueryStringParameters): Pageable {
+    private fun buildPageRequest(page: Int, pageSize: Int): Pageable {
         val sortByIssueDateDesc = Sort.by(DESC, "issueDate")
         val sortBySurnameAsc = Sort.by(ASC, "surname")
-        val repositoryPageIndex = searchCriteria.page - 1
-        return PageRequest.of(repositoryPageIndex, searchCriteria.pageSize, sortByIssueDateDesc.and(sortBySurnameAsc))
+        val repositoryPageIndex = page - 1
+        return PageRequest.of(repositoryPageIndex, pageSize, sortByIssueDateDesc.and(sortBySurnameAsc))
     }
 }

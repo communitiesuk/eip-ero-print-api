@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
+import uk.gov.dluhc.printapi.mapper.aed.AedSearchQueryStringParametersMapper
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
 import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
@@ -48,6 +49,7 @@ class AnonymousElectorDocumentController(
     private val reIssueAnonymousElectorDocumentMapper: ReIssueAnonymousElectorDocumentMapper,
     private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
     private val anonymousSearchSummaryMapper: AnonymousSearchSummaryMapper,
+    private val aedSearchQueryStringParametersMapper: AedSearchQueryStringParametersMapper,
 ) {
 
     @PostMapping
@@ -105,12 +107,11 @@ class AnonymousElectorDocumentController(
     fun searchAnonymousElectorDocumentSummaries(
         @PathVariable eroId: String,
     ): AedSearchSummaryResponse {
-        val summaryResults =
-            anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(
-                eroId = eroId,
-                searchCriteria = AedSearchQueryStringParameters()
-            )
-        with(summaryResults) {
+        val searchCriteriaDto = aedSearchQueryStringParametersMapper.toAnonymousSearchCriteriaDto(
+            eroId = eroId,
+            searchQueryParameters = AedSearchQueryStringParameters()
+        )
+        with(anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(searchCriteriaDto)) {
             return AedSearchSummaryResponse(
                 results = results.map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryApi(it) }
             )
