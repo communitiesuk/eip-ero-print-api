@@ -109,13 +109,14 @@ class LocalStackContainerConfiguration {
     fun configureEmailIdentityAndExposeSesClient(
         awsBasicCredentialsProvider: AwsCredentialsProvider,
         emailClientProperties: EmailClientProperties,
+        @Value("\${cloud.aws.mail.endpoint}") sesVpcEndpoint: URI,
     ): SesClient {
         localStackContainer.verifyEmailIdentity(emailClientProperties.sender)
 
         return SesClient.builder()
             .region(Region.of(DEFAULT_REGION))
             .credentialsProvider(awsBasicCredentialsProvider)
-            .applyMutation { builder -> builder.endpointOverride(localStackContainer.getEndpointOverride()) }
+            .endpointOverride(sesVpcEndpoint)
             .build()
     }
 
@@ -159,7 +160,7 @@ class LocalStackContainerConfiguration {
 
         TestPropertyValues.of(
             "cloud.aws.sqs.endpoint=$apiUrl",
-            "cloud.aws.email.endpoint=$apiUrl",
+            "cloud.aws.mail.endpoint=$apiUrl",
         ).applyTo(applicationContext)
 
         return LocalStackContainerSettings(

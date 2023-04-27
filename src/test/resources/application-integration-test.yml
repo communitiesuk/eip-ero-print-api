@@ -7,7 +7,7 @@ cloud:
       secret-key: test
     sqs:
       endpoint: http://replaced-by-localStackContainerSettings-bean
-    email:
+    mail:
       endpoint: http://replaced-by-localStackContainerSettings-bean
 
 spring:
