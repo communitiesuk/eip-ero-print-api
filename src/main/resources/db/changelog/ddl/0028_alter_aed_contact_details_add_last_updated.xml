@@ -8,10 +8,10 @@
     <changeSet author="nathan.russell@valtech.com" id="0028_EIP-5761_aed_contact_details add updated_by and date_updated" context="ddl">
 
         <addColumn tableName="aed_contact_details">
-            <column name="date_updated" type="timestamp" beforeColumn="version">
+            <column name="date_updated" type="timestamp" afterColumn="created_by">
                 <constraints nullable="true"/>
             </column>
-            <column name="updated_by" type="varchar(255)" beforeColumn="version">
+            <column name="updated_by" type="varchar(255)" afterColumn="date_updated">
                 <constraints nullable="true"/>
             </column>
         </addColumn>
