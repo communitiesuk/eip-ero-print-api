@@ -15,6 +15,7 @@ class AnonymousElectorDocumentDto(
     val certificateLanguage: CertificateLanguage,
     val supportingInformationFormat: AnonymousSupportingInformationFormat,
     val deliveryAddressType: DeliveryAddressType,
+    val collectionReason: String?,
     val elector: AnonymousElectorDto,
     val status: AnonymousElectorDocumentStatus,
     val photoLocationArn: String,

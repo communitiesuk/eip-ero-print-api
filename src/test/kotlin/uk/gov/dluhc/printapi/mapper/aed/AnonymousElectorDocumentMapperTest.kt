@@ -15,7 +15,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
-import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.REGISTERED
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
@@ -30,6 +30,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
@@ -62,12 +63,16 @@ class AnonymousElectorDocumentMapperTest {
         @Test
         fun `should map AnonymousElectorDocumentDto to an AnonymousElectorDocument API model`() {
             // Given
-            val dtoRequest = buildAnonymousElectorDocumentDto(supportingInformationFormat = AnonymousSupportingInformationFormatDtoEnum.EASY_READ)
+            val dtoRequest = buildAnonymousElectorDocumentDto(
+                supportingInformationFormat = AnonymousSupportingInformationFormatDtoEnum.EASY_READ,
+                deliveryAddressType = DtoDeliveryAddressType.ERO_COLLECTION,
+                collectionReason = "Currently away"
+            )
             val requestDateTime = aValidGeneratedDateTime()
 
             given(certificateLanguageMapper.mapDtoToApi(any())).willReturn(CertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapDtoToApi(any())).willReturn(AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ)
-            given(deliveryAddressTypeMapper.mapDtoToApi(any())).willReturn(DeliveryAddressType.REGISTERED)
+            given(deliveryAddressTypeMapper.mapDtoToApi(any())).willReturn(DeliveryAddressType.ERO_MINUS_COLLECTION)
             given(instantMapper.toOffsetDateTime(any())).willReturn(requestDateTime)
 
             val expected = with(dtoRequest) {
@@ -79,7 +84,8 @@ class AnonymousElectorDocumentMapperTest {
                     applicationReference = applicationReference,
                     certificateLanguage = CertificateLanguage.EN,
                     supportingInformationFormat = AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ,
-                    deliveryAddressType = DeliveryAddressType.REGISTERED,
+                    deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
+                    collectionReason = collectionReason,
                     elector = with(elector) {
                         buildAnonymousElectorApi(
                             firstName = firstName,
@@ -116,7 +122,7 @@ class AnonymousElectorDocumentMapperTest {
             assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
             verify(certificateLanguageMapper).mapDtoToApi(dtoRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapDtoToApi(dtoRequest.supportingInformationFormat)
-            verify(deliveryAddressTypeMapper).mapDtoToApi(DtoDeliveryAddressType.REGISTERED)
+            verify(deliveryAddressTypeMapper).mapDtoToApi(DtoDeliveryAddressType.ERO_COLLECTION)
             verify(instantMapper).toOffsetDateTime(dtoRequest.requestDateTime)
             verifyNoMoreInteractions(
                 certificateLanguageMapper, supportingInformationFormatMapper,
@@ -136,11 +142,12 @@ class AnonymousElectorDocumentMapperTest {
                     firstName = "John",
                     middleNames = "J",
                     surname = "Bloggs"
-                )
+                ),
+                delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
             )
             given(certificateLanguageMapper.mapEntityToDto(any())).willReturn(DtoCertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapEntityToDto(any())).willReturn(AnonymousSupportingInformationFormatDtoEnum.BRAILLE)
-            given(deliveryAddressTypeMapper.mapEntityToDto(any())).willReturn(DtoDeliveryAddressType.REGISTERED)
+            given(deliveryAddressTypeMapper.mapEntityToDto(any())).willReturn(DtoDeliveryAddressType.ERO_COLLECTION)
 
             val expected = with(entityRequest) {
                 buildAnonymousElectorDocumentDto(
@@ -151,7 +158,8 @@ class AnonymousElectorDocumentMapperTest {
                     applicationReference = applicationReference,
                     certificateLanguage = DtoCertificateLanguage.EN,
                     supportingInformationFormat = AnonymousSupportingInformationFormatDtoEnum.BRAILLE,
-                    deliveryAddressType = DtoDeliveryAddressType.REGISTERED,
+                    deliveryAddressType = DtoDeliveryAddressType.ERO_COLLECTION,
+                    collectionReason = delivery!!.collectionReason,
                     elector = with(contactDetails!!) {
                         buildAnonymousElectorDto(
                             firstName = firstName,
@@ -188,7 +196,7 @@ class AnonymousElectorDocumentMapperTest {
             assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
             verify(certificateLanguageMapper).mapEntityToDto(entityRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapEntityToDto(entityRequest.supportingInformationFormat!!)
-            verify(deliveryAddressTypeMapper).mapEntityToDto(REGISTERED)
+            verify(deliveryAddressTypeMapper).mapEntityToDto(ERO_COLLECTION)
             verifyNoMoreInteractions(certificateLanguageMapper, supportingInformationFormatMapper, deliveryAddressTypeMapper)
             verifyNoInteractions(instantMapper)
         }

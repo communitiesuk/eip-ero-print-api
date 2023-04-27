@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.15.2'
+  version: '1.15.3'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1250,6 +1250,11 @@ components:
           $ref: '#/components/schemas/AnonymousSupportingInformationFormat'
         deliveryAddressType:
           $ref: '#/components/schemas/DeliveryAddressType'
+        collectionReason:
+          type: string
+          description: |
+            The reason the elector gave for having to collect their AED (if applicable).
+          maxLength: 1024
         elector:
           $ref: '#/components/schemas/AnonymousElector'
         status:
