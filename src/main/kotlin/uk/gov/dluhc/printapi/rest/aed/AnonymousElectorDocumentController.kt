@@ -22,12 +22,15 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
 import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.ReIssueAnonymousElectorDocumentMapper
+import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentsResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.models.ReIssueAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.rest.HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY
+import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentSearchService
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import java.io.ByteArrayInputStream
@@ -40,9 +43,11 @@ class AnonymousElectorDocumentController(
     @Qualifier("anonymousElectorDocumentExplainerPdfService")
     private val explainerPdfService: ExplainerPdfService,
     private val anonymousElectorDocumentService: AnonymousElectorDocumentService,
+    private val anonymousElectorDocumentSearchService: AnonymousElectorDocumentSearchService,
     private val generateAnonymousElectorDocumentMapper: GenerateAnonymousElectorDocumentMapper,
     private val reIssueAnonymousElectorDocumentMapper: ReIssueAnonymousElectorDocumentMapper,
     private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
+    private val anonymousSearchSummaryMapper: AnonymousSearchSummaryMapper,
 ) {
 
     @PostMapping
@@ -92,6 +97,24 @@ class AnonymousElectorDocumentController(
             .getAnonymousElectorDocuments(eroId, applicationId)
             .map { anonymousElectorDocumentMapper.mapToApiAnonymousElectorDocument(it) }
         return AnonymousElectorDocumentsResponse(anonymousElectorDocuments = anonymousElectorDocuments)
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
+    @ResponseStatus(OK)
+    fun searchAnonymousElectorDocumentSummaries(
+        @PathVariable eroId: String,
+    ): AedSearchSummaryResponse {
+        val summaryResults =
+            anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(
+                eroId = eroId,
+                searchCriteria = AedSearchQueryStringParameters()
+            )
+        with(summaryResults) {
+            return AedSearchSummaryResponse(
+                results = results.map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryApi(it) }
+            )
+        }
     }
 
     @PostMapping(value = ["{gssCode}/explainer-document"], produces = [APPLICATION_PDF_VALUE])

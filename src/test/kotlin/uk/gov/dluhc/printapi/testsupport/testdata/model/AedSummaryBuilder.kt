@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.model
 
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.models.AedSearchSummary
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
@@ -14,6 +15,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 fun buildAedSearchSummaryApi(
     gssCode: String = aGssCode(),
@@ -41,4 +43,26 @@ fun buildAedSearchSummaryApi(
         surname = surname,
         postcode = postcode
     )
+}
+
+fun buildAedSearchSummaryApiFromAedEntity(
+    aedEntity: AnonymousElectorDocument,
+    electoralRollNumber: String = aedEntity.electoralRollNumber,
+    surname: String = aedEntity.contactDetails!!.surname
+): AedSearchSummary {
+    return with(aedEntity) {
+        AedSearchSummary(
+            gssCode = gssCode,
+            sourceReference = sourceReference,
+            applicationReference = applicationReference,
+            certificateNumber = certificateNumber,
+            electoralRollNumber = electoralRollNumber,
+            status = AnonymousElectorDocumentStatus.PRINTED,
+            issueDate = issueDate,
+            dateTimeCreated = requestDateTime.atOffset(ZoneOffset.UTC),
+            firstName = contactDetails!!.firstName,
+            surname = surname,
+            postcode = contactDetails!!.address!!.postcode!!
+        )
+    }
 }
