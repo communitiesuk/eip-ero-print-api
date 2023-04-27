@@ -29,6 +29,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildReIssueAnonymousEle
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
 import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -38,7 +39,8 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         private const val FIXED_DATE_STRING = "2022-10-18"
         private val FIXED_DATE = LocalDate.parse(FIXED_DATE_STRING)
         private val FIXED_TIME = Instant.parse("${FIXED_DATE_STRING}T11:22:32.123Z")
-        private val IGNORED_FIELDS = arrayOf(".*id", ".*dateCreated", ".*createdBy", ".*version")
+        private val IGNORED_FIELDS =
+            arrayOf(".*id", ".*dateCreated", ".*createdBy", ".*dateUpdated", ".*updatedBy", ".*version")
     }
 
     @InjectMocks
@@ -98,7 +100,19 @@ class ReIssueAnonymousElectorDocumentMapperTest {
                 deliveryAddressType = DeliveryAddressType.ERO_COLLECTION,
                 collectionReason = "There is a postal strike"
             ),
-        )
+        ).apply {
+            createdBy = "some-user"
+            dateCreated = Instant.now().minus(1, ChronoUnit.DAYS)
+            version = 0
+            with(contactDetails!!) {
+                id = UUID.randomUUID()
+                createdBy = "some-user"
+                dateCreated = Instant.now().minus(1, ChronoUnit.DAYS)
+                updatedBy = "some-other-user"
+                dateUpdated = Instant.now()
+                version = 1
+            }
+        }
         val templateFilename = aTemplateFilename()
 
         val newCertificateNumber = aValidVacNumber()
@@ -152,6 +166,8 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         assertThat(actual.contactDetails!!.id).isNull()
         assertThat(actual.contactDetails!!.dateCreated).isNull()
         assertThat(actual.contactDetails!!.createdBy).isNull()
+        assertThat(actual.contactDetails!!.dateUpdated).isNull()
+        assertThat(actual.contactDetails!!.updatedBy).isNull()
         assertThat(actual.contactDetails!!.version).isNull()
         assertThat(actual.contactDetails!!.address!!.id).isNull()
         assertThat(actual.contactDetails!!.address!!.dateCreated).isNull()

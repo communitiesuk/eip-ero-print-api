@@ -13,8 +13,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAnonymousElectorDocumentTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidElectoralRollNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidFirstName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssueDate
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPrintRequestStatusEventDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
@@ -89,9 +91,13 @@ fun buildAedContactDetails(
     middleNames: String? = null,
     surname: String = aValidSurname(),
     address: Address = buildAddress(),
+    email: String = aValidEmailAddress(),
+    phoneNumber: String = aValidPhoneNumber(),
 ): AedContactDetails = AedContactDetails(
     firstName = firstName,
     middleNames = middleNames,
     surname = surname,
     address = address,
+    email = email,
+    phoneNumber = phoneNumber,
 )

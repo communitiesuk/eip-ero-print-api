@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="nathan.russell@valtech.com" id="0028_EIP-5761_aed_contact_details add updated_by and date_updated" context="ddl">
+
+        <addColumn tableName="aed_contact_details">
+            <column name="date_updated" type="timestamp" beforeColumn="version">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_by" type="varchar(255)" beforeColumn="version">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <sql>
+            UPDATE aed_contact_details SET date_updated = date_created;
+            UPDATE aed_contact_details SET updated_by = created_by;
+        </sql>
+
+        <addNotNullConstraint tableName="aed_contact_details" columnName="date_updated" columnDataType="timestamp"/>
+        <addNotNullConstraint tableName="aed_contact_details" columnName="updated_by" columnDataType="varchar(255)"/>
+
+        <rollback>
+            <dropColumn tableName="aed_contact_details" columnName="date_updated"/>
+            <dropColumn tableName="aed_contact_details" columnName="updated_by"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
