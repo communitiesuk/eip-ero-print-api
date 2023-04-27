@@ -1253,7 +1253,7 @@ components:
         collectionReason:
           type: string
           description: |
-            The reason the elector gave for having to collect their voter ID (if applicable).
+            The reason the elector gave for having to collect their AED (if applicable).
           maxLength: 1024
         elector:
           $ref: '#/components/schemas/AnonymousElector'
