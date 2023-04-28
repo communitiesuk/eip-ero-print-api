@@ -28,6 +28,13 @@ sqs:
   application-removed-queue-name: ${SQS_APPLICATION_REMOVED_QUEUE_NAME}
   remove-certificate-queue-name: ${SQS_REMOVE_CERTIFICATE_QUEUE_NAME}
 
+s3:
+  # TODO - EIP1-5839 - infra PR (including S3 permissions)
+  # TODO - add properties to README
+  certificate-photo-access-duration: 1M
+  certificate-photos-target-bucket: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME}
+  certificate-photos-target-bucket-proxy-endpoint: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT}
+
 api:
   print-api:
     base.url: ${API_PRINT_API_BASE_URL}
