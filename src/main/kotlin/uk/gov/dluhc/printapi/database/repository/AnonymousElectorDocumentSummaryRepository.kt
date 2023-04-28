@@ -17,4 +17,11 @@ interface AnonymousElectorDocumentSummaryRepository :
         sourceType: SourceType,
         pageRequest: Pageable
     ): Page<AnonymousElectorDocumentSummary>
+
+    fun findAllByGssCodeInAndSourceTypeAndSanitizedSurname(
+        gssCodes: List<String>,
+        sourceType: SourceType,
+        sanitizedSurname: String,
+        pageRequest: Pageable
+    ): Page<AnonymousElectorDocumentSummary>
 }

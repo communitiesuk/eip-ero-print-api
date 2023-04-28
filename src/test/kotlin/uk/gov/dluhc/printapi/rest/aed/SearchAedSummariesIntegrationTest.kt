@@ -9,7 +9,6 @@ import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAedSearchSummaryApiFromAedEntity
@@ -83,7 +82,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
             applicationReference = aed1ApplicationReference,
             issueDate = currentDate.minusDays(10),
             requestDateTime = currentDateTimeInstant.minusSeconds(10),
-            contactDetails = buildAedContactDetails(surname = "A")
+            surname = "AAA",
         )
         val application1SecondAed = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
@@ -110,7 +109,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
             applicationReference = aed2ApplicationReference,
             issueDate = currentDate.minusDays(10),
             requestDateTime = currentDateTimeInstant.minusSeconds(10),
-            contactDetails = buildAedContactDetails(surname = "Z")
+            surname = "ZZZ",
         )
         val application2SecondAed = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
