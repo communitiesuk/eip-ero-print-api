@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.testsupport.testdata.entity
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentSummary
 import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.testsupport.buildSanitizedSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
@@ -45,7 +46,7 @@ fun buildAnonymousElectorDocumentSummaryEntity(
         dateCreated = dateCreated,
         firstName = firstName,
         surname = surname,
-        sanitizedSurname = surname,
+        sanitizedSurname = buildSanitizedSurname(surname),
         postcode = postcode
     )
 }
@@ -67,7 +68,7 @@ fun buildAnonymousElectorDocumentSummaryViewFromAedEntity(
             sanitizedElectoralRollNumber = electoralRollNumber,
             firstName = contactDetails!!.firstName,
             surname = surname,
-            sanitizedSurname = surname,
+            sanitizedSurname = buildSanitizedSurname(surname),
             postcode = contactDetails!!.address!!.postcode!!,
             issueDate = issueDate,
             dateCreated = requestDateTime
