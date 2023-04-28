@@ -22,6 +22,7 @@ class SesEmailClient(
         val filteredEmailToAddresses = filterRecipientsIfAllowListConfigured(emailToRecipients, subject)
         val filteredEmailCcAddresses = filterRecipientsIfAllowListConfigured(emailCcRecipients, subject)
         if (filteredEmailToAddresses.isEmpty() && filteredEmailCcAddresses.isEmpty()) {
+            logger.warn { "Both toAddresses and ccAddresses have been filtered down to empty sets. No recipients to send to." }
             return emptySet()
         }
 
@@ -34,11 +35,11 @@ class SesEmailClient(
         )
 
         try {
-            logger.debug { "sending an email to [$filteredEmailToAddresses], cc[$filteredEmailCcAddresses] with subject[$subject]" }
+            logger.info { "Sending an email to [$filteredEmailToAddresses], cc [$filteredEmailCcAddresses] with subject [$subject]" }
             val messageId = sesClient.sendEmail(emailRequest).messageId()
-            logger.debug { "email sent with messageId[$messageId]" }
+            logger.debug { "email sent with messageId [$messageId]" }
         } catch (e: SesException) {
-            logger.error("failed to send email to [$filteredEmailToAddresses], cc[$filteredEmailCcAddresses] with subject[$subject]", e)
+            logger.error("failed to send email to [$filteredEmailToAddresses], cc [$filteredEmailCcAddresses] with subject [$subject]", e)
             throw EmailNotSentException(filteredEmailToAddresses, filteredEmailCcAddresses, subject, e)
         }
         return filteredEmailToAddresses + filteredEmailCcAddresses
