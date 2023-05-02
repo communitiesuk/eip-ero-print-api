@@ -64,6 +64,8 @@ The following environment variables must be set in order to run the application:
 * `SFTP_PRINT_RESPONSE_DOWNLOAD_DIRECTORY` - Directory on the remote host to read print response files
 * `JOBS_BATCH_PRINT_REQUESTS_CRON` - Optional. Overrides the cron schedule for when print requests are batched and sent to the Print Provider
 * `JOBS_PROCESS_PRINT_RESPONSES_CRON` - Optional. Overrides the cron schedule for when the Print Provider's OutBound folder is polled to find and process print responses
+* `S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME` - the S3 bucket name where certificate photos are stored
+* `S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT` - the URL of the custom domain file proxy for certificate photos
 
 #### MYSQL Configuration
 For local setup refer to src/main/resources/db/readme.
