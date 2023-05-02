@@ -4,6 +4,8 @@ import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
+import org.hibernate.annotations.UpdateTimestamp
+import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.dluhc.printapi.database.repository.UUIDCharType
@@ -57,8 +59,15 @@ class AedContactDetails(
     var dateCreated: Instant? = null,
 
     @field:Size(max = 255)
-    @LastModifiedBy
+    @CreatedBy
     var createdBy: String? = null,
+
+    @UpdateTimestamp
+    var dateUpdated: Instant? = null,
+
+    @field:Size(max = 255)
+    @LastModifiedBy
+    var updatedBy: String? = null,
 
     @Version
     var version: Long? = null

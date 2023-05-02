@@ -58,6 +58,8 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
     @Mapping(target = "contactDetails.id", ignore = true)
     @Mapping(target = "contactDetails.dateCreated", ignore = true)
     @Mapping(target = "contactDetails.createdBy", ignore = true)
+    @Mapping(target = "contactDetails.dateUpdated", ignore = true)
+    @Mapping(target = "contactDetails.updatedBy", ignore = true)
     @Mapping(target = "contactDetails.version", ignore = true)
     @Mapping(target = "contactDetails.address.id", ignore = true)
     @Mapping(target = "contactDetails.address.dateCreated", ignore = true)
