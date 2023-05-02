@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.16.0'
+  version: '1.17.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1337,13 +1337,12 @@ components:
           $ref: '#/components/schemas/AnonymousElector'
         status:
           $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
-        photoLocation:
+        photoUrl:
           type: string
           description: |
-            The location of the Elector's Certificate photo. 
-            This is the photo that has been prepared and approved for the Certificate by the `vc-anonymous-admin`, rather than the photo that the applicant uploaded as part of their original application. 
-            Typically an S3 ARN
-          maxLength: 1024
+            The URL of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the Certificate by the ERO, rather than the photo that the applicant uploaded as part of their original application.
+          example: 'http://localhost:8080/eros/city-council/anonymous-elector-documents/photo?applicationId=507f1f77bcf86cd799439011'
         issueDate:
           type: string
           format: date
@@ -1360,7 +1359,7 @@ components:
         - deliveryAddressType
         - elector
         - status
-        - photoLocation
+        - photoUrl
         - issueDate
 
     AnonymousElector:

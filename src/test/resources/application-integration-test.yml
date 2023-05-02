@@ -33,6 +33,8 @@ sqs:
   remove-certificate-queue-name: remove-certificate
 
 api:
+  print-api:
+    base.url: http://localhost:8080
   ero-management:
     url: http://will-be-replaced-by-wireMockServer-bean
 

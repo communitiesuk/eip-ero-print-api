@@ -17,12 +17,15 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import uk.gov.dluhc.printapi.dto.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
+import uk.gov.dluhc.printapi.factory.UrlFactory
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.mapper.InstantMapper
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.models.CertificateLanguage
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidGeneratedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDto
@@ -34,6 +37,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.anAedPhotoUrl
 import uk.gov.dluhc.printapi.dto.CertificateLanguage as DtoCertificateLanguage
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType as DtoDeliveryAddressType
 import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentStatus as DtoAnonymousElectorDocumentStatus
@@ -58,6 +62,9 @@ class AnonymousElectorDocumentMapperTest {
     @Mock
     private lateinit var instantMapper: InstantMapper
 
+    @Mock
+    private lateinit var urlFactory: UrlFactory
+
     @Nested
     inner class MapToApiAnonymousElectorDocument {
         @Test
@@ -74,6 +81,10 @@ class AnonymousElectorDocumentMapperTest {
             given(supportingInformationFormatMapper.mapDtoToApi(any())).willReturn(AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ)
             given(deliveryAddressTypeMapper.mapDtoToApi(any())).willReturn(DeliveryAddressType.ERO_MINUS_COLLECTION)
             given(instantMapper.toOffsetDateTime(any())).willReturn(requestDateTime)
+
+            val eroId = aValidEroId()
+            val expectedPhotoUrl = anAedPhotoUrl(eroId = eroId, sourceReference = dtoRequest.sourceReference)
+            given(urlFactory.createPhotoUrl(any(), any(), any())).willReturn(expectedPhotoUrl)
 
             val expected = with(dtoRequest) {
                 buildAnonymousElectorDocumentApi(
@@ -107,7 +118,7 @@ class AnonymousElectorDocumentMapperTest {
                             phoneNumber = phoneNumber,
                         )
                     },
-                    photoLocation = photoLocationArn,
+                    photoUrl = expectedPhotoUrl,
                     issueDate = issueDate,
                     status = AnonymousElectorDocumentStatus.PRINTED,
                     userId = userId,
@@ -116,7 +127,7 @@ class AnonymousElectorDocumentMapperTest {
             }
 
             // When
-            val actual = mapper.mapToApiAnonymousElectorDocument(dtoRequest)
+            val actual = mapper.mapToApiAnonymousElectorDocument(dtoRequest, eroId)
 
             // Then
             assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
@@ -128,6 +139,7 @@ class AnonymousElectorDocumentMapperTest {
                 certificateLanguageMapper, supportingInformationFormatMapper,
                 deliveryAddressTypeMapper, instantMapper
             )
+            verify(urlFactory).createPhotoUrl(eroId, ANONYMOUS_ELECTOR_DOCUMENT, dtoRequest.sourceReference)
         }
     }
 
