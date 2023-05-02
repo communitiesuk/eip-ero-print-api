@@ -63,7 +63,6 @@ class AnonymousElectorDocumentService(
     ): List<AnonymousElectorDocumentDto> {
         val gssCodes = eroService.lookupGssCodesForEro(eroId)
         return getAnonymousElectorDocumentsSortedByDate(gssCodes, applicationId)
-            // TODO EIP1-5837 - populate photoLocation with URL to endpoint to get the certificate's pre-signed URL (instead of the arn)
             .map { anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(it) }
     }
 
