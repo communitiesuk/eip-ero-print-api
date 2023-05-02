@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.15.3'
+  version: '1.16.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -760,6 +760,84 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
 
+  '/eros/{eroId}/anonymous-elector-documents/photo':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Returns the Anonymous Elector Document photo for an Anonymous application
+      description: Returns the Anonymous Elector Document photo for an Anonymous application
+      tags:
+        - Anonymous Elector Documents (AED)
+      parameters:
+        - name: applicationId
+          description: An identifier of an Anonymous Elector Document application
+          schema:
+            type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/PreSignedUrlResource'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: get-anonymous-elector-documents-photo-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/photo'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
   #
   # Anonymous Elector Document (AED) Explainer Document
   # --------------------------------------------------------------------------------
@@ -1517,6 +1595,18 @@ components:
         - electoralRollNumber
         - deliveryAddressType
 
+    PreSignedUrlResourceResponse:
+      title: PreSignedUrlResourceResponse
+      description: An object detailing the pre-signed URL to use in order to retrieve the resource
+      properties:
+        preSignedUrl:
+          type: string
+          format: uri
+          description: AWS pre-signed URL giving time-limited access to the resource.
+          example: 'https://example.s3.eu-west-2.amazonaws.com/image.png?X-Amz-Expires=1800'
+      required:
+        - preSignedUrl
+
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
@@ -1653,6 +1743,23 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AedSearchSummaryResponse'
+    PreSignedUrlResource:
+      description: Response containing an object detailing the pre-signed URL for the resource
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PreSignedUrlResourceResponse'
+
   #
   # Request Body Definitions
   # --------------------------------------------------------------------------------
