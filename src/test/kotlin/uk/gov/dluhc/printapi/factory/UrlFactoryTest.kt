@@ -12,7 +12,7 @@ class UrlFactoryTest {
     private val factory = UrlFactory("http://localhost:8080")
 
     @Test
-    fun `should create photo URL given source type ANONYMOUS_ELECTOR_DOCUMENTED`() {
+    fun `should create photo URL given source type ANONYMOUS_ELECTOR_DOCUMENT`() {
         // Given
         val eroId = aValidEroId()
         val sourceReference = aValidSourceReference()
