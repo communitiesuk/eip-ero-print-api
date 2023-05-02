@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service.aed
 
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -8,7 +9,9 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
+import uk.gov.dluhc.printapi.dto.aed.AedSearchBy.SURNAME
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchCriteriaDto
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryDto
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
 import uk.gov.dluhc.printapi.service.EroService
@@ -23,16 +26,36 @@ class AnonymousElectorDocumentSearchService(
     fun searchAnonymousElectorDocumentSummaries(
         dto: AnonymousSearchCriteriaDto
     ): AnonymousSearchSummaryResults {
-        with(dto) {
-            val gssCodes = eroService.lookupGssCodesForEro(eroId)
-            val pagedSummaries = anonymousElectorDocumentSummaryRepository
-                .findAllByGssCodeInAndSourceType(
-                    gssCodes = gssCodes,
-                    sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
-                    pageRequest = buildPageRequest(page = page, pageSize = pageSize)
-                ).map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(it) }
+        val gssCodes = eroService.lookupGssCodesForEro(dto.eroId)
+        with(getAedPagedSummaries(dto = dto, gssCodes = gssCodes)) {
+            return AnonymousSearchSummaryResults(
+                results = content
+            )
+        }
+    }
 
-            return AnonymousSearchSummaryResults(results = pagedSummaries.content)
+    private fun getAedPagedSummaries(
+        dto: AnonymousSearchCriteriaDto,
+        gssCodes: List<String>
+    ): Page<AnonymousSearchSummaryDto> {
+        with(dto) {
+            val pageRequest = buildPageRequest(page = page, pageSize = pageSize)
+            return when (searchBy) {
+                null ->
+                    anonymousElectorDocumentSummaryRepository.findAllByGssCodeInAndSourceType(
+                        gssCodes = gssCodes,
+                        sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+                        pageRequest = pageRequest
+                    )
+
+                SURNAME ->
+                    anonymousElectorDocumentSummaryRepository.findAllByGssCodeInAndSourceTypeAndSanitizedSurname(
+                        gssCodes = gssCodes,
+                        sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+                        sanitizedSurname = sanitizeSurname(searchValue!!),
+                        pageRequest = pageRequest
+                    )
+            }.map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(entity = it) }
         }
     }
 
