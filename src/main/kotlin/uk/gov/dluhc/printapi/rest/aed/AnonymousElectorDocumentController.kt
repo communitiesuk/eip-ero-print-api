@@ -107,7 +107,7 @@ class AnonymousElectorDocumentController(
     ): AnonymousElectorDocumentsResponse {
         val anonymousElectorDocuments = anonymousElectorDocumentService
             .getAnonymousElectorDocuments(eroId, applicationId)
-            .map { anonymousElectorDocumentMapper.mapToApiAnonymousElectorDocument(it) }
+            .map { anonymousElectorDocumentMapper.mapToApiAnonymousElectorDocument(it, eroId) }
         return AnonymousElectorDocumentsResponse(anonymousElectorDocuments = anonymousElectorDocuments)
     }
 

@@ -109,6 +109,8 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             )
         )
 
+        val expectedPhotoUrl = "http://localhost:8080/eros/$ERO_ID/anonymous-elector-documents/photo?applicationId=$APPLICATION_ID"
+
         val expectedFirstRecord = with(aedMatchingDocument2) {
             buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
@@ -130,8 +132,11 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
                         phoneNumber = phoneNumber
                     )
                 },
-                photoLocation = photoLocationArn, issueDate = issueDate, userId = userId,
-                dateTime = requestDateTime.atOffset(ZoneOffset.UTC), supportingInformationFormat = STANDARD
+                photoUrl = expectedPhotoUrl,
+                issueDate = issueDate,
+                userId = userId,
+                dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
+                supportingInformationFormat = STANDARD
             )
         }
         val expectedSecondRecord = with(aedMatchingDocument1) {
@@ -155,8 +160,11 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
                         phoneNumber = phoneNumber
                     )
                 },
-                photoLocation = photoLocationArn, issueDate = issueDate, userId = userId,
-                dateTime = requestDateTime.atOffset(ZoneOffset.UTC), supportingInformationFormat = LARGE_MINUS_PRINT
+                photoUrl = expectedPhotoUrl,
+                issueDate = issueDate,
+                userId = userId,
+                dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
+                supportingInformationFormat = LARGE_MINUS_PRINT
             )
         }
 

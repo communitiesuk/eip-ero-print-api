@@ -20,7 +20,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
-import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.anAedPhotoUrl
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -36,7 +36,7 @@ fun buildAnonymousElectorDocumentApi(
     collectionReason: String? = null,
     elector: AnonymousElector = buildAnonymousElectorApi(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,
-    photoLocation: String = aPhotoArn(),
+    photoUrl: String = anAedPhotoUrl(),
     issueDate: LocalDate = aValidIssueDate(),
     userId: String = aValidUserId(),
     dateTime: OffsetDateTime = aValidGeneratedDateTime()
@@ -52,7 +52,7 @@ fun buildAnonymousElectorDocumentApi(
     collectionReason = collectionReason,
     elector = elector,
     status = status,
-    photoLocation = photoLocation,
+    photoUrl = photoUrl,
     issueDate = issueDate,
     userId = userId,
     dateTime = dateTime,

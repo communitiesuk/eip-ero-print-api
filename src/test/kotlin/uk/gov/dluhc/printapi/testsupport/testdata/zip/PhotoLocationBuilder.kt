@@ -2,6 +2,8 @@ package uk.gov.dluhc.printapi.testsupport.testdata.zip
 
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
 import uk.gov.dluhc.printapi.service.PhotoLocation
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 
 fun buildPhotoLocation(
     zipPath: String = aPhotoZipPath(),
@@ -28,3 +30,8 @@ fun aPhotoBucketPath() = "E99999999/6407b6158f529a11713a1e5c/certificate-photos/
 fun anotherPhotoBucketPath() = "E99999999/2304v5134f529a11713a1e6a/certificate-photos/0d21c6de-72d4-5aa2-c4da-c33456252922_certificate-photo-1.png"
 
 fun aPhotoZipPath() = "05372cf5339447b39f98b248c2217b9f-635abede7c432c0aaeeeba47.png"
+
+fun anAedPhotoUrl(
+    eroId: String = aValidEroId(),
+    sourceReference: String = aValidSourceReference()
+) = "http://localhost:8080/eros/$eroId/anonymous-elector-documents/photo?applicationId=$sourceReference"

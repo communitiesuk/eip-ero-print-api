@@ -35,6 +35,7 @@ sqs:
 
 api:
   print-api:
+    base.url: ${API_PRINT_API_BASE_URL}
     generate-temporary-certificate:
       valid-on-date:
         max-calendar-days-in-future: 30
