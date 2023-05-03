@@ -62,17 +62,10 @@ internal class S3PhotoServiceTest {
         val s3Arn = "arn:aws:s3:::$bucketName/$key"
         val presignedUrl = "https://${s3Properties.certificatePhotosTargetBucket}/$key?$S3_QUERY_PARAMS"
         val transformedUrl = "https://${s3Properties.certificatePhotosTargetBucketProxyEndpoint}/$key?$S3_QUERY_PARAMS"
-
         val expectedPresignRequest: GetObjectPresignRequest = GetObjectPresignRequest.builder()
             .signatureDuration(Duration.ofSeconds(CERTIFICATE_PHOTO_ACCESS_TIME_IN_SECONDS))
-            .getObjectRequest(
-                GetObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .build()
-            )
+            .getObjectRequest(GetObjectRequest.builder().bucket(bucketName).key(key).build())
             .build()
-
         val presignedGetObjectRequest = mock<PresignedGetObjectRequest>()
         given(presignedGetObjectRequest.url()).willReturn(URL(presignedUrl))
         given(s3Presigner.presignGetObject(any<GetObjectPresignRequest>())).willReturn(presignedGetObjectRequest)

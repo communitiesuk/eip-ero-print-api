@@ -119,4 +119,39 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
                 .matches(expectedUrl)
         }
     }
+
+    @Test
+    fun `should return a presigned url for the AED photo given object key contains special characters`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val photoObjectKey = "dir1/Jane+!@£$%^&*())))_+-=[]{}'\\|;;<>,.:?#`~§± Doe:Awesome Company Ltd:HEADSHOT.jpg"
+        val anonymousElectorDocument1 = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = APPLICATION_ID,
+            photoLocationArn = buildS3Arn(s3Bucket, photoObjectKey)
+        )
+        anonymousElectorDocumentRepository.save(anonymousElectorDocument1)
+        s3Client.addCertificatePhotoToS3(s3Bucket, photoObjectKey)
+        val expectedEncodedPath = "/dir1/Jane%2B%21%40%C2%A3%24%25%5E%26%2A%28%29%29%29%29_%2B-%3D%5B%5D%7B%7D%27%5C%7C%3B%3B%3C%3E%2C.%3A%3F%23%60~%C2%A7%C2%B1%20Doe%3AAwesome%20Company%20Ltd%3AHEADSHOT.jpg"
+
+        // When
+        val response = webTestClient.get()
+            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .returnResult(PreSignedUrlResourceResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual!!.preSignedUrl.rawPath).isEqualTo(expectedEncodedPath)
+    }
 }
