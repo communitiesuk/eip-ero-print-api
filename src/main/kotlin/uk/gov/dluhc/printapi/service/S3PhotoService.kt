@@ -61,7 +61,9 @@ class S3PhotoService(
             .getObjectRequest(getObjectRequest)
             .build()
         val req = s3Presigner.presignGetObject(presignRequest)
-        return transformS3ResourceUrl(req, s3Resource.bucket)
+        return req.url().toURI()
+        // TODO - EIP1-5838
+        // return transformS3ResourceUrl(req, s3Resource.bucket)
     }
 
     private fun transformS3ResourceUrl(request: PresignedGetObjectRequest, bucketName: String): URI {
