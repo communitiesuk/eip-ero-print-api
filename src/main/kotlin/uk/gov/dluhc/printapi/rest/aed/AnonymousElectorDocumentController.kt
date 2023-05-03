@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rest.aed
 
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
@@ -41,6 +42,8 @@ import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.validation.Valid
+
+private val logger = KotlinLogging.logger {}
 
 @RestController
 @CrossOrigin
@@ -116,11 +119,13 @@ class AnonymousElectorDocumentController(
     @ResponseStatus(OK)
     fun searchAnonymousElectorDocumentSummaries(
         @PathVariable eroId: String,
+        @Valid searchQueryStringParameters: AedSearchQueryStringParameters
     ): AedSearchSummaryResponse {
+        logger.debug { "Searching AED summaries for eroId [$eroId] with searchQueryStringParameters [$searchQueryStringParameters]" }
         val searchCriteriaDto =
             aedSearchQueryStringParametersMapper.toAnonymousSearchCriteriaDto(
                 eroId = eroId,
-                searchQueryParameters = AedSearchQueryStringParameters()
+                searchQueryParameters = searchQueryStringParameters
             )
         with(anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(searchCriteriaDto)) {
             return AedSearchSummaryResponse(

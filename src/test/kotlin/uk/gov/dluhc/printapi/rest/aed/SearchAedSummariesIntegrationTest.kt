@@ -3,7 +3,10 @@ package uk.gov.dluhc.printapi.rest.aed
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.models.AedSearchBy
+import uk.gov.dluhc.printapi.models.AedSearchBy.SURNAME
 import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
@@ -19,7 +22,7 @@ import java.time.LocalDate
 
 internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
     companion object {
-        private const val SEARCH_SUMMARY_URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents/search"
+        private const val SEARCH_SUMMARY_URI_TEMPLATE = "/eros/{eroId}/anonymous-elector-documents/search"
         private const val GSS_CODE = "W06000099"
         private const val ANOTHER_GSS_CODE = "E06000123"
     }
@@ -30,12 +33,27 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         val userGroupEroId = anotherValidEroId(ERO_ID)
 
         webTestClient.get()
-            .uri(SEARCH_SUMMARY_URI_TEMPLATE, ERO_ID)
+            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, eroId = ERO_ID))
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = userGroupEroId))
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus()
             .isForbidden
+    }
+
+    @Test
+    fun `should return bad request given invalid request`() {
+        // Given
+        wireMockService.stubCognitoJwtIssuerResponse()
+
+        // When
+        webTestClient.get()
+            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, searchBy = SURNAME))
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isBadRequest
     }
 
     @Test
@@ -50,7 +68,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // When
         val response = webTestClient.get()
-            .uri(SEARCH_SUMMARY_URI_TEMPLATE, ERO_ID)
+            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, eroId = ERO_ID))
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(APPLICATION_JSON)
             .exchange()
@@ -63,7 +81,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
     }
 
     @Test
-    fun `should return summaries given AEDs exist for an ERO`() {
+    fun `should return all summaries given no searchBy specified`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -149,7 +167,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // When
         val response = webTestClient.get()
-            .uri(SEARCH_SUMMARY_URI_TEMPLATE, ERO_ID)
+            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, eroId = ERO_ID))
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(APPLICATION_JSON)
             .exchange()
@@ -159,9 +177,122 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         // Then
         val actual = response.responseBody.blockFirst()
         assertThat(actual!!.results).isNotEmpty
-        assertThat(actual.results)
+            .hasSize(4)
             .usingRecursiveComparison()
             .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
             .isEqualTo(expectedResults)
+    }
+
+    @Test
+    fun `should return empty list given no matching records found when searchBy surname`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val application1Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "Smi-th")
+        val application2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "BlackSmith")
+        val application3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "Sm1th")
+        val application4Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "S mith")
+        val otherApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
+
+        anonymousElectorDocumentRepository.saveAll(
+            listOf(
+                application1Aed, application2Aed, application3Aed, application4Aed, otherApplicationAed
+            )
+        )
+
+        // When
+        val response = webTestClient.get()
+            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, eroId = ERO_ID, searchBy = SURNAME, searchValue = "Smith"))
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult(AedSearchSummaryResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual!!.results).isNotNull.isEmpty()
+    }
+
+    @Test
+    fun `should return summaries matching surname given searchBy surname specified`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val currentDate = LocalDate.now()
+        val currentDateTimeInstant = Instant.now()
+        val application1Aed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            issueDate = currentDate.minusDays(2),
+            requestDateTime = currentDateTimeInstant.minusSeconds(10),
+            surname = "Smith",
+        )
+
+        val application2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "BlackSmith")
+        val application3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.plusDays(1))
+        val application4Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate, surname = "S'mith")
+        val otherApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
+
+        anonymousElectorDocumentRepository.saveAll(
+            listOf(
+                application1Aed, application2Aed, application3Aed, application4Aed, otherApplicationAed
+            )
+        )
+
+        val expectedSummaryRecord1 = buildAedSearchSummaryApiFromAedEntity(application4Aed)
+        val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(application1Aed)
+        val expectedResults = listOf(expectedSummaryRecord1, expectedSummaryRecord2)
+
+        // When
+        val response = webTestClient.get()
+            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, eroId = ERO_ID, searchBy = SURNAME, searchValue = "Smith"))
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult(AedSearchSummaryResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual!!.results).isNotEmpty
+            .hasSize(2)
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
+            .isEqualTo(expectedResults)
+    }
+
+    private fun buildUri(
+        uriTemplate: String,
+        uriBuilder: UriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate),
+        eroId: String = ERO_ID,
+        page: Int? = null,
+        pageSize: Int? = null,
+        searchBy: AedSearchBy? = null,
+        searchValue: String? = null,
+    ): String {
+        if (page != null) {
+            uriBuilder.queryParam("page", page)
+        }
+        if (pageSize != null) {
+            uriBuilder.queryParam("pageSize", pageSize)
+        }
+        if (searchBy != null) {
+            uriBuilder.queryParam("searchBy", searchBy.value)
+        }
+        if (searchValue != null) {
+            uriBuilder.queryParam("searchValue", searchValue)
+        }
+
+        return uriBuilder.buildAndExpand(mapOf("eroId" to eroId)).toUriString()
     }
 }
