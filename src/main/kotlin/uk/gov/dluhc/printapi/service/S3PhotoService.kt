@@ -51,7 +51,7 @@ class S3PhotoService(
 
     private fun generateGetResourceUrl(s3arn: String, accessDuration: Duration): URI {
         val s3Resource = parseS3Arn(s3arn)
-        logger.info { "EIP1-5838 - S3 object to presign: $s3Resource"}
+        logger.info { "EIP1-5838 - S3 object to presign: $s3Resource" }
         val getObjectRequest: GetObjectRequest = GetObjectRequest.builder()
             .bucket(s3Resource.bucket)
             .key(s3Resource.path)
