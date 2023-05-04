@@ -16,13 +16,13 @@ import org.springframework.data.domain.PageImpl
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
 import uk.gov.dluhc.printapi.dto.aed.AedSearchBy
-import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousSearchSummaryMapper
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchCriteriaDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocumentSummaryEntity
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPageRequest
 
@@ -57,6 +57,10 @@ internal class AnonymousElectorDocumentSearchServiceTest {
 
         // Then
         assertThat(actualPagedRecords).isNotNull
+        assertThat(actualPagedRecords.page).isEqualTo(dto.page)
+        assertThat(actualPagedRecords.pageSize).isEqualTo(dto.pageSize)
+        assertThat(actualPagedRecords.totalPages).isOne() // For empty results, totalPages will be 1
+        assertThat(actualPagedRecords.totalResults).isZero()
         assertThat(actualPagedRecords.results).isNotNull.isEmpty()
         verify(eroService).lookupGssCodesForEro(eroId)
         verify(anonymousElectorDocumentSummaryRepository).findAllByGssCodeInAndSourceType(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, buildPageRequest())
@@ -71,15 +75,16 @@ internal class AnonymousElectorDocumentSearchServiceTest {
         val gssCodes = listOf(aGssCode())
         val aedSummary = buildAnonymousElectorDocumentSummaryEntity()
         val expectedSummaryDto = buildAnonymousSearchSummaryDto()
-        val pageRequest = buildPageRequest(page = 2)
-        val dto = buildAnonymousSearchCriteriaDto(eroId = eroId, page = 2, searchBy = null)
+        val pageRequest = buildPageRequest(page = 1, size = 100)
+        val dto = buildAnonymousSearchCriteriaDto(eroId = eroId, page = 1, searchBy = null)
 
         given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
         given(anonymousElectorDocumentSummaryRepository.findAllByGssCodeInAndSourceType(any(), any(), any()))
             .willReturn(PageImpl(listOf(aedSummary), pageRequest, 1))
         given(anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(any())).willReturn(expectedSummaryDto)
 
-        val expected = AnonymousSearchSummaryResults(results = listOf(expectedSummaryDto))
+        val expected =
+            buildAnonymousSearchSummaryResults(page = 1, pageSize = 100, results = listOf(expectedSummaryDto))
 
         // When
         val actualPagedRecords =
@@ -87,6 +92,10 @@ internal class AnonymousElectorDocumentSearchServiceTest {
 
         // Then
         assertThat(actualPagedRecords).usingRecursiveComparison().isEqualTo(expected)
+        assertThat(actualPagedRecords.page).isEqualTo(expected.page)
+        assertThat(actualPagedRecords.pageSize).isEqualTo(expected.pageSize)
+        assertThat(actualPagedRecords.totalPages).isEqualTo(expected.totalPages)
+        assertThat(actualPagedRecords.totalResults).isEqualTo(expected.totalResults)
         verify(eroService).lookupGssCodesForEro(eroId)
         verify(anonymousElectorDocumentSummaryRepository).findAllByGssCodeInAndSourceType(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, pageRequest)
         verify(anonymousSearchSummaryMapper).toAnonymousSearchSummaryDto(aedSummary)
@@ -111,6 +120,10 @@ internal class AnonymousElectorDocumentSearchServiceTest {
 
         // Then
         assertThat(actualPagedRecords).isNotNull
+        assertThat(actualPagedRecords.page).isEqualTo(dto.page)
+        assertThat(actualPagedRecords.pageSize).isEqualTo(dto.pageSize)
+        assertThat(actualPagedRecords.totalPages).isOne() // For empty results, totalPages will be 1
+        assertThat(actualPagedRecords.totalResults).isZero()
         assertThat(actualPagedRecords.results).isNotNull.isEmpty()
         verify(eroService).lookupGssCodesForEro(eroId)
         verify(anonymousElectorDocumentSummaryRepository).findAllByGssCodeInAndSourceTypeAndSanitizedSurname(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, sanitizedSurname, buildPageRequest())
@@ -125,12 +138,12 @@ internal class AnonymousElectorDocumentSearchServiceTest {
         val gssCodes = listOf(aGssCode())
         val aedSummary = buildAnonymousElectorDocumentSummaryEntity()
         val expectedSummaryDto = buildAnonymousSearchSummaryDto()
-        val pageRequest = buildPageRequest(page = 2)
+        val pageRequest = buildPageRequest(page = 1, size = 100)
         val searchValue = "J-Smith O'Rorke   Junior"
         val sanitizedSurname = "J SMITH ORORKE JUNIOR"
         val dto = buildAnonymousSearchCriteriaDto(
             eroId = eroId,
-            page = 2,
+            page = 1,
             searchBy = AedSearchBy.SURNAME,
             searchValue = searchValue
         )
@@ -140,7 +153,8 @@ internal class AnonymousElectorDocumentSearchServiceTest {
             .willReturn(PageImpl(listOf(aedSummary), pageRequest, 1))
         given(anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(any())).willReturn(expectedSummaryDto)
 
-        val expected = AnonymousSearchSummaryResults(results = listOf(expectedSummaryDto))
+        val expected =
+            buildAnonymousSearchSummaryResults(page = 1, pageSize = 100, results = listOf(expectedSummaryDto))
 
         // When
         val actualPagedRecords =
@@ -148,6 +162,10 @@ internal class AnonymousElectorDocumentSearchServiceTest {
 
         // Then
         assertThat(actualPagedRecords).usingRecursiveComparison().isEqualTo(expected)
+        assertThat(actualPagedRecords.page).isEqualTo(expected.page)
+        assertThat(actualPagedRecords.pageSize).isEqualTo(expected.pageSize)
+        assertThat(actualPagedRecords.totalPages).isEqualTo(expected.totalPages)
+        assertThat(actualPagedRecords.totalResults).isEqualTo(expected.totalResults)
         verify(eroService).lookupGssCodesForEro(eroId)
         verify(anonymousElectorDocumentSummaryRepository).findAllByGssCodeInAndSourceTypeAndSanitizedSurname(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, sanitizedSurname, pageRequest)
         verify(anonymousSearchSummaryMapper).toAnonymousSearchSummaryDto(aedSummary)

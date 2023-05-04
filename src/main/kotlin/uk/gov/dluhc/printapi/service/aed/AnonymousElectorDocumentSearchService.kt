@@ -29,6 +29,10 @@ class AnonymousElectorDocumentSearchService(
         val gssCodes = eroService.lookupGssCodesForEro(dto.eroId)
         with(getAedPagedSummaries(dto = dto, gssCodes = gssCodes)) {
             return AnonymousSearchSummaryResults(
+                page = dto.page,
+                pageSize = dto.pageSize,
+                totalPages = totalPages,
+                totalResults = totalElements.toInt(),
                 results = content
             )
         }
