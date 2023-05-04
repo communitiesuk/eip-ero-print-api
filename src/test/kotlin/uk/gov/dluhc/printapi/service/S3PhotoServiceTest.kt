@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -56,8 +55,6 @@ internal class S3PhotoServiceTest {
     }
 
     @Test
-    @Disabled
-    // TODO - EIP1-5838
     fun `should generate pre-signed URL to get certificate photo`() {
         // Given
         val bucketName = s3Properties.certificatePhotosTargetBucket

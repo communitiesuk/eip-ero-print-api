@@ -51,7 +51,6 @@ class S3PhotoService(
 
     private fun generateGetResourceUrl(s3arn: String, accessDuration: Duration): URI {
         val s3Resource = parseS3Arn(s3arn)
-        logger.info { "EIP1-5838 - S3 object to presign: $s3Resource" }
         val getObjectRequest: GetObjectRequest = GetObjectRequest.builder()
             .bucket(s3Resource.bucket)
             .key(s3Resource.path)
@@ -62,9 +61,7 @@ class S3PhotoService(
             .getObjectRequest(getObjectRequest)
             .build()
         val req = s3Presigner.presignGetObject(presignRequest)
-        return req.url().toURI()
-        // TODO - EIP1-5838
-        // return transformS3ResourceUrl(req, s3Resource.bucket)
+        return transformS3ResourceUrl(req, s3Resource.bucket)
     }
 
     private fun transformS3ResourceUrl(request: PresignedGetObjectRequest, bucketName: String): URI {
