@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.17.0'
+  version: '1.18.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -525,6 +525,23 @@ paths:
           $ref: '#/components/responses/AedSearchResults'
       operationId: search-anonymous-elector-document-summaries
       parameters:
+        - name: page
+          description: The page number being requested (with the first page being 1). Defaulted to 1 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          in: query
+          required: true
+        - name: pageSize
+          description: The number of results to return in each page. Defaulted to 100 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+          example: 100
+          in: query
+          required: true
         - name: searchBy
           description: |
             The data field to apply the `searchValue` to. An empty value will return all AED documents.
@@ -1418,12 +1435,32 @@ components:
       description: Response containing the meta data and results of searching for Anonymous Elector document summaries
       type: object
       properties:
+        page:
+          type: integer
+          description: The page number
+          example: 1
+        pageSize:
+          type: integer
+          description: The number of results per page
+          example: 1
+        totalPages:
+          type: integer
+          description: The total number of pages
+          example: 1
+        totalResults:
+          type: integer
+          description: The total number of results
+          example: 1
         results:
           type: array
           description: Array of anonymous elector document search summaries that matches the search criteria
           items:
             $ref: '#/components/schemas/AedSearchSummary'
       required:
+        - page
+        - pageSize
+        - totalPages
+        - totalResults
         - results
 
     AedSearchSummary:
