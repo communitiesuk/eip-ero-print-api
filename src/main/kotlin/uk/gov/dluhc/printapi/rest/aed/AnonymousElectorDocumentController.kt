@@ -186,6 +186,6 @@ class QueryStringParameterPropertyEditor : PropertyEditorSupport() {
 
 private fun UpdateAnonymousElectorDocumentRequest.validate() {
     if (email.isNullOrBlank() && phoneNumber.isNullOrBlank()) {
-        throw UpdateAnonymousElectorDocumentValidationException("At least one editable field must be provided")
+        throw UpdateAnonymousElectorDocumentValidationException("Either email or phoneNumber must be provided")
     }
 }

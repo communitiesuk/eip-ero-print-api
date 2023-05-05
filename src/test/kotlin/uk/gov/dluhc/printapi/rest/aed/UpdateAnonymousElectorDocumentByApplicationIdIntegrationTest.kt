@@ -60,7 +60,7 @@ internal class UpdateAnonymousElectorDocumentByApplicationIdIntegrationTest : In
         ErrorResponseAssert.assertThat(actual)
             .hasStatus(400)
             .hasError("Bad Request")
-            .hasMessageContaining("At least one editable field must be provided")
+            .hasMessageContaining("Either email or phoneNumber must be provided")
     }
 
     @Test
