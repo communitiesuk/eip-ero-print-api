@@ -128,14 +128,7 @@ class AnonymousElectorDocumentController(
                 searchQueryParameters = searchQueryStringParameters
             )
         with(anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(searchCriteriaDto)) {
-            return AedSearchSummaryResponse(
-                // TODO EIP1-5855 to populate pagination values below
-                page = 1,
-                pageSize = 100,
-                totalPages = 1,
-                totalResults = results.size,
-                results = results.map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryApi(it) }
-            )
+            return anonymousSearchSummaryMapper.toAedSearchSummaryResponse(this)
         }
     }
 

@@ -82,7 +82,7 @@ class AnonymousSearchSummaryMapperTest {
         }
 
         // When
-        val actual = mapper.toAnonymousSearchSummaryApi(dto)
+        val actual = mapper.toAedSearchSummaryApi(dto)
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)

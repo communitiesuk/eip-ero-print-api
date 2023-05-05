@@ -10,13 +10,13 @@ import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentSummary as 
 import uk.gov.dluhc.printapi.models.AedSearchSummary as AedSearchSummaryApi
 
 @Mapper(uses = [InstantMapper::class])
-interface AnonymousSearchSummaryMapper {
+abstract class AnonymousSearchSummaryMapper {
 
     @Mapping(target = "dateTimeCreated", source = "dateCreated")
-    fun toAnonymousSearchSummaryDto(entity: AnonymousElectorDocumentSummaryEntity): AnonymousSearchSummaryDto
+    abstract fun toAnonymousSearchSummaryDto(entity: AnonymousElectorDocumentSummaryEntity): AnonymousSearchSummaryDto
+
+    abstract fun toAedSearchSummaryResponse(aedSummaryResultsDto: AnonymousSearchSummaryResults): AedSearchSummaryResponse
 
     @Mapping(target = "status", constant = "PRINTED")
-    fun toAnonymousSearchSummaryApi(dto: AnonymousSearchSummaryDto): AedSearchSummaryApi
-
-    fun toAedSearchSummaryResponse(aedSummaryResultsDto: AnonymousSearchSummaryResults): AedSearchSummaryResponse
+    protected abstract fun toAedSearchSummaryApi(dto: AnonymousSearchSummaryDto): AedSearchSummaryApi
 }
