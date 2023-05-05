@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentSummary
 import uk.gov.dluhc.printapi.dto.aed.AedSearchBy
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchCriteriaDto
+import uk.gov.dluhc.printapi.service.aed.sanitizeApplicationReference
+import uk.gov.dluhc.printapi.service.aed.sanitizeSurname
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Root
@@ -62,14 +64,5 @@ class AnonymousElectorDocumentSummarySpecificationBuilder {
         return Specification<AnonymousElectorDocumentSummary> { root: Root<AnonymousElectorDocumentSummary?>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
             criteriaBuilder.equal(root.get<Any>(SANITIZED_SURNAME), sanitizedSurname)
         }
-    }
-
-    private fun sanitizeSurname(surname: String): String {
-        return surname.uppercase().replace(Regex("-"), " ").replace(Regex("'"), "").replace(Regex("[ ]{2,}"), " ")
-            .trim()
-    }
-
-    private fun sanitizeApplicationReference(applicationReference: String): String {
-        return applicationReference.uppercase().replace(Regex("[ ]+"), "")
     }
 }
