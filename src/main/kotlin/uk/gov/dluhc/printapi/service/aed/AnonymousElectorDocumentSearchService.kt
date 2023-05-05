@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
+import uk.gov.dluhc.printapi.dto.aed.AedSearchBy.APPLICATION_REFERENCE
 import uk.gov.dluhc.printapi.dto.aed.AedSearchBy.SURNAME
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchCriteriaDto
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryDto
@@ -59,6 +60,9 @@ class AnonymousElectorDocumentSearchService(
                         sanitizedSurname = sanitizeSurname(searchValue!!),
                         pageRequest = pageRequest
                     )
+
+                APPLICATION_REFERENCE ->
+                    throw UnsupportedOperationException("Searching AEDs by APPLICATION_REFERENCE is not yet supported")
             }.map { anonymousSearchSummaryMapper.toAnonymousSearchSummaryDto(entity = it) }
         }
     }
