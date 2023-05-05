@@ -10,6 +10,7 @@ import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.aed.UpdateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
@@ -53,6 +54,17 @@ class AnonymousElectorDocumentService(
         with(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(mostRecentAed, dto, templateFilename)) {
             return generatePdf()
                 .also { anonymousElectorDocumentRepository.save(this) }
+        }
+    }
+
+    @Transactional
+    fun updateAnonymousElectorDocument(eroId: String, updateAedDto: UpdateAnonymousElectorDocumentDto) {
+        with(updateAedDto) {
+            val anonymousElectorDocuments = getAnonymousElectorDocuments(eroId, sourceReference)
+            if (anonymousElectorDocuments.isEmpty()) {
+                throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, sourceReference)
+            }
+            // TODO EIP1-5925
         }
     }
 
