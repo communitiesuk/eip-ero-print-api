@@ -668,7 +668,7 @@ paths:
         $ref: '#/components/requestBodies/UpdateAnonymousElectorDocument'
       responses:
         '204':
-          description: AED updated successfully
+          description: Updated successfully
         '400':
           $ref: '#/components/responses/400ErrorResponse'
         '404':
