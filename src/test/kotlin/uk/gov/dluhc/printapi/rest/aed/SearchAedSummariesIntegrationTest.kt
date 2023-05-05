@@ -77,11 +77,18 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual!!.results).isEmpty()
+        assertThat(actual).isNotNull
+        with(actual!!) {
+            assertThat(page).isEqualTo(1)
+            assertThat(pageSize).isEqualTo(100)
+            assertThat(totalPages).isZero()
+            assertThat(totalResults).isZero()
+            assertThat(results).isNotNull.isEmpty()
+        }
     }
 
     @Test
-    fun `should return all summaries given no searchBy specified`() {
+    fun `should return all summaries given no pagination and no searchBy specified`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -148,13 +155,13 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         val application3AedDocument = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.plusDays(10))
         val application4AedDocument = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate)
-        val otherApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
+        val otherGssCodeApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
 
         anonymousElectorDocumentRepository.saveAll(
             listOf(
                 application1InitialAed, application1SecondAed, application1LatestAed,
                 application2InitialAed, application2SecondAed, application2LatestAed,
-                application3AedDocument, application4AedDocument, otherApplicationAed
+                application3AedDocument, application4AedDocument, otherGssCodeApplicationAed
             )
         )
 
@@ -162,8 +169,9 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(application4AedDocument)
         val expectedSummaryRecord3 = buildAedSearchSummaryApiFromAedEntity(application1LatestAed)
         val expectedSummaryRecord4 = buildAedSearchSummaryApiFromAedEntity(application2LatestAed)
-
-        val expectedResults = listOf(expectedSummaryRecord1, expectedSummaryRecord2, expectedSummaryRecord3, expectedSummaryRecord4)
+        val expectedResultsInExactOrder = listOf(expectedSummaryRecord1, expectedSummaryRecord2, expectedSummaryRecord3, expectedSummaryRecord4)
+        val expectedTotalPages = 1
+        val expectedTotalResults = 4
 
         // When
         val response = webTestClient.get()
@@ -176,11 +184,18 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual!!.results).isNotEmpty
-            .hasSize(4)
-            .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
-            .isEqualTo(expectedResults)
+        assertThat(actual).isNotNull
+        with(actual!!) {
+            assertThat(page).isEqualTo(1)
+            assertThat(pageSize).isEqualTo(100)
+            assertThat(totalPages).isEqualTo(expectedTotalPages)
+            assertThat(totalResults).isEqualTo(expectedTotalResults)
+            assertThat(results).isNotEmpty
+                .hasSize(4)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
+                .isEqualTo(expectedResultsInExactOrder)
+        }
     }
 
     @Test
@@ -197,11 +212,11 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         val application2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "BlackSmith")
         val application3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "Sm1th")
         val application4Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "S mith")
-        val otherApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
+        val otherGssCodeApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
 
         anonymousElectorDocumentRepository.saveAll(
             listOf(
-                application1Aed, application2Aed, application3Aed, application4Aed, otherApplicationAed
+                application1Aed, application2Aed, application3Aed, application4Aed, otherGssCodeApplicationAed
             )
         )
 
@@ -216,7 +231,14 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual!!.results).isNotNull.isEmpty()
+        assertThat(actual).isNotNull
+        with(actual!!) {
+            assertThat(page).isEqualTo(1)
+            assertThat(pageSize).isEqualTo(100)
+            assertThat(totalPages).isZero()
+            assertThat(totalResults).isZero()
+            assertThat(results).isNotNull.isEmpty()
+        }
     }
 
     @Test
@@ -230,32 +252,43 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
         val currentDate = LocalDate.now()
-        val currentDateTimeInstant = Instant.now()
-        val application1Aed = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE,
-            issueDate = currentDate.minusDays(2),
-            requestDateTime = currentDateTimeInstant.minusSeconds(10),
-            surname = "Smith",
-        )
+        val matchingApplication1Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.minusDays(2), surname = "Smith")
+        // Although surname matches for below AED 2, however this record won't be returned due to pageSize = 2
+        val matchingApplication2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.minusDays(5), surname = "Smith")
+        val matchingApplication3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate, surname = "S'mith")
 
-        val application2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "BlackSmith")
-        val application3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.plusDays(1))
-        val application4Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate, surname = "S'mith")
-        val otherApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
+        val unmatchedApplication1Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "BlackSmith")
+        val unmatchedApplication2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.plusDays(1))
+        val otherGssCodeApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
 
         anonymousElectorDocumentRepository.saveAll(
             listOf(
-                application1Aed, application2Aed, application3Aed, application4Aed, otherApplicationAed
+                matchingApplication1Aed, matchingApplication2Aed, matchingApplication3Aed,
+                unmatchedApplication1Aed, unmatchedApplication2Aed, otherGssCodeApplicationAed
             )
         )
 
-        val expectedSummaryRecord1 = buildAedSearchSummaryApiFromAedEntity(application4Aed)
-        val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(application1Aed)
-        val expectedResults = listOf(expectedSummaryRecord1, expectedSummaryRecord2)
+        val expectedSummaryRecord1 = buildAedSearchSummaryApiFromAedEntity(matchingApplication3Aed)
+        val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(matchingApplication1Aed)
+        val expectedResultsInExactOrder = listOf(expectedSummaryRecord1, expectedSummaryRecord2)
+        val expectedTotalPages = 2
+        val expectedTotalResults = 3
+
+        val pageSize = 2
+        val searchBySurnameValue = "Smith"
 
         // When
         val response = webTestClient.get()
-            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, eroId = ERO_ID, searchBy = SURNAME, searchValue = "Smith"))
+            .uri(
+                buildUri(
+                    uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE,
+                    eroId = ERO_ID,
+                    page = 1,
+                    pageSize = pageSize,
+                    searchBy = SURNAME,
+                    searchValue = searchBySurnameValue
+                )
+            )
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(APPLICATION_JSON)
             .exchange()
@@ -264,11 +297,18 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual!!.results).isNotEmpty
-            .hasSize(2)
-            .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
-            .isEqualTo(expectedResults)
+        assertThat(actual).isNotNull
+        with(actual!!) {
+            assertThat(page).isEqualTo(1)
+            assertThat(pageSize).isEqualTo(pageSize)
+            assertThat(totalPages).isEqualTo(expectedTotalPages)
+            assertThat(totalResults).isEqualTo(expectedTotalResults)
+            assertThat(results).isNotEmpty
+                .hasSize(2)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
+                .isEqualTo(expectedResultsInExactOrder)
+        }
     }
 
     private fun buildUri(
