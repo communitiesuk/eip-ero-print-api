@@ -12,10 +12,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.mapper.InstantMapper
+import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus.PRINTED
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocumentSummaryEntity
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAedSearchSummaryApi
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAedSearchSummaryApiFromAnonymousSearchSummaryDto
 import java.time.OffsetDateTime
 
 @ExtendWith(MockitoExtension::class)
@@ -84,6 +87,39 @@ class AnonymousSearchSummaryMapperTest {
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
         verify(instantMapper).toOffsetDateTime(dto.dateTimeCreated)
+        verifyNoMoreInteractions(instantMapper)
+    }
+
+    @Test
+    fun `should map AnonymousSearchSummaryResults Dto to an AedSearchSummaryResponse`() {
+        // Given
+        val aedSearchSummaryDto = buildAnonymousSearchSummaryDto()
+        val aedSummaryResults = buildAnonymousSearchSummaryResults(results = listOf(aedSearchSummaryDto))
+        val expectedOffsetDateTime = OffsetDateTime.now()
+
+        given(instantMapper.toOffsetDateTime(any())).willReturn(expectedOffsetDateTime)
+
+        val expected = with(aedSummaryResults) {
+            AedSearchSummaryResponse(
+                page = page,
+                pageSize = pageSize,
+                totalPages = totalPages,
+                totalResults = totalResults,
+                results = listOf(
+                    buildAedSearchSummaryApiFromAnonymousSearchSummaryDto(
+                        dto = aedSearchSummaryDto,
+                        dateTimeCreated = expectedOffsetDateTime
+                    )
+                ),
+            )
+        }
+
+        // When
+        val actual = mapper.toAedSearchSummaryResponse(aedSummaryResults)
+
+        // Then
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+        verify(instantMapper).toOffsetDateTime(aedSearchSummaryDto.dateTimeCreated)
         verifyNoMoreInteractions(instantMapper)
     }
 }

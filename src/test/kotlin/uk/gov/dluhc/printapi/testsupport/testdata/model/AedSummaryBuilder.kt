@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.model
 
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryDto
 import uk.gov.dluhc.printapi.models.AedSearchSummary
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
@@ -63,6 +64,27 @@ fun buildAedSearchSummaryApiFromAedEntity(
             firstName = contactDetails!!.firstName,
             surname = surname,
             postcode = contactDetails!!.address!!.postcode!!
+        )
+    }
+}
+
+fun buildAedSearchSummaryApiFromAnonymousSearchSummaryDto(
+    dto: AnonymousSearchSummaryDto,
+    dateTimeCreated: OffsetDateTime
+): AedSearchSummary {
+    return with(dto) {
+        AedSearchSummary(
+            gssCode = gssCode,
+            sourceReference = sourceReference,
+            applicationReference = applicationReference,
+            certificateNumber = certificateNumber,
+            electoralRollNumber = electoralRollNumber,
+            status = AnonymousElectorDocumentStatus.PRINTED,
+            issueDate = issueDate,
+            dateTimeCreated = dateTimeCreated,
+            firstName = firstName,
+            surname = surname,
+            postcode = postcode
         )
     }
 }

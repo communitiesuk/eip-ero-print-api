@@ -4,6 +4,10 @@ import java.time.Instant
 import java.time.LocalDate
 
 data class AnonymousSearchSummaryResults(
+    val page: Int,
+    val pageSize: Int,
+    val totalPages: Int,
+    val totalResults: Int,
     val results: List<AnonymousSearchSummaryDto>,
 )
 
