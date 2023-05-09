@@ -60,11 +60,19 @@ class AnonymousElectorDocumentService(
     @Transactional
     fun updateAnonymousElectorDocument(eroId: String, updateAedDto: UpdateAnonymousElectorDocumentDto) {
         with(updateAedDto) {
-            val anonymousElectorDocuments = getAnonymousElectorDocuments(eroId, sourceReference)
+            val gssCodes = eroService.lookupGssCodesForEro(eroId)
+            val anonymousElectorDocuments = getAnonymousElectorDocumentsSortedByDate(gssCodes, sourceReference)
             if (anonymousElectorDocuments.isEmpty()) {
                 throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, sourceReference)
             }
-            // TODO EIP1-5925
+            anonymousElectorDocuments.forEach {
+                if (valueHasChanged(email, it.contactDetails!!.email)) {
+                    it.contactDetails!!.email = email
+                }
+                if (valueHasChanged(phoneNumber, it.contactDetails!!.phoneNumber)) {
+                    it.contactDetails!!.phoneNumber = phoneNumber
+                }
+            }
         }
     }
 
@@ -99,5 +107,9 @@ class AnonymousElectorDocumentService(
         val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)
         val contents = pdfFactory.createPdfContents(templateDetails)
         return PdfFile(PDF_FILE_NAME.format(certificateNumber), contents)
+    }
+
+    private fun valueHasChanged(newValue: String?, existingValue: String?): Boolean {
+        return !newValue.isNullOrBlank() && newValue != existingValue
     }
 }
