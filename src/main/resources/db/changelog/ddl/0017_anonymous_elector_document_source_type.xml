@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="rob.ororke@valtech.com" id="0017_EIP-4173_anonymous_elector_document modify source_type column" context="ddl">
+        <modifyDataType
+            columnName="source_type"
+            newDataType="varchar(30) NOT NULL"
+            tableName="anonymous_elector_document"/>
+
+        <rollback>
+            <modifyDataType
+                columnName="source_type"
+                newDataType="varchar(20) NOT NULL"
+                tableName="anonymous_elector_document"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

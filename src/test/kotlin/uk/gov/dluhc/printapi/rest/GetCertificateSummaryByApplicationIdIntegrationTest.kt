@@ -2,20 +2,22 @@ package uk.gov.dluhc.printapi.rest
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.MediaType
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
+import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
 import uk.gov.dluhc.printapi.models.PrintRequestSummary
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
-import uk.gov.dluhc.printapi.testsupport.testdata.UNAUTHORIZED_BEARER_TOKEN
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
-import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
+import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import java.time.Instant
 import java.time.ZoneOffset
@@ -23,43 +25,21 @@ import java.time.temporal.ChronoUnit.SECONDS
 
 internal class GetCertificateSummaryByApplicationIdIntegrationTest : IntegrationTest() {
     companion object {
-        private const val URI_TEMPLATE = "/eros/{ERO_ID}/certificates/applications/{APPLICATION_ID}"
-        private const val ERO_ID = "some-city-council"
+        private const val URI_TEMPLATE = "/eros/{ERO_ID}/certificates?applicationId={APPLICATION_ID}"
         private const val APPLICATION_ID = "7762ccac7c056046b75d4aa3"
     }
 
     @Test
-    fun `should return unauthorized given no bearer token`() {
-        webTestClient.get()
-            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized
-    }
-
-    @Test
-    fun `should return unauthorized given user with invalid bearer token`() {
-        wireMockService.stubCognitoJwtIssuerResponse()
-        webTestClient.get()
-            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(UNAUTHORIZED_BEARER_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized
-    }
-
-    @Test
-    fun `should return forbidden given user with valid bearer token belonging to a different group`() {
+    fun `should return bad request given request without applicationId query string parameter`() {
         wireMockService.stubCognitoJwtIssuerResponse()
 
         webTestClient.get()
-            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-admin-$ERO_ID")))
+            .uri("/eros/{ERO_ID}/certificates", ERO_ID)
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
-            .isForbidden
+            .isBadRequest
     }
 
     @Test
@@ -69,12 +49,7 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
 
         webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(
-                getBearerToken(
-                    eroId = userGroupEroId,
-                    groups = listOf("ero-$userGroupEroId", "ero-vc-admin-$userGroupEroId")
-                )
-            )
+            .bearerToken(getVCAdminBearerToken(eroId = userGroupEroId))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -91,14 +66,19 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
+            .expectStatus()
+            .isEqualTo(NOT_FOUND)
+            .returnResult(ErrorResponse::class.java)
 
         // Then
-        response.expectStatus().isNotFound
-        val actual = response.returnResult(String::class.java).responseBody.blockFirst()
-        assertThat(actual).isEqualTo("Certificate for eroId = $ERO_ID and application id = $APPLICATION_ID not found")
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual)
+            .hasStatus(NOT_FOUND.value())
+            .hasError("Not Found")
+            .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ${SourceType.VOTER_CARD} and sourceReference = $APPLICATION_ID not found")
     }
 
     @Test
@@ -157,7 +137,7 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(getBearerToken(eroId = ERO_ID, groups = listOf("ero-$ERO_ID", "ero-vc-admin-$ERO_ID")))
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .exchange()
 

@@ -5,10 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.given
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
@@ -28,21 +27,35 @@ class PrintRequestsServiceTest {
     @Test
     fun `should process print requests and submit to queue`() {
         // Given
-        val batchSize = 5
-        val batchId1 = aValidBatchId()
-        val batchId2 = aValidBatchId()
-        val batchId3 = aValidBatchId()
-        val batchIds = setOf(batchId1, batchId2, batchId3)
-        given(certificateBatchingService.batchPendingCertificates(any())).willReturn(batchIds)
+        val batch1 = BatchInfo(aValidBatchId(), 6)
+        val batch2 = BatchInfo(aValidBatchId(), 23)
+        val batch3 = BatchInfo(aValidBatchId(), 2)
+        val batchIds = listOf(batch1, batch2, batch3)
+        given(certificateBatchingService.batchPendingCertificates()).willReturn(batchIds)
 
         // When
-        printRequestsService.processPrintRequests(batchSize)
+        printRequestsService.processPrintRequests()
 
         // Then
-        verify(certificateBatchingService).batchPendingCertificates(batchSize)
-        verify(processPrintRequestQueue, times(3)).submit(any())
-        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batchId1))
-        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batchId2))
-        verify(processPrintRequestQueue).submit(ProcessPrintRequestBatchMessage(batchId3))
+        verify(certificateBatchingService).batchPendingCertificates()
+        verify(processPrintRequestQueue).submit(
+            ProcessPrintRequestBatchMessage(
+                batch1.batchId,
+                batch1.printRequestCount
+            )
+        )
+        verify(processPrintRequestQueue).submit(
+            ProcessPrintRequestBatchMessage(
+                batch2.batchId,
+                batch2.printRequestCount
+            )
+        )
+        verify(processPrintRequestQueue).submit(
+            ProcessPrintRequestBatchMessage(
+                batch3.batchId,
+                batch3.printRequestCount
+            )
+        )
+        verifyNoMoreInteractions(processPrintRequestQueue)
     }
 }

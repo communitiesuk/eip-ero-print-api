@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.database.repository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Pageable
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -10,8 +11,15 @@ import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
-import uk.gov.dluhc.printapi.database.entity.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.DISPATCHED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
+import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressPostcode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressStreet
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
@@ -19,8 +27,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryClass
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryMethod
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroName
@@ -46,12 +54,15 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCodeList
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
-import java.time.OffsetDateTime
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.ChronoUnit.SECONDS
-import java.util.function.BiPredicate
 
 internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
+
+    companion object {
+        private val IGNORED_FIELDS = arrayOf(".*dateCreated")
+    }
 
     @Nested
     inner class FindById {
@@ -68,7 +79,8 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 issueDate = aValidIssueDate(),
                 suggestedExpiryDate = aValidSuggestedExpiryDate(),
                 gssCode = aGssCode(),
-                status = null
+                status = null,
+                photoLocationArn = aPhotoArn(),
             )
             val deliveryAddress = Address(
                 street = aValidAddressStreet(),
@@ -78,7 +90,9 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 addressee = aValidDeliveryName(),
                 address = deliveryAddress,
                 deliveryClass = aValidDeliveryClass(),
-                deliveryMethod = aValidDeliveryMethod()
+                deliveryAddressType = aValidDeliveryAddressType(),
+                collectionReason = null,
+                addressFormat = aValidAddressFormat(),
             )
             val eroEnglish = ElectoralRegistrationOffice(
                 address = Address(
@@ -98,7 +112,6 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 surname = aValidSurname(),
                 certificateLanguage = aValidCertificateLanguage(),
                 supportingInformationFormat = aValidSupportingInformationFormat(),
-                photoLocationArn = aPhotoArn(),
                 delivery = delivery,
                 eroEnglish = eroEnglish,
                 eroWelsh = null,
@@ -116,9 +129,10 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val actual = certificateRepository.findById(expected.id!!)
 
             // Then
-            assertThat(actual).isPresent
-            assertCertificateRecursiveEqual(actual.get(), expected)
-            assertThat(actual.get().status).isEqualTo(printRequestStatus.status)
+            assertThat(actual).get()
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(expected)
         }
     }
 
@@ -135,7 +149,10 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             val actual = certificateRepository.getByPrintRequestsRequestId(requestId)
 
             // Given
-            assertCertificateRecursiveEqual(actual!!, expected)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(expected)
         }
 
         @Test
@@ -153,9 +170,9 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     }
 
     @Nested
-    inner class Save {
+    inner class FindDistinctByPrintRequestStatusAndBatchId {
         @Test
-        fun `should get by status and batchId`() {
+        fun `should get the certificate with matching print request`() {
             // Given
             val batchId = aValidBatchId()
             val status = aValidCertificateStatus()
@@ -163,37 +180,117 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 status = status,
                 printRequests = listOf(buildPrintRequest(batchId = batchId))
             )
-            val expected = certificateRepository.save(certificate)
+            val expected = listOf(certificateRepository.save(certificate))
 
             // When
-            val actual = certificateRepository.findByStatusAndPrintRequestsBatchId(status, batchId)
+            val actual = certificateRepository.findDistinctByPrintRequestStatusAndBatchId(status, batchId)
 
             // Given
-            assertThat(actual).hasSize(1)
-            assertThat(actual[0].status).isEqualTo(status)
-            assertThat(actual[0].printRequests[0].batchId).isEqualTo(batchId)
-            assertCertificateRecursiveEqual(actual[0], expected)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(expected)
+        }
+
+        @Test
+        fun `should get the certificate with matching print requests`() {
+            // Given
+            val batchId = aValidBatchId()
+            val status = aValidCertificateStatus()
+            val certificate = buildCertificate(
+                status = status,
+                printRequests = listOf(buildPrintRequest(batchId = batchId), buildPrintRequest(batchId = batchId))
+            )
+            val expected = listOf(certificateRepository.save(certificate))
+
+            // When
+            val actual = certificateRepository.findDistinctByPrintRequestStatusAndBatchId(status, batchId)
+
+            // Given
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .ignoringCollectionOrder()
+                .isEqualTo(expected)
+        }
+
+        @Test
+        fun `should get the current print request status for events occurring at different millisecond`() {
+            // Given
+            val batchId = aValidBatchId()
+            val status = ASSIGNED_TO_BATCH
+            val now = Instant.now()
+            val certificate = buildCertificate(
+                status = status,
+                printRequests = listOf(
+                    buildPrintRequest(
+                        batchId = batchId,
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH, eventDateTime = now),
+                            buildPrintRequestStatus(status = ASSIGNED_TO_BATCH, eventDateTime = now.plusMillis(1))
+                        )
+                    )
+                )
+            )
+            certificateRepository.save(certificate)
+            val expected = ASSIGNED_TO_BATCH
+
+            // When
+            val actual = certificateRepository.findDistinctByPrintRequestStatusAndBatchId(status, batchId)
+
+            // Given
+            assertThat(actual[0].status).isEqualTo(expected)
+        }
+
+        @Test
+        fun `should get an empty list as no matching Certificates`() {
+            // Given
+            val batchId = aValidBatchId()
+            val certificate = buildCertificate(
+                status = PENDING_ASSIGNMENT_TO_BATCH,
+                printRequests = listOf(buildPrintRequest(batchId = batchId))
+            )
+            certificateRepository.save(certificate)
+
+            // When
+            val actual = certificateRepository.findDistinctByPrintRequestStatusAndBatchId(DISPATCHED, batchId)
+
+            // Given
+            assertThat(actual).isEmpty()
         }
     }
 
     @Nested
-    inner class FindByStatus {
+    inner class FindByStatusOrderByApplicationReceivedDateTimeAsc {
         @Test
-        fun `should get by status`() {
+        fun `should get by status ordered by application received timestamp`() {
             // Given
+            val maxUnBatchedRecordsToReturn = 10
+
             val status = aValidCertificateStatus()
-            val certificate = buildCertificate(
-                status = status,
-            )
-            val expected = certificateRepository.save(certificate)
+            val certificates = (1..15).map {
+                buildCertificate(
+                    status = status,
+                    applicationReference = "V${it.toString().padStart(9, '0')}", // V000000001 ... V0000000015
+                    applicationReceivedDateTime = Instant.now().minusSeconds(it.toLong()).truncatedTo(SECONDS)
+                )
+            }.let {
+                certificateRepository.saveAll(it)
+            }
+
+            val expected = certificates.sortedBy { it.applicationReceivedDateTime }.take(10)
 
             // When
-            val actual = certificateRepository.findByStatus(status)
+            val actual = certificateRepository.findByStatusOrderByApplicationReceivedDateTimeAsc(
+                status,
+                Pageable.ofSize(maxUnBatchedRecordsToReturn)
+            )
 
             // Given
-            assertThat(actual).hasSize(1)
-            assertThat(actual[0].status).isEqualTo(status)
-            assertCertificateRecursiveEqual(actual[0], expected)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(expected)
         }
     }
 
@@ -220,8 +317,10 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
             )
 
             // Then
-            assertThat(actual).isNotNull
-            assertCertificateRecursiveEqual(actual!!, certificate)
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(certificate)
         }
 
         @Test
@@ -256,11 +355,11 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                status = PENDING_ASSIGNMENT_TO_BATCH,
                                 eventDateTime = startOfDay
                             ),
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = endOfDay
                             )
                         )
@@ -273,7 +372,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                status = PENDING_ASSIGNMENT_TO_BATCH,
                                 eventDateTime = startOfDay.minusSeconds(10)
                             )
                         )
@@ -281,7 +380,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = startOfDay
                             )
                         )
@@ -294,7 +393,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                                status = PENDING_ASSIGNMENT_TO_BATCH,
                                 eventDateTime = now.plusSeconds(10)
                             )
                         )
@@ -307,11 +406,11 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                     buildPrintRequest(
                         printRequestStatuses = listOf(
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = startOfDay.minusSeconds(1)
                             ),
                             buildPrintRequestStatus(
-                                status = Status.ASSIGNED_TO_BATCH,
+                                status = ASSIGNED_TO_BATCH,
                                 eventDateTime = endOfDay.plusSeconds(1)
                             )
                         )
@@ -323,29 +422,87 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
             // When
             val actual =
-                certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, Status.ASSIGNED_TO_BATCH)
+                certificateRepository.getPrintRequestStatusCount(startOfDay, endOfDay, ASSIGNED_TO_BATCH)
 
             // Then
             assertThat(actual).isEqualTo(2)
         }
     }
 
-    private fun assertCertificateRecursiveEqual(actual: Certificate, expected: Certificate) {
-        val offsetEqualToRoundedSeconds: BiPredicate<OffsetDateTime, OffsetDateTime> =
-            BiPredicate<OffsetDateTime, OffsetDateTime> { a, b -> withinSecond(a.toEpochSecond(), b.toEpochSecond()) }
-        val instantEqualToRoundedSeconds: BiPredicate<Instant, Instant> =
-            BiPredicate<Instant, Instant> { a, b -> withinSecond(a.epochSecond, b.epochSecond) }
-        assertThat(actual).usingRecursiveComparison()
-            .withEqualsForType(offsetEqualToRoundedSeconds, OffsetDateTime::class.java)
-            .withEqualsForType(instantEqualToRoundedSeconds, Instant::class.java)
-            .ignoringCollectionOrder()
-            .isEqualTo(expected)
+    @Nested
+    inner class GetCertificatesForInitialRetentionDataRemoval {
+        @Test
+        fun `should find certificates for removal of initial retention period data`() {
+            // Given
+            val expected1 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+            val expected2 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+
+            val other1 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().minusDays(1),
+                initialRetentionDataRemoved = true // should be excluded
+            )
+
+            val other2 = buildCertificate(
+                initialRetentionRemovalDate = LocalDate.now().plusDays(1)
+            )
+
+            certificateRepository.saveAll(listOf(other1, expected1, other2, expected2))
+
+            // When
+            val actual = certificateRepository.findPendingRemovalOfInitialRetentionData(VOTER_CARD)
+
+            // Then
+            assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)
+        }
     }
 
-    fun withinSecond(actual: Long, epochSeconds: Long): Boolean {
-        val variance = 1
-        val lowerBound: Long = epochSeconds - variance
-        val upperBound: Long = epochSeconds + variance
-        return actual in lowerBound..upperBound
+    @Nested
+    inner class GetCertificatesForFinalRetentionDataRemoval {
+
+        @Test
+        fun `should count certificates for removal of final retention period data`() {
+            // Given
+            val expectedCount = 2
+            certificateRepository.saveAll(
+                listOf(
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1)),
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().minusDays(1)),
+                    buildCertificate(finalRetentionRemovalDate = LocalDate.now().plusDays(1)) // should not be included
+                )
+            )
+
+            // When
+            val count = certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(VOTER_CARD)
+
+            // Then
+            assertThat(count).isEqualTo(expectedCount)
+        }
+
+        @Test
+        fun `should find certificates for removal of final retention period data`() {
+            // Given
+            val certificate1 = buildCertificate(
+                finalRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+            val certificate2 = buildCertificate(
+                finalRetentionRemovalDate = LocalDate.now().minusDays(1)
+            )
+            val certificate3 = buildCertificate(
+                finalRetentionRemovalDate = LocalDate.now().plusDays(1)
+            )
+            certificateRepository.saveAll(listOf(certificate1, certificate2, certificate3))
+            val expected1 = CertificateRemovalSummary(certificate1.id, certificate1.photoLocationArn)
+            val expected2 = CertificateRemovalSummary(certificate2.id, certificate2.photoLocationArn)
+
+            // When
+            val actual = certificateRepository.findPendingRemovalOfFinalRetentionData(VOTER_CARD, 1, 10000)
+
+            // Then
+            assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)
+        }
     }
 }

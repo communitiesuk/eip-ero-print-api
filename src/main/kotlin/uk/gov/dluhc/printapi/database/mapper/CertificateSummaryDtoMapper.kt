@@ -9,7 +9,7 @@ import uk.gov.dluhc.printapi.dto.PrintRequestSummaryDto
 @Component
 class CertificateSummaryDtoMapper {
 
-    val statusMapper: DtoStatusMapper = DtoStatusMapper()
+    val statusMapper: PrintRequestStatusDtoMapper = PrintRequestStatusDtoMapper()
 
     fun certificateToCertificatePrintRequestSummaryDto(certificate: Certificate): CertificateSummaryDto {
         return CertificateSummaryDto(
@@ -19,13 +19,15 @@ class CertificateSummaryDtoMapper {
     }
 
     private fun toPrintRequests(printRequests: MutableList<PrintRequest>): List<PrintRequestSummaryDto> =
-        printRequests.map { printRequest -> toPrintRequestSummaryDto(printRequest) }
+        printRequests
+            .map { printRequest -> toPrintRequestSummaryDto(printRequest) }
+            .sortedByDescending { it.dateTime }
 
     private fun toPrintRequestSummaryDto(printRequest: PrintRequest): PrintRequestSummaryDto {
         val currentStatus = printRequest.getCurrentStatus()
         return PrintRequestSummaryDto(
             userId = printRequest.userId!!,
-            status = statusMapper.toDtoStatus(currentStatus.status!!),
+            status = statusMapper.toPrintRequestStatusDto(currentStatus.status!!),
             dateTime = currentStatus.eventDateTime!!,
             message = currentStatus.message
         )

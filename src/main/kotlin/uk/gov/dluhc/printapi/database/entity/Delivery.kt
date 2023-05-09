@@ -21,7 +21,6 @@ import javax.persistence.Id
 import javax.persistence.OneToOne
 import javax.persistence.Table
 import javax.persistence.Version
-import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
 @Table
@@ -34,20 +33,23 @@ class Delivery(
     @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
     var id: UUID? = null,
 
-    @field:NotNull
     @field:Size(max = 255)
-    var addressee: String? = null,
+    var addressee: String,
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    var address: Address? = null,
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    var address: Address,
 
-    @field:NotNull
     @Enumerated(EnumType.STRING)
-    var deliveryClass: DeliveryClass? = null,
+    var addressFormat: AddressFormat,
 
-    @field:NotNull
     @Enumerated(EnumType.STRING)
-    var deliveryMethod: DeliveryMethod? = null,
+    var deliveryClass: DeliveryClass,
+
+    @Enumerated(EnumType.STRING)
+    var deliveryAddressType: DeliveryAddressType,
+
+    @field:Size(max = 1024)
+    var collectionReason: String? = null,
 
     @CreationTimestamp
     var dateCreated: Instant? = null,

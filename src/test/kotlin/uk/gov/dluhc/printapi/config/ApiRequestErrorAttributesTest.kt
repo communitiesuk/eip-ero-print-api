@@ -8,7 +8,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.validation.BindException
 import org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST
 import org.springframework.web.context.request.ServletWebRequest
-import uk.gov.dluhc.printapi.testsupport.assertj.assertions.ErrorResponseAssert.Companion.assertThat
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import javax.servlet.RequestDispatcher

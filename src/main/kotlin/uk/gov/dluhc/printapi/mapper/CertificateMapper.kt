@@ -21,6 +21,8 @@ abstract class CertificateMapper {
 
     @Mapping(target = "vacNumber", expression = "java( idFactory.vacNumber() )")
     @Mapping(source = "ero.englishContactDetails.name", target = "issuingAuthority")
+    @Mapping(source = "ero.welshContactDetails.name", target = "issuingAuthorityCy")
+    @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     abstract fun toCertificate(
         message: SendApplicationToPrintMessage,
         ero: EroDto

@@ -1,20 +1,54 @@
 spring:
+  application:
+    name: 'eip-ero-print-api'
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/print_application
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 20 # max pool size and min-idle deliberately sized to cater for extreme volume and load
+      minimum-idle: 10
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
     contexts: ${LIQUIBASE_CONTEXTS}
+
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
 
 sqs:
   send-application-to-print-queue-name: ${SQS_SEND_APPLICATION_TO_PRINT_QUEUE_NAME}
   process-print-request-batch-queue-name: ${SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME}
   process-print-response-file-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME}
   process-print-response-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME}
+  application-removed-queue-name: ${SQS_APPLICATION_REMOVED_QUEUE_NAME}
+  remove-certificate-queue-name: ${SQS_REMOVE_CERTIFICATE_QUEUE_NAME}
+
+s3:
+  certificate-photo-access-duration: 1M
+  certificate-photos-target-bucket: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME}
+  certificate-photos-target-bucket-proxy-endpoint: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT}
 
 api:
+  print-api:
+    base.url: ${API_PRINT_API_BASE_URL}
+    generate-temporary-certificate:
+      valid-on-date:
+        max-calendar-days-in-future: 30
+    data-retention:
+      # The legislation defines the first (initial) retention period as 28 working days from the date of "issue", which has been confirmed as the date the
+      # certificate was printed, not when it was sent to the print provider (and therefore not the "issue date" that is currently printed on the certificate
+      # itself). As it stands, we are not informed when the certificate was printed (only when it was dispatched, which may not be the same day).
+      # However, we have established that in the vast majority of cases the certificate will be printed the next working day after it was sent to the print
+      # provider. Therefore, as a workaround, the following property is set to 29 (28+1) for the time being.
+      # A separate story will set this according to the actual printed date, which will require changes to the specification with the print provider.
+      certificate-initial-retention-period: "P29D"
+      certificate-removal-batch-size: 10000
+
   ero-management:
     url: ${API_ERO_MANAGEMENT_URL}
 
@@ -33,10 +67,137 @@ jobs:
     name: "BatchPrintRequests"
     cron: "0 0/15 * * * *" # every 15 minutes, starting on the hour - see analysis and recommendations in EIP1-2515
     batch-size: 50
+    max-un-batched-records: 5000 # see analysis and recommendations in EIP1-2885
     daily-limit: 150_000
   process-print-responses:
     name: "ProcessPrintResponses"
     cron: "0 15/30 * * * *" # every 30 minutes starting at 15 minutes past the hour - see analysis and recommendations in EIP1-2515
+  remove-vca-initial-retention-period-data:
+    name: "RemoveVcaInitialRetentionPeriodData"
+    # Runs at 21:35, 01:35 and 05:35.
+    # Running outside business hours to avoid delivery info suddenly disappearing.
+    cron: "0 35 1,5,21 * * *"
+  remove-aed-initial-retention-period-data:
+    name: "RemoveAedInitialRetentionPeriodData"
+    # Runs at 21:32, 01:32 and 05:32.
+    # Running outside business hours to avoid delivery info suddenly disappearing.
+    cron: "0 32 1,5,21 * * *"
+  remove-vca-final-retention-period-data:
+    name: "RemoveVcaFinalRetentionPeriodData"
+    # Runs at 01:40
+    # Running outside business hours to avoid certificate data suddenly disappearing.
+    cron: "0 40 1 * * *"
+  remove-aed-final-retention-period-data:
+    name: "RemoveAedFinalRetentionPeriodData"
+    # Runs at 01:30
+    # Running outside business hours to avoid Anonymous Elector Documents suddenly disappearing.
+    cron: "0 30 1 * * *"
+temporary-certificate:
+  certificate-pdf:
+    english:
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (English) v1.pdf"
+      placeholder:
+        elector-name: "applicant-name"
+        local-authority-name-en: "local-authority-name-en"
+        date-of-issue: "date-issued"
+        valid-on-date: "date-valid"
+        certificate-number: "certificate-number"
+      images:
+        voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
+          absolute-x-mm: 21.6
+          absolute-y-mm: 201.6
+          fit-width-mm: 35
+          fit-height-mm: 45
+    welsh:
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Certificate (Bilingual) v1.pdf"
+      placeholder:
+        elector-name: "applicant-name"
+        local-authority-name-en: "local-authority-name-en"
+        local-authority-name-cy: "local-authority-name-cy"
+        date-of-issue: "date-issued"
+        valid-on-date: "date-valid"
+        certificate-number: "certificate-number"
+      images:
+        voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
+          absolute-x-mm: 21.6
+          absolute-y-mm: 194.6
+          fit-width-mm: 35
+          fit-height-mm: 45
+  explainer-pdf:
+    download-filename-prefix: "temporary-certificate-explainer-document"
+    english:
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Explainer (English) v1.pdf"
+      placeholder:
+        contact-details1: "ero-recipient"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
+    welsh:
+      path: "classpath:temporary-certificate-template/Temp Voter Authority Explainer (Bilingual) v1.pdf"
+      placeholder:
+        contact-details1: "ero-recipient"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
+
+anonymous-elector-document:
+  certificate-pdf:
+    english:
+      path: "classpath:anonymous-elector-document-template/AED Document (English) v2.pdf"
+      placeholder:
+        electoral-roll-number: "electoral-number"
+        date-of-issue: "date-issued"
+        certificate-number: "certificate-number"
+      images:
+        voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
+          absolute-x-mm: 17.9
+          absolute-y-mm: 186.3
+          fit-width-mm: 35
+          fit-height-mm: 45
+    welsh:
+      path: "classpath:anonymous-elector-document-template/AED Document (Bilingual) v2.pdf"
+      placeholder:
+        electoral-roll-number: "electoral-number"
+        date-of-issue: "date-issued"
+        certificate-number: "certificate-number"
+      images:
+        voter-photo: # Position the top-left corner of the image measured in mm from the page origin in the bottom-left
+          absolute-x-mm: 17.9
+          absolute-y-mm: 186.3
+          fit-width-mm: 35
+          fit-height-mm: 45
+  explainer-pdf:
+    download-filename-prefix: "AED-explainer-document"
+    english:
+      path: "classpath:anonymous-elector-document-template/AED Explainer (English) v1.pdf"
+      placeholder:
+        contact-details1: "ero-recipient"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
+    welsh:
+      path: "classpath:anonymous-elector-document-template/AED Explainer (Bilingual) v1.pdf"
+      placeholder:
+        contact-details1: "ero-recipient"
+        contact-details2: "ero-contact-1"
+        contact-details3: "ero-contact-2"
+        contact-details4: "ero-contact-3"
+        contact-details5: "ero-contact-4"
+        contact-details6: "ero-contact-5"
+        contact-details7: "ero-contact-6"
+        contact-details8: "ero-contact-7"
 
 thread-pool:
   zip:
@@ -45,8 +206,26 @@ thread-pool:
 
 logging:
   pattern:
-    level: "%X{correlationId}%5p"
+    level: "%X{correlationId} %5p"
   level:
     com:
       jcraft:
         jsch: WARN
+
+email:
+  client:
+    sender: noreply_erouser@erop.ierds.uk
+    allow-list-enabled: false
+    allow-list-domains:
+  content:
+    portal-base-url: https://erop.ierds.uk
+    vac-context-root: voter-authority-certificate
+    aed-context-root: anonymous-elector-document
+    certificate-returned:
+      subject: Electoral Registration Office Portal - certificate returned - application ${applicationReference}
+      email-body-template: email-templates/prod/certificate-returned.html
+      send-to-requesting-user: false
+    certificate-failed-to-print:
+      subject: Electoral Registration Office Portal - printing failed - application ${applicationReference}
+      email-body-template: email-templates/prod/certificate-failed-to-print.html
+      send-to-requesting-user: false

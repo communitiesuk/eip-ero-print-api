@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
-import org.apache.commons.lang3.RandomStringUtils
+import org.apache.commons.lang3.RandomStringUtils.randomAlphabetic
 import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.apache.commons.lang3.RandomStringUtils.randomNumeric
 import org.bson.types.ObjectId
@@ -8,6 +8,7 @@ import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
 fun aValidEroId() = "${faker.address().city().lowercase()}-city-council"
@@ -44,13 +45,19 @@ fun aValidVacVersion(): String = randomAlphanumeric(20)
 
 fun aValidSourceReference(): String = getAMongoDbId()
 
-fun aValidApplicationReference(): String = "V${RandomStringUtils.randomAlphabetic(9).uppercase()}"
+fun aValidApplicationReference(): String = "V${randomAlphabetic(9).uppercase()}"
+
+fun aValidElectoralRollNumber(): String = "${randomAlphabetic(4)}-${randomNumeric(8)}" // no specific format. "Special" characters allowed
 
 fun aValidApplicationReceivedDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
 fun aValidIssuingAuthority(): String = aValidLocalAuthorityName()
 
 fun aValidIssueDate(): LocalDate = LocalDate.now()
+
+fun aValidOnDate(): LocalDate = LocalDate.now()
+
+fun aValidGeneratedDateTime(): OffsetDateTime = OffsetDateTime.now()
 
 fun aValidSuggestedExpiryDate(): LocalDate = LocalDate.now().plusYears(10)
 
@@ -73,3 +80,5 @@ fun aValidEmailAddress(): String = "contact@${aValidEroName().replaceSpacesWith(
 fun aValidWebsite(): String = "https://${aValidEroName().replaceSpacesWith("-")}.gov.uk"
 
 fun aValidPrintRequestStatusEventDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
+
+fun aValidEventMessage(): String = faker.harryPotter().spell()

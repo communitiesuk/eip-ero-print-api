@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="nathan.russell@valtech.com" id="0001_EIP1-3454_update_certificate - populate issuing_authority_cy column">
+        <sql>
+            <comment>
+                Set issuing_authority_cy to the best value we can for existing Welsh language certificates.
+                Setting this field for existing certificates will prevent null pointer exceptions if these certificates are ever reprinted.
+                The 'best value' we can set is `Swyddog Cofrestru Etholiadol` which translates as `Electoral Registration Officer` rather than the actual Welsh Issuing Authority.
+                This is deemed acceptable as that is the value that would have been printed (incorrectly) on the original certificate when printed for the first time.
+                Over and above that we do not have the Welsh Local Authority name in the context of the execution of this running liquibase migration - the actual value is only
+                available at runtime when we call the ERO Management REST API to get the relevant ERO and local authorities.
+
+                This is not guaranteed to fix all Welsh certificates unfortunately. There are some certificates in the production database that are meant to be Welsh/Dual Language
+                but have their `certificate_language` field set to `EN`. This is because they were created before bugfix EIP1-3314 was deployed and their `certificate_language` field
+                was incorrectly set based on the language the applicant used when creating their initial application on the IER site. We have no way of easily identifying those records.
+                (We could possibly identify them via their gssCode starting with `W` but we won't have the rest of the Welsh LA data such as address etc to correct all of the data)
+            </comment>
+            UPDATE certificate c
+            INNER JOIN print_request pr on c.id = pr.certificate_id
+            SET c.issuing_authority_cy = 'Swyddog Cofrestru Etholiadol'
+            WHERE pr.certificate_language = 'CY'
+        </sql>
+
+        <rollback/>
+    </changeSet>
+
+</databaseChangeLog>

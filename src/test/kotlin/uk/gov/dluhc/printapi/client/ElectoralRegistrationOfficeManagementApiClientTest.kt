@@ -170,7 +170,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
                 Mono.just(erosResponse)
             )
             val expected = buildEroDto()
-            given(eroMapper.toEroDto(any())).willReturn(expected)
+            given(eroMapper.toEroDto(any(), any())).willReturn(expected)
 
             // When
             val ero = apiClient.getEro(gssCode)
@@ -178,7 +178,7 @@ internal class ElectoralRegistrationOfficeManagementApiClientTest {
             // Then
             assertThat(ero).isSameAs(expected)
             assertRequestUri(gssCode)
-            verify(eroMapper).toEroDto(eroResponse.localAuthorities[0])
+            verify(eroMapper).toEroDto(eroResponse.id, eroResponse.localAuthorities[0])
         }
 
         @Test

@@ -1,10 +1,8 @@
 package uk.gov.dluhc.printapi.mapper
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -16,8 +14,8 @@ import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
@@ -35,7 +33,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
-import java.util.stream.Stream
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateFormat as PrintRequestCertificateFormat
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateLanguage as PrintRequestCertificateLanguage
 
@@ -55,49 +52,45 @@ class CertificateToPrintRequestMapperTest {
     private lateinit var certificateLanguageMapper: CertificateLanguageMapper
 
     companion object {
-        @JvmStatic
-        private fun welshEro(): Stream<Arguments> {
-            return Stream.of(
-                Arguments.of(null),
-                Arguments.of(buildElectoralRegistrationOffice(name = aValidLocalAuthorityName())),
-            )
-        }
-    }
-
-    @ParameterizedTest
-    @MethodSource("welshEro")
-    fun `should map ERO response to dto with optional Welsh ERO translation`(eroWelsh: ElectoralRegistrationOffice?) {
-        // Given
-        given(supportingInformationFormatMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateFormat.STANDARD)
-        given(certificateLanguageMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateLanguage.EN)
-        given(instantMapper.toOffsetDateTime(any())).willReturn(OffsetDateTime.ofInstant(Instant.ofEpochMilli(0), UTC))
-
-        val requestId: String = aValidRequestId()
-        val sourceReference: String = aValidSourceReference()
-        val applicationReference: String = aValidApplicationReference()
-        val vacNumber: String = aValidVacNumber()
-        val vacVersion = "1"
-        val sourceType: SourceType = SourceType.VOTER_CARD
-        val requestDateTime: Instant = Instant.ofEpochMilli(0)
-        val firstName = "John"
-        val middleNames = "Anthony Barry"
-        val surname = "Doe"
-        val certificateLanguage = CertificateLanguage.EN
-        val supportingInformationFormat = SupportingInformationFormat.STANDARD
-        val delivery = buildDelivery()
-        val gssCode: String = getRandomGssCode()
-        val issuingAuthority: String = aValidLocalAuthorityName()
-        val issueDate = LocalDate.of(2022, 10, 21)
-        val suggestedExpiryDate = LocalDate.of(2032, 10, 21)
-        val eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(name = issuingAuthority)
-        val photoLocation = aPhotoArn()
-        val statusHistory = mutableListOf(
+        private val requestId: String = aValidRequestId()
+        private val sourceReference: String = aValidSourceReference()
+        private val applicationReference: String = aValidApplicationReference()
+        private val vacNumber: String = aValidVacNumber()
+        private val vacVersion = "1"
+        private val sourceType: SourceType = SourceType.VOTER_CARD
+        private val requestDateTime: Instant = Instant.ofEpochMilli(0)
+        private val firstName = "John"
+        private val middleNames = "Anthony Barry"
+        private val surname = "Doe"
+        private val supportingInformationFormat = SupportingInformationFormat.STANDARD
+        private val delivery = buildDelivery()
+        private val gssCode: String = getRandomGssCode()
+        private val issuingAuthorityEn = aValidLocalAuthorityName()
+        private val issueDate = LocalDate.of(2022, 10, 21)
+        private val suggestedExpiryDate = LocalDate.of(2032, 10, 21)
+        private val photoLocation = aPhotoArn()
+        private val statusHistory = mutableListOf(
             PrintRequestStatus(
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 eventDateTime = Instant.now()
             )
         )
-        val batchId = aValidBatchId()
+        private val batchId = aValidBatchId()
+        private val photoZipPath: String = aPhotoZipPath()
+    }
+
+    @Test
+    fun `should map to print request with English ERO`() {
+        // Given
+        given(certificateLanguageMapper.mapEntityToPrintRequest(any())).willReturn(PrintRequestCertificateLanguage.EN)
+
+        given(supportingInformationFormatMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateFormat.STANDARD)
+        given(instantMapper.toOffsetDateTime(any())).willReturn(OffsetDateTime.ofInstant(Instant.ofEpochMilli(0), UTC))
+
+        val certificateLanguage = CertificateLanguage.EN
+
+        val eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(name = issuingAuthorityEn)
+
         val printRequest = PrintRequest(
             requestId = requestId,
             vacVersion = vacVersion,
@@ -107,10 +100,9 @@ class CertificateToPrintRequestMapperTest {
             surname = surname,
             certificateLanguage = certificateLanguage,
             supportingInformationFormat = supportingInformationFormat,
-            photoLocationArn = photoLocation,
             delivery = delivery,
             eroEnglish = eroEnglish,
-            eroWelsh = eroWelsh,
+            eroWelsh = null,
             batchId = batchId,
             userId = aValidUserId(),
             statusHistory = statusHistory
@@ -121,14 +113,15 @@ class CertificateToPrintRequestMapperTest {
             sourceReference = sourceReference,
             applicationReference = applicationReference,
             applicationReceivedDateTime = Instant.now(),
-            issuingAuthority = issuingAuthority,
+            issuingAuthority = issuingAuthorityEn,
+            issuingAuthorityCy = null,
             issueDate = issueDate,
             suggestedExpiryDate = suggestedExpiryDate,
             status = Status.PENDING_ASSIGNMENT_TO_BATCH,
             gssCode = gssCode,
+            photoLocationArn = photoLocation,
             printRequests = mutableListOf(printRequest)
         )
-        val photoZipPath: String = aPhotoZipPath()
 
         val expected = uk.gov.dluhc.printapi.printprovider.models.PrintRequest()
         expected.requestId = requestId
@@ -146,12 +139,12 @@ class CertificateToPrintRequestMapperTest {
         expected.deliveryOption = uk.gov.dluhc.printapi.printprovider.models.PrintRequest.DeliveryOption.STANDARD
         expected.photo = photoZipPath
         expected.deliveryName = delivery.addressee
-        expected.deliveryStreet = delivery.address?.street
-        expected.deliveryProperty = delivery.address?.property
-        expected.deliveryLocality = delivery.address?.locality
-        expected.deliveryTown = delivery.address?.town
-        expected.deliveryArea = delivery.address?.area
-        expected.deliveryPostcode = delivery.address?.postcode
+        expected.deliveryStreet = delivery.address.street
+        expected.deliveryProperty = delivery.address.property
+        expected.deliveryLocality = delivery.address.locality
+        expected.deliveryTown = delivery.address.town
+        expected.deliveryArea = delivery.address.area
+        expected.deliveryPostcode = delivery.address.postcode
         expected.eroNameEn = eroEnglish.name
         expected.eroPhoneNumberEn = eroEnglish.phoneNumber
         expected.eroEmailAddressEn = eroEnglish.emailAddress
@@ -162,18 +155,18 @@ class CertificateToPrintRequestMapperTest {
         expected.eroDeliveryTownEn = eroEnglish.address?.town
         expected.eroDeliveryAreaEn = eroEnglish.address?.area
         expected.eroDeliveryPostcodeEn = eroEnglish.address?.postcode
-        // Optional Welsh translation expectations
-        expected.issuingAuthorityCy = eroWelsh?.name
-        expected.eroNameCy = eroWelsh?.name
-        expected.eroPhoneNumberCy = eroWelsh?.phoneNumber
-        expected.eroEmailAddressCy = eroWelsh?.emailAddress
-        expected.eroWebsiteCy = eroWelsh?.website
-        expected.eroDeliveryStreetCy = eroWelsh?.address?.street
-        expected.eroDeliveryPropertyCy = eroWelsh?.address?.property
-        expected.eroDeliveryLocalityCy = eroWelsh?.address?.locality
-        expected.eroDeliveryTownCy = eroWelsh?.address?.town
-        expected.eroDeliveryAreaCy = eroWelsh?.address?.area
-        expected.eroDeliveryPostcodeCy = eroWelsh?.address?.postcode
+        // Welsh fields
+        expected.issuingAuthorityCy = null
+        expected.eroNameCy = null
+        expected.eroPhoneNumberCy = null
+        expected.eroEmailAddressCy = null
+        expected.eroWebsiteCy = null
+        expected.eroDeliveryStreetCy = null
+        expected.eroDeliveryPropertyCy = null
+        expected.eroDeliveryLocalityCy = null
+        expected.eroDeliveryTownCy = null
+        expected.eroDeliveryAreaCy = null
+        expected.eroDeliveryPostcodeCy = null
 
         // When
         val actual = mapper.map(certificate, printRequest, photoZipPath)
@@ -181,6 +174,107 @@ class CertificateToPrintRequestMapperTest {
         // Then
         assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
         verify(supportingInformationFormatMapper).toPrintRequestApiEnum(supportingInformationFormat)
-        verify(certificateLanguageMapper).toPrintRequestApiEnum(certificateLanguage)
+        verify(certificateLanguageMapper).mapEntityToPrintRequest(certificateLanguage)
+    }
+
+    @Test
+    fun `should map to print request with Welsh ERO`() {
+        // Given
+        given(certificateLanguageMapper.mapEntityToPrintRequest(any())).willReturn(PrintRequestCertificateLanguage.CY)
+
+        given(supportingInformationFormatMapper.toPrintRequestApiEnum(any())).willReturn(PrintRequestCertificateFormat.STANDARD)
+        given(instantMapper.toOffsetDateTime(any())).willReturn(OffsetDateTime.ofInstant(Instant.ofEpochMilli(0), UTC))
+
+        val certificateLanguage = CertificateLanguage.CY
+
+        val issuingAuthorityCy = aValidLocalAuthorityName()
+
+        val eroWelsh = buildElectoralRegistrationOffice(name = issuingAuthorityCy)
+        val eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(name = issuingAuthorityEn)
+
+        val printRequest = PrintRequest(
+            requestId = requestId,
+            vacVersion = vacVersion,
+            requestDateTime = requestDateTime,
+            firstName = firstName,
+            middleNames = middleNames,
+            surname = surname,
+            certificateLanguage = certificateLanguage,
+            supportingInformationFormat = supportingInformationFormat,
+            delivery = delivery,
+            eroEnglish = eroEnglish,
+            eroWelsh = eroWelsh,
+            batchId = batchId,
+            userId = aValidUserId(),
+            statusHistory = statusHistory
+        )
+        val certificate = Certificate(
+            vacNumber = vacNumber,
+            sourceType = sourceType,
+            sourceReference = sourceReference,
+            applicationReference = applicationReference,
+            applicationReceivedDateTime = Instant.now(),
+            issuingAuthority = issuingAuthorityEn,
+            issuingAuthorityCy = issuingAuthorityCy,
+            issueDate = issueDate,
+            suggestedExpiryDate = suggestedExpiryDate,
+            status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+            gssCode = gssCode,
+            photoLocationArn = photoLocation,
+            printRequests = mutableListOf(printRequest)
+        )
+
+        val expected = uk.gov.dluhc.printapi.printprovider.models.PrintRequest()
+        expected.requestId = requestId
+        expected.issuingAuthorityEn = eroEnglish.name
+        expected.issueDate = issueDate
+        expected.suggestedExpiryDate = suggestedExpiryDate
+        expected.requestDateTime = requestDateTime.atOffset(UTC)
+        expected.cardFirstname = firstName
+        expected.cardMiddleNames = middleNames
+        expected.cardSurname = surname
+        expected.cardVersion = vacVersion
+        expected.cardNumber = vacNumber
+        expected.certificateLanguage = uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateLanguage.CY
+        expected.certificateFormat = uk.gov.dluhc.printapi.printprovider.models.PrintRequest.CertificateFormat.STANDARD
+        expected.deliveryOption = uk.gov.dluhc.printapi.printprovider.models.PrintRequest.DeliveryOption.STANDARD
+        expected.photo = photoZipPath
+        expected.deliveryName = delivery.addressee
+        expected.deliveryStreet = delivery.address.street
+        expected.deliveryProperty = delivery.address.property
+        expected.deliveryLocality = delivery.address.locality
+        expected.deliveryTown = delivery.address.town
+        expected.deliveryArea = delivery.address.area
+        expected.deliveryPostcode = delivery.address.postcode
+        expected.eroNameEn = eroEnglish.name
+        expected.eroPhoneNumberEn = eroEnglish.phoneNumber
+        expected.eroEmailAddressEn = eroEnglish.emailAddress
+        expected.eroWebsiteEn = eroEnglish.website
+        expected.eroDeliveryStreetEn = eroEnglish.address?.street
+        expected.eroDeliveryPropertyEn = eroEnglish.address?.property
+        expected.eroDeliveryLocalityEn = eroEnglish.address?.locality
+        expected.eroDeliveryTownEn = eroEnglish.address?.town
+        expected.eroDeliveryAreaEn = eroEnglish.address?.area
+        expected.eroDeliveryPostcodeEn = eroEnglish.address?.postcode
+        // Welsh fields
+        expected.issuingAuthorityCy = eroWelsh.name
+        expected.eroNameCy = eroWelsh.name
+        expected.eroPhoneNumberCy = eroWelsh.phoneNumber
+        expected.eroEmailAddressCy = eroWelsh.emailAddress
+        expected.eroWebsiteCy = eroWelsh.website
+        expected.eroDeliveryStreetCy = eroWelsh.address?.street
+        expected.eroDeliveryPropertyCy = eroWelsh.address?.property
+        expected.eroDeliveryLocalityCy = eroWelsh.address?.locality
+        expected.eroDeliveryTownCy = eroWelsh.address?.town
+        expected.eroDeliveryAreaCy = eroWelsh.address?.area
+        expected.eroDeliveryPostcodeCy = eroWelsh.address?.postcode
+
+        // When
+        val actual = mapper.map(certificate, printRequest, photoZipPath)
+
+        // Then
+        assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
+        verify(supportingInformationFormatMapper).toPrintRequestApiEnum(supportingInformationFormat)
+        verify(certificateLanguageMapper).mapEntityToPrintRequest(certificateLanguage)
     }
 }

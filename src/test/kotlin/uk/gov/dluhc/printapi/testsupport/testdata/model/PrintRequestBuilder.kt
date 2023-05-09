@@ -8,6 +8,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildElectoralRegistrat
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import net.datafaker.providers.base.Address as FakerAddress
+import net.datafaker.providers.base.Name as FakerName
 
 fun buildPrintRequest(
     eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(),
@@ -18,22 +20,24 @@ fun buildPrintRequest(
     issueDate: LocalDate = LocalDate.parse("2023-07-12"),
     suggestedExpiryDate: LocalDate = LocalDate.parse("2033-02-28"),
     requestDateTime: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
-    cardFirstname: String = faker.name().firstName(),
-    cardMiddleNames: String? = faker.name().firstName(),
-    cardSurname: String = faker.name().lastName(),
+    fakeName: FakerName = faker.name(),
+    cardFirstname: String = fakeName.firstName(),
+    cardMiddleNames: String? = fakeName.firstName(),
+    cardSurname: String = fakeName.lastName(),
     cardVersion: String = "1",
     cardNumber: String = "3987",
     certificateLanguage: PrintRequest.CertificateLanguage = PrintRequest.CertificateLanguage.EN,
     certificateFormat: PrintRequest.CertificateFormat = PrintRequest.CertificateFormat.STANDARD,
     deliveryOption: PrintRequest.DeliveryOption = PrintRequest.DeliveryOption.STANDARD,
     photo: String = "8a53a30ac9bae2ebb9b1239b.png",
-    deliveryName: String = faker.name().name(),
-    deliveryProperty: String? = faker.address().buildingNumber(),
-    deliveryLocality: String? = faker.address().streetName(),
-    deliveryTown: String? = faker.address().city(),
-    deliveryArea: String? = faker.address().state(),
-    deliveryStreet: String = faker.address().streetName(),
-    deliveryPostcode: String = faker.address().postcode(),
+    deliveryName: String = fakeName.name(),
+    fakeAddress: FakerAddress = faker.address(),
+    deliveryProperty: String? = fakeAddress.buildingNumber(),
+    deliveryLocality: String? = fakeAddress.streetName(),
+    deliveryTown: String? = fakeAddress.city(),
+    deliveryArea: String? = fakeAddress.state(),
+    deliveryStreet: String = fakeAddress.streetName(),
+    deliveryPostcode: String = fakeAddress.postcode(),
     eroNameEn: String = eroEnglish.name!!,
     eroPhoneNumberEn: String = eroEnglish.phoneNumber!!,
     eroEmailAddressEn: String = eroEnglish.emailAddress!!,

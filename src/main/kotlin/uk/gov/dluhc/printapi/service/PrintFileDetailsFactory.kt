@@ -2,8 +2,10 @@ package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.mapper.CertificateToPrintRequestMapper
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
+import uk.gov.dluhc.printapi.database.entity.PrintRequest as EntityPrintRequest
 
 @Component
 class PrintFileDetailsFactory(
@@ -15,7 +17,7 @@ class PrintFileDetailsFactory(
     fun createFileDetailsFromCertificates(batchId: String, certificates: List<Certificate>): FileDetails {
         val fileContents = createFromCertificates(certificates)
         return FileDetails(
-            printRequestsFilename = filenameFactory.createPrintRequestsFilename(batchId, certificates.size),
+            printRequestsFilename = filenameFactory.createPrintRequestsFilename(batchId, certificates),
             printRequests = fileContents.printRequests,
             photoLocations = fileContents.photoLocations
         )
@@ -33,10 +35,19 @@ class PrintFileDetailsFactory(
         requests: MutableList<PrintRequest>,
         photos: MutableList<PhotoLocation>
     ) {
-        val latestRequest = certificate.getCurrentPrintRequest()
-        val photoArn = latestRequest.photoLocationArn!!
-        val photoLocation = photoLocationFactory.create(latestRequest.batchId!!, latestRequest.requestId!!, photoArn)
-        val printRequest = certificateToPrintRequestMapper.map(certificate, latestRequest, photoLocation.zipPath)
+        certificate.getPrintRequestsByStatus(Status.ASSIGNED_TO_BATCH)
+            .forEach { requestInBatch -> processPrintRequest(requestInBatch, certificate, requests, photos) }
+    }
+
+    private fun processPrintRequest(
+        pendingPrintRequest: EntityPrintRequest,
+        certificate: Certificate,
+        requests: MutableList<PrintRequest>,
+        photos: MutableList<PhotoLocation>
+    ) {
+        val photoLocation =
+            photoLocationFactory.create(pendingPrintRequest.batchId!!, pendingPrintRequest.requestId!!, certificate.photoLocationArn!!)
+        val printRequest = certificateToPrintRequestMapper.map(certificate, pendingPrintRequest, photoLocation.zipPath)
         requests.add(printRequest)
         photos.add(photoLocation)
     }

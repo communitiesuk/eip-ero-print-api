@@ -64,6 +64,20 @@ class PrintRequestStatus(
 
     @Override
     override fun toString(): String {
-        return this::class.simpleName + "(id = $id , dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
+        return this::class.simpleName + "(id = $id , status = $status , dateCreated = $dateCreated , createdBy = $createdBy , version = $version )"
+    }
+
+    enum class Status {
+        PENDING_ASSIGNMENT_TO_BATCH,
+        ASSIGNED_TO_BATCH,
+        SENT_TO_PRINT_PROVIDER,
+        RECEIVED_BY_PRINT_PROVIDER,
+        VALIDATED_BY_PRINT_PROVIDER,
+        IN_PRODUCTION,
+        DISPATCHED,
+        NOT_DELIVERED,
+        PRINT_PROVIDER_VALIDATION_FAILED,
+        PRINT_PROVIDER_PRODUCTION_FAILED,
+        PRINT_PROVIDER_DISPATCH_FAILED,
     }
 }

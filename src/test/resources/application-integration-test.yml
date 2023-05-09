@@ -6,7 +6,7 @@ cloud:
       access-key: test
       secret-key: test
     sqs:
-      endpoint: http://replaced-by-localStackContainerSqsSettings-bean
+      endpoint: http://replaced-by-localStackContainerSettings-bean
 
 spring:
   datasource:
@@ -27,8 +27,16 @@ sqs:
   process-print-request-batch-queue-name: process-print-request-batch
   process-print-response-file-queue-name: process-print-response-file
   process-print-response-queue-name: process-print-response
+  application-removed-queue-name: application-removed
+  remove-certificate-queue-name: remove-certificate
+
+s3:
+  certificate-photos-target-bucket: localstack-vca-api-vca-target-bucket
+  certificate-photos-target-bucket-proxy-endpoint: localhost
 
 api:
+  print-api:
+    base.url: http://localhost:8080
   ero-management:
     url: http://will-be-replaced-by-wireMockServer-bean
 

@@ -6,6 +6,7 @@ import com.jcraft.jsch.ChannelSftp.LsEntry
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.dao.TransientDataAccessException
+import org.springframework.data.repository.CrudRepository
 import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
@@ -27,17 +29,26 @@ import org.springframework.integration.support.MessageBuilder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.s3.S3Client
+import uk.gov.dluhc.printapi.client.BankHolidayDataClient
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
+import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
+import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentSummaryRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
+import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
+import uk.gov.dluhc.printapi.jobs.FinalRetentionPeriodDataRemovalJob
+import uk.gov.dluhc.printapi.jobs.InitialRetentionPeriodDataRemovalJob
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
+import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
+import uk.gov.dluhc.printapi.testsupport.emails.LocalstackEmailMessage
+import uk.gov.dluhc.printapi.testsupport.emails.LocalstackEmailMessagesSentClient
 import java.io.File
 import java.nio.charset.Charset
 import java.time.Clock
@@ -62,6 +73,9 @@ internal abstract class IntegrationTest {
     protected lateinit var wireMockService: WiremockService
 
     @Autowired
+    protected lateinit var localstackEmailMessagesSentClient: LocalstackEmailMessagesSentClient
+
+    @Autowired
     protected lateinit var sqsMessagingTemplate: QueueMessagingTemplate
 
     @Autowired
@@ -79,10 +93,19 @@ internal abstract class IntegrationTest {
     protected lateinit var processPrintResponsesBatchJob: ProcessPrintResponsesBatchJob
 
     @Autowired
+    protected lateinit var initialRetentionPeriodDataRemovalJob: InitialRetentionPeriodDataRemovalJob
+
+    @Autowired
+    protected lateinit var finalRetentionPeriodDataRemovalJob: FinalRetentionPeriodDataRemovalJob
+
+    @Autowired
     protected lateinit var batchPrintRequestsJob: BatchPrintRequestsJob
 
     @Autowired
     protected lateinit var s3Client: S3Client
+
+    @Autowired
+    protected lateinit var bankHolidayDataClient: BankHolidayDataClient
 
     @Autowired
     protected lateinit var clock: Clock
@@ -92,6 +115,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var processPrintResponseMessageQueue: MessageQueue<ProcessPrintResponseMessage>
+
+    @Autowired
+    protected lateinit var removeCertificateMessageQueue: MessageQueue<RemoveCertificateMessage>
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
@@ -105,8 +131,32 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.process-print-response-file-queue-name}")
     protected lateinit var processPrintResponseFileQueueName: String
 
+    @Value("\${sqs.application-removed-queue-name}")
+    protected lateinit var applicationRemovedQueueName: String
+
+    @Value("\${sqs.remove-certificate-queue-name}")
+    protected lateinit var removeCertificateQueueName: String
+
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository
+
+    @Autowired
+    protected lateinit var temporaryCertificateRepository: TemporaryCertificateRepository
+
+    @Autowired
+    protected lateinit var anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository
+
+    @Autowired
+    protected lateinit var anonymousElectorDocumentSummaryRepository: AnonymousElectorDocumentSummaryRepository
+
+    @Autowired
+    protected lateinit var testDeliveryRepository: TestDeliveryRepository
+
+    @Autowired
+    protected lateinit var testAddressRepository: TestAddressRepository
+
+    @Autowired
+    protected lateinit var testPrintRequestRepository: TestPrintRequestRepository
 
     @BeforeEach
     fun clearLogAppender() {
@@ -132,12 +182,18 @@ internal abstract class IntegrationTest {
 
     @BeforeEach
     @AfterEach
-    fun clearRdsDatabase() {
+    fun clearDatabase() {
+        clearRepository(certificateRepository, "certificateRepository")
+        clearRepository(temporaryCertificateRepository, "temporaryCertificateRepository")
+        clearRepository(anonymousElectorDocumentRepository, "anonymousElectorDocumentRepository")
+    }
+
+    private fun clearRepository(repository: CrudRepository<*, *>, repoName: String) {
         try {
-            certificateRepository.deleteAll()
+            repository.deleteAll()
         } catch (tdae: TransientDataAccessException) {
-            logger.warn("exception while cleaning up db with `certificateRepository.deleteAll()`", tdae)
-            certificateRepository.deleteAll()
+            logger.warn("exception while cleaning up db with `$repoName.deleteAll()`", tdae)
+            repository.deleteAll()
         }
     }
 
@@ -146,6 +202,7 @@ internal abstract class IntegrationTest {
         val localStackContainer = LocalStackContainerConfiguration.getInstance()
         val sftpContainer = SftpContainerConfiguration.getInstance()
         const val LOCAL_SFTP_OUTBOUND_TEST_DIRECTORY = "src/test/resources/sftp/local/OutBound"
+        const val ERO_ID = "some-city-council"
     }
 
     @TestConfiguration
@@ -187,6 +244,23 @@ internal abstract class IntegrationTest {
                 .setHeader(FILENAME, fileName)
                 .build()
         )
+    }
+
+    protected fun assertEmailSent(expected: LocalstackEmailMessage) {
+        val expectedEmailBodyRegex = Regex(expected.body.htmlPart!!)
+        with(localstackEmailMessagesSentClient.getEmailMessagesSent()) {
+            val foundMessage = messages.any {
+                !it.timestamp.isBefore(expected.timestamp) &&
+                    it.destination.toAddresses.toSet() == expected.destination.toAddresses.toSet() &&
+                    it.subject == expected.subject &&
+                    expectedEmailBodyRegex.matches(it.body.htmlPart!!) &&
+                    it.body.textPart == expected.body.textPart &&
+                    it.source == expected.source
+            }
+            Assertions.assertThat(foundMessage)
+                .`as` { "failed to find expectedEmailMessage[$expected], in list of messages[$messages]" }
+                .isTrue
+        }
     }
 
     private fun getSftpInboundDirectoryFileNames() =

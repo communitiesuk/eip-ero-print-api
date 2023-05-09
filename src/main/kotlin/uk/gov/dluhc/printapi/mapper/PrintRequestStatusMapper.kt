@@ -2,7 +2,7 @@ package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.Mapper
 import org.mapstruct.ValueMapping
-import uk.gov.dluhc.printapi.dto.StatusDto
+import uk.gov.dluhc.printapi.dto.PrintRequestStatusDto
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
 
 @Mapper
@@ -18,5 +18,5 @@ interface PrintRequestStatusMapper {
     @ValueMapping(source = "PRINT_PROVIDER_VALIDATION_FAILED", target = "PRINT_MINUS_FAILED")
     @ValueMapping(source = "PRINT_PROVIDER_PRODUCTION_FAILED", target = "PRINT_MINUS_PROCESSING")
     @ValueMapping(source = "PRINT_PROVIDER_DISPATCH_FAILED", target = "PRINT_MINUS_PROCESSING")
-    fun toPrintRequestStatus(status: StatusDto): PrintRequestStatus
+    fun toPrintRequestStatus(status: PrintRequestStatusDto): PrintRequestStatus
 }

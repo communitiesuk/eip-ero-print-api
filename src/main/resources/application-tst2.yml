@@ -1,0 +1,16 @@
+
+email:
+  client:
+    sender: noreply_tst2_erouser@erop.ierds.uk
+    allow-list-enabled: true
+    allow-list-domains:
+      - valtech.com
+      - levellingup.gov.uk
+      - softwire.com
+  content:
+    certificate-returned:
+      email-body-template: email-templates/non-prod/certificate-returned.html
+      send-to-requesting-user: true
+    certificate-failed-to-print:
+      email-body-template: email-templates/non-prod/certificate-failed-to-print.html
+      send-to-requesting-user: true

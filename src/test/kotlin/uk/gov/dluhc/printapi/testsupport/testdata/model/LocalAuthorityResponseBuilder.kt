@@ -9,6 +9,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
+import net.datafaker.providers.base.Address as FakerAddress
 
 fun buildLocalAuthorityResponse(
     gssCode: String = getRandomGssCode(),
@@ -23,12 +24,14 @@ fun buildLocalAuthorityResponse(
 )
 
 fun buildContactDetails(
+    name: String = aValidLocalAuthorityName(),
     websiteAddress: String = aValidWebsite(),
     phoneNumber: String = aValidPhoneNumber(),
     emailAddress: String = aValidEmailAddress(),
     address: Address = buildEroManagementAddress(),
 ): ContactDetails =
     ContactDetails(
+        name = name,
         website = websiteAddress,
         phone = phoneNumber,
         email = emailAddress,
@@ -36,11 +39,12 @@ fun buildContactDetails(
     )
 
 fun buildEroManagementAddress(
-    street: String = faker.address().streetName(),
-    postcode: String = faker.address().postcode(),
-    property: String = faker.address().buildingNumber(),
-    town: String = faker.address().city(),
-    area: String = faker.address().state(),
+    fakeAddress: FakerAddress = faker.address(),
+    street: String = fakeAddress.streetName(),
+    postcode: String = fakeAddress.postcode(),
+    property: String = fakeAddress.buildingNumber(),
+    town: String = fakeAddress.city(),
+    area: String = fakeAddress.state(),
     locality: String? = null,
     uprn: String? = null,
 ): Address =

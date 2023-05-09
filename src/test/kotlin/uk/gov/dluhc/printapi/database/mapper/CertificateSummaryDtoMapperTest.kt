@@ -2,17 +2,17 @@ package uk.gov.dluhc.printapi.database.mapper
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.database.entity.Status.ASSIGNED_TO_BATCH
-import uk.gov.dluhc.printapi.database.entity.Status.DISPATCHED
-import uk.gov.dluhc.printapi.database.entity.Status.IN_PRODUCTION
-import uk.gov.dluhc.printapi.database.entity.Status.PENDING_ASSIGNMENT_TO_BATCH
-import uk.gov.dluhc.printapi.database.entity.Status.RECEIVED_BY_PRINT_PROVIDER
-import uk.gov.dluhc.printapi.database.entity.Status.SENT_TO_PRINT_PROVIDER
-import uk.gov.dluhc.printapi.database.entity.Status.VALIDATED_BY_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.DISPATCHED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.RECEIVED_BY_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.VALIDATED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.dto.CertificateSummaryDto
+import uk.gov.dluhc.printapi.dto.PrintRequestStatusDto
 import uk.gov.dluhc.printapi.dto.PrintRequestSummaryDto
-import uk.gov.dluhc.printapi.dto.StatusDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aDifferentValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestDateTime
@@ -23,6 +23,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import java.time.Instant
 import java.time.Instant.now
+import java.time.temporal.ChronoUnit.MINUTES
 
 internal class CertificateSummaryDtoMapperTest {
 
@@ -50,7 +51,7 @@ internal class CertificateSummaryDtoMapperTest {
             vacNumber = vacNumber,
             printRequests = listOf(
                 PrintRequestSummaryDto(
-                    status = StatusDto.valueOf(expectedStatus.name),
+                    status = PrintRequestStatusDto.valueOf(expectedStatus.name),
                     dateTime = expectedDateTime,
                     userId = expectedUserId,
                     message = null
@@ -94,7 +95,7 @@ internal class CertificateSummaryDtoMapperTest {
             vacNumber = vacNumber,
             printRequests = listOf(
                 PrintRequestSummaryDto(
-                    status = StatusDto.valueOf(expectedStatus.name),
+                    status = PrintRequestStatusDto.valueOf(expectedStatus.name),
                     dateTime = expectedDateTime,
                     userId = expectedUserId,
                     message = expectedMessage
@@ -114,11 +115,11 @@ internal class CertificateSummaryDtoMapperTest {
         // Given
         val vacNumber = aValidVacNumber()
         val expectedStatus1 = aValidCertificateStatus()
-        val expectedDateTime1 = aValidRequestDateTime()
+        val expectedDateTime1 = now().minus(1, MINUTES)
         val expectedUserId1 = aValidUserId()
         val expectedMessage1 = null
         val expectedStatus2 = aDifferentValidCertificateStatus()
-        val expectedDateTime2 = aValidRequestDateTime()
+        val expectedDateTime2 = now()
         val expectedUserId2 = aValidUserId()
         val expectedMessage2 = "Successfully dispatched by Royal Mail"
         val certificate = buildCertificate(
@@ -142,16 +143,16 @@ internal class CertificateSummaryDtoMapperTest {
             vacNumber = vacNumber,
             printRequests = listOf(
                 PrintRequestSummaryDto(
-                    status = StatusDto.valueOf(expectedStatus1.name),
-                    dateTime = expectedDateTime1,
-                    userId = expectedUserId1,
-                    message = expectedMessage1
-                ),
-                PrintRequestSummaryDto(
-                    status = StatusDto.valueOf(expectedStatus2.name),
+                    status = PrintRequestStatusDto.valueOf(expectedStatus2.name),
                     dateTime = expectedDateTime2,
                     userId = expectedUserId2,
                     message = expectedMessage2
+                ),
+                PrintRequestSummaryDto(
+                    status = PrintRequestStatusDto.valueOf(expectedStatus1.name),
+                    dateTime = expectedDateTime1,
+                    userId = expectedUserId1,
+                    message = expectedMessage1
                 ),
             )
         )
@@ -160,7 +161,7 @@ internal class CertificateSummaryDtoMapperTest {
         val actual = mapper.certificateToCertificatePrintRequestSummaryDto(certificate)
 
         // Then
-        assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
     }
 
     private fun printRequestStatus(status: Status, eventDateTime: Instant, message: String?) =

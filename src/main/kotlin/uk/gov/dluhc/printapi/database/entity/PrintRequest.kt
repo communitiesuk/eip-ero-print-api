@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.database.entity
 
 import org.hibernate.Hibernate
-import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
 import org.springframework.data.annotation.LastModifiedBy
@@ -22,6 +21,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
+import javax.persistence.PrePersist
 import javax.persistence.Table
 import javax.persistence.Version
 import javax.validation.constraints.NotNull
@@ -63,15 +63,10 @@ class PrintRequest(
     @Enumerated(EnumType.STRING)
     var certificateLanguage: CertificateLanguage? = null,
 
-    @field:NotNull
     @Enumerated(EnumType.STRING)
     var supportingInformationFormat: SupportingInformationFormat? = null,
 
-    @field:NotNull
-    @field:Size(max = 255)
-    var photoLocationArn: String? = null,
-
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var delivery: Delivery? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
@@ -93,7 +88,7 @@ class PrintRequest(
     @JoinColumn(name = "print_request_id", nullable = false)
     var statusHistory: MutableList<PrintRequestStatus> = mutableListOf(),
 
-    @CreationTimestamp
+    // managed using JPA pre-persist annotated method below
     var dateCreated: Instant? = null,
 
     @field:Size(max = 255)
@@ -104,6 +99,14 @@ class PrintRequest(
     var version: Long? = null
 
 ) {
+
+    @PrePersist
+    fun populateDateCreated() {
+        if (dateCreated == null) {
+            dateCreated = Instant.now()
+        }
+    }
+
     fun addPrintRequestStatus(newPrintRequestStatus: PrintRequestStatus): PrintRequest {
         statusHistory += newPrintRequestStatus
         return this

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.8.0'
+  version: '1.9.5'
   description: |-
     Print API SQS Message Types
     
@@ -12,6 +12,9 @@ info:
     
     The `paths` element is only being used in order to maintain the structure of the openApi spec, as `paths` are required 
     elements.
+    
+    The SQS listeners and producers in this API also consume/produce an optional x-correlation-id header that can be used
+    to trace requests.
 #
 # --------------------------------------------------------------------------------
 #
@@ -55,6 +58,26 @@ paths:
         - SQS Queues
       requestBody:
         $ref: '#/components/requestBodies/ProcessPrintResponseMessage'
+      responses:
+        '204':
+          description: No response content.
+
+  '/application-removed':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/ApplicationRemovedMessage'
+      responses:
+        '204':
+          description: No response content.
+
+  '/remove-certificate':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/RemoveCertificateMessage'
       responses:
         '204':
           description: No response content.
@@ -137,12 +160,48 @@ components:
         - delivery
         - userId
 
+    ApplicationRemovedMessage:
+      description: The SQS message sent when the source application is removed from the originating system.
+      type: object
+      properties:
+        sourceReference:
+          type: string
+          description: Reference in the source application.
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        gssCode:
+          type: string
+          minLength: 9
+          maxLength: 9
+          description: GSS code of the ERO responsible for sending the message
+      required:
+        - sourceReference
+        - sourceType
+        - gssCode
+
+    RemoveCertificateMessage:
+      title: RemoveCertificateMessage
+      description: The SQS message sent to remove an individual Certificate record from the database and its corresponding photo from S3.
+      type: object
+      properties:
+        certificateId:
+          type: string
+          format: uuid
+          description: The id (primary key) of the Certificate row
+        certificatePhotoArn:
+          type: string
+          description: The Certificate photo's S3 arn
+      required:
+        - certificateId
+        - certificatePhotoArn
+
     SourceType:
       title: SourceType
       description: An enumeration of sources for this print request
       type: string
       enum:
         - voter-card
+        - anonymous-elector-document
 
     CertificateLanguage:
       title: CertificateLanguage
@@ -169,19 +228,22 @@ components:
       properties:
         deliveryClass:
           $ref: '#/components/schemas/DeliveryClass'
-        deliveryMethod:
-          $ref: '#/components/schemas/DeliveryMethod'
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
         addressee:
           type: string
           maxLength: 255
           description: The addressee to be printed in addition to the delivery address
         address:
           $ref: '#/components/schemas/Address'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
       required:
-        - deliveryOption
-        - deliveryMethod
+        - deliveryClass
+        - deliveryAddressType
         - addressee
         - address
+        - addressFormat
 
     DeliveryClass:
       title: DeliveryClass
@@ -190,13 +252,14 @@ components:
       enum:
         - standard
 
-    DeliveryMethod:
-      title: DeliveryMethod
-      description: The delivery method for the Voter Authority Certificate
+    DeliveryAddressType:
+      title: DeliveryAddressType
+      description: The delivery address type for the Voter Authority Certificate
       type: string
       enum:
-        - delivery
-        - collection
+        - registered
+        - ero-collection
+        - alternative
 
     Address:
       title: Address
@@ -241,6 +304,15 @@ components:
         - street
         - postcode
 
+    AddressFormat:
+      title: AddressFormat
+      description: Enumeration of address formats
+      type: string
+      enum:
+        - uk
+        - overseas
+        - bfpo
+
     ProcessPrintRequestBatchMessage:
       description: The SQS message for processing a batch of print requests
       type: object
@@ -248,6 +320,9 @@ components:
         batchId:
           type: string
           description: The batch ID
+        printRequestCount:
+          type: integer
+          description: The number of print requests included in the batch
       required:
         - batchId
 
@@ -333,3 +408,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ProcessPrintResponseMessage'
+    ApplicationRemovedMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApplicationRemovedMessage'
+    RemoveCertificateMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RemoveCertificateMessage'

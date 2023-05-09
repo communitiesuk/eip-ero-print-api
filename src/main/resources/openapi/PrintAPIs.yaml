@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.1.1'
+  version: '1.18.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -17,18 +17,12 @@ paths:
   #
 
   #
-  # Single Certificate Summary
+  # Voter Authority Certificate (VAC)
   # --------------------------------------------------------------------------------
-  '/eros/{eroId}/certificates/applications/{applicationId}':
+  '/eros/{eroId}/certificates':
     parameters:
       - name: eroId
         description: The ID of the Electoral Registration Office responsible for the application.
-        schema:
-          type: string
-        in: path
-        required: true
-      - name: applicationId
-        description: The identifier of the Voter Card Application to retrieve.
         schema:
           type: string
         in: path
@@ -38,7 +32,7 @@ paths:
       description: |
         Enable CORS by returning correct headers
       tags:
-        - Single Certificate Summary
+        - Voter Authority Certificates (VAC)
       responses:
         200:
           description: Default response for CORS method
@@ -71,16 +65,102 @@ paths:
               application/json: |
                 {}
     get:
-      summary: Returns a single certificate summary
-      description: Returns a single certificate summary
+      summary: Returns a single certificate summary for a Voter Card Application
+      description: Returns a single certificate summary for a Voter Card Application
+      parameters:
+        - name: applicationId
+          description: The identifier of the Voter Card Application.
+          schema:
+            type: string
+          in: query
+          required: true
       tags:
-        - Single Certificate Summary
+        - Voter Authority Certificates (VAC)
       responses:
         '200':
           $ref: '#/components/responses/CertificateSummary'
         '404':
-          description: Not Found
+          $ref: '#/components/responses/404ErrorResponse'
       operationId: get-certificate-summary-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/certificates'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  '/eros/{eroId}/certificates/applications/{applicationId}':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: applicationId
+        description: The identifier of the Voter Card Application to retrieve.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      deprecated: true
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Voter Authority Certificates (VAC)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      deprecated: true
+      summary: Returns a single certificate summary. Deprecated. Use /eros/{eroId}/certificates?applicationId={applicationId} instead
+      description: Returns a single certificate summary. Deprecated. Use /eros/{eroId}/certificates?applicationId={applicationId} instead
+      tags:
+        - Voter Authority Certificates (VAC)
+      responses:
+        '200':
+          $ref: '#/components/responses/CertificateSummary'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: deprecated-get-certificate-summary-by-application-id
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
@@ -97,6 +177,775 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: GET
 
+
+  #
+  # Temporary Certificates for a Voter Card Application
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/temporary-certificates/applications/{applicationId}':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: applicationId
+        description: The identifier of the Voter Card Application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      deprecated: true
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - VAC Temporary Certificates
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      deprecated: true
+      summary: Returns the Temporary Certificate summaries for an application. Deprecated. Use /eros/{eroId}/temporary-certificates?applicationId={applicationId} instead
+      description: Returns the Temporary Certificate summaries for an application. Deprecated. Use /eros/{eroId}/temporary-certificates?applicationId={applicationId} instead
+      tags:
+        - VAC Temporary Certificates
+      responses:
+        200:
+          $ref: '#/components/responses/TemporaryCertificateSummaries'
+      operationId: deprecated-get-temporary-certificate-summaries-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/temporary-certificates/applications/{applicationId}'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.applicationId: method.request.path.applicationId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  #
+  # Temporary Certificates
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/temporary-certificates':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - VAC Temporary Certificates
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Generates and returns a temporary certificate
+      description: Generates and returns a temporary certificate
+      tags:
+        - VAC Temporary Certificates
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateTemporaryCertificate'
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="temporary-certificate-DGFF4E6420YHWPJYX560.pdf"
+        '400':
+          $ref: '#/components/responses/400ErrorResponse'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: generate-temporary-certificate
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/temporary-certificates'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
+    get:
+      summary: Returns the Temporary Certificate summaries for a Voter Card Application
+      description: Returns the Temporary Certificate summaries for a Voter Card Application
+      parameters:
+        - name: applicationId
+          description: The identifier of the Voter Card Application.
+          schema:
+            type: string
+          in: query
+          required: true
+      tags:
+        - VAC Temporary Certificates
+      responses:
+        200:
+          $ref: '#/components/responses/TemporaryCertificateSummaries'
+      operationId: get-temporary-certificate-summaries-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/temporary-certificates'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  #
+  # Temporary Certificates Explainer Document
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/temporary-certificates/{gssCode}/explainer-document':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: gssCode
+        description: The relevant GSS code for the local authority.
+        schema:
+          type: string
+          example: 'E09000007'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - VAC Temporary Certificates
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Returns the Local Authority's Explainer Document for a temporary certificate
+      description: |
+        Returns the Local Authority's Explainer Document for a temporary certificate  
+        The Explainer Document is a separately generated and printed document that accompanies the Temporary Certificate
+        and is used to explain to the Elector how to use their Temporary Certificate.
+      tags:
+        - VAC Temporary Certificates
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="temporary-certificate-explainer-document-E09000007.pdf"
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: generate-temporary-certificate-explainer-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/temporary-certificates/{gssCode}/explainer-document'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.gssCode: method.request.path.gssCode
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
+
+  #
+  # Anonymous Elector Document Summaries
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-elector-documents/search':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the Anonymous Elector Documents.
+        schema:
+          type: string
+        example: 'city-council'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Document Summaries
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Search for Anonymous Elector Document Summaries
+      description: 'Search for Anonymous Elector Document summaries based on querying parameters'
+      tags:
+        - Anonymous Elector Document Summaries
+      responses:
+        '200':
+          $ref: '#/components/responses/AedSearchResults'
+      operationId: search-anonymous-elector-document-summaries
+      parameters:
+        - name: page
+          description: The page number being requested (with the first page being 1). Defaulted to 1 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          in: query
+          required: true
+        - name: pageSize
+          description: The number of results to return in each page. Defaulted to 100 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+          example: 100
+          in: query
+          required: true
+        - name: searchBy
+          description: |
+            The data field to apply the `searchValue` to. An empty value will return all AED documents.
+            This value must be provided when `searchValue` is present
+          schema:
+            $ref: '#/components/schemas/AedSearchBy'
+          example: surname
+          in: query
+          required: false
+        - name: searchValue
+          description: |
+            The value to search the field specified by the `searchBy` parameter. 
+            The search is a case insensitive match. We do not support fuzzy or wildcard matching.
+            This value must be provided when `searchBy` is present
+          schema:
+            type: string
+          in: query
+          example: Smith
+          required: false
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/search'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  #
+  # Anonymous Elector Documents (AEDs)
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-elector-documents':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Generates and returns an Anonymous Elector Document (AED). The document status is marked as `PRINTED` upon successful generation of AED document.
+      description: Generates and returns an Anonymous Elector Document (AED). The document status is marked as `PRINTED` upon successful generation of AED document.
+      tags:
+        - Anonymous Elector Documents (AED)
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateAnonymousElectorDocument'
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="anonymous-elector-document-DGFF4E6420YHWPJYX560.pdf"
+        '400':
+          $ref: '#/components/responses/400ErrorResponse'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: generate-anonymous-elector-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
+    get:
+      summary: Returns the Anonymous Elector Documents for an Anonymous application
+      description: Returns the Anonymous Elector Documents for an Anonymous application
+      tags:
+        - Anonymous Elector Documents (AED)
+      parameters:
+        - name: applicationId
+          description: An identifier of an Anonymous Elector Document application
+          schema:
+            type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/AnonymousElectorDocuments'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: get-anonymous-elector-documents-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  '/eros/{eroId}/anonymous-elector-documents/re-issue':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Re-issues and returns an Anonymous Elector Document (AED). The document status is marked as `PRINTED` upon successful re-issue of AED document.
+      description: |
+        Re-issues an Anonymous Elector Document (AED). This results in a new AED document based on the last AED of the specified application ID.
+        At present there is no business case or differentiation between an AED being generated and it being printed. It is assumed the ERO will
+        print the document once generated via this API. Therefore the status of the new AED will be set as `PRINTED`.
+      tags:
+        - Anonymous Elector Documents (AED)
+      requestBody:
+        $ref: '#/components/requestBodies/ReIssueAnonymousElectorDocument'
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="anonymous-elector-document-DGFF4E6420YHWPJYX560.pdf"
+        '400':
+          $ref: '#/components/responses/400ErrorResponse'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: re-issue-anonymous-elector-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/re-issue'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
+  '/eros/{eroId}/anonymous-elector-documents/photo':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Returns the Anonymous Elector Document photo for an Anonymous application
+      description: Returns the Anonymous Elector Document photo for an Anonymous application
+      tags:
+        - Anonymous Elector Documents (AED)
+      parameters:
+        - name: applicationId
+          description: An identifier of an Anonymous Elector Document application
+          schema:
+            type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/PreSignedUrlResource'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: get-anonymous-elector-documents-photo-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/photo'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  #
+  # Anonymous Elector Document (AED) Explainer Document
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-elector-documents/{gssCode}/explainer-document':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the AED application.
+        schema:
+          type: string
+        in: path
+        required: true
+      - name: gssCode
+        description: The relevant GSS code for the local authority.
+        schema:
+          type: string
+          example: 'E09000007'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED) Explainer Document
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Returns the Local Authority's Explainer Document for an AED
+      description: |
+        Returns the Local Authority's Explainer Document for an Anonymous Elector Document  
+        The Explainer Document is a separately generated and printed document that accompanies the AED
+        and is used to explain to the Elector how to use their AED.
+      operationId: generate-aed-explainer-document
+      tags:
+        - Anonymous Elector Documents (AED) Explainer Document
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="aed-explainer-document-E09000007.pdf"
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/{gssCode}/explainer-document'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+          integration.request.path.gssCode: method.request.path.gssCode
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
 components:
   #
   # Schema and Enum Definitions
@@ -104,7 +953,9 @@ components:
   schemas:
     ErrorResponse:
       title: ErrorResponse
-      description: Response describing errors in a web request
+      description: |
+        A generic response body object describing errors in a web request, and can be used to communicate several
+        different types of error condition such as (but not limited to) `400 BAD REQUEST`, `409 CONFLICT` etc.
       properties:
         timestamp:
           type: string
@@ -118,8 +969,9 @@ components:
           example: 'Bad Request'
         message:
           type: string
-          example: 'Validation failed for object=paperVoterCardApplicationRequest. Error count: 14'
+          example: 'Validation failed for object=applicationRequest. Error count: 14'
         validationErrors:
+          description: Validation errors are only present if the error being described is a `400 BAD REQUEST`.
           type: array
           items:
             type: string
@@ -149,28 +1001,18 @@ components:
         - printRequestSummaries
     PrintRequestSummary:
       title: PrintRequestSummary
-      type: object
       description: An object containing print request summary
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UpdatedBy'
       properties:
         status:
           $ref: '#/components/schemas/PrintRequestStatus'
-        userId:
-          type: string
-          format: email
-          example: fred.blogs@some-domain.co.uk
-          description: UserId of the user who made the print request
-        dateTime:
-          type: string
-          format: date-time
-          description: The timestamp in ISO-8601 UTC that the print request status update was received
-          example: '2022-11-17T10:53:25Z'
         message:
           type: string
           description: Message received for the print request status update
       required:
         - status
-        - userId
-        - dateTime
     PrintRequestStatus:
       title: PrintRequestStatus
       type: string
@@ -180,10 +1022,699 @@ components:
         - dispatched
         - not-delivered
 
+    AedSearchBy:
+      title: AedSearchBy
+      description: An enumeration of search by fields for searching AEDs
+      type: string
+      enum:
+        - surname
+
+    SourceType:
+      title: SourceType
+      description: An enumeration of sources
+      type: string
+      enum:
+        - voter-card
+        - anonymous-elector-document
+
+    CertificateLanguage:
+      title: CertificateLanguage
+      description: An enumeration of Certificate languages
+      type: string
+      enum:
+        - cy
+        - en
+      default: en
+
+    UpdatedBy:
+      title: UpdatedBy
+      description: Object containing the updated by details of a resource.
+      type: object
+      properties:
+        userId:
+          description: "UserId (email address) of who last updated the resource."
+          format: email
+          type: string
+          example: fred@some-ero.gov.uk
+        dateTime:
+          description: "The timestamp in ISO-8601 UTC when an update on the resource occurred."
+          type: string
+          format: date-time
+          example: '2022-08-17T16:38:06Z'
+      required:
+        - userId
+        - dateTime
+
+    SupportingInformationFormat:
+      title: SupportingInformationFormat
+      type: string
+      description: The format of the supporting information sent with the document.
+      enum:
+        - standard
+    AnonymousSupportingInformationFormat:
+      title: AnonymousSupportingInformationFormat
+      type: string
+      description: Special format of the supporting information sent with the Anonymous Elector Document certificate when standard format is not suitable.
+      enum:
+        - standard
+        - braille
+        - large-print
+        - easy-read
+    CertificateDelivery:
+      title: CertificateDelivery
+      description: Object describing how and where the Anonymous Elector Document should be delivered
+      type: object
+      properties:
+        deliveryClass:
+          $ref: '#/components/schemas/DeliveryClass'
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
+        collectionReason:
+          type: string
+          maxLength: 1024
+          description: The reason the elector gave for having to collect their voter ID (if applicable).
+        addressee:
+          type: string
+          maxLength: 255
+          description: The addressee to be printed in addition to the delivery address
+        deliveryAddress:
+          $ref: '#/components/schemas/Address'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
+      required:
+        - deliveryClass
+        - deliveryAddressType
+        - addressee
+        - deliveryAddress
+        - addressFormat
+
+    DeliveryClass:
+      title: DeliveryClass
+      description: The delivery class for the Anonymous Elector Document
+      type: string
+      enum:
+        - standard
+
+    DeliveryAddressType:
+      title: DeliveryAddressType
+      description: The delivery address type for the Anonymous Elector Document
+      type: string
+      enum:
+        - registered
+        - ero-collection
+        - alternative
+
+    AddressFormat:
+      title: AddressFormat
+      description: Enumeration of address formats
+      type: string
+      enum:
+        - uk
+        - overseas
+        - bfpo
+
+    Address:
+      title: Address
+      description: Address format used throughout gov.uk voter services.
+      type: object
+      x-examples:
+        Minimum data:
+          street: Street 1
+          postcode: PC1 2FB
+        Normal Address:
+          street: East Lodge
+          property: Balruddery
+          locality: Invergowrie
+          town: Dundee
+          area: Angus
+          postcode: DD25LF
+          uprn: '117095813'
+      properties:
+        street:
+          type: string
+          maxLength: 255
+        property:
+          type: string
+          maxLength: 255
+        locality:
+          type: string
+          maxLength: 255
+        town:
+          type: string
+          maxLength: 255
+        area:
+          type: string
+          maxLength: 255
+        postcode:
+          type: string
+          maxLength: 10
+        uprn:
+          type: string
+          description: Unique Property Reference Number consisting of up to 12 digits in length
+          pattern: '^\d{1,12}$'
+      required:
+        - street
+        - postcode
+
+    TemporaryCertificateSummariesResponse:
+      title: TemporaryCertificateSummariesResponse
+      type: object
+      description: A response containing a collection of Temporary Certificate summaries
+      properties:
+        temporaryCertificates:
+          type: array
+          description: List of Temporary Certificate summaries for the application.
+          items:
+            $ref: '#/components/schemas/TemporaryCertificateSummary'
+      required:
+        - temporaryCertificates
+    TemporaryCertificateSummary:
+      title: TemporaryCertificateSummary
+      type: object
+      description: An object containing Temporary Certificate summary
+      properties:
+        certificateNumber:
+          type: string
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          description: The unique identifier of the Certificate. A 20 character alphanumeric string.
+          example: DEV1W0XDH1368LWE1J40
+        status:
+          $ref: '#/components/schemas/TemporaryCertificateStatus'
+        userId:
+          type: string
+          format: email
+          example: fred.blogs@some-domain.co.uk
+          description: UserId of the user who generated the Temporary Certificate
+        dateTimeGenerated:
+          type: string
+          format: date-time
+          description: The timestamp in ISO-8601 UTC that the Temporary Certificate was generated
+          example: '2022-11-17T10:53:25Z'
+        issueDate:
+          type: string
+          format: date
+          description: The date that the Temporary Certificate was issued
+          example: '2022-11-17'
+        validOnDate:
+          type: string
+          format: date
+          description: The date on which the Temporary Certificate is/was valid
+          example: '2022-11-19'
+      required:
+        - certificateNumber
+        - status
+        - userId
+        - dateTimeGenerated
+        - issueDate
+        - validOnDate
+    TemporaryCertificateStatus:
+      title: TemporaryCertificateStatus
+      type: string
+      enum:
+        - generated
+
+    GenerateTemporaryCertificateRequest:
+      title: GenerateTemporaryCertificateRequest
+      description: Request body to generate a Temporary Certificate
+      type: object
+      properties:
+        gssCode:
+          type: string
+          example: E12345678
+          minLength: 9
+          maxLength: 9
+          description: GSS code of the ERO responsible for the application
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Temporary Certificate is for.
+        applicationReference:
+          type: string
+          example: V3JSZC4CRH
+          description: The application reference as known by the citizen. Not guaranteed to be unique.
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        certificateLanguage:
+          $ref: '#/components/schemas/CertificateLanguage'
+        photoLocation:
+          type: string
+          description: |
+            The location of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the Certificate by the vc-admin, rather than the photo that the applicant uploaded as part of their original application. 
+            Typically an S3 ARN
+          maxLength: 1024
+        validOnDate:
+          type: string
+          format: date
+          description: The date that the Temporary Certificate is valid for.
+          example: '2023-07-27'
+      required:
+        - gssCode
+        - sourceType
+        - sourceReference
+        - applicationReference
+        - firstName
+        - surname
+        - certificateLanguage
+        - photoLocation
+        - validOnDate
+
+    AnonymousElectorDocumentsResponse:
+      title: AnonymousElectorDocumentsResponse
+      description: A response containing a collection of Anonymous Elector Documents sorted with latest changes ordered first.
+      type: object
+      properties:
+        anonymousElectorDocuments:
+          title: AnonymousElectorDocuments
+          type: array
+          description: List of Anonymous Elector Documents for the application.
+          items:
+            $ref: '#/components/schemas/AnonymousElectorDocument'
+      required:
+        - anonymousElectorDocuments
+
+    AnonymousElectorDocument:
+      title: AnonymousElectorDocument
+      description: An object containing the details of an Anonymous Elector Document (AED)
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UpdatedBy'
+      properties:
+        certificateNumber:
+          type: string
+          description: The unique identifier of the Anonymous Electoral Document. A 20 character alphanumeric string.
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          example: DEV1W0XDH1368LWE1J40
+        electoralRollNumber:
+          type: string
+          description: Electoral roll number printed on the AED. There is no specific format and they can vary across EROs.
+          maxLength: 25
+        gssCode:
+          type: string
+          description: GSS code of the ERO responsible for the application
+          example: E12345678
+        sourceReference:
+          type: string
+          pattern: '^[a-fA-F\d]{24}$'
+          description: |
+            A 24 character hex string. 
+            The unique identifier of an Anonymous elector document application.
+          example: 1f0f76a9a66f438b9bb33070
+        applicationReference:
+          type: string
+          description: The reference number of an Anonymous elector document application
+          example: V3JSZC4CRH
+        certificateLanguage:
+          $ref: '#/components/schemas/CertificateLanguage'
+        supportingInformationFormat:
+          $ref: '#/components/schemas/AnonymousSupportingInformationFormat'
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
+        collectionReason:
+          type: string
+          description: |
+            The reason the elector gave for having to collect their AED (if applicable).
+          maxLength: 1024
+        elector:
+          $ref: '#/components/schemas/AnonymousElector'
+        status:
+          $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
+        photoUrl:
+          type: string
+          description: |
+            The URL of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the Certificate by the ERO, rather than the photo that the applicant uploaded as part of their original application.
+          example: 'http://localhost:8080/eros/city-council/anonymous-elector-documents/photo?applicationId=507f1f77bcf86cd799439011'
+        issueDate:
+          type: string
+          format: date
+          description: The date on which the AED was issued
+          example: '2023-01-15'
+      required:
+        - certificateNumber
+        - electoralRollNumber
+        - gssCode
+        - sourceReference
+        - applicationReference
+        - certificateLanguage
+        - supportingInformationFormat
+        - deliveryAddressType
+        - elector
+        - status
+        - photoUrl
+        - issueDate
+
+    AnonymousElector:
+      title: AnonymousElector
+      description: An object containing the details for an anonymous elector on the AED certificate
+      type: object
+      properties:
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        addressee:
+          type: string
+          description: Usually the `firstName middleNames surname` of an elector
+          example: "Wayne Christopher Smith"
+        email:
+          type: string
+          maxLength: 1024
+          format: email
+          description: The applicant's email address. Null if not known
+          example: fred.blogs@some-domain.co.uk
+        phoneNumber:
+          type: string
+          maxLength: 50
+          description: The applicant's phone number. Null if not known
+          example: 01234 567890
+        registeredAddress:
+          $ref: '#/components/schemas/Address'
+      required:
+        - firstName
+        - surname
+        - addressee
+        - registeredAddress
+
+    AnonymousElectorDocumentStatus:
+      title: AnonymousElectorDocumentStatus
+      description: Status of an Anonymous Elector document
+      type: string
+      enum:
+        - generated
+        - printed
+
+    AedSearchSummaryResponse:
+      title: AedSearchSummaryResponse
+      description: Response containing the meta data and results of searching for Anonymous Elector document summaries
+      type: object
+      properties:
+        page:
+          type: integer
+          description: The page number
+          example: 1
+        pageSize:
+          type: integer
+          description: The number of results per page
+          example: 1
+        totalPages:
+          type: integer
+          description: The total number of pages
+          example: 1
+        totalResults:
+          type: integer
+          description: The total number of results
+          example: 1
+        results:
+          type: array
+          description: Array of anonymous elector document search summaries that matches the search criteria
+          items:
+            $ref: '#/components/schemas/AedSearchSummary'
+      required:
+        - page
+        - pageSize
+        - totalPages
+        - totalResults
+        - results
+
+    AedSearchSummary:
+      title: AedSearchSummary
+      description: An object containing summary information of an each Anonymous Elector document summary
+      type: object
+      properties:
+        gssCode:
+          type: string
+          description: The relevant GSS code for the local authority.
+          example: 'E09000007'
+        sourceReference:
+          type: string
+          pattern: '^[a-fA-F\d]{24}$'
+          description: |
+            A 24 character hex string. 
+            The unique identifier of an Anonymous elector document application.
+          example: 1f0f76a9a66f438b9bb33070
+        applicationReference:
+          type: string
+          description: The reference number of an Anonymous elector document application
+          example: V3JSZC4CRH
+        certificateNumber:
+          type: string
+          description: The unique identifier of the Anonymous elector document. A 20 character alphanumeric string.
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          example: DEV1W0XDH1368LWE1J40
+        electoralRollNumber:
+          type: string
+          description: Electoral roll number printed on the AED. There is no specific format and they can vary across EROs.
+          maxLength: 25
+        status:
+          $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
+        firstName:
+          type: string
+          description: The applicant's first name
+          example: Fred
+        surname:
+          type: string
+          description: The applicant's surname
+          example: Blogs
+        postcode:
+          type: string
+          description: The applicant's postcode
+          example: AA1 1AA
+        issueDate:
+          type: string
+          format: date
+          description: The date on which the AED was issued
+          example: '2023-01-15'
+        dateTimeCreated:
+          type: string
+          format: date-time
+          description: The timestamp in ISO-8601 UTC that the AED was originally created
+          example: '2022-07-27T09:39:44Z'
+      required:
+        - gssCode
+        - sourceReference
+        - applicationReference
+        - certificateNumber
+        - electoralRollNumber
+        - status
+        - firstName
+        - surname
+        - postcode
+        - issueDate
+        - dateTimeCreated
+
+    GenerateAnonymousElectorDocumentRequest:
+      title: GenerateAnonymousElectorDocumentRequest
+      description: Request body to generate an Anonymous Elector Document (AED)
+      type: object
+      properties:
+        gssCode:
+          type: string
+          example: E12345678
+          minLength: 9
+          maxLength: 9
+          description: GSS code of the ERO responsible for the application
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Anonymous Elector Document is for.
+        applicationReference:
+          type: string
+          example: V3JSZC4CRH
+          description: The application reference as known by the citizen. Not guaranteed to be unique.
+        electoralRollNumber:
+          type: string
+          description: The electoral roll number allocated by the Local Authority to the elector. There is no specific format and they can vary across EROs.
+          minLength: 1
+          maxLength: 25
+        certificateLanguage:
+          $ref: '#/components/schemas/CertificateLanguage'
+        supportingInformationFormat:
+          $ref: '#/components/schemas/AnonymousSupportingInformationFormat'
+        photoLocation:
+          type: string
+          description: |
+            The location of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the AED by the `vc-anonymous-admin`, rather than the photo that the applicant uploaded as part of their original application. 
+            Typically an S3 ARN
+          maxLength: 1024
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        email:
+          type: string
+          maxLength: 1024
+          format: email
+          description: The applicant's email address. Null if not known
+          example: fred.blogs@some-domain.co.uk
+        phoneNumber:
+          type: string
+          maxLength: 50
+          description: The applicant's phone number. Null if not known
+          example: 01234 567890
+        registeredAddress:
+          $ref: '#/components/schemas/Address'
+        delivery:
+          $ref: '#/components/schemas/CertificateDelivery'
+      required:
+        - gssCode
+        - sourceType
+        - sourceReference
+        - applicationReference
+        - electoralRollNumber
+        - certificateLanguage
+        - supportingInformationFormat
+        - photoLocation
+        - firstName
+        - surname
+        - registeredAddress
+        - delivery
+
+    ReIssueAnonymousElectorDocumentRequest:
+      title: ReIssueAnonymousElectorDocumentRequest
+      description: Request body to re-issue an Anonymous Elector Document (AED)
+      type: object
+      properties:
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Anonymous Elector Document is for.
+        electoralRollNumber:
+          type: string
+          description: The electoral roll number allocated by the Local Authority to the elector. There is no specific format and they can vary across EROs.
+          minLength: 1
+          maxLength: 25
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
+      required:
+        - sourceReference
+        - electoralRollNumber
+        - deliveryAddressType
+
+    PreSignedUrlResourceResponse:
+      title: PreSignedUrlResourceResponse
+      description: An object detailing the pre-signed URL to use in order to retrieve the resource
+      properties:
+        preSignedUrl:
+          type: string
+          format: uri
+          description: AWS pre-signed URL giving time-limited access to the resource.
+          example: 'https://example.s3.eu-west-2.amazonaws.com/image.png?X-Amz-Expires=1800'
+      required:
+        - preSignedUrl
+
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
   responses:
+    400ErrorResponse:
+      description: Error response for a HTTP 400 describing fields in the request payload that are in error
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: '2022-09-28T18:01:42.105Z'
+            status: 400
+            error: 'Bad Request'
+            message: 'Validation failed for object=applicationRequest. Error count: 14'
+            validationErrors: 'Error on field applicant.nino: rejected value [aaaaaaaaaaa], must match ^.{1,10}$'
+    404ErrorResponse:
+      description: |
+        Error response for a HTTP 404 describing the problem with the request.
+        Typical examples are resources such as the application not found.
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: '2022-09-28T18:01:42.105Z'
+            status: 404
+            error: 'Not Found'
+            message: 'Certificate photo for voter card application with eroId=[some-ero] and applicationType=[VOTER_CARD] and applicationId=[507f1f77bcf86cd799439011] not found'
+    409ErrorResponse:
+      description: |
+        Error response for a HTTP 409 describing the problem with the request.
+        Typical examples are that an application's status(es) are not in the required state to perform the requested operation.
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: '2022-09-28T18:01:42.105Z'
+            status: 409
+            error: 'Conflict'
+            message: 'An application with eroId = some-ero and applicationType = VOTER_CARD and applicationId = 507f1f77bcf86cd799439011 has an unexpected photoCheckStatus = ACCEPTED'
     CertificateSummary:
       description: Response containing a single Certificate summary
       headers:
@@ -200,6 +1731,93 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CertificateSummaryResponse'
+    TemporaryCertificateSummaries:
+      description: Response containing a collection of Temporary Certificate summaries
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TemporaryCertificateSummariesResponse'
+    AnonymousElectorDocuments:
+      description: Response containing a collection of Anonymous Elector Documents
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AnonymousElectorDocumentsResponse'
+    AedSearchResults:
+      description: Response containing the search result of Anonymous Elector document summaries
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AedSearchSummaryResponse'
+    PreSignedUrlResource:
+      description: Response containing an object detailing the pre-signed URL for the resource
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PreSignedUrlResourceResponse'
+
+  #
+  # Request Body Definitions
+  # --------------------------------------------------------------------------------
+  requestBodies:
+    GenerateTemporaryCertificate:
+      description: Request body to generate a Temporary Certificate
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerateTemporaryCertificateRequest'
+    GenerateAnonymousElectorDocument:
+      description: Request body to generate an Anonymous Elector Document (AED)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerateAnonymousElectorDocumentRequest'
+    ReIssueAnonymousElectorDocument:
+      description: Request body to re-issue an Anonymous Elector Document (AED)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReIssueAnonymousElectorDocumentRequest'
 
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:

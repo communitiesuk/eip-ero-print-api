@@ -17,6 +17,9 @@ class MySQLContainerConfiguration : MySQLContainer<MySQLContainerConfiguration>(
                     .withUsername(USER)
                     .withPassword(PASSWORD)
                     .withReuse(true)
+                    .withCreateContainerCmdModifier {
+                        it.withName("print-api-integration-test-mysql")
+                    }
                     .also {
                         it.start()
                         System.setProperty(DATASOURCE_URL, it.jdbcUrl)

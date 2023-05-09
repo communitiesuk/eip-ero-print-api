@@ -77,7 +77,7 @@ internal class CertificateFinderServiceTest {
             verify(certificateRepository).findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, sourceType, sourceReference)
             assertThat(error)
                 .isNotNull
-                .hasMessage("Certificate for eroId = camden-city-council and application id = 63774ff4bb4e7049b67182d9 not found")
+                .hasMessage("Certificate for eroId = camden-city-council with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found")
         }
     }
 }

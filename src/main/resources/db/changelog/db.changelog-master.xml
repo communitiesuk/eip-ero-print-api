@@ -13,4 +13,27 @@
     <include relativeToChangelogFile="true" file="ddl/0005_add_index_gss_code_source_type_source_reference.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0006_add_index_event_date_time_status_to_print_request_status.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0007_EIP1-2781_alter_print_request.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0008_EIP1-2833_alter_delivery.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0009_EIP1-3454_alter_certificate.xml"/>
+    <include relativeToChangelogFile="true" file="migration/0001_EIP1-3454_update_certificate.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0010_create_temporary_certificate_tables.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0011_initial_data_retention_period_changes.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0012_supporting_information_non_mandatory.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0013_initial_retention_data_removed_column.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0014_create_anonymous_elector_document_tables.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0015_refactor_anonymous_elector_document_tables.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0016_final_retention_data_removed_column.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0017_anonymous_elector_document_source_type.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0018_EIP1-4481_alter_photo_location_arn_column_in_tables.xml"/>
+    <include relativeToChangelogFile="true" file="migration/0002_EIP1-4616_update_aed_status.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0019_final_retention_date_removed_column.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0020_alter_anonymous_elector_document.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0021_alter_aed_contact_details.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0022_alter_certificate_status_event_timestamp_precision.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0023_alter_aed_and_aed_contact_details.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0024_create_aed_summary_view.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0025_alter_aed_application_ref_not_null.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0026_alter_delivery_add_collection_reason.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0027_update_aed_summary_view.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0028_alter_aed_contact_details_add_last_updated.xml"/>
 </databaseChangeLog>

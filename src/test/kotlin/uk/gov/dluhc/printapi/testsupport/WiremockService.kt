@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.ok
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
@@ -51,7 +52,15 @@ class WiremockService(private val wireMockServer: WireMockServer) {
     }
 
     fun stubEroManagementGetEroByGssCode(ero: ElectoralRegistrationOfficeResponse, gssCode: String) {
-        val responseBody = objectMapper.writeValueAsString(ElectoralRegistrationOfficesResponse(listOf(ero)))
+        stubEroManagementGetEroByGssCode(gssCode, listOf(ero))
+    }
+
+    fun stubEroManagementGetEroByGssCodeNoMatch(gssCode: String) {
+        stubEroManagementGetEroByGssCode(gssCode, listOf())
+    }
+
+    private fun stubEroManagementGetEroByGssCode(gssCode: String, eros: List<ElectoralRegistrationOfficeResponse>) {
+        val responseBody = objectMapper.writeValueAsString(ElectoralRegistrationOfficesResponse(eros))
         wireMockServer.stubFor(
             get(urlEqualTo("/ero-management-api/eros?gssCode=$gssCode"))
                 .willReturn(
@@ -76,7 +85,21 @@ class WiremockService(private val wireMockServer: WireMockServer) {
         )
     }
 
+    fun stubEroManagementGetEroThrowsInternalServerError() {
+        wireMockServer.stubFor(
+            get(urlPathMatching("/ero-management-api/eros/.*"))
+                .willReturn(
+                    ResponseDefinitionBuilder.responseDefinition()
+                        .withStatus(500)
+                )
+        )
+    }
+
     fun verifyEroManagementGetEro(gssCode: String) {
         wireMockServer.verify(1, getRequestedFor(urlEqualTo("/ero-management-api/eros?gssCode=$gssCode")))
+    }
+
+    fun verifyEroManagementGetEroByEroIdWithCorrelationId(eroId: String, correlationIdMatcher: StringValuePattern) {
+        wireMockServer.verify(1, getRequestedFor(urlEqualTo("/ero-management-api/eros/$eroId")).withHeader("x-correlation-id", correlationIdMatcher))
     }
 }

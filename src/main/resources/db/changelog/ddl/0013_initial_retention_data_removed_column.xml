@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="matt.wills@valtech.com" id="0013_EIP1-4053_alter_certificate - add initial_retention_data_removed column" context="ddl">
+
+        <addColumn tableName="certificate">
+            <column name="initial_retention_data_removed" type="boolean" valueBoolean="false"
+                    remarks="Indicates if initial retention period data has been removed from a certificate">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <dropIndex tableName="certificate" indexName="certificate_initial_retention_removal_date_idx"/>
+
+        <createIndex tableName="certificate" indexName="certificate_initial_retention_removal_idx">
+            <column name="source_type"/>
+            <column name="initial_retention_data_removed"/>
+            <column name="initial_retention_removal_date"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="certificate" indexName="certificate_initial_retention_removal_idx"/>
+
+            <dropColumn
+                tableName="certificate"
+                columnName="initial_retention_data_removed"/>
+
+            <createIndex tableName="certificate" indexName="certificate_initial_retention_removal_date_idx">
+                <column name="source_type"/>
+                <column name="initial_retention_removal_date"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

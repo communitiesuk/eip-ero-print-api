@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="neil.massey@valtech.com" id="0015-EIP1-4179-refactor-anonymous-elector-document-table"
+               context="ddl">
+        <addColumn tableName="anonymous_elector_document">
+            <column name="electoral_roll_number" type="varchar(7)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="anonymous_elector_document">
+            <column name="aed_template_filename" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="anonymous_elector_document">
+            <column name="issue_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="anonymous_elector_document">
+            <column name="request_date_time" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="anonymous_elector_document">
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <sql>
+            <comment>Copy AED details from Print Request</comment>
+            UPDATE anonymous_elector_document, aed_print_request
+            SET anonymous_elector_document.electoral_roll_number = aed_print_request.electoral_roll_number, anonymous_elector_document.aed_template_filename = aed_print_request.aed_template_filename, anonymous_elector_document.issue_date = aed_print_request.issue_date, anonymous_elector_document.request_date_time = aed_print_request.request_date_time, anonymous_elector_document.user_id = aed_print_request.user_id
+            WHERE anonymous_elector_document.id = aed_print_request.aed_id;
+        </sql>
+
+        <addNotNullConstraint tableName="anonymous_elector_document" columnName="electoral_roll_number"
+                              columnDataType="varchar(7)"/>
+        <addNotNullConstraint tableName="anonymous_elector_document" columnName="aed_template_filename"
+                              columnDataType="varchar(255)"/>
+        <addNotNullConstraint tableName="anonymous_elector_document" columnName="issue_date" columnDataType="date"/>
+        <addNotNullConstraint tableName="anonymous_elector_document" columnName="request_date_time"
+                              columnDataType="timestamp"/>
+        <addNotNullConstraint tableName="anonymous_elector_document" columnName="user_id"
+                              columnDataType="varchar(255)"/>
+
+        <dropIndex tableName="anonymous_elector_document" indexName="aed_source_details_idx"/>
+        <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document" unique="false">
+            <column name="gss_code"/>
+            <column name="source_type"/>
+            <column name="source_reference"/>
+        </createIndex>
+
+        <rollback>
+            <dropColumn tableName="anonymous_elector_document" columnName="electoral_roll_number"/>
+            <dropColumn tableName="anonymous_elector_document" columnName="aed_template_filename"/>
+            <dropColumn tableName="anonymous_elector_document" columnName="issue_date"/>
+            <dropColumn tableName="anonymous_elector_document" columnName="request_date_time"/>
+            <dropColumn tableName="anonymous_elector_document" columnName="user_id"/>
+
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_source_details_idx"/>
+            <createIndex indexName="aed_source_details_idx" tableName="anonymous_elector_document" unique="true">
+                <column name="gss_code"/>
+                <column name="source_type"/>
+                <column name="source_reference"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="neil.massey@valtech.com" id="0015-EIP1-4179-create-anonymous-elector-document-status"
+               context="ddl">
+        <createTable tableName="anonymous_elector_document_status">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true" unique="true"
+                             primaryKeyName="aed_status_pkey"/>
+            </column>
+            <column name="aed_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_aed_status_aed"
+                             references="anonymous_elector_document(id)"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_date_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="aed_status_date_created_idx" tableName="anonymous_elector_document_status"
+                     unique="false">
+            <column name="status"/>
+            <column name="date_created"/>
+        </createIndex>
+
+        <sql>
+            <comment>Populate AED status table from Print Request and Print Request Status</comment>
+            INSERT INTO anonymous_elector_document_status
+            (id, aed_id, status, event_date_time, date_created, created_by, version)
+            SELECT prs.id, pr.aed_id, prs.status, prs.event_date_time, prs.date_created, prs.created_by, prs.version
+            FROM aed_print_request_status prs
+                     INNER JOIN aed_print_request pr ON pr.id = prs.aed_print_request_id;
+        </sql>
+
+        <rollback>
+            <dropTable tableName="anonymous_elector_document_status"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="neil.massey@valtech.com" id="0015-EIP1-4179-drop-aed-print-request-tables" context="ddl">
+        <dropTable tableName="aed_print_request_status"/>
+        <dropTable tableName="aed_print_request"/>
+        <rollback>
+            <createTable tableName="aed_print_request">
+                <column name="id" type="uuid">
+                    <constraints nullable="false" primaryKey="true" unique="true"
+                                 primaryKeyName="print_request_pkey"/>
+                </column>
+                <column name="aed_id" type="uuid">
+                    <constraints nullable="false"
+                                 foreignKeyName="fk_print_request_aed"
+                                 references="anonymous_elector_document(id)"/>
+                </column>
+
+                <column name="date_created" type="timestamp">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="created_by" type="varchar(255)">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="version" type="bigint">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+
+            <createIndex indexName="aed_electoral_roll_number_idx" tableName="aed_print_request" unique="false">
+                <column name="electoral_roll_number"/>
+            </createIndex>
+
+            <createTable tableName="aed_print_request_status">
+                <column name="id" type="uuid">
+                    <constraints nullable="false" primaryKey="true" unique="true"
+                                 primaryKeyName="aed_print_request_status_pkey"/>
+                </column>
+                <column name="aed_print_request_id" type="uuid">
+                    <constraints nullable="false"
+                                 foreignKeyName="fk_aed_print_request_status_aed_print_request"
+                                 references="aed_print_request(id)"/>
+                </column>
+                <column name="status" type="varchar(50)">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="event_date_time" type="timestamp">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="date_created" type="timestamp">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="created_by" type="varchar(255)">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="version" type="bigint">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+
+            <createIndex indexName="aed_status_date_created_idx" tableName="aed_print_request_status" unique="false">
+                <column name="status"/>
+                <column name="date_created"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

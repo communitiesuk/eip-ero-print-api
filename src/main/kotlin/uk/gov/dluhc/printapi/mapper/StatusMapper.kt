@@ -1,15 +1,15 @@
 package uk.gov.dluhc.printapi.mapper
 
 import org.springframework.stereotype.Component
-import uk.gov.dluhc.printapi.database.entity.Status.DISPATCHED
-import uk.gov.dluhc.printapi.database.entity.Status.IN_PRODUCTION
-import uk.gov.dluhc.printapi.database.entity.Status.NOT_DELIVERED
-import uk.gov.dluhc.printapi.database.entity.Status.PRINT_PROVIDER_DISPATCH_FAILED
-import uk.gov.dluhc.printapi.database.entity.Status.PRINT_PROVIDER_PRODUCTION_FAILED
-import uk.gov.dluhc.printapi.database.entity.Status.PRINT_PROVIDER_VALIDATION_FAILED
-import uk.gov.dluhc.printapi.database.entity.Status.VALIDATED_BY_PRINT_PROVIDER
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.DISPATCHED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PRINT_PROVIDER_DISPATCH_FAILED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PRINT_PROVIDER_PRODUCTION_FAILED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PRINT_PROVIDER_VALIDATION_FAILED
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.VALIDATED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage.StatusStep
-import uk.gov.dluhc.printapi.database.entity.Status as StatusEntityEnum
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status as StatusEntityEnum
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage.Status as StatusModelEnum
 
 @Component

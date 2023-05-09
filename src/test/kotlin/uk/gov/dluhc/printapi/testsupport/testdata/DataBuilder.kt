@@ -9,6 +9,8 @@ fun aValidCertificateNumber() = CertificateNumber.create()
 
 fun aGssCode() = "E99999999"
 
+fun anotherGssCode() = "E11111111"
+
 fun aValidPrintRequestsFilename() = "05372cf5339447b39f98b248c2217b9f-20221018112232123-10.psv"
 
 fun aValidZipFilename() = "05372cf5339447b39f98b248c2217b9f-20221018112232123-10.zip"

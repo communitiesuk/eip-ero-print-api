@@ -30,6 +30,8 @@ class ElectoralRegistrationOfficeManagementApiClient(
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
     fun getElectoralRegistrationOfficeGssCodes(eroId: String): List<String> {
+        logger.info { "Retrieving gss codes for ero $eroId" }
+
         val response = eroManagementWebClient
             .get()
             .uri("/eros/{eroId}", eroId)
@@ -37,6 +39,8 @@ class ElectoralRegistrationOfficeManagementApiClient(
             .bodyToMono(ElectoralRegistrationOfficeResponse::class.java)
             .onErrorResume { ex -> handleException(ex, mapOf("eroId" to eroId)) }
             .block()!!
+
+        logger.info { "Finished retrieving gss codes for ero $eroId" }
 
         return response.localAuthorities.map { it.gssCode }
     }
@@ -49,6 +53,8 @@ class ElectoralRegistrationOfficeManagementApiClient(
      * @throws [ElectoralRegistrationOfficeManagementApiException] concrete implementation if the API returns an error
      */
     fun getEro(gssCode: String): EroDto {
+        logger.info { "Retrieving Ero for gssCode $gssCode" }
+
         val response = eroManagementWebClient
             .get()
             .uri("/eros?gssCode=$gssCode")
@@ -57,13 +63,18 @@ class ElectoralRegistrationOfficeManagementApiClient(
             .onErrorResume { ex -> handleException(ex, mapOf("gssCode" to gssCode)) }
             .block()!!
 
+        logger.info { "Finished retrieving Ero for gssCode $gssCode" }
+
         if (response.eros.size != 1 ||
             response.eros[0].localAuthorities.filter { it.gssCode == gssCode }.size != 1
         ) {
             throw ElectoralRegistrationOfficeNotFoundException(mapOf("gssCode" to gssCode))
         }
 
-        return eroMapper.toEroDto(response.eros[0].localAuthorities.filter { it.gssCode == gssCode }[0])
+        return eroMapper.toEroDto(
+            response.eros[0].id,
+            response.eros[0].localAuthorities.filter { it.gssCode == gssCode }[0]
+        )
     }
 
     private fun <T> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =

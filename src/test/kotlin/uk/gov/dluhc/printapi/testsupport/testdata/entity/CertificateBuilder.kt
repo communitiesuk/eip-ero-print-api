@@ -2,21 +2,26 @@ package uk.gov.dluhc.printapi.testsupport.testdata.entity
 
 import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.dluhc.printapi.database.entity.Address
+import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
+import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.database.entity.Status
-import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker
+import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReceivedDateTime
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateLanguage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryClass
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryMethod
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryName
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroName
@@ -38,31 +43,49 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacVersion
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
+import java.util.UUID.randomUUID
+import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildCertificate(
-    id: UUID? = UUID.randomUUID(),
+    id: UUID? = randomUUID(),
     vacNumber: String = aValidVacNumber(),
     status: Status = aValidCertificateStatus(),
+    batchId: String = aValidBatchId(),
     printRequests: List<PrintRequest> = listOf(
-        buildPrintRequest(printRequestStatuses = listOf(buildPrintRequestStatus(status = status)))
+        buildPrintRequest(
+            batchId = batchId,
+            printRequestStatuses = listOf(buildPrintRequestStatus(status = status))
+        )
     ),
     gssCode: String = aGssCode(),
+    photoLocationArn: String = aPhotoArn(),
     sourceType: SourceType = aValidSourceType(),
     sourceReference: String = aValidSourceReference(),
+    applicationReceivedDateTime: Instant = aValidApplicationReceivedDateTime(),
+    applicationReference: String = aValidApplicationReference(),
+    issueDate: LocalDate = aValidIssueDate(),
+    initialRetentionRemovalDate: LocalDate? = null,
+    initialRetentionDataRemoved: Boolean = false,
+    finalRetentionRemovalDate: LocalDate? = null,
 ): Certificate {
     val certificate = Certificate(
         id = id,
         vacNumber = vacNumber,
         sourceType = sourceType,
         sourceReference = sourceReference,
-        applicationReference = aValidApplicationReference(),
-        applicationReceivedDateTime = aValidApplicationReceivedDateTime(),
+        applicationReference = applicationReference,
+        applicationReceivedDateTime = applicationReceivedDateTime,
         issuingAuthority = aValidIssuingAuthority(),
-        issueDate = aValidIssueDate(),
+        issueDate = issueDate,
         suggestedExpiryDate = aValidSuggestedExpiryDate(),
         gssCode = gssCode,
-        status = status
+        photoLocationArn = photoLocationArn,
+        status = status,
+        initialRetentionRemovalDate = initialRetentionRemovalDate,
+        initialRetentionDataRemoved = initialRetentionDataRemoved,
+        finalRetentionRemovalDate = finalRetentionRemovalDate
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate
@@ -76,7 +99,6 @@ fun buildPrintRequest(
     eroWelsh: ElectoralRegistrationOffice? = null,
     delivery: Delivery = buildDelivery(),
     batchId: String? = null,
-    photoLocationArn: String? = aPhotoArn(),
     userId: String = aValidUserId(),
 ): PrintRequest {
     val printRequest = PrintRequest(
@@ -87,7 +109,6 @@ fun buildPrintRequest(
         surname = aValidSurname(),
         certificateLanguage = aValidCertificateLanguage(),
         supportingInformationFormat = aValidSupportingInformationFormat(),
-        photoLocationArn = photoLocationArn,
         delivery = delivery,
         eroEnglish = eroEnglish,
         eroWelsh = eroWelsh,
@@ -124,14 +145,17 @@ fun buildElectoralRegistrationOffice(
 }
 
 fun buildAddress(
-    street: String = DataFaker.faker.address().streetName(),
-    postcode: String = DataFaker.faker.address().postcode(),
-    property: String? = DataFaker.faker.address().buildingNumber(),
-    locality: String? = DataFaker.faker.address().streetName(),
-    town: String? = DataFaker.faker.address().city(),
-    area: String? = DataFaker.faker.address().state(),
+    id: UUID? = randomUUID(),
+    fakeAddress: DataFakerAddress = faker.address(),
+    street: String = fakeAddress.streetName(),
+    postcode: String = fakeAddress.postcode(),
+    property: String? = fakeAddress.buildingNumber(),
+    locality: String? = fakeAddress.streetName(),
+    town: String? = fakeAddress.city(),
+    area: String? = fakeAddress.state(),
     uprn: String? = RandomStringUtils.randomNumeric(12)
 ) = Address(
+    id = id,
     street = street,
     postcode = postcode,
     property = property,
@@ -141,11 +165,20 @@ fun buildAddress(
     uprn = uprn,
 )
 
-fun buildDelivery(): Delivery {
-    return Delivery(
-        addressee = aValidDeliveryName(),
-        address = buildAddress(),
-        deliveryClass = aValidDeliveryClass(),
-        deliveryMethod = aValidDeliveryMethod()
-    )
-}
+fun buildDelivery(
+    id: UUID? = randomUUID(),
+    addressee: String = aValidDeliveryName(),
+    address: Address = buildAddress(),
+    deliveryClass: DeliveryClass = aValidDeliveryClass(),
+    deliveryAddressType: DeliveryAddressType = aValidDeliveryAddressType(),
+    collectionReason: String? = null,
+    addressFormat: AddressFormat = aValidAddressFormat(),
+): Delivery = Delivery(
+    id = id,
+    addressee = addressee,
+    address = address,
+    deliveryClass = deliveryClass,
+    deliveryAddressType = deliveryAddressType,
+    collectionReason = collectionReason,
+    addressFormat = addressFormat,
+)
