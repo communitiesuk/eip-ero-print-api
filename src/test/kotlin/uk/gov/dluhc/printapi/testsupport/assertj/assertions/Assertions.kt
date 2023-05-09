@@ -11,6 +11,7 @@ import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.TemporaryCertificate
+import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 
 /**
  * Entry point for assertions of different data types. Each method in this class is a static factory for the
@@ -114,5 +115,16 @@ object Assertions : Assertions() {
     @CheckReturnValue
     fun assertThat(actual: List<AnonymousElectorDocumentStatus>?): AnonymousElectorDocumentStatusListAssert {
         return AnonymousElectorDocumentStatusListAssert(actual)
+    }
+
+    /**
+     * Creates a new instance of `[AnonymousSearchSummaryResultsAssert]`.
+     *
+     * @param actual the actual value.
+     * @return the created assertion object.
+     */
+    @CheckReturnValue
+    fun assertThat(actual: AnonymousSearchSummaryResults?): AnonymousSearchSummaryResultsAssert {
+        return AnonymousSearchSummaryResultsAssert(actual)
     }
 }
