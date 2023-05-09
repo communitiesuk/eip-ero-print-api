@@ -3,9 +3,10 @@ import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 import org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
+import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "2.7.10"
+    id("org.springframework.boot") version "2.7.11"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version "1.8.10"
     kotlin("kapt") version "1.8.10"
@@ -15,7 +16,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
     id("org.openapi.generator") version "6.2.1"
-    id("org.owasp.dependencycheck") version "8.1.2"
+    id("org.owasp.dependencycheck") version "8.2.1"
     id("org.jsonschema2dataclass") version "4.5.0"
 }
 
@@ -31,8 +32,18 @@ allOpen {
     annotations("javax.persistence.Entity", "javax.persistence.MappedSuperclass", "javax.persistence.Embedabble")
 }
 
+val awsProfile = System.getenv("AWS_PROFILE_ARG") ?: "--profile code-artifact"
+val codeArtifactToken = "aws codeartifact get-authorization-token --domain erop-artifacts --domain-owner 063998039290 --query authorizationToken --output text $awsProfile".runCommand()
+
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://erop-artifacts-063998039290.d.codeartifact.eu-west-2.amazonaws.com/maven/api-repo/")
+        credentials {
+            username = "aws"
+            password = codeArtifactToken
+        }
+    }
 }
 
 apply(plugin = "org.jlleitschuh.gradle.ktlint")
@@ -55,6 +66,9 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     kapt("org.mapstruct:mapstruct-processor:1.5.3.Final")
 
+    // internal libs
+    implementation("uk.gov.dluhc:logging-library:0.0.2")
+
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -66,6 +80,9 @@ dependencies {
     }
     implementation("org.springframework.integration:spring-integration-sftp")
 
+    // Logging
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.3")
+
     // webclient
     implementation("org.springframework:spring-webflux")
     implementation("io.projectreactor.netty:reactor-netty-http")
@@ -73,6 +90,8 @@ dependencies {
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    // later version of nimbus-jose-jwt than brought in transitively by spring security - earlier version triggers CVE-2023-1370
+    implementation("com.nimbusds:nimbus-jose-jwt:9.31")
 
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -86,6 +105,8 @@ dependencies {
 
     // AWS v2 dependencies
     implementation("software.amazon.awssdk:s3")
+    // email
+    implementation("software.amazon.awssdk:ses")
 
     // mongo core datatypes, so that we can generate a Mongo ObjectId (a 12 byte/24 char hex string ID)
     implementation("org.mongodb:bson:4.7.1")
@@ -246,6 +267,15 @@ kapt {
         arg("mapstruct.defaultComponentModel", "spring")
         arg("mapstruct.unmappedTargetPolicy", "IGNORE")
     }
+}
+
+fun String.runCommand(): String {
+    val parts = this.split("\\s".toRegex())
+    val process = ProcessBuilder(*parts.toTypedArray())
+        .redirectOutput(Redirect.PIPE)
+        .start()
+    process.waitFor()
+    return process.inputStream.bufferedReader().readText().trim()
 }
 
 /* Configuration for the OWASP dependency check */

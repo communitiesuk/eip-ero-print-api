@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.12.4'
+  version: '1.18.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -465,6 +465,117 @@ paths:
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
 
+
+  #
+  # Anonymous Elector Document Summaries
+  # --------------------------------------------------------------------------------
+  '/eros/{eroId}/anonymous-elector-documents/search':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the Anonymous Elector Documents.
+        schema:
+          type: string
+        example: 'city-council'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Document Summaries
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Search for Anonymous Elector Document Summaries
+      description: 'Search for Anonymous Elector Document summaries based on querying parameters'
+      tags:
+        - Anonymous Elector Document Summaries
+      responses:
+        '200':
+          $ref: '#/components/responses/AedSearchResults'
+      operationId: search-anonymous-elector-document-summaries
+      parameters:
+        - name: page
+          description: The page number being requested (with the first page being 1). Defaulted to 1 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          in: query
+          required: true
+        - name: pageSize
+          description: The number of results to return in each page. Defaulted to 100 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+          example: 100
+          in: query
+          required: true
+        - name: searchBy
+          description: |
+            The data field to apply the `searchValue` to. An empty value will return all AED documents.
+            This value must be provided when `searchValue` is present
+          schema:
+            $ref: '#/components/schemas/AedSearchBy'
+          example: surname
+          in: query
+          required: false
+        - name: searchValue
+          description: |
+            The value to search the field specified by the `searchBy` parameter. 
+            The search is a case insensitive match. We do not support fuzzy or wildcard matching.
+            This value must be provided when `searchBy` is present
+          schema:
+            type: string
+          in: query
+          example: Smith
+          required: false
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/search'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
   #
   # Anonymous Elector Documents (AEDs)
   # --------------------------------------------------------------------------------
@@ -550,8 +661,8 @@ paths:
         httpMethod: POST
 
     get:
-      summary: Returns the Anonymous Elector Document summaries for an Anonymous application
-      description: Returns the Anonymous Elector Document summaries for an Anonymous application
+      summary: Returns the Anonymous Elector Documents for an Anonymous application
+      description: Returns the Anonymous Elector Documents for an Anonymous application
       tags:
         - Anonymous Elector Documents (AED)
       parameters:
@@ -563,15 +674,177 @@ paths:
           required: true
       responses:
         '200':
-          $ref: '#/components/responses/AnonymousElectorDocumentSummaries'
+          $ref: '#/components/responses/AnonymousElectorDocuments'
         '404':
           $ref: '#/components/responses/404ErrorResponse'
-      operationId: get-anonymous-elector-document-summaries-by-application-id
+      operationId: get-anonymous-elector-documents-by-application-id
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  '/eros/{eroId}/anonymous-elector-documents/re-issue':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Re-issues and returns an Anonymous Elector Document (AED). The document status is marked as `PRINTED` upon successful re-issue of AED document.
+      description: |
+        Re-issues an Anonymous Elector Document (AED). This results in a new AED document based on the last AED of the specified application ID.
+        At present there is no business case or differentiation between an AED being generated and it being printed. It is assumed the ERO will
+        print the document once generated via this API. Therefore the status of the new AED will be set as `PRINTED`.
+      tags:
+        - Anonymous Elector Documents (AED)
+      requestBody:
+        $ref: '#/components/requestBodies/ReIssueAnonymousElectorDocument'
+      responses:
+        '201':
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="anonymous-elector-document-DGFF4E6420YHWPJYX560.pdf"
+        '400':
+          $ref: '#/components/responses/400ErrorResponse'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: re-issue-anonymous-elector-document
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/re-issue'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: POST
+
+  '/eros/{eroId}/anonymous-elector-documents/photo':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the application.
+        schema:
+          type: string
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Returns the Anonymous Elector Document photo for an Anonymous application
+      description: Returns the Anonymous Elector Document photo for an Anonymous application
+      tags:
+        - Anonymous Elector Documents (AED)
+      parameters:
+        - name: applicationId
+          description: An identifier of an Anonymous Elector Document application
+          schema:
+            type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/PreSignedUrlResource'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: get-anonymous-elector-documents-photo-by-application-id
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/photo'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
         responseParameters:
@@ -749,6 +1022,13 @@ components:
         - dispatched
         - not-delivered
 
+    AedSearchBy:
+      title: AedSearchBy
+      description: An enumeration of search by fields for searching AEDs
+      type: string
+      enum:
+        - surname
+
     SourceType:
       title: SourceType
       description: An enumeration of sources
@@ -809,6 +1089,10 @@ components:
           $ref: '#/components/schemas/DeliveryClass'
         deliveryAddressType:
           $ref: '#/components/schemas/DeliveryAddressType'
+        collectionReason:
+          type: string
+          maxLength: 1024
+          description: The reason the elector gave for having to collect their voter ID (if applicable).
         addressee:
           type: string
           maxLength: 255
@@ -1010,23 +1294,23 @@ components:
         - photoLocation
         - validOnDate
 
-    AnonymousElectorDocumentSummariesResponse:
-      title: AnonymousElectorDocumentSummariesResponse
-      description: A response containing a collection of Anonymous Elector Document summaries sorted with latest changes ordered first.
+    AnonymousElectorDocumentsResponse:
+      title: AnonymousElectorDocumentsResponse
+      description: A response containing a collection of Anonymous Elector Documents sorted with latest changes ordered first.
       type: object
       properties:
         anonymousElectorDocuments:
           title: AnonymousElectorDocuments
           type: array
-          description: List of Anonymous Elector Document summaries for the application.
+          description: List of Anonymous Elector Documents for the application.
           items:
-            $ref: '#/components/schemas/AnonymousElectorDocumentSummary'
+            $ref: '#/components/schemas/AnonymousElectorDocument'
       required:
         - anonymousElectorDocuments
 
-    AnonymousElectorDocumentSummary:
-      title: AnonymousElectorDocumentSummary
-      description: An object summarising the current state of an Anonymous Elector Document (AED)
+    AnonymousElectorDocument:
+      title: AnonymousElectorDocument
+      description: An object containing the details of an Anonymous Elector Document (AED)
       type: object
       allOf:
         - $ref: '#/components/schemas/UpdatedBy'
@@ -1044,23 +1328,38 @@ components:
           type: string
           description: GSS code of the ERO responsible for the application
           example: E12345678
+        sourceReference:
+          type: string
+          pattern: '^[a-fA-F\d]{24}$'
+          description: |
+            A 24 character hex string. 
+            The unique identifier of an Anonymous elector document application.
+          example: 1f0f76a9a66f438b9bb33070
+        applicationReference:
+          type: string
+          description: The reference number of an Anonymous elector document application
+          example: V3JSZC4CRH
         certificateLanguage:
           $ref: '#/components/schemas/CertificateLanguage'
         supportingInformationFormat:
           $ref: '#/components/schemas/AnonymousSupportingInformationFormat'
         deliveryAddressType:
           $ref: '#/components/schemas/DeliveryAddressType'
+        collectionReason:
+          type: string
+          description: |
+            The reason the elector gave for having to collect their AED (if applicable).
+          maxLength: 1024
         elector:
           $ref: '#/components/schemas/AnonymousElector'
         status:
           $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
-        photoLocation:
+        photoUrl:
           type: string
           description: |
-            The location of the Elector's Certificate photo. 
-            This is the photo that has been prepared and approved for the Certificate by the `vc-anonymous-admin`, rather than the photo that the applicant uploaded as part of their original application. 
-            Typically an S3 ARN
-          maxLength: 1024
+            The URL of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the Certificate by the ERO, rather than the photo that the applicant uploaded as part of their original application.
+          example: 'http://localhost:8080/eros/city-council/anonymous-elector-documents/photo?applicationId=507f1f77bcf86cd799439011'
         issueDate:
           type: string
           format: date
@@ -1070,12 +1369,14 @@ components:
         - certificateNumber
         - electoralRollNumber
         - gssCode
+        - sourceReference
+        - applicationReference
         - certificateLanguage
         - supportingInformationFormat
         - deliveryAddressType
         - elector
         - status
-        - photoLocation
+        - photoUrl
         - issueDate
 
     AnonymousElector:
@@ -1083,13 +1384,41 @@ components:
       description: An object containing the details for an anonymous elector on the AED certificate
       type: object
       properties:
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
         addressee:
           type: string
           description: Usually the `firstName middleNames surname` of an elector
           example: "Wayne Christopher Smith"
+        email:
+          type: string
+          maxLength: 1024
+          format: email
+          description: The applicant's email address. Null if not known
+          example: fred.blogs@some-domain.co.uk
+        phoneNumber:
+          type: string
+          maxLength: 50
+          description: The applicant's phone number. Null if not known
+          example: 01234 567890
         registeredAddress:
           $ref: '#/components/schemas/Address'
       required:
+        - firstName
+        - surname
         - addressee
         - registeredAddress
 
@@ -1100,6 +1429,105 @@ components:
       enum:
         - generated
         - printed
+
+    AedSearchSummaryResponse:
+      title: AedSearchSummaryResponse
+      description: Response containing the meta data and results of searching for Anonymous Elector document summaries
+      type: object
+      properties:
+        page:
+          type: integer
+          description: The page number
+          example: 1
+        pageSize:
+          type: integer
+          description: The number of results per page
+          example: 1
+        totalPages:
+          type: integer
+          description: The total number of pages
+          example: 1
+        totalResults:
+          type: integer
+          description: The total number of results
+          example: 1
+        results:
+          type: array
+          description: Array of anonymous elector document search summaries that matches the search criteria
+          items:
+            $ref: '#/components/schemas/AedSearchSummary'
+      required:
+        - page
+        - pageSize
+        - totalPages
+        - totalResults
+        - results
+
+    AedSearchSummary:
+      title: AedSearchSummary
+      description: An object containing summary information of an each Anonymous Elector document summary
+      type: object
+      properties:
+        gssCode:
+          type: string
+          description: The relevant GSS code for the local authority.
+          example: 'E09000007'
+        sourceReference:
+          type: string
+          pattern: '^[a-fA-F\d]{24}$'
+          description: |
+            A 24 character hex string. 
+            The unique identifier of an Anonymous elector document application.
+          example: 1f0f76a9a66f438b9bb33070
+        applicationReference:
+          type: string
+          description: The reference number of an Anonymous elector document application
+          example: V3JSZC4CRH
+        certificateNumber:
+          type: string
+          description: The unique identifier of the Anonymous elector document. A 20 character alphanumeric string.
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          example: DEV1W0XDH1368LWE1J40
+        electoralRollNumber:
+          type: string
+          description: Electoral roll number printed on the AED. There is no specific format and they can vary across EROs.
+          maxLength: 25
+        status:
+          $ref: '#/components/schemas/AnonymousElectorDocumentStatus'
+        firstName:
+          type: string
+          description: The applicant's first name
+          example: Fred
+        surname:
+          type: string
+          description: The applicant's surname
+          example: Blogs
+        postcode:
+          type: string
+          description: The applicant's postcode
+          example: AA1 1AA
+        issueDate:
+          type: string
+          format: date
+          description: The date on which the AED was issued
+          example: '2023-01-15'
+        dateTimeCreated:
+          type: string
+          format: date-time
+          description: The timestamp in ISO-8601 UTC that the AED was originally created
+          example: '2022-07-27T09:39:44Z'
+      required:
+        - gssCode
+        - sourceReference
+        - applicationReference
+        - certificateNumber
+        - electoralRollNumber
+        - status
+        - firstName
+        - surname
+        - postcode
+        - issueDate
+        - dateTimeCreated
 
     GenerateAnonymousElectorDocumentRequest:
       title: GenerateAnonymousElectorDocumentRequest
@@ -1181,6 +1609,39 @@ components:
         - surname
         - registeredAddress
         - delivery
+
+    ReIssueAnonymousElectorDocumentRequest:
+      title: ReIssueAnonymousElectorDocumentRequest
+      description: Request body to re-issue an Anonymous Elector Document (AED)
+      type: object
+      properties:
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Anonymous Elector Document is for.
+        electoralRollNumber:
+          type: string
+          description: The electoral roll number allocated by the Local Authority to the elector. There is no specific format and they can vary across EROs.
+          minLength: 1
+          maxLength: 25
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
+      required:
+        - sourceReference
+        - electoralRollNumber
+        - deliveryAddressType
+
+    PreSignedUrlResourceResponse:
+      title: PreSignedUrlResourceResponse
+      description: An object detailing the pre-signed URL to use in order to retrieve the resource
+      properties:
+        preSignedUrl:
+          type: string
+          format: uri
+          description: AWS pre-signed URL giving time-limited access to the resource.
+          example: 'https://example.s3.eu-west-2.amazonaws.com/image.png?X-Amz-Expires=1800'
+      required:
+        - preSignedUrl
 
   #
   # Response Body Definitions
@@ -1286,8 +1747,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TemporaryCertificateSummariesResponse'
-    AnonymousElectorDocumentSummaries:
-      description: Response containing a collection of Anonymous Elector Document summaries
+    AnonymousElectorDocuments:
+      description: Response containing a collection of Anonymous Elector Documents
       headers:
         Access-Control-Allow-Origin:
           schema:
@@ -1301,7 +1762,40 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AnonymousElectorDocumentSummariesResponse'
+            $ref: '#/components/schemas/AnonymousElectorDocumentsResponse'
+    AedSearchResults:
+      description: Response containing the search result of Anonymous Elector document summaries
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AedSearchSummaryResponse'
+    PreSignedUrlResource:
+      description: Response containing an object detailing the pre-signed URL for the resource
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PreSignedUrlResourceResponse'
+
   #
   # Request Body Definitions
   # --------------------------------------------------------------------------------
@@ -1318,6 +1812,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenerateAnonymousElectorDocumentRequest'
+    ReIssueAnonymousElectorDocument:
+      description: Request body to re-issue an Anonymous Elector Document (AED)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReIssueAnonymousElectorDocumentRequest'
 
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:

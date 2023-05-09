@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="vishal.gupta@valtech.com" id="0023a_alter_aed_contact_details - add sanitized_surname column and indexes" context="ddl">
+        <sql>
+            <comment>Resulted sanitized_surname is created from surname by uppercasing, replacing hyphen with space, removing any apostrophe, replacing multiple spaces to a single space</comment>
+            ALTER TABLE aed_contact_details ADD sanitized_surname VARCHAR(255) AS (TRIM(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(UPPER(surname),'-',' '),'\'',''),'[ ]{2,}',' '))) STORED AFTER surname;
+        </sql>
+
+        <createIndex tableName="aed_contact_details" indexName="aed_contact_details_sanitized_surname_idx">
+            <column name="sanitized_surname"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="aed_contact_details" indexName="aed_contact_details_sanitized_surname_idx"/>
+            <dropColumn tableName="aed_contact_details" columnName="sanitized_surname"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="vishal.gupta@valtech.com" id="0023b_alter_anonymous_elector_document - add sanitized_electoral_roll_number column and indexes" context="ddl">
+        <sql>
+            <comment>Resulted sanitized_electoral_roll_number is created from electoral_roll_number by uppercasing, replacing hyphen with space, removing any apostrophe, replacing multiple spaces to a single space</comment>
+            ALTER TABLE anonymous_elector_document ADD sanitized_electoral_roll_number VARCHAR(30) AS (TRIM(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(UPPER(electoral_roll_number),'-',' '),'\'',''),'[ ]{2,}',' '))) STORED AFTER electoral_roll_number;
+        </sql>
+
+        <createIndex tableName="anonymous_elector_document" indexName="aed_sanitized_electoral_roll_number_idx">
+            <column name="sanitized_electoral_roll_number"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="anonymous_elector_document" indexName="aed_sanitized_electoral_roll_number_idx"/>
+            <dropColumn tableName="anonymous_elector_document" columnName="sanitized_electoral_roll_number"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

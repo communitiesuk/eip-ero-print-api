@@ -1,9 +1,9 @@
-name: Build image and deploy to dev
+name: Build image and deploy to dev2
 
 on:
   push:
     branches:
-      - main
+      - eip-main
 
 jobs:
   tag:

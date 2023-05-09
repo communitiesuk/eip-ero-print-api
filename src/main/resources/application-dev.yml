@@ -1,10 +1,5 @@
 jobs:
-  process-print-responses:
-    name: "ProcessPrintResponses"
-    cron: "0 */10 * ? * *" # every 10 minutes
   batch-print-requests:
-    name: "BatchPrintRequests"
-    cron: "0 */10 * ? * *" # every 10 minutes
     daily-limit: 1000
   remove-vca-initial-retention-period-data:
     name: "RemoveVcaInitialRetentionPeriodData"
@@ -18,3 +13,19 @@ jobs:
   remove-aed-final-retention-period-data:
     name: "RemoveAedFinalRetentionPeriodData"
     cron: "0 5/10 * ? * *" # every 10 minutes starting at :05
+
+email:
+  client:
+    sender: noreply_dev_erouser@erop.ierds.uk
+    allow-list-enabled: true
+    allow-list-domains:
+      - valtech.com
+      - levellingup.gov.uk
+      - softwire.com
+  content:
+    certificate-returned:
+      email-body-template: email-templates/non-prod/certificate-returned.html
+      send-to-requesting-user: true
+    certificate-failed-to-print:
+      email-body-template: email-templates/non-prod/certificate-failed-to-print.html
+      send-to-requesting-user: true

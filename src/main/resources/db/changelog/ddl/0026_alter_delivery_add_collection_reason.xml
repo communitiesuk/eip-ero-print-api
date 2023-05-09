@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="matt.wills@valtech.com" id="0026_EIP-5675_delivery add collection_reason" context="ddl">
+
+        <addColumn tableName="delivery">
+            <column name="collection_reason" type="text" afterColumn="delivery_address_type" remarks="The reason the elector gave for having to collect their voter ID (if applicable)">
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="delivery" columnName="collection_reason"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

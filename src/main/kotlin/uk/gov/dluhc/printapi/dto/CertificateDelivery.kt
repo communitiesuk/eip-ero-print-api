@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.dto
 data class CertificateDelivery(
     val deliveryClass: DeliveryClass,
     val deliveryAddressType: DeliveryAddressType,
+    val collectionReason: String?,
     val addressee: String,
     val deliveryAddress: AddressDto,
     val addressFormat: AddressFormat,
