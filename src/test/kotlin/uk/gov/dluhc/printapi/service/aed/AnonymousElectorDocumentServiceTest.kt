@@ -27,11 +27,17 @@ import uk.gov.dluhc.printapi.mapper.aed.ReIssueAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
+import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEmailAddress
+import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidPhoneNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildGenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildReIssueAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildUpdateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
@@ -309,6 +315,132 @@ internal class AnonymousElectorDocumentServiceTest {
                 .hasMessage("Certificate for eroId = $eroId with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${dto.sourceReference} not found")
             verify(eroService).lookupGssCodesForEro(eroId)
             verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
+        }
+    }
+
+    @Nested
+    inner class UpdateAnonymousElectorDocument {
+        @Test
+        fun `should update elector's email address on single AED`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+            val originalEmailAddress = aValidEmailAddress()
+            val originalPhoneNumber = aValidPhoneNumber()
+            val aed = buildAnonymousElectorDocument(
+                gssCode = gssCodes.first(),
+                contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
+            )
+            val newEmailAddress = anotherValidEmailAddress()
+            val updateAedDto = buildUpdateAnonymousElectorDocumentDto(
+                sourceReference = aed.sourceReference,
+                email = newEmailAddress,
+                phoneNumber = null
+            )
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+            given(anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(listOf(aed))
+
+            // When
+            anonymousElectorDocumentService.updateAnonymousElectorDocument(eroId, updateAedDto)
+
+            // Then
+            assertThat(aed.contactDetails!!.email).isEqualTo(newEmailAddress)
+            assertThat(aed.contactDetails!!.phoneNumber).isEqualTo(originalPhoneNumber)
+        }
+
+        @Test
+        fun `should update elector's phone number on single AED`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+            val originalEmailAddress = aValidEmailAddress()
+            val originalPhoneNumber = aValidPhoneNumber()
+            val aed = buildAnonymousElectorDocument(
+                gssCode = gssCodes.first(),
+                contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
+            )
+            val newPhoneNumber = anotherValidPhoneNumber()
+            val updateAedDto = buildUpdateAnonymousElectorDocumentDto(
+                sourceReference = aed.sourceReference,
+                email = null,
+                phoneNumber = newPhoneNumber
+            )
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+            given(anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(listOf(aed))
+
+            // When
+            anonymousElectorDocumentService.updateAnonymousElectorDocument(eroId, updateAedDto)
+
+            // Then
+            assertThat(aed.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
+            assertThat(aed.contactDetails!!.email).isEqualTo(originalEmailAddress)
+        }
+
+        @Test
+        fun `should update elector's email address and phone number on single AED`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+            val originalEmailAddress = aValidEmailAddress()
+            val originalPhoneNumber = aValidPhoneNumber()
+            val aed = buildAnonymousElectorDocument(
+                gssCode = gssCodes.first(),
+                contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
+            )
+            val newEmailAddress = anotherValidEmailAddress()
+            val newPhoneNumber = anotherValidPhoneNumber()
+            val updateAedDto = buildUpdateAnonymousElectorDocumentDto(
+                sourceReference = aed.sourceReference,
+                email = newEmailAddress,
+                phoneNumber = newPhoneNumber
+            )
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+            given(anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(listOf(aed))
+
+            // When
+            anonymousElectorDocumentService.updateAnonymousElectorDocument(eroId, updateAedDto)
+
+            // Then
+            assertThat(aed.contactDetails!!.email).isEqualTo(newEmailAddress)
+            assertThat(aed.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
+        }
+
+        @Test
+        fun `should update elector's email address and phone number on multiple AEDs`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+            val sourceReference = aValidSourceReference()
+            val originalEmail = aValidEmailAddress()
+            val originalPhoneNumber = aValidPhoneNumber()
+            val aed1 = buildAnonymousElectorDocument(
+                sourceReference = sourceReference,
+                gssCode = gssCodes.first(),
+                contactDetails = buildAedContactDetails(email = originalEmail, phoneNumber = originalPhoneNumber)
+            )
+            val aed2 = buildAnonymousElectorDocument(
+                sourceReference = sourceReference,
+                gssCode = gssCodes.first(),
+                contactDetails = buildAedContactDetails(email = originalEmail, phoneNumber = originalPhoneNumber)
+            )
+            val newEmailAddress = anotherValidEmailAddress()
+            val newPhoneNumber = anotherValidPhoneNumber()
+            val updateAedDto = buildUpdateAnonymousElectorDocumentDto(
+                sourceReference = sourceReference,
+                email = newEmailAddress,
+                phoneNumber = newPhoneNumber
+            )
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+            given(anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(listOf(aed1, aed2))
+
+            // When
+            anonymousElectorDocumentService.updateAnonymousElectorDocument(eroId, updateAedDto)
+
+            // Then
+            assertThat(aed1.contactDetails!!.email).isEqualTo(newEmailAddress)
+            assertThat(aed1.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
+            assertThat(aed2.contactDetails!!.email).isEqualTo(newEmailAddress)
+            assertThat(aed2.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
         }
     }
 }
