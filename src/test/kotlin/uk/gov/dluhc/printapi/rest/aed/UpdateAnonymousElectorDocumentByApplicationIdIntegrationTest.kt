@@ -120,7 +120,7 @@ internal class UpdateAnonymousElectorDocumentByApplicationIdIntegrationTest : In
             contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
         )
         anonymousElectorDocumentRepository.save(aed)
-        Thread.sleep(2000)
+        Thread.sleep(1000)
 
         val dateCreated = aed.contactDetails!!.dateCreated!!
         val createdBy = aed.contactDetails!!.createdBy!!
@@ -170,7 +170,7 @@ internal class UpdateAnonymousElectorDocumentByApplicationIdIntegrationTest : In
             contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
         )
         anonymousElectorDocumentRepository.save(aed)
-        Thread.sleep(2000)
+        Thread.sleep(1000)
 
         val dateCreated = aed.contactDetails!!.dateCreated!!
         val createdBy = aed.contactDetails!!.createdBy!!
