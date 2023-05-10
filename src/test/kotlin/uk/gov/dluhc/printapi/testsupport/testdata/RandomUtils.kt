@@ -75,7 +75,11 @@ fun aValidAddressPostcode(): String = faker.address().postcode()
 
 fun aValidPhoneNumber(): String = faker.phoneNumber().cellPhone()
 
+fun anotherValidPhoneNumber(): String = faker.phoneNumber().phoneNumber()
+
 fun aValidEmailAddress(): String = "contact@${aValidEroName().replaceSpacesWith("-")}.gov.uk"
+
+fun anotherValidEmailAddress(): String = "info@${aValidEroName().replaceSpacesWith("-")}.gov.uk"
 
 fun aValidWebsite(): String = "https://${aValidEroName().replaceSpacesWith("-")}.gov.uk"
 
