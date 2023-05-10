@@ -48,6 +48,9 @@ class Delivery(
     @Enumerated(EnumType.STRING)
     var deliveryAddressType: DeliveryAddressType,
 
+    @field:Size(max = 1024)
+    var collectionReason: String? = null,
+
     @CreationTimestamp
     var dateCreated: Instant? = null,
 

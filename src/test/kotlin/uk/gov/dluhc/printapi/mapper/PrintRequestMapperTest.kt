@@ -129,6 +129,7 @@ class PrintRequestMapperTest {
                         },
                         deliveryClass = DeliveryClass.STANDARD,
                         deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        collectionReason = null,
                         addressFormat = AddressFormat.UK,
                     )
                 },
@@ -218,6 +219,7 @@ class PrintRequestMapperTest {
                         },
                         deliveryClass = DeliveryClass.STANDARD,
                         deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        collectionReason = null,
                         addressFormat = AddressFormat.UK,
                     )
                 },
@@ -303,6 +305,7 @@ class PrintRequestMapperTest {
                         },
                         deliveryClass = DeliveryClass.STANDARD,
                         deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        collectionReason = null,
                         addressFormat = AddressFormat.UK,
                     )
                 },

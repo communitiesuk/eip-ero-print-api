@@ -255,6 +255,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                     },
                     deliveryClass = DeliveryClass.STANDARD,
                     deliveryAddressType = DeliveryAddressType.REGISTERED,
+                    collectionReason = null,
                     addressFormat = AddressFormat.UK,
                 )
             },

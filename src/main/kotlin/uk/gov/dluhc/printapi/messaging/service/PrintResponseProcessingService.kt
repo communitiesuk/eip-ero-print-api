@@ -25,7 +25,9 @@ class PrintResponseProcessingService(
     private val idFactory: IdFactory,
     private val statusMapper: StatusMapper,
     private val processPrintResponseMessageMapper: ProcessPrintResponseMessageMapper,
-    private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>
+    private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>,
+    private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
+    private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
 ) {
 
     fun processPrintResponses(printResponses: List<PrintResponse>) {
@@ -107,5 +109,11 @@ class PrintResponseProcessingService(
         }
 
         certificateRepository.save(certificate)
+
+        if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
+            certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
+        } else if (printResponse.status == ProcessPrintResponseMessage.Status.FAILED) {
+            certificateFailedToPrintEmailSenderService.send(printResponse, certificate)
+        }
     }
 }

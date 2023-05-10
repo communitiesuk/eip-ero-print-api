@@ -21,7 +21,7 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
-import uk.gov.dluhc.printapi.testsupport.assertj.assertions.AnonymousElectorDocumentCertificateAssert
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
@@ -36,6 +36,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
 import java.util.UUID.randomUUID
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddressTypeEntity
+import uk.gov.dluhc.printapi.models.DeliveryAddressType as DeliveryAddressTypeApi
+import uk.gov.dluhc.printapi.models.DeliveryClass as DeliveryClassApi
 
 internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest() {
 
@@ -151,16 +154,23 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
     fun `should return AED pdf given valid request for authorised user`() {
         // Given
         val photoLocationArn = addPhotoToS3()
+        val collectionReason = "I don't trust Royal Mail"
         val request = buildGenerateAnonymousElectorDocumentRequest(
             supportingInformationFormat = AnonymousSupportingInformationFormat.LARGE_MINUS_PRINT,
             photoLocation = photoLocationArn,
             delivery = buildApiCertificateDelivery(
-                deliveryClass = uk.gov.dluhc.printapi.models.DeliveryClass.STANDARD,
-                deliveryAddressType = uk.gov.dluhc.printapi.models.DeliveryAddressType.REGISTERED,
+                deliveryClass = DeliveryClassApi.STANDARD,
+                deliveryAddressType = DeliveryAddressTypeApi.ERO_MINUS_COLLECTION,
+                collectionReason = collectionReason,
                 addressFormat = uk.gov.dluhc.printapi.models.AddressFormat.UK
             )
         )
-        processValidRequest(request = request, expectedSupportingFormat = SupportingInformationFormat.LARGE_PRINT)
+        processValidRequest(
+            request = request,
+            expectedSupportingFormat = SupportingInformationFormat.LARGE_PRINT,
+            expectedAddressType = DeliveryAddressTypeEntity.ERO_COLLECTION,
+            expectedCollectionReason = collectionReason
+        )
     }
 
     @Test
@@ -185,6 +195,8 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
     private fun processValidRequest(
         request: GenerateAnonymousElectorDocumentRequest,
         expectedSupportingFormat: SupportingInformationFormat,
+        expectedAddressType: DeliveryAddressType = DeliveryAddressTypeEntity.REGISTERED,
+        expectedCollectionReason: String? = null,
     ) {
         // Given
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
@@ -211,7 +223,8 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                     )
                 },
                 deliveryClass = DeliveryClass.STANDARD,
-                deliveryAddressType = DeliveryAddressType.REGISTERED,
+                deliveryAddressType = expectedAddressType,
+                collectionReason = expectedCollectionReason,
                 addressFormat = AddressFormat.UK,
             )
         }
@@ -231,33 +244,33 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             .returnResult()
 
         // Then
+        val pdfContent = response.responseBody
+        val contentDisposition = response.responseHeaders.contentDisposition
+
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             request.gssCode,
             ANONYMOUS_ELECTOR_DOCUMENT,
             request.sourceReference
         )
+        assertThat(electorDocuments).hasSize(1)
+        val newlyCreatedAed = electorDocuments.first()
 
-        assertThat(electorDocuments).isNotNull
-        electorDocuments.forEach {
-            assertThat(it.statusHistory.size).isOne
-            assertThat(it.statusHistory.first().status).isEqualTo(AnonymousElectorDocumentStatus.Status.PRINTED)
-
-            AnonymousElectorDocumentCertificateAssert(it)
-                .hasId()
-                .hasSupportingInformationFormat(expectedSupportingFormat)
-                .hasDelivery(expectedDelivery)
-                .hasDateCreated()
-
-            val contentDisposition = response.responseHeaders.contentDisposition
-            assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${it.certificateNumber}.pdf")
-
-            val pdfContent = response.responseBody
-            assertThat(pdfContent).isNotNull
-            PdfReader(pdfContent).use { reader ->
-                val text = PdfTextExtractor(reader).getTextFromPage(1)
-                assertThat(text).contains(it.certificateNumber)
-                assertThat(text).doesNotContainIgnoringCase(request.surname)
+        assertThat(newlyCreatedAed)
+            .hasId()
+            .hasSupportingInformationFormat(expectedSupportingFormat)
+            .hasDelivery(expectedDelivery)
+            .hasDateCreated()
+            .statusHistory {
+                it.hasSize(1)
+                it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
             }
+
+        assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf")
+
+        PdfReader(pdfContent).use { reader ->
+            val text = PdfTextExtractor(reader).getTextFromPage(1)
+            assertThat(text).contains(newlyCreatedAed.certificateNumber)
+            assertThat(text).doesNotContainIgnoringCase(request.surname)
         }
     }
 

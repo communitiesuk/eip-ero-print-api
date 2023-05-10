@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: 'eip-ero-print-api'
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/print_application
     username: ${MYSQL_USER}
@@ -26,8 +28,14 @@ sqs:
   application-removed-queue-name: ${SQS_APPLICATION_REMOVED_QUEUE_NAME}
   remove-certificate-queue-name: ${SQS_REMOVE_CERTIFICATE_QUEUE_NAME}
 
+s3:
+  certificate-photo-access-duration: 1M
+  certificate-photos-target-bucket: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME}
+  certificate-photos-target-bucket-proxy-endpoint: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT}
+
 api:
   print-api:
+    base.url: ${API_PRINT_API_BASE_URL}
     generate-temporary-certificate:
       valid-on-date:
         max-calendar-days-in-future: 30
@@ -203,3 +211,21 @@ logging:
     com:
       jcraft:
         jsch: WARN
+
+email:
+  client:
+    sender: noreply_erouser@erop.ierds.uk
+    allow-list-enabled: false
+    allow-list-domains:
+  content:
+    portal-base-url: https://erop.ierds.uk
+    vac-context-root: voter-authority-certificate
+    aed-context-root: anonymous-elector-document
+    certificate-returned:
+      subject: Electoral Registration Office Portal - certificate returned - application ${applicationReference}
+      email-body-template: email-templates/prod/certificate-returned.html
+      send-to-requesting-user: false
+    certificate-failed-to-print:
+      subject: Electoral Registration Office Portal - printing failed - application ${applicationReference}
+      email-body-template: email-templates/prod/certificate-failed-to-print.html
+      send-to-requesting-user: false

@@ -91,6 +91,7 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
                 address = deliveryAddress,
                 deliveryClass = aValidDeliveryClass(),
                 deliveryAddressType = aValidDeliveryAddressType(),
+                collectionReason = null,
                 addressFormat = aValidAddressFormat(),
             )
             val eroEnglish = ElectoralRegistrationOffice(

@@ -11,6 +11,24 @@ $ ./gradlew ktlintApplyToIdea
 ```
 This only needs doing once to set up your IDE with the code styles.
 
+#### AWS CodeArtifact Access Set Up
+
+To access libraries stored in the AWS CodeArtifact repository an access token is required that the build script fetches
+in the background using the credentials for the `code-artifact` profile. To create this profile on your developer
+machine follow these instructions:
+
+```shell
+aws configure --profile code-artifact
+```
+
+At the prompts configure the `code-artifact` profile as follows:
+* Your AWS Access Key ID
+* Your AWS Secret Access Key
+* Default region name, `eu-west-2`
+* Default output format, `json`
+
+Note: AWS CLI must be installed on the developer workstation as a pre-requisite.
+
 #### Running Tests
 ```
 $ ./gradlew check
@@ -35,6 +53,7 @@ The following environment variables must be set in order to run the application:
 * `SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME` - the queue name for processing individual print responses
 * `SQS_APPLICATION_REMOVED_QUEUE_NAME` - the queue name to notify this api that a source application has been removed
 * `SQS_REMOVE_CERTIFICATE_QUEUE_NAME` - the queue name for removing certificates after the final data retention period
+* `API_PRINT_API_BASE_URL` - the base URL to this print-api REST API service or its API Gateway.
 * `API_ERO_MANAGEMENT_URL` - the base URL of the ERO Management REST API service.
 * `THREAD_POOL_ZIP_CORE_SIZE` - number of core threads for the Zip producer thread pool 
 * `THREAD_POOL_ZIP_MAX_SIZE` - maximum number of threads for the Zip producer thread pool
@@ -43,6 +62,10 @@ The following environment variables must be set in order to run the application:
 * `SFTP_PRIVATE_KEY` - SSH private key to use when securely connecting to the SFTP server
 * `SFTP_PRINT_REQUEST_UPLOAD_DIRECTORY` - Directory on the remote host to write print request files
 * `SFTP_PRINT_RESPONSE_DOWNLOAD_DIRECTORY` - Directory on the remote host to read print response files
+* `JOBS_BATCH_PRINT_REQUESTS_CRON` - Optional. Overrides the cron schedule for when print requests are batched and sent to the Print Provider
+* `JOBS_PROCESS_PRINT_RESPONSES_CRON` - Optional. Overrides the cron schedule for when the Print Provider's OutBound folder is polled to find and process print responses
+* `S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME` - the S3 bucket name where certificate photos are stored
+* `S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT` - the URL of the custom domain file proxy for certificate photos
 
 #### MYSQL Configuration
 For local setup refer to src/main/resources/db/readme.

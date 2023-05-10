@@ -18,8 +18,10 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.PENDING_ASSIGNMENT_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.RECEIVED_BY_PRINT_PROVIDER
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
@@ -62,6 +64,12 @@ class PrintResponseProcessingServiceTest {
     @Captor
     private lateinit var processPrintResponseMessageCaptor: ArgumentCaptor<ProcessPrintResponseMessage>
 
+    @Mock
+    private lateinit var certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService
+
+    @Mock
+    private lateinit var certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService
+
     @BeforeEach
     fun setup() {
         service = PrintResponseProcessingService(
@@ -69,7 +77,9 @@ class PrintResponseProcessingServiceTest {
             idFactory,
             statusMapper,
             processPrintResponseMessageMapper,
-            processPrintResponseQueue
+            processPrintResponseQueue,
+            certificateNotDeliveredEmailSenderService,
+            certificateFailedToPrintEmailSenderService,
         )
     }
 
@@ -204,6 +214,8 @@ class PrintResponseProcessingServiceTest {
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository).save(certificate)
+            verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
+            verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
             assertThat(certificate.status).isEqualTo(expectedStatus)
             assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
                 .usingRecursiveComparison().isEqualTo(
@@ -213,6 +225,107 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
+        }
+
+        @Test
+        fun `should update print request status to Not Delivered and send email`() {
+            // Given
+            val requestId = aValidRequestId()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                status = ProcessPrintResponseMessage.Status.FAILED,
+                statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+            )
+
+            val expectedStatus = NOT_DELIVERED
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
+
+            val certificate = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        requestId = requestId,
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = SENT_TO_PRINT_PROVIDER,
+                                eventDateTime = response.timestamp.toInstant().minusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
+            verify(certificateRepository).getByPrintRequestsRequestId(requestId)
+            verify(certificateRepository).save(certificate)
+            verify(certificateNotDeliveredEmailSenderService).send(response, certificate)
+            verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
+
+            assertThat(certificate.status).isEqualTo(expectedStatus)
+            assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
+                .usingRecursiveComparison().isEqualTo(
+                    PrintRequestStatus(
+                        status = expectedStatus,
+                        eventDateTime = response.timestamp.toInstant(),
+                        message = response.message
+                    )
+                )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
+        }
+
+        @Test
+        fun `should update print request status to Failed To Print and send email`() {
+            // Given
+            val requestId = aValidRequestId()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                status = ProcessPrintResponseMessage.Status.FAILED,
+                statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
+            )
+
+            val expectedStatus = NOT_DELIVERED
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(expectedStatus)
+
+            val certificate = buildCertificate(
+                printRequests = listOf(
+                    buildPrintRequest(
+                        requestId = requestId,
+                        printRequestStatuses = listOf(
+                            buildPrintRequestStatus(
+                                status = SENT_TO_PRINT_PROVIDER,
+                                eventDateTime = response.timestamp.toInstant().minusSeconds(10)
+                            )
+                        )
+                    )
+                )
+            )
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
+            verify(certificateRepository).getByPrintRequestsRequestId(requestId)
+            verify(certificateRepository).save(certificate)
+            verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
+            verify(certificateFailedToPrintEmailSenderService).send(response, certificate)
+
+            assertThat(certificate.status).isEqualTo(expectedStatus)
+            assertThat(certificate.printRequests[0].statusHistory.sortedByDescending { it.eventDateTime }.first())
+                .usingRecursiveComparison().isEqualTo(
+                    PrintRequestStatus(
+                        status = expectedStatus,
+                        eventDateTime = response.timestamp.toInstant(),
+                        message = response.message
+                    )
+                )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test

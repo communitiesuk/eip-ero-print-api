@@ -12,11 +12,13 @@ fun buildApiCertificateDelivery(
     deliveryAddress: Address = buildValidAddress(),
     deliveryClass: DeliveryClass = DeliveryClass.STANDARD,
     deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
+    collectionReason: String? = null,
     addressFormat: AddressFormat = AddressFormat.UK,
 ): CertificateDelivery = CertificateDelivery(
     addressee = addressee,
     deliveryAddress = deliveryAddress,
     deliveryClass = deliveryClass,
     deliveryAddressType = deliveryAddressType,
+    collectionReason = collectionReason,
     addressFormat = addressFormat,
 )
