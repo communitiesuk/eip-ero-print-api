@@ -2,8 +2,9 @@ package uk.gov.dluhc.printapi.rest.aed
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.dluhc.printapi.models.AedSearchBy
-import uk.gov.dluhc.printapi.models.AedSearchBy.SURNAME
 import javax.validation.ConstraintViolation
 import javax.validation.Validation
 
@@ -25,10 +26,11 @@ class AedSearchByParametersAreValidConstraintValidatorTest {
         assertThat(violations).isEmpty()
     }
 
-    @Test
-    fun `should validate with 1 violations given query string parameters have searchBy but no searchValue`() {
+    @ParameterizedTest
+    @EnumSource(AedSearchBy::class)
+    fun `should validate with 1 violations given query string parameters have searchBy but no searchValue`(searchBy: AedSearchBy) {
         // Then
-        val searchCriteria = buildAedSearchQueryStringParameters(searchValue = null, searchBy = SURNAME)
+        val searchCriteria = buildAedSearchQueryStringParameters(searchValue = null, searchBy = searchBy)
 
         // When
         val violations: Set<ConstraintViolation<AedSearchQueryStringParameters>> =
@@ -55,10 +57,11 @@ class AedSearchByParametersAreValidConstraintValidatorTest {
             .isEqualTo("searchBy and searchValue must be specified together")
     }
 
-    @Test
-    fun `should validate with 0 violations given query string parameters have both searchBy and searchValue`() {
+    @ParameterizedTest
+    @EnumSource(AedSearchBy::class)
+    fun `should validate with 0 violations given query string parameters have both searchBy and searchValue`(searchBy: AedSearchBy) {
         // Then
-        val searchCriteria = buildAedSearchQueryStringParameters(searchValue = "SMITH", searchBy = SURNAME)
+        val searchCriteria = buildAedSearchQueryStringParameters(searchValue = "some value", searchBy = searchBy)
 
         // When
         val violations: Set<ConstraintViolation<AedSearchQueryStringParameters>> =

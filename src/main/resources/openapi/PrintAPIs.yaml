@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.18.0'
+  version: '1.19.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1028,6 +1028,7 @@ components:
       type: string
       enum:
         - surname
+        - applicationReference
 
     SourceType:
       title: SourceType
