@@ -6,5 +6,6 @@ data class PrintRequestSummaryDto(
     val status: PrintRequestStatusDto,
     val dateTime: Instant,
     val userId: String,
-    val message: String?
+    val message: String?,
+    val deliveryAddressType: DeliveryAddressType
 )
