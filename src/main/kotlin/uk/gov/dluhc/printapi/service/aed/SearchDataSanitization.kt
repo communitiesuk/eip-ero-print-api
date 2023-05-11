@@ -10,3 +10,8 @@ fun sanitizeSurname(surname: String): String =
         .replace(Regex("'"), EMPTY) // remove apostrophe
         .replace(Regex(" {2,}"), SPACE) // multiple spaces to single space
         .trim()
+
+fun sanitizeApplicationReference(applicationReference: String): String =
+    applicationReference
+        .uppercase()
+        .replace(Regex(" +"), EMPTY) // any number of spaces to empty
