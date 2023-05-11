@@ -1,58 +1,58 @@
-package uk.gov.dluhc.printapi.database.repository
+package uk.gov.dluhc.printapi.service.aed
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.dto.aed.AedSearchBy
+import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchCriteriaDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import java.time.Instant
 import java.time.LocalDate
 
-@Deprecated("This is a temporary test, and will be removed when EIP1-5612 uses the specification builder in the search service")
-internal class AnonymousElectorDocumentSummarySpecificationBuilderIntegrationTest : IntegrationTest() {
+internal class AnonymousElectorDocumentSearchServiceIntegrationTest : IntegrationTest() {
 
     companion object {
         private const val GSS_CODE = "W06000099"
         private const val ANOTHER_GSS_CODE = "E06000123"
     }
 
-    @Autowired
-    private lateinit var specificationBuilder: AnonymousElectorDocumentSummarySpecificationBuilder
-
     @Test
     fun `should return all AEDs for gsscode given no search by criteria`() {
         // Given
         createAndSaveSomeAeds()
 
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
         val criteria = buildAnonymousSearchCriteriaDto(
+            eroId = ERO_ID,
             page = 1,
             pageSize = 100,
             searchBy = null,
             searchValue = null
         )
 
-        val specification = specificationBuilder.buildSpecification(listOf(GSS_CODE), criteria)
-        val pageRequest = PageRequest.of(
-            criteria.page - 1, // pages are zero indexed
-            criteria.pageSize,
-            Sort.by(Sort.Direction.DESC, "issueDate").and(Sort.by(Sort.Direction.ASC, "surname"))
-        )
-
         // When
-        val actual = anonymousElectorDocumentSummaryRepository.findAll(specification, pageRequest)
+        val actual = anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(criteria)
 
         // Then
-        assertThat(actual.content.map { it.applicationReference }).containsExactly(
-            "V_APP_REF3", // AED3 first because it's the most recent (today)
-            "V_APP_REF1", // AED1 2nd because it has the same date as AED2 but the surname is AAA (9 days old)
-            "V_APP_REF2", // AED2 3rd because it has the same date as AED1 but the surname is ZZZ (9 days old)
-            "V_APP_REF4", // AED4 last because it's the oldest (10 days old)
-        )
+        assertThat(actual)
+            .isPage(1)
+            .hasPageSize(100)
+            .hasTotalPages(1)
+            .hasTotalResults(4)
+            .resultsAreForApplicationReferences(
+                "V_APP_REF3", // AED3 first because it's the most recent (today)
+                "V_APP_REF1", // AED1 2nd because it has the same date as AED2 but the surname is AAA (9 days old)
+                "V_APP_REF2", // AED2 3rd because it has the same date as AED1 but the surname is ZZZ (9 days old)
+                "V_APP_REF4", // AED4 last because it's the oldest (10 days old)
+            )
     }
 
     @Test
@@ -60,27 +60,32 @@ internal class AnonymousElectorDocumentSummarySpecificationBuilderIntegrationTes
         // Given
         createAndSaveSomeAeds()
 
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
         val criteria = buildAnonymousSearchCriteriaDto(
+            eroId = ERO_ID,
             page = 1,
             pageSize = 100,
             searchBy = AedSearchBy.SURNAME,
             searchValue = "zZz"
         )
 
-        val specification = specificationBuilder.buildSpecification(listOf(GSS_CODE), criteria)
-        val pageRequest = PageRequest.of(
-            criteria.page - 1, // pages are zero indexed
-            criteria.pageSize,
-            Sort.by(Sort.Direction.DESC, "issueDate").and(Sort.by(Sort.Direction.ASC, "surname"))
-        )
-
         // When
-        val actual = anonymousElectorDocumentSummaryRepository.findAll(specification, pageRequest)
+        val actual = anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(criteria)
 
         // Then
-        assertThat(actual.content.map { it.applicationReference }).containsExactly(
-            "V_APP_REF2", // AED2 because it has the surname ZZZ
-        )
+        assertThat(actual)
+            .isPage(1)
+            .hasPageSize(100)
+            .hasTotalPages(1)
+            .hasTotalResults(1)
+            .resultsAreForApplicationReferences(
+                "V_APP_REF2", // AED2 because it has the surname ZZZ
+            )
     }
 
     @Test
@@ -88,27 +93,32 @@ internal class AnonymousElectorDocumentSummarySpecificationBuilderIntegrationTes
         // Given
         createAndSaveSomeAeds()
 
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = ANOTHER_GSS_CODE))
+        )
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
         val criteria = buildAnonymousSearchCriteriaDto(
+            eroId = ERO_ID,
             page = 1,
             pageSize = 100,
             searchBy = AedSearchBy.SURNAME,
             searchValue = "  o'LeaRY  "
         )
 
-        val specification = specificationBuilder.buildSpecification(listOf(ANOTHER_GSS_CODE), criteria)
-        val pageRequest = PageRequest.of(
-            criteria.page - 1, // pages are zero indexed
-            criteria.pageSize,
-            Sort.by(Sort.Direction.DESC, "issueDate").and(Sort.by(Sort.Direction.ASC, "surname"))
-        )
-
         // When
-        val actual = anonymousElectorDocumentSummaryRepository.findAll(specification, pageRequest)
+        val actual = anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(criteria)
 
         // Then
-        assertThat(actual.content.map { it.applicationReference }).containsExactly(
-            "V_APP_REF5", // AED5 because it has the surname O'Leary and is for gssCode ANOTHER_GSS_CODE
-        )
+        assertThat(actual)
+            .isPage(1)
+            .hasPageSize(100)
+            .hasTotalPages(1)
+            .hasTotalResults(1)
+            .resultsAreForApplicationReferences(
+                "V_APP_REF5", // AED5 because it has the surname O'Leary and is for gssCode ANOTHER_GSS_CODE
+            )
     }
 
     @Test
@@ -116,27 +126,32 @@ internal class AnonymousElectorDocumentSummarySpecificationBuilderIntegrationTes
         // Given
         createAndSaveSomeAeds()
 
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
         val criteria = buildAnonymousSearchCriteriaDto(
+            eroId = ERO_ID,
             page = 1,
             pageSize = 100,
             searchBy = AedSearchBy.APPLICATION_REFERENCE,
             searchValue = "V_APP_REF3"
         )
 
-        val specification = specificationBuilder.buildSpecification(listOf(GSS_CODE), criteria)
-        val pageRequest = PageRequest.of(
-            criteria.page - 1, // pages are zero indexed
-            criteria.pageSize,
-            Sort.by(Sort.Direction.DESC, "issueDate").and(Sort.by(Sort.Direction.ASC, "surname"))
-        )
-
         // When
-        val actual = anonymousElectorDocumentSummaryRepository.findAll(specification, pageRequest)
+        val actual = anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(criteria)
 
         // Then
-        assertThat(actual.content.map { it.applicationReference }).containsExactly(
-            "V_APP_REF3", // AED3 because it has the application reference V_APP_REF3
-        )
+        assertThat(actual)
+            .isPage(1)
+            .hasPageSize(100)
+            .hasTotalPages(1)
+            .hasTotalResults(1)
+            .resultsAreForApplicationReferences(
+                "V_APP_REF3", // AED3 because it has the application reference V_APP_REF3
+            )
     }
 
     @Test
@@ -144,25 +159,30 @@ internal class AnonymousElectorDocumentSummarySpecificationBuilderIntegrationTes
         // Given
         createAndSaveSomeAeds()
 
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
         val criteria = buildAnonymousSearchCriteriaDto(
+            eroId = ERO_ID,
             page = 1,
             pageSize = 100,
             searchBy = AedSearchBy.SURNAME,
             searchValue = "Bloggs"
         )
 
-        val specification = specificationBuilder.buildSpecification(listOf(GSS_CODE), criteria)
-        val pageRequest = PageRequest.of(
-            criteria.page - 1, // pages are zero indexed
-            criteria.pageSize,
-            Sort.by(Sort.Direction.DESC, "issueDate").and(Sort.by(Sort.Direction.ASC, "surname"))
-        )
-
         // When
-        val actual = anonymousElectorDocumentSummaryRepository.findAll(specification, pageRequest)
+        val actual = anonymousElectorDocumentSearchService.searchAnonymousElectorDocumentSummaries(criteria)
 
         // Then
-        assertThat(actual.content).isEmpty()
+        assertThat(actual)
+            .isPage(0)
+            .hasPageSize(100)
+            .hasTotalPages(0)
+            .hasTotalResults(0)
+            .hasResults(emptyList())
     }
 
     private fun createAndSaveSomeAeds() {
