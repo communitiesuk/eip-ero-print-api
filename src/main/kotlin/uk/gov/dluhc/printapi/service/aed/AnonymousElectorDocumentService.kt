@@ -10,6 +10,7 @@ import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.aed.UpdateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
@@ -56,6 +57,25 @@ class AnonymousElectorDocumentService(
         }
     }
 
+    @Transactional
+    fun updateAnonymousElectorDocument(eroId: String, updateAedDto: UpdateAnonymousElectorDocumentDto) {
+        with(updateAedDto) {
+            val gssCodes = eroService.lookupGssCodesForEro(eroId)
+            val anonymousElectorDocuments = getAnonymousElectorDocumentsSortedByDate(gssCodes, sourceReference)
+            if (anonymousElectorDocuments.isEmpty()) {
+                throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, sourceReference)
+            }
+            anonymousElectorDocuments.forEach {
+                if (valueHasChanged(email, it.contactDetails!!.email)) {
+                    it.contactDetails!!.email = email
+                }
+                if (valueHasChanged(phoneNumber, it.contactDetails!!.phoneNumber)) {
+                    it.contactDetails!!.phoneNumber = phoneNumber
+                }
+            }
+        }
+    }
+
     @Transactional(readOnly = true)
     fun getAnonymousElectorDocuments(
         eroId: String,
@@ -87,5 +107,9 @@ class AnonymousElectorDocumentService(
         val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)
         val contents = pdfFactory.createPdfContents(templateDetails)
         return PdfFile(PDF_FILE_NAME.format(certificateNumber), contents)
+    }
+
+    private fun valueHasChanged(newValue: String?, existingValue: String?): Boolean {
+        return !newValue.isNullOrBlank() && newValue != existingValue
     }
 }

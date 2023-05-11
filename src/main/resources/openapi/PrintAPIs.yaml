@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.18.1'
+  version: '1.19.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -659,7 +659,35 @@ paths:
         connectionType: VPC_LINK
         connectionId: '${vpc_connection_id}'
         httpMethod: POST
-
+    patch:
+      summary: Updates specific details within an Anonymous Elector Document (AED).
+      description: Updates specific details (e.g. the elector's phone number) within an Anonymous Elector Document (AED). Note that if more than one AED has been issued for an application, then all of them will be updated.
+      tags:
+        - Anonymous Elector Documents (AED)
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateAnonymousElectorDocument'
+      responses:
+        '204':
+          description: Updated successfully
+        '400':
+          $ref: '#/components/responses/400ErrorResponse'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: update-anonymous-elector-document-details
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: PATCH
     get:
       summary: Returns the Anonymous Elector Documents for an Anonymous application
       description: Returns the Anonymous Elector Documents for an Anonymous application
@@ -1633,6 +1661,29 @@ components:
         - electoralRollNumber
         - deliveryAddressType
 
+    UpdateAnonymousElectorDocumentRequest:
+      title: UpdateAnonymousElectorDocumentRequest
+      description: Request body to update specific details of an Anonymous Elector Document (AED).
+      type: object
+      properties:
+        sourceReference:
+          type: string
+          example: 1f0f76a9a66f438b9bb33070
+          description: Reference in the source application that this Anonymous Elector Document is for.
+        email:
+          type: string
+          maxLength: 1024
+          format: email
+          description: The applicant's email address. This will only be updated if a non-null value is provided.
+          example: fred.blogs@some-domain.co.uk
+        phoneNumber:
+          type: string
+          maxLength: 50
+          description: The applicant's phone number. This will only be updated if a non-null value is provided.
+          example: 01234 567890
+      required:
+        - sourceReference
+
     PreSignedUrlResourceResponse:
       title: PreSignedUrlResourceResponse
       description: An object detailing the pre-signed URL to use in order to retrieve the resource
@@ -1820,6 +1871,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ReIssueAnonymousElectorDocumentRequest'
+    UpdateAnonymousElectorDocument:
+      description: Request body to update specific details belonging to one or more Anonymous Elector Documents (AEDs)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateAnonymousElectorDocumentRequest'
 
   securitySchemes:
     eroUserCognitoUserPoolAuthorizer:
