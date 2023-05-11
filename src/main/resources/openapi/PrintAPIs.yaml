@@ -1058,6 +1058,7 @@ components:
       type: string
       enum:
         - surname
+        - applicationReference
 
     SourceType:
       title: SourceType
