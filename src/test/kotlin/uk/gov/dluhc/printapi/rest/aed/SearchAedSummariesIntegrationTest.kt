@@ -79,7 +79,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         val actual = response.responseBody.blockFirst()
         assertThat(actual).isNotNull
         with(actual!!) {
-            assertThat(page).isEqualTo(1)
+            assertThat(page).isZero()
             assertThat(pageSize).isEqualTo(100)
             assertThat(totalPages).isZero()
             assertThat(totalResults).isZero()
@@ -233,7 +233,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         val actual = response.responseBody.blockFirst()
         assertThat(actual).isNotNull
         with(actual!!) {
-            assertThat(page).isEqualTo(1)
+            assertThat(page).isZero()
             assertThat(pageSize).isEqualTo(100)
             assertThat(totalPages).isZero()
             assertThat(totalResults).isZero()
