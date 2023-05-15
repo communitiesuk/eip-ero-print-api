@@ -29,6 +29,9 @@ class CertificateSummaryResponseMapperTest {
     @Mock
     private lateinit var instantMapper: InstantMapper
 
+    @Mock
+    private lateinit var deliveryAddressTypeMapper: DeliveryAddressTypeMapper
+
     @Test
     fun `should map certificate summary dto to certificate summary response`() {
         // Given

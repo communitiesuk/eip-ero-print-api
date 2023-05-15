@@ -14,6 +14,9 @@ interface DeliveryAddressTypeMapper {
     @ValueMapping(target = "ERO_COLLECTION", source = "ERO_MINUS_COLLECTION")
     fun mapSqsToEntity(sqsType: DeliveryAddressTypeSqs): DeliveryAddressTypeEntity
 
+    @ValueMapping(target = "ERO_MINUS_COLLECTION", source = "ERO_COLLECTION")
+    fun mapEntityToApi(entityType: DeliveryAddressTypeEntity): ApiDeliveryAddressType
+
     @ValueMapping(target = "ERO_COLLECTION", source = "ERO_MINUS_COLLECTION")
     fun mapApiToDto(apiType: ApiDeliveryAddressType): DtoDeliveryAddressType
 
