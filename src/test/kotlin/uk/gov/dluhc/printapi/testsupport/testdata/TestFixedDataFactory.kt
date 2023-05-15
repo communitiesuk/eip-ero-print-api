@@ -28,6 +28,8 @@ fun aValidDeliveryClass(): DeliveryClass = DeliveryClass.STANDARD
 
 fun aValidDeliveryAddressType(): DeliveryAddressType = DeliveryAddressType.REGISTERED
 
+fun aDifferentValidDeliveryAddressType(): DeliveryAddressType = DeliveryAddressType.ERO_COLLECTION
+
 fun aValidAddressFormat(): AddressFormat = AddressFormat.UK
 
 fun aValidTemporaryCertificateTemplateFilename(): String = "temporary-certificate-template-en.pdf"

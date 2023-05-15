@@ -5,7 +5,7 @@ import org.mapstruct.Mapping
 import uk.gov.dluhc.printapi.dto.CertificateSummaryDto
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 
-@Mapper(uses = [PrintRequestStatusMapper::class, InstantMapper::class])
+@Mapper(uses = [PrintRequestStatusMapper::class, InstantMapper::class, DeliveryAddressTypeMapper::class])
 interface CertificateSummaryResponseMapper {
     @Mapping(source = "printRequests", target = "printRequestSummaries")
     fun toCertificateSummaryResponse(dto: CertificateSummaryDto): CertificateSummaryResponse

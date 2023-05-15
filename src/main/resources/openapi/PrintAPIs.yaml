@@ -1039,6 +1039,8 @@ components:
         message:
           type: string
           description: Message received for the print request status update
+        deliveryAddressType:
+          $ref: '#/components/schemas/DeliveryAddressType'
       required:
         - status
     PrintRequestStatus:
@@ -1146,7 +1148,7 @@ components:
 
     DeliveryAddressType:
       title: DeliveryAddressType
-      description: The delivery address type for the Anonymous Elector Document
+      description: The delivery address type for the Anonymous Elector Document and Voter Authority Certificate
       type: string
       enum:
         - registered
