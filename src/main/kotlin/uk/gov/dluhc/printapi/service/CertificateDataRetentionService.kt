@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.service
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SourceType
@@ -10,7 +11,6 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
-import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 
