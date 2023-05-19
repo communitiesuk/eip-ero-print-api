@@ -4,6 +4,7 @@ import io.awspring.cloud.messaging.listener.annotation.SqsListener
 import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
+import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.service.PrintResponseFileService
 import javax.validation.Valid

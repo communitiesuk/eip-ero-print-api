@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.messaging.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
@@ -9,7 +10,6 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
-import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS

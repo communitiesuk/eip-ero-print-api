@@ -12,7 +12,7 @@ import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver
 import org.springframework.messaging.handler.annotation.support.PayloadMethodArgumentResolver
 import org.springframework.validation.Validator
-import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
