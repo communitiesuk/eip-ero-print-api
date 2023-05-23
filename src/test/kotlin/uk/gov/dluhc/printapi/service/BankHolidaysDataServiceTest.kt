@@ -55,7 +55,7 @@ internal class BankHolidaysDataServiceTest {
         )
 
         // When
-        val actualBankHolidayDates = bankHolidaysDataService.getUpcomingBankHolidays(gssCode)
+        val actualBankHolidayDates = bankHolidaysDataService.getUpcomingBankHolidays(gssCode, fromDate = today)
 
         // Then
         assertThat(actualBankHolidayDates).hasSize(1).isEqualTo(expectedBankHolidayDatesResponse)

@@ -90,7 +90,8 @@ class ElectorDocumentRemovalDateResolver(
     }
 
     private fun getTotalDaysForWorkingDays(issueDate: LocalDate, requiredWorkingDays: Int, gssCode: String): Int {
-        val upcomingBankHolidays = bankHolidaysDataService.getUpcomingBankHolidays(gssCode)
+        val upcomingBankHolidays =
+            bankHolidaysDataService.getUpcomingBankHolidays(gssCode = gssCode, fromDate = issueDate)
 
         var date = issueDate
         var workingDays = 0

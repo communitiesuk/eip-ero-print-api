@@ -20,10 +20,11 @@ class BankHolidaysDataService(
     private val clock: Clock
 ) {
 
-    fun getUpcomingBankHolidays(gssCode: String): List<LocalDate> {
-        val fromDate = LocalDate.now(clock)
-        val toDate = fromDate.plusDays(100)
-
+    fun getUpcomingBankHolidays(
+        gssCode: String,
+        fromDate: LocalDate = LocalDate.now(clock),
+        toDate: LocalDate = fromDate.plusDays(100)
+    ): List<LocalDate> {
         logger.info { "Computing bank holiday(s) between [$fromDate] and [$toDate]" }
         return bankHolidayDataClient.getBankHolidayDates(
             division = BankHolidayDivision.fromGssCode(gssCode),
