@@ -66,6 +66,8 @@ The following environment variables must be set in order to run the application:
 * `JOBS_PROCESS_PRINT_RESPONSES_CRON` - Optional. Overrides the cron schedule for when the Print Provider's OutBound folder is polled to find and process print responses
 * `S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME` - the S3 bucket name where certificate photos are stored
 * `S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT` - the URL of the custom domain file proxy for certificate photos
+* `S3_BANK_HOLIDAYS_BUCKET_NAME` - the bucket name where bank holidays file will be present
+* `S3_BANK_HOLIDAYS_BUCKET_OBJECT_KEY` - the name(object key) of bank holidays json file on bank holidays bucket
 
 #### MYSQL Configuration
 For local setup refer to src/main/resources/db/readme.
