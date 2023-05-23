@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDataClient
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDivision
-import java.time.Clock
 import java.time.LocalDate
 
 private val logger = KotlinLogging.logger {}
@@ -17,12 +16,11 @@ private val logger = KotlinLogging.logger {}
 @Service
 class BankHolidaysDataService(
     private val bankHolidayDataClient: BankHolidayDataClient,
-    private val clock: Clock
 ) {
 
     fun getUpcomingBankHolidays(
         gssCode: String,
-        fromDate: LocalDate = LocalDate.now(clock),
+        fromDate: LocalDate,
         toDate: LocalDate = fromDate.plusDays(100)
     ): List<LocalDate> {
         logger.info { "Computing bank holiday(s) between [$fromDate] and [$toDate]" }

@@ -13,7 +13,6 @@ import org.mockito.kotlin.verify
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDataClient
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDivision
 import uk.gov.dluhc.printapi.testsupport.toRoundedUTCOffsetDateTime
-import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneOffset
 
@@ -27,11 +26,9 @@ internal class BankHolidaysDataServiceTest {
 
     private val fixedDateAndTime = LocalDate.of(2023, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant()
 
-    private val fixedClock = Clock.fixed(fixedDateAndTime, ZoneOffset.UTC)
-
     @BeforeEach
     fun beforeEach() {
-        bankHolidaysDataService = BankHolidaysDataService(bankHolidayDataClient, fixedClock)
+        bankHolidaysDataService = BankHolidaysDataService(bankHolidayDataClient)
     }
 
     @ParameterizedTest
@@ -55,7 +52,7 @@ internal class BankHolidaysDataServiceTest {
         )
 
         // When
-        val actualBankHolidayDates = bankHolidaysDataService.getUpcomingBankHolidays(gssCode, fromDate = today)
+        val actualBankHolidayDates = bankHolidaysDataService.getUpcomingBankHolidays(gssCode = gssCode, fromDate = today)
 
         // Then
         assertThat(actualBankHolidayDates).hasSize(1).isEqualTo(expectedBankHolidayDatesResponse)
