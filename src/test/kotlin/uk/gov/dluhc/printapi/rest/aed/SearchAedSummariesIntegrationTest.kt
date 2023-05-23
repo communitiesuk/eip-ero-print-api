@@ -6,6 +6,7 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.models.AedSearchBy
+import uk.gov.dluhc.printapi.models.AedSearchBy.APPLICATION_REFERENCE
 import uk.gov.dluhc.printapi.models.AedSearchBy.SURNAME
 import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
 import uk.gov.dluhc.printapi.testsupport.bearerToken
@@ -79,7 +80,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         val actual = response.responseBody.blockFirst()
         assertThat(actual).isNotNull
         with(actual!!) {
-            assertThat(page).isEqualTo(1)
+            assertThat(page).isZero()
             assertThat(pageSize).isEqualTo(100)
             assertThat(totalPages).isZero()
             assertThat(totalResults).isZero()
@@ -199,7 +200,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
     }
 
     @Test
-    fun `should return empty list given no matching records found when searchBy surname`() {
+    fun `should return summaries matching surname given searchBy surname specified`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -208,17 +209,29 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         wireMockService.stubCognitoJwtIssuerResponse()
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
-        val application1Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "Smi-th")
+        val currentDate = LocalDate.now()
+        val currentDateTimeInstant = Instant.now()
+        val application1Aed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            issueDate = currentDate.minusDays(2),
+            requestDateTime = currentDateTimeInstant.minusSeconds(10),
+            surname = "Smith",
+        )
+
         val application2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "BlackSmith")
-        val application3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "Sm1th")
-        val application4Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "S mith")
-        val otherGssCodeApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
+        val application3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.plusDays(1))
+        val application4Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate, surname = "S'mith")
+        val otherApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
 
         anonymousElectorDocumentRepository.saveAll(
             listOf(
-                application1Aed, application2Aed, application3Aed, application4Aed, otherGssCodeApplicationAed
+                application1Aed, application2Aed, application3Aed, application4Aed, otherApplicationAed
             )
         )
+
+        val expectedSummaryRecord1 = buildAedSearchSummaryApiFromAedEntity(application4Aed)
+        val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(application1Aed)
+        val expectedResults = listOf(expectedSummaryRecord1, expectedSummaryRecord2)
 
         // When
         val response = webTestClient.get()
@@ -231,18 +244,15 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual).isNotNull
-        with(actual!!) {
-            assertThat(page).isEqualTo(1)
-            assertThat(pageSize).isEqualTo(100)
-            assertThat(totalPages).isZero()
-            assertThat(totalResults).isZero()
-            assertThat(results).isNotNull.isEmpty()
-        }
+        assertThat(actual!!.results).isNotEmpty
+            .hasSize(2)
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
+            .isEqualTo(expectedResults)
     }
 
     @Test
-    fun `should return summaries matching surname given searchBy surname specified`() {
+    fun `should return summaries matching application reference given searchBy applicationReference specified`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -251,31 +261,26 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
         wireMockService.stubCognitoJwtIssuerResponse()
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
-        val currentDate = LocalDate.now()
-        val matchingApplication1Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.minusDays(2), surname = "Smith")
-        // Although surname matches for below AED 2, however this record won't be returned due to pageSize = 2
-        val matchingApplication2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.minusDays(5), surname = "Smith")
-        val matchingApplication3Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate, surname = "S'mith")
+        val applicationReference1 = aValidApplicationReference()
+        val application1Aed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            applicationReference = applicationReference1
+        )
 
-        val unmatchedApplication1Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, surname = "BlackSmith")
-        val unmatchedApplication2Aed = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate.plusDays(1))
-        val otherGssCodeApplicationAed = buildAnonymousElectorDocument(gssCode = ANOTHER_GSS_CODE)
+        val applicationReference2 = aValidApplicationReference()
+        val application2Aed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            applicationReference = applicationReference2
+        )
 
         anonymousElectorDocumentRepository.saveAll(
             listOf(
-                matchingApplication1Aed, matchingApplication2Aed, matchingApplication3Aed,
-                unmatchedApplication1Aed, unmatchedApplication2Aed, otherGssCodeApplicationAed
+                application1Aed, application2Aed
             )
         )
 
-        val expectedSummaryRecord1 = buildAedSearchSummaryApiFromAedEntity(matchingApplication3Aed)
-        val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(matchingApplication1Aed)
-        val expectedResultsInExactOrder = listOf(expectedSummaryRecord1, expectedSummaryRecord2)
-        val expectedTotalPages = 2
-        val expectedTotalResults = 3
-
-        val pageSize = 2
-        val searchBySurnameValue = "Smith"
+        val expectedSummaryRecord1 = buildAedSearchSummaryApiFromAedEntity(application1Aed)
+        val expectedResults = listOf(expectedSummaryRecord1)
 
         // When
         val response = webTestClient.get()
@@ -283,10 +288,8 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
                 buildUri(
                     uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE,
                     eroId = ERO_ID,
-                    page = 1,
-                    pageSize = pageSize,
-                    searchBy = SURNAME,
-                    searchValue = searchBySurnameValue
+                    searchBy = APPLICATION_REFERENCE,
+                    searchValue = applicationReference1
                 )
             )
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
@@ -297,18 +300,11 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual).isNotNull
-        with(actual!!) {
-            assertThat(page).isEqualTo(1)
-            assertThat(pageSize).isEqualTo(pageSize)
-            assertThat(totalPages).isEqualTo(expectedTotalPages)
-            assertThat(totalResults).isEqualTo(expectedTotalResults)
-            assertThat(results).isNotEmpty
-                .hasSize(2)
-                .usingRecursiveComparison()
-                .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
-                .isEqualTo(expectedResultsInExactOrder)
-        }
+        assertThat(actual!!.results).isNotEmpty
+            .hasSize(1)
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
+            .isEqualTo(expectedResults)
     }
 
     private fun buildUri(

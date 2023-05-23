@@ -2,7 +2,7 @@ package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 
 private val logger = KotlinLogging.logger { }

@@ -9,77 +9,39 @@ internal class SearchDataSanitizationTest {
     @CsvSource(
         value = [
             "doe,DOE",
-            "Doe,DOE",
-            "DoE,DOE",
-        ]
-    )
-    @ParameterizedTest
-    fun `should uppercase surname in sanitized form`(surname: String, expected: String) {
-
-        val actual = sanitizeSurname(surname)
-
-        assertThat(actual).isEqualTo(expected)
-    }
-
-    @CsvSource(
-        value = [
-            "doe ,DOE",
-            " doe,DOE",
             " doe ,DOE",
-        ]
-    )
-    @ParameterizedTest
-    fun `should trim surname in sanitized form`(surname: String, expected: String) {
-
-        val actual = sanitizeSurname(surname)
-
-        assertThat(actual).isEqualTo(expected)
-    }
-
-    @CsvSource(
-        value = [
             "o'leary,OLEARY",
-            "de'Medici,DEMEDICI",
-            "Nyong'o,NYONGO",
-            "Prud'hon,PRUDHON",
-        ]
-    )
-    @ParameterizedTest
-    fun `should remove apostrophe from surname in sanitized form`(surname: String, expected: String) {
-
-        val actual = sanitizeSurname(surname)
-
-        assertThat(actual).isEqualTo(expected)
-    }
-
-    @CsvSource(
-        value = [
             "Llewelyn-Bowen,LLEWELYN BOWEN",
-            "Day-Lewis,DAY LEWIS",
-            "Zeta-Jones,ZETA JONES",
-            "Taylor-Joy,TAYLOR JOY",
-        ]
-    )
-    @ParameterizedTest
-    fun `should replace hyphen with space for surname in sanitized form`(surname: String, expected: String) {
-
-        val actual = sanitizeSurname(surname)
-
-        assertThat(actual).isEqualTo(expected)
-    }
-
-    @CsvSource(
-        value = [
             "Harper Adams,HARPER ADAMS",
             "Harper  Adams,HARPER ADAMS",
-            "Harper   Adams,HARPER ADAMS",
         ]
     )
     @ParameterizedTest
-    fun `should reduce to single space for surname in sanitized form`(surname: String, expected: String) {
+    fun `should sanitize surname`(surname: String, expected: String) {
+        // Given
 
+        // When
         val actual = sanitizeSurname(surname)
 
+        // Then
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @CsvSource(
+        value = [
+            "V123ABCXYZ,V123ABCXYZ",
+            "v123abcxyz,V123ABCXYZ",
+            "v  123  ab  c xy z  ,V123ABCXYZ"
+        ]
+    )
+    @ParameterizedTest
+    fun `should sanitize application reference number`(applicationReference: String, expected: String) {
+        // Given
+
+        // When
+        val actual = sanitizeApplicationReference(applicationReference)
+
+        // Then
         assertThat(actual).isEqualTo(expected)
     }
 }
