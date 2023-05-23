@@ -37,7 +37,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             val upcomingBankHoliday = LocalDate.of(2023, 2, 1)
             val expectedRemovalDate = LocalDate.of(2023, 2, 9)
             given(dataRetentionConfig.certificateInitialRetentionPeriod).willReturn(Period.ofDays(28))
-            given(bankHolidaysDataService.getUpcomingBankHolidays(any())).willReturn(listOf(upcomingBankHoliday))
+            given(bankHolidaysDataService.getUpcomingBankHolidays(any(), any(), any())).willReturn(listOf(upcomingBankHoliday))
 
             // When
             val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
@@ -45,7 +45,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
             verify(dataRetentionConfig).certificateInitialRetentionPeriod
-            verify(bankHolidaysDataService).getUpcomingBankHolidays(gssCode)
+            verify(bankHolidaysDataService).getUpcomingBankHolidays(gssCode, fromDate = issueDate, toDate = issueDate.plusDays(100))
         }
 
         @Test
@@ -55,7 +55,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             val issueDate = LocalDate.of(2023, 1, 1)
             val expectedRemovalDate = LocalDate.of(2023, 2, 8)
             given(dataRetentionConfig.certificateInitialRetentionPeriod).willReturn(Period.ofDays(28))
-            given(bankHolidaysDataService.getUpcomingBankHolidays(any())).willReturn(emptyList())
+            given(bankHolidaysDataService.getUpcomingBankHolidays(any(), any(), any())).willReturn(emptyList())
 
             // When
             val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
@@ -63,7 +63,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
             verify(dataRetentionConfig).certificateInitialRetentionPeriod
-            verify(bankHolidaysDataService).getUpcomingBankHolidays(gssCode)
+            verify(bankHolidaysDataService).getUpcomingBankHolidays(gssCode, fromDate = issueDate, toDate = issueDate.plusDays(100))
         }
     }
 
