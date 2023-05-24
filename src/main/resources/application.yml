@@ -32,6 +32,8 @@ s3:
   certificate-photo-access-duration: 1M
   certificate-photos-target-bucket: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME}
   certificate-photos-target-bucket-proxy-endpoint: ${S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT}
+  bank-holidays-bucket: ${S3_BANK_HOLIDAYS_BUCKET_NAME}
+  bank-holidays-bucket-object-key: ${S3_BANK_HOLIDAYS_BUCKET_OBJECT_KEY}
 
 api:
   print-api:

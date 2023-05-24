@@ -68,6 +68,7 @@ dependencies {
 
     // internal libs
     implementation("uk.gov.dluhc:logging-library:2.2.0")
+    implementation("uk.gov.dluhc:bank-holidays-data-client-library:1.0.0")
     implementation("uk.gov.dluhc:messaging-support-library:1.0.0")
 
     // api

@@ -3,11 +3,11 @@ package uk.gov.dluhc.printapi.client
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import uk.gov.dluhc.printapi.client.BankHolidayDivision.ENGLAND_AND_WALES
+import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDivision.ENGLAND_AND_WALES
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import java.time.LocalDate
 
-internal class BankHolidayDataFileClientTest : IntegrationTest() {
+internal class S3V2ApiBankHolidayDataClientIntegrationTest : IntegrationTest() {
 
     @ParameterizedTest
     @CsvSource(
@@ -18,13 +18,17 @@ internal class BankHolidayDataFileClientTest : IntegrationTest() {
             "2023-04-03,2023-04-11,2"
         ]
     )
-    fun `should get bank holiday dates`(fromDate: LocalDate, toDate: LocalDate, count: Int) {
+    fun `should get bank holiday dates`(
+        fromDate: LocalDate,
+        toDate: LocalDate,
+        expectedBankHolidayCount: Int
+    ) {
         // Given
 
         // When
         val bankHolidayDates = bankHolidayDataClient.getBankHolidayDates(ENGLAND_AND_WALES, fromDate, toDate)
 
         // Then
-        assertThat(bankHolidayDates).hasSize(count)
+        assertThat(bankHolidayDates).hasSize(expectedBankHolidayCount)
     }
 }

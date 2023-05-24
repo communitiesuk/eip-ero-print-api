@@ -12,10 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
-import uk.gov.dluhc.printapi.client.BankHolidayDataClient
-import uk.gov.dluhc.printapi.client.BankHolidayDivision.ENGLAND_AND_WALES
 import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import java.time.LocalDate
+import java.time.Month.FEBRUARY
+import java.time.Month.JANUARY
 import java.time.Period
 
 @ExtendWith(MockitoExtension::class)
@@ -24,7 +24,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
     private lateinit var dataRetentionConfig: DataRetentionConfiguration
 
     @Mock
-    private lateinit var bankHolidayDataClient: BankHolidayDataClient
+    private lateinit var bankHolidaysDataService: BankHolidaysDataService
 
     @InjectMocks
     private lateinit var electorDocumentRemovalDateResolver: ElectorDocumentRemovalDateResolver
@@ -35,11 +35,11 @@ internal class ElectorDocumentRemovalDateResolverTest {
         fun `should get initial retention period removal date for delivery info given upcoming bank holiday`() {
             // Given
             val gssCode = "E09000007"
-            val issueDate = LocalDate.of(2023, 1, 1)
-            val upcomingBankHoliday = LocalDate.of(2023, 2, 1)
-            val expectedRemovalDate = LocalDate.of(2023, 2, 9)
+            val issueDate = LocalDate.of(2023, JANUARY, 1)
+            val upcomingBankHoliday = LocalDate.of(2023, FEBRUARY, 1)
+            val expectedRemovalDate = LocalDate.of(2023, FEBRUARY, 9)
             given(dataRetentionConfig.certificateInitialRetentionPeriod).willReturn(Period.ofDays(28))
-            given(bankHolidayDataClient.getBankHolidayDates(any(), any(), any())).willReturn(listOf(upcomingBankHoliday))
+            given(bankHolidaysDataService.getUpcomingBankHolidays(any(), any(), any())).willReturn(listOf(upcomingBankHoliday))
 
             // When
             val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
@@ -47,17 +47,17 @@ internal class ElectorDocumentRemovalDateResolverTest {
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
             verify(dataRetentionConfig).certificateInitialRetentionPeriod
-            verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES, issueDate)
+            verify(bankHolidaysDataService).getUpcomingBankHolidays(gssCode, fromDate = issueDate, toDate = issueDate.plusDays(100))
         }
 
         @Test
         fun `should get initial retention period removal date for delivery info given no upcoming bank holidays`() {
             // Given
             val gssCode = "E09000007"
-            val issueDate = LocalDate.of(2023, 1, 1)
-            val expectedRemovalDate = LocalDate.of(2023, 2, 8)
+            val issueDate = LocalDate.of(2023, JANUARY, 1)
+            val expectedRemovalDate = LocalDate.of(2023, FEBRUARY, 8)
             given(dataRetentionConfig.certificateInitialRetentionPeriod).willReturn(Period.ofDays(28))
-            given(bankHolidayDataClient.getBankHolidayDates(any(), any(), any())).willReturn(emptyList())
+            given(bankHolidaysDataService.getUpcomingBankHolidays(any(), any(), any())).willReturn(emptyList())
 
             // When
             val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
@@ -65,7 +65,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
             verify(dataRetentionConfig).certificateInitialRetentionPeriod
-            verify(bankHolidayDataClient).getBankHolidayDates(ENGLAND_AND_WALES, issueDate)
+            verify(bankHolidaysDataService).getUpcomingBankHolidays(gssCode, fromDate = issueDate, toDate = issueDate.plusDays(100))
         }
     }
 
