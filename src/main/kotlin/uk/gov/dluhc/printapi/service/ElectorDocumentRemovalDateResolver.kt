@@ -1,14 +1,12 @@
 package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Component
-import uk.gov.dluhc.printapi.client.BankHolidayDataClient
-import uk.gov.dluhc.printapi.client.BankHolidayDivision
 import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.Month
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.DAYS
 
 /**
  * Responsible for determining the removal date for an Elector Document's data. The removal date varies, depending on
@@ -17,7 +15,7 @@ import java.time.temporal.ChronoUnit
 @Component
 class ElectorDocumentRemovalDateResolver(
     private val dataRetentionConfig: DataRetentionConfiguration,
-    private val bankHolidayDataClient: BankHolidayDataClient
+    private val bankHolidaysDataService: BankHolidaysDataService,
 ) {
 
     /**
@@ -92,7 +90,9 @@ class ElectorDocumentRemovalDateResolver(
     }
 
     private fun getTotalDaysForWorkingDays(issueDate: LocalDate, requiredWorkingDays: Int, gssCode: String): Int {
-        val upcomingBankHolidays = bankHolidayDataClient.getBankHolidayDates(BankHolidayDivision.fromGssCode(gssCode), issueDate)
+        val upcomingBankHolidays =
+            bankHolidaysDataService.getUpcomingBankHolidays(gssCode = gssCode, fromDate = issueDate)
+
         var date = issueDate
         var workingDays = 0
         while (workingDays < requiredWorkingDays) {
@@ -101,7 +101,7 @@ class ElectorDocumentRemovalDateResolver(
                 workingDays++
             }
         }
-        return ChronoUnit.DAYS.between(issueDate, date).toInt()
+        return DAYS.between(issueDate, date).toInt()
     }
 
     private fun isWorkingDay(date: LocalDate, upcomingBankHolidays: List<LocalDate>) =

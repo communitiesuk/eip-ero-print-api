@@ -23,5 +23,7 @@ class S3Configuration {
 data class S3Properties(
     val certificatePhotosTargetBucket: String,
     val certificatePhotosTargetBucketProxyEndpoint: String,
-    val certificatePhotoAccessDuration: Duration
+    val certificatePhotoAccessDuration: Duration,
+    val bankHolidaysBucket: String,
+    val bankHolidaysBucketObjectKey: String,
 )

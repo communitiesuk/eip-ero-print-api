@@ -8,16 +8,20 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.core.io.ClassPathResource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
 import software.amazon.awssdk.services.ses.SesClient
+import uk.gov.dluhc.printapi.testsupport.buildS3Arn
 import java.net.InetAddress
 import java.net.URI
 
@@ -80,7 +84,8 @@ class LocalStackContainerConfiguration {
     @Primary
     @Bean
     fun createS3BucketSettings(
-        awsCredentialsProvider: AwsCredentialsProvider?
+        awsCredentialsProvider: AwsCredentialsProvider?,
+        s3Properties: S3Properties
     ): S3Client {
         val s3Client = S3Client.builder()
             .endpointOverride(localStackContainer.getEndpointOverride())
@@ -91,16 +96,40 @@ class LocalStackContainerConfiguration {
             )
             .build()
 
-        createS3BucketsRequiredForTesting(s3Client)
+        createS3BucketsRequiredForTesting(s3Client = s3Client, s3Properties = s3Properties)
+        createS3FileInBankHolidaysBucket(s3Client = s3Client, s3Properties = s3Properties)
 
         return s3Client
     }
 
-    private fun createS3BucketsRequiredForTesting(s3Client: S3Client) {
+    private fun createS3BucketsRequiredForTesting(
+        s3Client: S3Client,
+        s3Properties: S3Properties
+    ) {
         try {
-            s3Client.createBucket(CreateBucketRequest.builder().bucket(S3_BUCKET_CONTAINING_PHOTOS).build())
+            with(s3Properties) {
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(certificatePhotosTargetBucket).build())
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(bankHolidaysBucket).build())
+            }
         } catch (ex: S3Exception) {
             // ignore
+        }
+    }
+
+    private fun createS3FileInBankHolidaysBucket(
+        s3Client: S3Client,
+        s3Properties: S3Properties
+    ) {
+        with(s3Properties) {
+            val bankHolidaysArn = buildS3Arn(bankHolidaysBucket, bankHolidaysBucketObjectKey)
+            val testFileLocation = "bank-holidays/test-bank-holidays.json"
+            val putObjectRequest =
+                PutObjectRequest.builder()
+                    .bucket(bankHolidaysBucket)
+                    .key(bankHolidaysBucketObjectKey)
+                    .build()
+            s3Client.putObject(putObjectRequest, RequestBody.fromFile(ClassPathResource(testFileLocation).file))
+            logger.info { "Uploaded [$testFileLocation] to S3 bucket [$bankHolidaysBucket] with arn [$bankHolidaysArn]" }
         }
     }
 
