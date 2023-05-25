@@ -1,9 +1,11 @@
 package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDataClient
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDivision
+import uk.gov.dluhc.printapi.config.UK_BANK_HOLIDAYS_CACHE
 import java.time.LocalDate
 
 private val logger = KotlinLogging.logger {}
@@ -18,6 +20,7 @@ class BankHolidaysDataService(
     private val bankHolidayDataClient: BankHolidayDataClient,
 ) {
 
+    @Cacheable(UK_BANK_HOLIDAYS_CACHE)
     fun getUpcomingBankHolidays(
         gssCode: String,
         fromDate: LocalDate,

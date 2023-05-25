@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
@@ -44,6 +45,7 @@ import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
+import uk.gov.dluhc.printapi.service.BankHolidaysDataService
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentSearchService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
@@ -53,6 +55,7 @@ import uk.gov.dluhc.printapi.testsupport.emails.LocalstackEmailMessagesSentClien
 import java.io.File
 import java.nio.charset.Charset
 import java.time.Clock
+import java.time.Duration
 
 private val logger = KotlinLogging.logger {}
 
@@ -162,6 +165,15 @@ internal abstract class IntegrationTest {
     @Autowired
     protected lateinit var anonymousElectorDocumentSearchService: AnonymousElectorDocumentSearchService
 
+    @Autowired
+    protected lateinit var bankHolidaysDataService: BankHolidaysDataService
+
+    @Autowired
+    protected lateinit var cacheManager: CacheManager
+
+    @Value("\${caching.time-to-live}")
+    protected lateinit var timeToLive: Duration
+
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
@@ -190,6 +202,7 @@ internal abstract class IntegrationTest {
         clearRepository(certificateRepository, "certificateRepository")
         clearRepository(temporaryCertificateRepository, "temporaryCertificateRepository")
         clearRepository(anonymousElectorDocumentRepository, "anonymousElectorDocumentRepository")
+        cacheManager.getCache(UK_BANK_HOLIDAYS_CACHE)?.clear()
     }
 
     private fun clearRepository(repository: CrudRepository<*, *>, repoName: String) {
