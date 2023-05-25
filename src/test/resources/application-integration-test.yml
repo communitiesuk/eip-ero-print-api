@@ -81,3 +81,5 @@ jobs:
   enabled: false
   batch-print-requests:
     batch-size: 100
+
+caching.time-to-live: PT2S  #Time period of 2 seconds
