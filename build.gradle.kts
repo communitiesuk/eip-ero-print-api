@@ -120,6 +120,10 @@ dependencies {
     // OpenPDF
     implementation("com.github.librepdf:openpdf:1.3.30")
 
+    // caching
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
     // Test implementations
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")

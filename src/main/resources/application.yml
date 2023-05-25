@@ -231,3 +231,5 @@ email:
       subject: Electoral Registration Office Portal - printing failed - application ${applicationReference}
       email-body-template: email-templates/prod/certificate-failed-to-print.html
       send-to-requesting-user: false
+
+caching.time-to-live: PT24H  #Time period of 24 hours
