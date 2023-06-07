@@ -68,6 +68,7 @@ dependencies {
 
     // internal libs
     implementation("uk.gov.dluhc:logging-library:2.2.0")
+    implementation("uk.gov.dluhc:bank-holidays-data-client-library:1.0.0")
     implementation("uk.gov.dluhc:messaging-support-library:1.0.0")
 
     // api
@@ -118,6 +119,10 @@ dependencies {
 
     // OpenPDF
     implementation("com.github.librepdf:openpdf:1.3.30")
+
+    // caching
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine")
 
     // Test implementations
     testImplementation("org.springframework.boot:spring-boot-starter-test")
