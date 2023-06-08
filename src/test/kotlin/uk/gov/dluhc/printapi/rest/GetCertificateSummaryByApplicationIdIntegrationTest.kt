@@ -7,6 +7,8 @@ import org.springframework.http.MediaType
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapperImpl
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
@@ -28,6 +30,8 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
         private const val URI_TEMPLATE = "/eros/{ERO_ID}/certificates?applicationId={APPLICATION_ID}"
         private const val APPLICATION_ID = "7762ccac7c056046b75d4aa3"
     }
+
+    private val deliveryAddressTypeMapper: DeliveryAddressTypeMapper = DeliveryAddressTypeMapperImpl()
 
     @Test
     fun `should return bad request given request without applicationId query string parameter`() {
@@ -123,13 +127,15 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
                     userId = request1.userId!!,
                     dateTime = status2.eventDateTime!!.atOffset(ZoneOffset.UTC),
-                    message = status2.message
+                    message = status2.message,
+                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToApi(request1.delivery!!.deliveryAddressType)
                 ),
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_FAILED,
                     userId = request2.userId!!,
                     dateTime = status4.eventDateTime!!.atOffset(ZoneOffset.UTC),
-                    message = status4.message
+                    message = status4.message,
+                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToApi(request2.delivery!!.deliveryAddressType)
                 ),
             )
         )
