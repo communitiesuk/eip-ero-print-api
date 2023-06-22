@@ -39,7 +39,7 @@ class EmailService(
                 "sourceReference" to sourceReference,
                 "applicationReference" to applicationReference,
                 "localAuthorityEmailAddresses" to localAuthorityEmailAddresses,
-                "applicationUrl" to "${emailContentConfiguration.vacBaseUrl}/${request.applicationReference}"
+                "applicationUrl" to "${emailContentConfiguration.vacBaseUrl}/${request.sourceReference}"
             )
         }
 
