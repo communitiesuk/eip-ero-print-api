@@ -47,7 +47,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = emptySet<String>()
             val expectedSubject = "Electoral Registration Office Portal - certificate returned - application $applicationReference"
-            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
+            val expectedEmailBodyContainingLink = "(.|\\s)*href=\".*/voter-authority-certificate/$sourceReference\"(.|\\s)*"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(
@@ -74,7 +74,8 @@ internal class EmailServiceTest {
                     eq(expectedSubject),
                     capture()
                 )
-                assertThat(firstValue).matches(expectedEmailBody)
+                assertThat(firstValue).contains(applicationReference)
+                assertThat(firstValue).matches(expectedEmailBodyContainingLink)
             }
             verify(emailContentConfiguration).vacBaseUrl
             verify(emailContentConfiguration).certificateReturned
@@ -93,7 +94,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = setOf("joe.bloggs@camden.gov.uk")
             val expectedSubject = "Electoral Registration Office Portal - certificate returned - application $applicationReference"
-            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
+            val expectedEmailBodyContainingLink = "(.|\\s)*href=\".*/voter-authority-certificate/$sourceReference\"(.|\\s)*"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(
@@ -120,7 +121,8 @@ internal class EmailServiceTest {
                     eq(expectedSubject),
                     capture()
                 )
-                assertThat(firstValue).matches(expectedEmailBody)
+                assertThat(firstValue).contains(applicationReference)
+                assertThat(firstValue).matches(expectedEmailBodyContainingLink)
             }
             verify(emailContentConfiguration).vacBaseUrl
             verify(emailContentConfiguration).certificateReturned
@@ -152,7 +154,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = emptySet<String>()
             val expectedSubject = "Electoral Registration Office Portal - printing failed - application $applicationReference"
-            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
+            val expectedEmailBodyContainingLink = "(.|\\s)*href=\".*/voter-authority-certificate/$sourceReference\"(.|\\s)*"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(
@@ -179,7 +181,8 @@ internal class EmailServiceTest {
                     eq(expectedSubject),
                     capture()
                 )
-                assertThat(firstValue).matches(expectedEmailBody)
+                assertThat(firstValue).contains(applicationReference)
+                assertThat(firstValue).matches(expectedEmailBodyContainingLink)
             }
             verify(emailContentConfiguration).vacBaseUrl
             verify(emailContentConfiguration).certificateFailedToPrint
@@ -198,7 +201,7 @@ internal class EmailServiceTest {
             val expectedToRecipients = setOf("electoral.services@camden.gov.uk")
             val expectedCcRecipients = setOf("joe.bloggs@camden.gov.uk")
             val expectedSubject = "Electoral Registration Office Portal - printing failed - application $applicationReference"
-            val expectedEmailBody = "((.|\\s)*)$applicationReference((.|\\s)*)"
+            val expectedEmailBodyContainingLink = "(.|\\s)*href=\".*/voter-authority-certificate/$sourceReference\"(.|\\s)*"
 
             given(emailContentConfiguration.vacBaseUrl).willReturn("https://ero.dev.erop.ierds.uk/voter-authority-certificate")
             val emailContentProperties = buildEmailContentProperties(
@@ -225,7 +228,8 @@ internal class EmailServiceTest {
                     eq(expectedSubject),
                     capture()
                 )
-                assertThat(firstValue).matches(expectedEmailBody)
+                assertThat(firstValue).contains(applicationReference)
+                assertThat(firstValue).matches(expectedEmailBodyContainingLink)
             }
             verify(emailContentConfiguration).vacBaseUrl
             verify(emailContentConfiguration).certificateFailedToPrint
