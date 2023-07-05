@@ -6,13 +6,13 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "2.7.11"
+    id("org.springframework.boot") version "2.7.12"
     id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.8.10"
-    kotlin("kapt") version "1.8.10"
-    kotlin("plugin.spring") version "1.8.10"
-    kotlin("plugin.jpa") version "1.8.10"
-    kotlin("plugin.allopen") version "1.8.10"
+    kotlin("jvm") version "1.8.22"
+    kotlin("kapt") version "1.8.22"
+    kotlin("plugin.spring") version "1.8.22"
+    kotlin("plugin.jpa") version "1.8.22"
+    kotlin("plugin.allopen") version "1.8.22"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
     id("org.openapi.generator") version "6.2.1"
@@ -85,10 +85,6 @@ dependencies {
     // Logging
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.3")
 
-    // webclient
-    implementation("org.springframework:spring-webflux")
-    implementation("io.projectreactor.netty:reactor-netty-http")
-
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -97,6 +93,7 @@ dependencies {
 
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.1")
@@ -127,7 +124,6 @@ dependencies {
     // Test implementations
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 
     testImplementation("org.testcontainers:junit-jupiter:1.17.6")
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
