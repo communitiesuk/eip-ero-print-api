@@ -8,14 +8,22 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.mapper.CertificateSummaryResponseMapper
+import uk.gov.dluhc.printapi.mapper.VacSearchQueryStringParametersMapper
+import uk.gov.dluhc.printapi.mapper.VacSummarySearchResponseMapper
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
+import uk.gov.dluhc.printapi.models.VacSearchSummaryResponse
 import uk.gov.dluhc.printapi.service.CertificateSummaryService
+import uk.gov.dluhc.printapi.service.VacSummarySearchService
+import javax.validation.Valid
 
 @RestController
 @CrossOrigin
 class CertificateSummaryController(
     private val certificateSummaryService: CertificateSummaryService,
-    private val certificateSummaryResponseMapper: CertificateSummaryResponseMapper
+    private val certificateSearchSummaryService: VacSummarySearchService,
+    private val certificateSummaryResponseMapper: CertificateSummaryResponseMapper,
+    private val vacSummarySearchResponseMapper: VacSummarySearchResponseMapper,
+    private val vacSearchQueryStringParametersMapper: VacSearchQueryStringParametersMapper
 ) {
     @GetMapping("/eros/{eroId}/certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
@@ -25,6 +33,22 @@ class CertificateSummaryController(
     ): CertificateSummaryResponse {
         return certificateSummaryService.getCertificateSummary(eroId, VOTER_CARD, applicationId)
             .let { certificateSummaryResponseMapper.toCertificateSummaryResponse(it) }
+    }
+
+    @GetMapping("/eros/{eroId}/certificates/search")
+    @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
+    fun searchCertificates(
+        @PathVariable eroId: String,
+        @Valid searchQueryStringParameters: VacSearchQueryStringParameters
+    ): VacSearchSummaryResponse {
+        val searchCriteriaDto =
+            vacSearchQueryStringParametersMapper.toVacSearchCriteriaDto(
+                eroId = eroId,
+                searchQueryParameters = searchQueryStringParameters
+            )
+        with(certificateSearchSummaryService.searchVacSummaries(searchCriteriaDto)) {
+            return vacSummarySearchResponseMapper.toVacSearchSummaryResponse(this)
+        }
     }
 
     @Deprecated(
