@@ -100,7 +100,7 @@ paths:
   '/eros/{eroId}/certificates/search':
     parameters:
       - name: eroId
-        description: The ID of the Electoral Registration Office responsible for the Anonymous Elector Documents.
+        description: The ID of the Electoral Registration Office responsible for the Voter Authority Certificates.
         schema:
           type: string
         example: 'city-council'
@@ -172,7 +172,7 @@ paths:
           required: false
         - name: searchBy
           description: |
-            The data field to apply the `searchValue` to. An empty value will return all AED documents.
+            The data field to apply the `searchValue` to. An empty value will return all VAC documents.
             This value must be provided when `searchValue` is present
           schema:
             $ref: '#/components/schemas/VacSearchBy'
@@ -193,7 +193,7 @@ paths:
         - eroUserCognitoUserPoolAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
-        uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/search'
+        uri: '${base_uri}/eros/{eroId}/certificates/search'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
         responseParameters:

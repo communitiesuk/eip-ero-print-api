@@ -31,7 +31,7 @@ class VacSearchSummaryResponseMapperTest {
     private lateinit var mapper: VacSummarySearchResponseMapperImpl
 
     @Test
-    fun `should map VacSummaryDto to an VacSummaryResponse`() {
+    fun `should map VacSummaryDto to a VacSummaryResponse`() {
         // Given
         val expectedOffsetDateTime = OffsetDateTime.now()
         given(instantMapper.toOffsetDateTime(any())).willReturn(expectedOffsetDateTime)
@@ -69,7 +69,7 @@ class VacSearchSummaryResponseMapperTest {
     }
 
     @Test
-    fun `should map VacSearchSummaryResults dto to an VacSearchSummaryResponse Api`() {
+    fun `should map VacSearchSummaryResults dto to a VacSearchSummaryResponse Api`() {
         // Given
         val expectedOffsetDateTime = OffsetDateTime.now()
         given(instantMapper.toOffsetDateTime(any())).willReturn(expectedOffsetDateTime)
