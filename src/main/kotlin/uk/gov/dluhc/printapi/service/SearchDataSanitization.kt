@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.aed
+package uk.gov.dluhc.printapi.service
 
 import org.apache.commons.lang3.StringUtils.EMPTY
 import org.apache.commons.lang3.StringUtils.SPACE
