@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.19.0'
+  version: '1.20.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -87,6 +87,113 @@ paths:
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
         uri: '${base_uri}/eros/{eroId}/certificates'
+        requestParameters:
+          integration.request.path.eroId: method.request.path.eroId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  '/eros/{eroId}/certificates/search':
+    parameters:
+      - name: eroId
+        description: The ID of the Electoral Registration Office responsible for the Voter Authority Certificates.
+        schema:
+          type: string
+        example: 'city-council'
+        in: path
+        required: true
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Voter Authority Certificates (VAC)
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Search for Voter Authority Certificates
+      description: 'Search for Voter Authority Certificates based on querying parameters'
+      tags:
+        - Voter Authority Certificates (VAC)
+      responses:
+        '200':
+          $ref: '#/components/responses/VacSearchResults'
+      operationId: search-voter-authority-certificates
+      parameters:
+        - name: page
+          description: The page number being requested (with the first page being 1). Defaulted to 1 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          in: query
+          required: false
+        - name: pageSize
+          description: The number of results to return in each page. Defaulted to 100 if not supplied
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+          example: 100
+          in: query
+          required: false
+        - name: searchBy
+          description: |
+            The data field to apply the `searchValue` to. An empty value will return all VAC documents.
+            This value must be provided when `searchValue` is present
+          schema:
+            $ref: '#/components/schemas/VacSearchBy'
+          example: applicationReference
+          in: query
+          required: false
+        - name: searchValue
+          description: |
+            The value to search the field specified by the `searchBy` parameter. 
+            The search is a case insensitive match. We do not support fuzzy or wildcard matching.
+            This value must be provided when `searchBy` is present
+          schema:
+            type: string
+          in: query
+          example: ABCD1X2XX3
+          required: false
+      security:
+        - eroUserCognitoUserPoolAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/eros/{eroId}/certificates/search'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
         responseParameters:
@@ -1027,6 +1134,83 @@ components:
       required:
         - vacNumber
         - printRequestSummaries
+    VacSummaryResponse:
+      title: VacSummaryResponse
+      type: object
+      description: A response containing a single Certificate summary
+      properties:
+        vacNumber:
+          type: string
+          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
+          description: The unique identifier of the Certificate. A 20 character alphanumeric string.
+          example: DEV1W0XDH1368LWE1J40
+        applicationReference:
+          type: string
+          example: V3JSZC4CRH
+          description: The application reference as known by the citizen. Not guaranteed to be unique.
+        sourceReference:
+          type: string
+          pattern: '^[a-fA-F\d]{24}$'
+          description: |
+            A 24 character hex string. 
+            The unique identifier of an Anonymous elector document application.
+          example: 1f0f76a9a66f438b9bb33070
+        firstName:
+          type: string
+          maxLength: 255
+          description: First name of the Elector
+          example: John
+        middleNames:
+          type: string
+          maxLength: 255
+          description: Middle names of the Elector
+          example: Malcolm
+        surname:
+          type: string
+          maxLength: 255
+          description: Surname of the Elector
+          example: Smith
+        printRequestSummaries:
+          type: array
+          description: List of print request summaries for the certificate.
+          items:
+            $ref: '#/components/schemas/VacPrintRequestSummary'
+      required:
+        - vacNumber
+        - applicationReference
+        - printRequestSummaries
+    VacSearchSummaryResponse:
+      title: VacSearchSummaryResponse
+      description: Response containing the meta data and results of searching for Voter Authority Certificate summaries
+      type: object
+      properties:
+        page:
+          type: integer
+          description: The page number
+          example: 1
+        pageSize:
+          type: integer
+          description: The number of results per page
+          example: 1
+        totalPages:
+          type: integer
+          description: The total number of pages
+          example: 1
+        totalResults:
+          type: integer
+          description: The total number of results
+          example: 1
+        results:
+          type: array
+          description: Array of voter authority certificate search summaries that matches the search criteria
+          items:
+            $ref: '#/components/schemas/VacSummaryResponse'
+      required:
+        - page
+        - pageSize
+        - totalPages
+        - totalResults
+        - results
     PrintRequestSummary:
       title: PrintRequestSummary
       description: An object containing print request summary
@@ -1051,6 +1235,17 @@ components:
         - print-failed
         - dispatched
         - not-delivered
+    VacPrintRequestSummary:
+      title: VacPrintRequestSummary
+      description: An object containing VAC print request summary
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UpdatedBy'
+      properties:
+        status:
+          $ref: '#/components/schemas/PrintRequestStatus'
+      required:
+        - status
 
     AedSearchBy:
       title: AedSearchBy
@@ -1058,6 +1253,13 @@ components:
       type: string
       enum:
         - surname
+        - applicationReference
+
+    VacSearchBy:
+      title: VacSearchBy
+      description: An enumeration of search by fields for searching VACs
+      type: string
+      enum:
         - applicationReference
 
     SourceType:
@@ -1833,6 +2035,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AedSearchSummaryResponse'
+    VacSearchResults:
+      description: Response containing the search result of Voter Authority Certificates
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VacSearchSummaryResponse'
     PreSignedUrlResource:
       description: Response containing an object detailing the pre-signed URL for the resource
       headers:
