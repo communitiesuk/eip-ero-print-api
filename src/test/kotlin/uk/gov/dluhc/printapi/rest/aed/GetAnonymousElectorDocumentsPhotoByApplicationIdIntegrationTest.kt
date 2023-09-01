@@ -138,7 +138,7 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
         )
         anonymousElectorDocumentRepository.save(anonymousElectorDocument1)
         s3Client.addCertificatePhotoToS3(s3Bucket, photoObjectKey)
-        val expectedEncodedPath = "/dir1/Jane%2B%21%40%C2%A3%24%25%5E%26%2A%28%29%29%29%29_%2B-%3D%5B%5D%7B%7D%27%5C%7C%3B%3B%3C%3E%2C.%3A%3F%23%60~%C2%A7%C2%B1%20Doe%3AAwesome%20Company%20Ltd%3AHEADSHOT.jpg"
+        val expectedEncodedPath = "dir1/Jane%2B%21%40%C2%A3%24%25%5E%26%2A%28%29%29%29%29_%2B-%3D%5B%5D%7B%7D%27%5C%7C%3B%3B%3C%3E%2C.%3A%3F%23%60~%C2%A7%C2%B1%20Doe%3AAwesome%20Company%20Ltd%3AHEADSHOT.jpg"
 
         // When
         val response = webTestClient.get()
@@ -152,6 +152,6 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
 
         // Then
         val actual = response.responseBody.blockFirst()
-        assertThat(actual!!.preSignedUrl.rawPath).isEqualTo(expectedEncodedPath)
+        assertThat(actual!!.preSignedUrl.rawPath).isEqualTo("/$s3Bucket/$expectedEncodedPath")
     }
 }
