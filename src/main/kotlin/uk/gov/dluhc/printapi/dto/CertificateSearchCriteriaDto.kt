@@ -1,13 +1,13 @@
 package uk.gov.dluhc.printapi.dto
 
-data class VacSearchCriteriaDto(
+data class CertificateSearchCriteriaDto(
     val eroId: String,
     val page: Int,
     val pageSize: Int,
-    val searchBy: VacSearchBy? = null,
+    val searchBy: CertificateSearchBy? = null,
     val searchValue: String? = null,
 )
 
-enum class VacSearchBy {
+enum class CertificateSearchBy {
     APPLICATION_REFERENCE,
 }

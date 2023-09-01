@@ -102,13 +102,15 @@ fun buildPrintRequest(
     batchId: String? = null,
     userId: String = aValidUserId(),
     supportingInformationFormat: SupportingInformationFormat? = aValidSupportingInformationFormat(),
+    firstName: String = aValidFirstName(),
+    surname: String = aValidSurname()
 ): PrintRequest {
     val printRequest = PrintRequest(
         requestId = requestId,
         vacVersion = aValidVacVersion(),
         requestDateTime = requestDateTime,
-        firstName = aValidFirstName(),
-        surname = aValidSurname(),
+        firstName = firstName,
+        surname = surname,
         certificateLanguage = aValidCertificateLanguage(),
         supportingInformationFormat = supportingInformationFormat,
         delivery = delivery,

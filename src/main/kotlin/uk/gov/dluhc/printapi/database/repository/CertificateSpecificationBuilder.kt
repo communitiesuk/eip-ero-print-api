@@ -3,8 +3,8 @@ package uk.gov.dluhc.printapi.database.repository
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.dto.VacSearchBy
-import uk.gov.dluhc.printapi.dto.VacSearchCriteriaDto
+import uk.gov.dluhc.printapi.dto.CertificateSearchBy
+import uk.gov.dluhc.printapi.dto.CertificateSearchCriteriaDto
 import uk.gov.dluhc.printapi.service.sanitizeApplicationReference
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
@@ -20,7 +20,7 @@ class CertificateSpecificationBuilder {
 
     fun buildSpecification(
         gssCodes: List<String>,
-        criteria: VacSearchCriteriaDto
+        criteria: CertificateSearchCriteriaDto
     ): Specification<Certificate> {
         return buildSpecificationForGssCodes(gssCodes)
             .and(buildSpecificationForSearchBy(criteria.searchBy, criteria.searchValue))
@@ -30,7 +30,7 @@ class CertificateSpecificationBuilder {
         hasGssCodeIn(gssCodes)
 
     private fun buildSpecificationForSearchBy(
-        searchBy: VacSearchBy?,
+        searchBy: CertificateSearchBy?,
         searchValue: String?
     ): Specification<Certificate>? {
         if (searchBy == null || searchValue == null) {
@@ -38,7 +38,7 @@ class CertificateSpecificationBuilder {
         }
 
         return when (searchBy) {
-            VacSearchBy.APPLICATION_REFERENCE -> hasApplicationReference(sanitizeApplicationReference(searchValue))
+            CertificateSearchBy.APPLICATION_REFERENCE -> hasApplicationReference(sanitizeApplicationReference(searchValue))
         }
     }
 

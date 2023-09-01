@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.20.0'
+  version: '1.21.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -150,7 +150,7 @@ paths:
         - Voter Authority Certificates (VAC)
       responses:
         '200':
-          $ref: '#/components/responses/VacSearchResults'
+          $ref: '#/components/responses/CertificateSearchResults'
       operationId: search-voter-authority-certificates
       parameters:
         - name: page
@@ -175,7 +175,7 @@ paths:
             The data field to apply the `searchValue` to. An empty value will return all VAC documents.
             This value must be provided when `searchValue` is present
           schema:
-            $ref: '#/components/schemas/VacSearchBy'
+            $ref: '#/components/schemas/CertificateSearchBy'
           example: applicationReference
           in: query
           required: false
@@ -1126,24 +1126,6 @@ components:
           pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
           description: The unique identifier of the Certificate. A 20 character alphanumeric string.
           example: DEV1W0XDH1368LWE1J40
-        printRequestSummaries:
-          type: array
-          description: List of print request summaries for the certificate.
-          items:
-            $ref: '#/components/schemas/PrintRequestSummary'
-      required:
-        - vacNumber
-        - printRequestSummaries
-    VacSummaryResponse:
-      title: VacSummaryResponse
-      type: object
-      description: A response containing a single Certificate summary
-      properties:
-        vacNumber:
-          type: string
-          pattern: '^[0-9AC-HJ-NP-RT-Z]{20}$'
-          description: The unique identifier of the Certificate. A 20 character alphanumeric string.
-          example: DEV1W0XDH1368LWE1J40
         applicationReference:
           type: string
           example: V3JSZC4CRH
@@ -1153,7 +1135,7 @@ components:
           pattern: '^[a-fA-F\d]{24}$'
           description: |
             A 24 character hex string. 
-            The unique identifier of an Anonymous elector document application.
+            The unique identifier of a Voter Authority Certificate application.
           example: 1f0f76a9a66f438b9bb33070
         firstName:
           type: string
@@ -1174,13 +1156,13 @@ components:
           type: array
           description: List of print request summaries for the certificate.
           items:
-            $ref: '#/components/schemas/VacPrintRequestSummary'
+            $ref: '#/components/schemas/PrintRequestSummary'
       required:
         - vacNumber
         - applicationReference
         - printRequestSummaries
-    VacSearchSummaryResponse:
-      title: VacSearchSummaryResponse
+    CertificateSearchSummaryResponse:
+      title: CertificateSearchSummaryResponse
       description: Response containing the meta data and results of searching for Voter Authority Certificate summaries
       type: object
       properties:
@@ -1204,7 +1186,7 @@ components:
           type: array
           description: Array of voter authority certificate search summaries that matches the search criteria
           items:
-            $ref: '#/components/schemas/VacSummaryResponse'
+            $ref: '#/components/schemas/CertificateSummaryResponse'
       required:
         - page
         - pageSize
@@ -1235,17 +1217,6 @@ components:
         - print-failed
         - dispatched
         - not-delivered
-    VacPrintRequestSummary:
-      title: VacPrintRequestSummary
-      description: An object containing VAC print request summary
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/UpdatedBy'
-      properties:
-        status:
-          $ref: '#/components/schemas/PrintRequestStatus'
-      required:
-        - status
 
     AedSearchBy:
       title: AedSearchBy
@@ -1255,8 +1226,8 @@ components:
         - surname
         - applicationReference
 
-    VacSearchBy:
-      title: VacSearchBy
+    CertificateSearchBy:
+      title: CertificateSearchBy
       description: An enumeration of search by fields for searching VACs
       type: string
       enum:
@@ -2035,7 +2006,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AedSearchSummaryResponse'
-    VacSearchResults:
+    CertificateSearchResults:
       description: Response containing the search result of Voter Authority Certificates
       headers:
         Access-Control-Allow-Origin:
@@ -2050,7 +2021,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/VacSearchSummaryResponse'
+            $ref: '#/components/schemas/CertificateSearchSummaryResponse'
     PreSignedUrlResource:
       description: Response containing an object detailing the pre-signed URL for the resource
       headers:

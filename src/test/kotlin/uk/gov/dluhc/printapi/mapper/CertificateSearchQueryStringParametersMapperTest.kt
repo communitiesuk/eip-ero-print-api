@@ -3,15 +3,15 @@ package uk.gov.dluhc.printapi.mapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import uk.gov.dluhc.printapi.models.VacSearchBy
-import uk.gov.dluhc.printapi.rest.VacSearchQueryStringParameters
+import uk.gov.dluhc.printapi.models.CertificateSearchBy
+import uk.gov.dluhc.printapi.rest.CertificateSearchQueryStringParameters
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildVacSearchCriteriaDto
-import uk.gov.dluhc.printapi.dto.VacSearchBy as VacSearchByDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificateSearchCriteriaDto
+import uk.gov.dluhc.printapi.dto.CertificateSearchBy as CertificateSearchByDto
 
-class VacSearchQueryStringParametersMapperTest {
+class CertificateSearchQueryStringParametersMapperTest {
 
-    private val mapper = VacSearchQueryStringParametersMapperImpl()
+    private val mapper = CertificateSearchQueryStringParametersMapperImpl()
 
     @ParameterizedTest
     @CsvSource(
@@ -20,21 +20,21 @@ class VacSearchQueryStringParametersMapperTest {
             "APPLICATION_REFERENCE, V123ABC456, APPLICATION_REFERENCE",
         ]
     )
-    fun `should map VacSearchQueryStringParameters to VacSearchCriteriaDto given searchBy and searchName values`(
-        apiSearchBy: VacSearchBy?,
+    fun `should map CertificateSearchQueryStringParameters to CertificateSearchCriteriaDto given searchBy and searchName values`(
+        apiSearchBy: CertificateSearchBy?,
         searchValue: String?,
-        expectedSearchBy: VacSearchByDto?
+        expectedSearchBy: CertificateSearchByDto?
     ) {
         // Given
         val eroId = aValidEroId()
-        val searchQueryStringParams = VacSearchQueryStringParameters(
+        val searchQueryStringParams = CertificateSearchQueryStringParameters(
             page = 2,
             pageSize = 10,
             searchBy = apiSearchBy,
             searchValue = searchValue
         )
 
-        val expected = buildVacSearchCriteriaDto(
+        val expected = buildCertificateSearchCriteriaDto(
             eroId = eroId,
             page = 2,
             pageSize = 10,
@@ -43,7 +43,7 @@ class VacSearchQueryStringParametersMapperTest {
         )
 
         // When
-        val actual = mapper.toVacSearchCriteriaDto(eroId, searchQueryStringParams)
+        val actual = mapper.toCertificateSearchCriteriaDto(eroId, searchQueryStringParams)
 
         // Then
         assertThat(actual).isEqualTo(expected)

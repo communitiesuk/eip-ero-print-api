@@ -14,19 +14,19 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.dluhc.printapi.database.entity.Certificate
-import uk.gov.dluhc.printapi.database.mapper.VacSummaryDtoMapper
+import uk.gov.dluhc.printapi.database.mapper.CertificateSummaryDtoMapper
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateSpecificationBuilder
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildVacSearchCriteriaDto
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildVacSearchSummaryResults
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildVacSummaryDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificateSearchCriteriaDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificateSearchSummaryResults
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificateSummaryDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildVacPageRequest
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificatePageRequest
 
 @ExtendWith(MockitoExtension::class)
-internal class VacSummarySearchServiceTest {
+internal class CertificateSummarySearchServiceTest {
 
     @Mock
     private lateinit var eroService: EroService
@@ -35,13 +35,13 @@ internal class VacSummarySearchServiceTest {
     private lateinit var certificateRepository: CertificateRepository
 
     @Mock
-    private lateinit var vacSummaryDtoMapper: VacSummaryDtoMapper
+    private lateinit var certificateSummaryDtoMapper: CertificateSummaryDtoMapper
 
     @Mock
     private lateinit var specificationBuilder: CertificateSpecificationBuilder
 
     @InjectMocks
-    private lateinit var vacSummarySearchService: VacSummarySearchService
+    private lateinit var certificateSummarySearchService: CertificateSummarySearchService
 
     @Test
     fun `should return Voter Authority Certificate summaries`() {
@@ -50,7 +50,7 @@ internal class VacSummarySearchServiceTest {
         val gssCodes = listOf(aGssCode())
         given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
 
-        val expectedPageRequest = buildVacPageRequest(page = 1, size = 100)
+        val expectedPageRequest = buildCertificatePageRequest(page = 1, size = 100)
         val certificate = buildCertificate()
         given(
             certificateRepository.findAll(
@@ -62,16 +62,16 @@ internal class VacSummarySearchServiceTest {
         val expectedSpecification = mock<Specification<Certificate>>()
         given(specificationBuilder.buildSpecification(any(), any())).willReturn(expectedSpecification)
 
-        val expectedSummaryDto = buildVacSummaryDto()
-        given(vacSummaryDtoMapper.certificateToVacSummaryDto(any())).willReturn(expectedSummaryDto)
+        val expectedSummaryDto = buildCertificateSummaryDto()
+        given(certificateSummaryDtoMapper.certificateToCertificatePrintRequestSummaryDto(any())).willReturn(expectedSummaryDto)
 
         val expected =
-            buildVacSearchSummaryResults(page = 1, pageSize = 100, results = listOf(expectedSummaryDto))
+            buildCertificateSearchSummaryResults(page = 1, pageSize = 100, results = listOf(expectedSummaryDto))
 
-        val criteria = buildVacSearchCriteriaDto(eroId = eroId, page = 1, searchBy = null)
+        val criteria = buildCertificateSearchCriteriaDto(eroId = eroId, page = 1, searchBy = null)
 
         // When
-        val actual = vacSummarySearchService.searchVacSummaries(criteria)
+        val actual = certificateSummarySearchService.searchCertificateSummaries(criteria)
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
@@ -81,6 +81,6 @@ internal class VacSummarySearchServiceTest {
             expectedSpecification,
             expectedPageRequest
         )
-        verify(vacSummaryDtoMapper).certificateToVacSummaryDto(certificate)
+        verify(certificateSummaryDtoMapper).certificateToCertificatePrintRequestSummaryDto(certificate)
     }
 }

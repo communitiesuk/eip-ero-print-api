@@ -1,9 +1,9 @@
 package uk.gov.dluhc.printapi.dto
 
-data class VacSearchSummaryResults(
+data class CertificateSearchSummaryResults(
     val page: Int,
     val pageSize: Int,
     val totalPages: Int,
     val totalResults: Int,
-    val results: List<VacSummaryDto>,
+    val results: List<CertificateSummaryDto>,
 )

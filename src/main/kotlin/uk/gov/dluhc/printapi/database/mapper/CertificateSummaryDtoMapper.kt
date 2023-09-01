@@ -15,8 +15,17 @@ class CertificateSummaryDtoMapper {
     val deliveryAddressTypeMapper: DeliveryAddressTypeMapper = DeliveryAddressTypeMapperImpl()
 
     fun certificateToCertificatePrintRequestSummaryDto(certificate: Certificate): CertificateSummaryDto {
+        val mostRecentPrintRequest = certificate
+            .printRequests
+            .sortedBy { it.requestDateTime }
+            .last()
         return CertificateSummaryDto(
             vacNumber = certificate.vacNumber!!,
+            applicationReference = certificate.applicationReference!!,
+            sourceReference = certificate.sourceReference!!,
+            firstName = mostRecentPrintRequest.firstName!!,
+            middleNames = mostRecentPrintRequest.middleNames,
+            surname = mostRecentPrintRequest.surname!!,
             printRequests = toPrintRequests(certificate.printRequests)
         )
     }
@@ -33,7 +42,9 @@ class CertificateSummaryDtoMapper {
             status = statusMapper.toPrintRequestStatusDto(currentStatus.status!!),
             dateTime = currentStatus.eventDateTime!!,
             message = currentStatus.message,
-            deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(printRequest.delivery!!.deliveryAddressType)
+            deliveryAddressType = printRequest.delivery?.deliveryAddressType?.let {
+                deliveryAddressTypeMapper.mapEntityToDto(it)
+            }
         )
     }
 }
