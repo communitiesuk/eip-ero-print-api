@@ -19,9 +19,11 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aDifferentValidCertificateStat
 import uk.gov.dluhc.printapi.testsupport.testdata.aDifferentValidDeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidCertificateStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidDeliveryAddressType
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestDateTime
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidFirstName
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificateSummaryDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildPrintRequestSummaryDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
@@ -38,35 +40,28 @@ internal class CertificateSummaryDtoMapperTest {
     @Test
     fun `should map from Certificate to CertificatePrintRequestSummary given single print request with one status`() {
         // Given
-        val vacNumber = aValidVacNumber()
-        val expectedStatus = aValidCertificateStatus()
-        val expectedDateTime = aValidRequestDateTime()
-        val expectedUserId = aValidUserId()
-        val deliveryAddressType = aValidDeliveryAddressType()
-        val certificate = buildCertificate(
-            vacNumber = vacNumber,
-            printRequests = listOf(
-                buildPrintRequest(
-                    userId = expectedUserId,
-                    printRequestStatuses = listOf(
-                        buildPrintRequestStatus(status = expectedStatus, eventDateTime = expectedDateTime, message = null)
-                    ),
-                    delivery = buildDelivery(deliveryAddressType = deliveryAddressType)
+        val printRequestStatus = buildPrintRequestStatus()
+        val printRequest = buildPrintRequest(printRequestStatuses = listOf(printRequestStatus))
+        val certificate = buildCertificate(printRequests = listOf(printRequest))
+        val expected = with(certificate) {
+            buildCertificateSummaryDto(
+                sourceReference = sourceReference!!,
+                applicationReference = applicationReference!!,
+                vacNumber = vacNumber!!,
+                firstName = printRequest.firstName!!,
+                middleNames = printRequest.middleNames,
+                surname = printRequest.surname!!,
+                printRequests = listOf(
+                    buildPrintRequestSummaryDto(
+                        userId = printRequest.userId!!,
+                        status = PrintRequestStatusDto.valueOf(printRequestStatus.status!!.name),
+                        eventDateTime = printRequestStatus.eventDateTime!!,
+                        message = printRequestStatus.message,
+                        deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(printRequest.delivery!!.deliveryAddressType)
+                    )
                 )
             )
-        )
-        val expected = CertificateSummaryDto(
-            vacNumber = vacNumber,
-            printRequests = listOf(
-                PrintRequestSummaryDto(
-                    status = PrintRequestStatusDto.valueOf(expectedStatus.name),
-                    dateTime = expectedDateTime,
-                    userId = expectedUserId,
-                    message = null,
-                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(deliveryAddressType)
-                )
-            )
-        )
+        }
 
         // When
         val actual = mapper.certificateToCertificatePrintRequestSummaryDto(certificate)
@@ -78,42 +73,38 @@ internal class CertificateSummaryDtoMapperTest {
     @Test
     fun `should map from Certificate to CertificatePrintRequestSummary given one print request with multiple status`() {
         // Given
-        val vacNumber = aValidVacNumber()
-        val expectedStatus = DISPATCHED
-        val expectedDateTime = now().minusSeconds(2)
-        val expectedMessage = "Success"
-        val deliveryAddressType = aValidDeliveryAddressType()
-        val expectedUserId = aValidUserId()
-        val certificate = buildCertificate(
-            vacNumber = vacNumber,
-            printRequests = listOf(
-                buildPrintRequest(
-                    userId = expectedUserId,
-                    printRequestStatuses = listOf(
-                        printRequestStatus(PENDING_ASSIGNMENT_TO_BATCH, now().minusSeconds(10), null),
-                        printRequestStatus(ASSIGNED_TO_BATCH, now().minusSeconds(9), null),
-                        printRequestStatus(SENT_TO_PRINT_PROVIDER, now().minusSeconds(8), null),
-                        printRequestStatus(RECEIVED_BY_PRINT_PROVIDER, now().minusSeconds(7), null),
-                        printRequestStatus(VALIDATED_BY_PRINT_PROVIDER, now().minusSeconds(6), null),
-                        printRequestStatus(IN_PRODUCTION, now().minusSeconds(5), null),
-                        printRequestStatus(expectedStatus, expectedDateTime, expectedMessage),
-                    ),
-                    delivery = buildDelivery(deliveryAddressType = deliveryAddressType)
+        val expectedMessage = "The certificate has been dispatched"
+        val expectedTime = now()
+        val printRequestStatuses = listOf(
+            buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH, eventDateTime = expectedTime.minusSeconds(10)),
+            buildPrintRequestStatus(status = ASSIGNED_TO_BATCH, eventDateTime = expectedTime.minusSeconds(9)),
+            buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER, eventDateTime = expectedTime.minusSeconds(8)),
+            buildPrintRequestStatus(status = RECEIVED_BY_PRINT_PROVIDER, eventDateTime = expectedTime.minusSeconds(7)),
+            buildPrintRequestStatus(status = VALIDATED_BY_PRINT_PROVIDER, eventDateTime = expectedTime.minusSeconds(6)),
+            buildPrintRequestStatus(status = IN_PRODUCTION, eventDateTime = expectedTime.minusSeconds(5)),
+            buildPrintRequestStatus(status = DISPATCHED, eventDateTime = expectedTime, message = expectedMessage),
+        )
+        val printRequest = buildPrintRequest(printRequestStatuses = printRequestStatuses)
+        val certificate = buildCertificate(printRequests = listOf(printRequest))
+        val expected = with(certificate) {
+            buildCertificateSummaryDto(
+                sourceReference = sourceReference!!,
+                applicationReference = applicationReference!!,
+                vacNumber = vacNumber!!,
+                firstName = printRequest.firstName!!,
+                middleNames = printRequest.middleNames,
+                surname = printRequest.surname!!,
+                printRequests = listOf(
+                    buildPrintRequestSummaryDto(
+                        userId = printRequest.userId!!,
+                        status = PrintRequestStatusDto.DISPATCHED,
+                        eventDateTime = expectedTime,
+                        message = expectedMessage,
+                        deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(printRequest.delivery!!.deliveryAddressType)
+                    )
                 )
             )
-        )
-        val expected = CertificateSummaryDto(
-            vacNumber = vacNumber,
-            printRequests = listOf(
-                PrintRequestSummaryDto(
-                    status = PrintRequestStatusDto.valueOf(expectedStatus.name),
-                    dateTime = expectedDateTime,
-                    userId = expectedUserId,
-                    message = expectedMessage,
-                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(deliveryAddressType)
-                )
-            )
-        )
+        }
 
         // When
         val actual = mapper.certificateToCertificatePrintRequestSummaryDto(certificate)
@@ -125,55 +116,63 @@ internal class CertificateSummaryDtoMapperTest {
     @Test
     fun `should map from Certificate to CertificatePrintRequestSummary given multiple print requests`() {
         // Given
-        val vacNumber = aValidVacNumber()
         val expectedStatus1 = aValidCertificateStatus()
-        val expectedDateTime1 = now().minus(1, MINUTES)
-        val expectedUserId1 = aValidUserId()
-        val expectedMessage1 = null
         val expectedStatus2 = aDifferentValidCertificateStatus()
+        val expectedDateTime1 = now().minus(1, MINUTES)
         val expectedDateTime2 = now()
+        val expectedUserId1 = aValidUserId()
         val expectedUserId2 = aValidUserId()
+        val expectedMessage1 = null
         val expectedMessage2 = "Successfully dispatched by Royal Mail"
         val deliveryAddressType1 = aValidDeliveryAddressType()
         val deliveryAddressType2 = aDifferentValidDeliveryAddressType()
-        val certificate = buildCertificate(
-            vacNumber = vacNumber,
-            printRequests = listOf(
-                buildPrintRequest(
-                    userId = expectedUserId1,
-                    printRequestStatuses = listOf(
-                        printRequestStatus(expectedStatus1, expectedDateTime1, expectedMessage1)
+        val firstName1 = aValidFirstName()
+        val firstName2 = aValidFirstName()
+        val surname1 = aValidSurname()
+        val surname2 = aValidSurname()
+        val printRequestStatus1 = buildPrintRequestStatus(status = expectedStatus1, eventDateTime = expectedDateTime1, message = expectedMessage1)
+        val printRequestStatus2 = buildPrintRequestStatus(status = expectedStatus2, eventDateTime = expectedDateTime2, message = expectedMessage2)
+        val printRequest1 = buildPrintRequest(
+            userId = expectedUserId1,
+            printRequestStatuses = listOf(printRequestStatus1),
+            firstName = firstName1,
+            surname = surname1,
+            delivery = buildDelivery(deliveryAddressType = deliveryAddressType1)
+        )
+        val printRequest2 = buildPrintRequest(
+            userId = expectedUserId2,
+            printRequestStatuses = listOf(printRequestStatus2),
+            firstName = firstName2,
+            surname = surname2,
+            delivery = buildDelivery(deliveryAddressType = deliveryAddressType2)
+        )
+        val certificate = buildCertificate(printRequests = listOf(printRequest1, printRequest2))
+        val expected = with(certificate) {
+            CertificateSummaryDto(
+                sourceReference = sourceReference!!,
+                applicationReference = applicationReference!!,
+                vacNumber = vacNumber!!,
+                firstName = printRequest2.firstName!!,
+                middleNames = printRequest2.middleNames,
+                surname = printRequest2.surname!!,
+                printRequests = listOf(
+                    PrintRequestSummaryDto(
+                        status = PrintRequestStatusDto.valueOf(expectedStatus2.name),
+                        dateTime = expectedDateTime2,
+                        userId = expectedUserId2,
+                        message = expectedMessage2,
+                        deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(deliveryAddressType2)
                     ),
-                    delivery = buildDelivery(deliveryAddressType = deliveryAddressType1)
-                ),
-                buildPrintRequest(
-                    userId = expectedUserId2,
-                    printRequestStatuses = listOf(
-                        printRequestStatus(expectedStatus2, expectedDateTime2, expectedMessage2)
+                    PrintRequestSummaryDto(
+                        status = PrintRequestStatusDto.valueOf(expectedStatus1.name),
+                        dateTime = expectedDateTime1,
+                        userId = expectedUserId1,
+                        message = expectedMessage1,
+                        deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(deliveryAddressType1)
                     ),
-                    delivery = buildDelivery(deliveryAddressType = deliveryAddressType2)
                 )
             )
-        )
-        val expected = CertificateSummaryDto(
-            vacNumber = vacNumber,
-            printRequests = listOf(
-                PrintRequestSummaryDto(
-                    status = PrintRequestStatusDto.valueOf(expectedStatus2.name),
-                    dateTime = expectedDateTime2,
-                    userId = expectedUserId2,
-                    message = expectedMessage2,
-                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(deliveryAddressType2)
-                ),
-                PrintRequestSummaryDto(
-                    status = PrintRequestStatusDto.valueOf(expectedStatus1.name),
-                    dateTime = expectedDateTime1,
-                    userId = expectedUserId1,
-                    message = expectedMessage1,
-                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToDto(deliveryAddressType1)
-                ),
-            )
-        )
+        }
 
         // When
         val actual = mapper.certificateToCertificatePrintRequestSummaryDto(certificate)

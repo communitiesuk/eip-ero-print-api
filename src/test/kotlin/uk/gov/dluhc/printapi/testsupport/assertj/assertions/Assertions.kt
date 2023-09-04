@@ -11,7 +11,7 @@ import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.TemporaryCertificate
-import uk.gov.dluhc.printapi.dto.VacSearchSummaryResults
+import uk.gov.dluhc.printapi.dto.CertificateSearchSummaryResults
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 
 /**
@@ -130,13 +130,13 @@ object Assertions : Assertions() {
     }
 
     /**
-     * Creates a new instance of `[VacSearchSummaryResultsAssert]`.
+     * Creates a new instance of `[CertificateSearchSummaryResultsAssert]`.
      *
      * @param actual the actual value.
      * @return the created assertion object.
      */
     @CheckReturnValue
-    fun assertThat(actual: VacSearchSummaryResults?): VacSearchSummaryResultsAssert {
-        return VacSearchSummaryResultsAssert(actual)
+    fun assertThat(actual: CertificateSearchSummaryResults?): CertificateSearchSummaryResultsAssert {
+        return CertificateSearchSummaryResultsAssert(actual)
     }
 }

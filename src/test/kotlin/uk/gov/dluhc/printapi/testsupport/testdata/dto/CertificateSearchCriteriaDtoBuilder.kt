@@ -1,17 +1,17 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.dto
 
-import uk.gov.dluhc.printapi.dto.VacSearchBy
-import uk.gov.dluhc.printapi.dto.VacSearchCriteriaDto
+import uk.gov.dluhc.printapi.dto.CertificateSearchBy
+import uk.gov.dluhc.printapi.dto.CertificateSearchCriteriaDto
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroId
 
-fun buildVacSearchCriteriaDto(
+fun buildCertificateSearchCriteriaDto(
     eroId: String = aValidEroId(),
     page: Int = 1,
     pageSize: Int = 100,
-    searchBy: VacSearchBy? = null,
+    searchBy: CertificateSearchBy? = null,
     searchValue: String? = null,
-): VacSearchCriteriaDto {
-    return VacSearchCriteriaDto(
+): CertificateSearchCriteriaDto {
+    return CertificateSearchCriteriaDto(
         eroId = eroId,
         page = page,
         pageSize = pageSize,

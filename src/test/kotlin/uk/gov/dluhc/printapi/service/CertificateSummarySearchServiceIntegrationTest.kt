@@ -3,15 +3,15 @@ package uk.gov.dluhc.printapi.service
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.dto.VacSearchBy
+import uk.gov.dluhc.printapi.dto.CertificateSearchBy
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
-import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildVacSearchCriteriaDto
+import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildCertificateSearchCriteriaDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import java.time.LocalDate
 
-internal class VacSummarySearchServiceIntegrationTest : IntegrationTest() {
+internal class CertificateSummarySearchServiceIntegrationTest : IntegrationTest() {
 
     companion object {
         private const val GSS_CODE = "W06000099"
@@ -29,7 +29,7 @@ internal class VacSummarySearchServiceIntegrationTest : IntegrationTest() {
         )
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
-        val criteria = buildVacSearchCriteriaDto(
+        val criteria = buildCertificateSearchCriteriaDto(
             eroId = ERO_ID,
             page = 1,
             pageSize = 100,
@@ -38,7 +38,7 @@ internal class VacSummarySearchServiceIntegrationTest : IntegrationTest() {
         )
 
         // When
-        val actual = vacSummarySearchService.searchVacSummaries(criteria)
+        val actual = certificateSummarySearchService.searchCertificateSummaries(criteria)
 
         // Then
         assertThat(actual)
@@ -64,16 +64,16 @@ internal class VacSummarySearchServiceIntegrationTest : IntegrationTest() {
         )
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
-        val criteria = buildVacSearchCriteriaDto(
+        val criteria = buildCertificateSearchCriteriaDto(
             eroId = ERO_ID,
             page = 1,
             pageSize = 100,
-            searchBy = VacSearchBy.APPLICATION_REFERENCE,
+            searchBy = CertificateSearchBy.APPLICATION_REFERENCE,
             searchValue = "APP_REF_3"
         )
 
         // When
-        val actual = vacSummarySearchService.searchVacSummaries(criteria)
+        val actual = certificateSummarySearchService.searchCertificateSummaries(criteria)
 
         // Then
         assertThat(actual)
@@ -97,16 +97,16 @@ internal class VacSummarySearchServiceIntegrationTest : IntegrationTest() {
         )
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
-        val criteria = buildVacSearchCriteriaDto(
+        val criteria = buildCertificateSearchCriteriaDto(
             eroId = ERO_ID,
             page = 1,
             pageSize = 100,
-            searchBy = VacSearchBy.APPLICATION_REFERENCE,
+            searchBy = CertificateSearchBy.APPLICATION_REFERENCE,
             searchValue = "ABCDEFG"
         )
 
         // When
-        val actual = vacSummarySearchService.searchVacSummaries(criteria)
+        val actual = certificateSummarySearchService.searchCertificateSummaries(criteria)
 
         // Then
         assertThat(actual)

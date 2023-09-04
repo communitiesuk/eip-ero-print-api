@@ -5,18 +5,20 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.dluhc.printapi.config.IntegrationTest
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.models.CertificateSearchBy
+import uk.gov.dluhc.printapi.models.CertificateSearchBy.APPLICATION_REFERENCE
+import uk.gov.dluhc.printapi.models.CertificateSearchSummaryResponse
+import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
-import uk.gov.dluhc.printapi.models.VacPrintRequestSummary
-import uk.gov.dluhc.printapi.models.VacSearchBy
-import uk.gov.dluhc.printapi.models.VacSearchBy.APPLICATION_REFERENCE
-import uk.gov.dluhc.printapi.models.VacSearchSummaryResponse
-import uk.gov.dluhc.printapi.models.VacSummaryResponse
+import uk.gov.dluhc.printapi.models.PrintRequestSummary
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
@@ -26,8 +28,9 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import uk.gov.dluhc.printapi.models.DeliveryAddressType as DeliveryAddressTypeResponse
 
-internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
+internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
     companion object {
         private const val SEARCH_SUMMARY_URI_TEMPLATE = "/eros/{eroId}/certificates/search"
         private const val GSS_CODE = "W06000099"
@@ -80,7 +83,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
-            .returnResult(VacSearchSummaryResponse::class.java)
+            .returnResult(CertificateSearchSummaryResponse::class.java)
 
         // Then
         val actual = response.responseBody.blockFirst()
@@ -111,7 +114,10 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             status = uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
             eventDateTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
         )
-        val vac1Request = buildPrintRequest(printRequestStatuses = listOf(vac1Status))
+        val vac1Request = buildPrintRequest(
+            printRequestStatuses = listOf(vac1Status),
+            delivery = buildDelivery(deliveryAddressType = DeliveryAddressType.ERO_COLLECTION)
+        )
         val vac1 = buildCertificate(
             gssCode = GSS_CODE,
             sourceReference = vac1SourceReference,
@@ -127,7 +133,10 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             status = uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
             eventDateTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
         )
-        val vac2Request = buildPrintRequest(printRequestStatuses = listOf(vac2Status))
+        val vac2Request = buildPrintRequest(
+            printRequestStatuses = listOf(vac2Status),
+            delivery = buildDelivery(deliveryAddressType = DeliveryAddressType.REGISTERED)
+        )
         val vac2 = buildCertificate(
             gssCode = GSS_CODE,
             sourceReference = vac2SourceReference,
@@ -161,7 +170,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             )
         )
 
-        val expectedResult1 = VacSummaryResponse(
+        val expectedResult1 = CertificateSummaryResponse(
             vacNumber = vac1.vacNumber!!,
             applicationReference = vac1ApplicationReference,
             sourceReference = vac1SourceReference,
@@ -169,14 +178,16 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             middleNames = vac1Request.middleNames,
             surname = vac1Request.surname,
             printRequestSummaries = listOf(
-                VacPrintRequestSummary(
+                PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
                     userId = vac1Request.userId!!,
                     dateTime = vac1Request.requestDateTime!!.atOffset(ZoneOffset.UTC),
+                    message = vac1Status.message,
+                    deliveryAddressType = DeliveryAddressTypeResponse.ERO_MINUS_COLLECTION
                 )
             )
         )
-        val expectedResult2 = VacSummaryResponse(
+        val expectedResult2 = CertificateSummaryResponse(
             vacNumber = vac2.vacNumber!!,
             applicationReference = vac2ApplicationReference,
             sourceReference = vac2SourceReference,
@@ -184,10 +195,12 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             middleNames = vac2Request.middleNames,
             surname = vac2Request.surname,
             printRequestSummaries = listOf(
-                VacPrintRequestSummary(
+                PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
                     userId = vac2Request.userId!!,
                     dateTime = vac2Request.requestDateTime!!.atOffset(ZoneOffset.UTC),
+                    message = vac2Status.message,
+                    deliveryAddressType = DeliveryAddressTypeResponse.REGISTERED
                 ),
             )
         )
@@ -202,7 +215,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
-            .returnResult(VacSearchSummaryResponse::class.java)
+            .returnResult(CertificateSearchSummaryResponse::class.java)
 
         // Then
         val actual = response.responseBody.blockFirst()
@@ -252,7 +265,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
 
         certificateRepository.save(vac)
 
-        val expectedResult = VacSummaryResponse(
+        val expectedResult = CertificateSummaryResponse(
             vacNumber = vac.vacNumber!!,
             applicationReference = vacApplicationReference,
             sourceReference = vacSourceReference,
@@ -260,10 +273,12 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             middleNames = vacRequest.middleNames,
             surname = vacRequest.surname,
             printRequestSummaries = listOf(
-                VacPrintRequestSummary(
+                PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
                     userId = vacRequest.userId!!,
                     dateTime = vacRequest.requestDateTime!!.atOffset(ZoneOffset.UTC),
+                    message = vacStatus.message,
+                    deliveryAddressType = null
                 )
             )
         )
@@ -275,7 +290,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
-            .returnResult(VacSearchSummaryResponse::class.java)
+            .returnResult(CertificateSearchSummaryResponse::class.java)
 
         // Then
         val actual = response.responseBody.blockFirst()
@@ -306,7 +321,10 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             status = uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
             eventDateTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
         )
-        val vac1Request = buildPrintRequest(printRequestStatuses = listOf(vac1Status))
+        val vac1Request = buildPrintRequest(
+            printRequestStatuses = listOf(vac1Status),
+            delivery = buildDelivery(deliveryAddressType = DeliveryAddressType.REGISTERED)
+        )
         val vac1 = buildCertificate(
             gssCode = GSS_CODE,
             sourceReference = vac1SourceReference,
@@ -339,7 +357,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             )
         )
 
-        val expectedResult1 = VacSummaryResponse(
+        val expectedResult1 = CertificateSummaryResponse(
             vacNumber = vac1.vacNumber!!,
             applicationReference = vac1ApplicationReference,
             sourceReference = vac1SourceReference,
@@ -347,10 +365,12 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             middleNames = vac1Request.middleNames,
             surname = vac1Request.surname,
             printRequestSummaries = listOf(
-                VacPrintRequestSummary(
+                PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
                     userId = vac1Request.userId!!,
                     dateTime = vac1Status.eventDateTime!!.atOffset(ZoneOffset.UTC),
+                    message = vac1Status.message,
+                    deliveryAddressType = DeliveryAddressTypeResponse.REGISTERED
                 )
             )
         )
@@ -372,7 +392,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
-            .returnResult(VacSearchSummaryResponse::class.java)
+            .returnResult(CertificateSearchSummaryResponse::class.java)
 
         // Then
         val actual = response.responseBody.blockFirst()
@@ -388,7 +408,7 @@ internal class SearchVacSummariesIntegrationTest : IntegrationTest() {
         eroId: String = ERO_ID,
         page: Int? = null,
         pageSize: Int? = null,
-        searchBy: VacSearchBy? = null,
+        searchBy: CertificateSearchBy? = null,
         searchValue: String? = null,
     ): String {
         if (page != null) {

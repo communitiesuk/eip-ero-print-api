@@ -7,5 +7,5 @@ data class PrintRequestSummaryDto(
     val dateTime: Instant,
     val userId: String,
     val message: String?,
-    val deliveryAddressType: DeliveryAddressType
+    val deliveryAddressType: DeliveryAddressType?
 )
