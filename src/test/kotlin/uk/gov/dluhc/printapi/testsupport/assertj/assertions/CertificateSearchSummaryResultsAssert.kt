@@ -2,16 +2,16 @@ package uk.gov.dluhc.printapi.testsupport.assertj.assertions
 
 import org.assertj.core.api.AbstractObjectAssert
 import org.assertj.core.api.Assertions.assertThat
-import uk.gov.dluhc.printapi.dto.VacSearchSummaryResults
-import uk.gov.dluhc.printapi.dto.VacSummaryDto
+import uk.gov.dluhc.printapi.dto.CertificateSearchSummaryResults
+import uk.gov.dluhc.printapi.dto.CertificateSummaryDto
 
-class VacSearchSummaryResultsAssert(actual: VacSearchSummaryResults?) :
-    AbstractObjectAssert<VacSearchSummaryResultsAssert, VacSearchSummaryResults?>(
+class CertificateSearchSummaryResultsAssert(actual: CertificateSearchSummaryResults?) :
+    AbstractObjectAssert<CertificateSearchSummaryResultsAssert, CertificateSearchSummaryResults?>(
         actual,
-        VacSearchSummaryResultsAssert::class.java
+        CertificateSearchSummaryResultsAssert::class.java
     ) {
 
-    fun isPage(expected: Int): VacSearchSummaryResultsAssert {
+    fun isPage(expected: Int): CertificateSearchSummaryResultsAssert {
         isNotNull
         with(actual!!) {
             if (page != expected) {
@@ -21,7 +21,7 @@ class VacSearchSummaryResultsAssert(actual: VacSearchSummaryResults?) :
         return this
     }
 
-    fun hasPageSize(expected: Int): VacSearchSummaryResultsAssert {
+    fun hasPageSize(expected: Int): CertificateSearchSummaryResultsAssert {
         isNotNull
         with(actual!!) {
             if (pageSize != expected) {
@@ -31,7 +31,7 @@ class VacSearchSummaryResultsAssert(actual: VacSearchSummaryResults?) :
         return this
     }
 
-    fun hasTotalPages(expected: Int): VacSearchSummaryResultsAssert {
+    fun hasTotalPages(expected: Int): CertificateSearchSummaryResultsAssert {
         isNotNull
         with(actual!!) {
             if (totalPages != expected) {
@@ -41,7 +41,7 @@ class VacSearchSummaryResultsAssert(actual: VacSearchSummaryResults?) :
         return this
     }
 
-    fun hasTotalResults(expected: Int): VacSearchSummaryResultsAssert {
+    fun hasTotalResults(expected: Int): CertificateSearchSummaryResultsAssert {
         isNotNull
         with(actual!!) {
             if (totalResults != expected) {
@@ -51,7 +51,7 @@ class VacSearchSummaryResultsAssert(actual: VacSearchSummaryResults?) :
         return this
     }
 
-    fun hasResults(expected: List<VacSummaryDto>): VacSearchSummaryResultsAssert {
+    fun hasResults(expected: List<CertificateSummaryDto>): CertificateSearchSummaryResultsAssert {
         isNotNull
         with(actual!!) {
             if (results != expected) {
@@ -61,7 +61,7 @@ class VacSearchSummaryResultsAssert(actual: VacSearchSummaryResults?) :
         return this
     }
 
-    fun resultsAreForApplicationReferences(vararg expected: String): VacSearchSummaryResultsAssert {
+    fun resultsAreForApplicationReferences(vararg expected: String): CertificateSearchSummaryResultsAssert {
         isNotNull
         with(actual!!) {
             val applicationReferences = results.map { it.applicationReference }

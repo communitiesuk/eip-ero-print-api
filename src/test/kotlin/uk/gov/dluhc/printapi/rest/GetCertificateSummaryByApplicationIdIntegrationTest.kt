@@ -110,8 +110,14 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
             eventDateTime = Instant.now().plusSeconds(3).truncatedTo(SECONDS),
             message = "Print provider production failed"
         )
-        val request1 = buildPrintRequest(printRequestStatuses = listOf(status1, status2, status3))
-        val request2 = buildPrintRequest(printRequestStatuses = listOf(status4))
+        val request1 = buildPrintRequest(
+            printRequestStatuses = listOf(status1, status2, status3),
+            requestDateTime = Instant.now().truncatedTo(SECONDS)
+        )
+        val request2 = buildPrintRequest(
+            printRequestStatuses = listOf(status4),
+            requestDateTime = Instant.now().plusSeconds(1).truncatedTo(SECONDS)
+        )
         val certificate = buildCertificate(
             gssCode = eroResponse.localAuthorities[0].gssCode,
             sourceType = SourceType.VOTER_CARD,
@@ -122,6 +128,11 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
         certificateRepository.save(certificate)
         val expected = CertificateSummaryResponse(
             vacNumber = certificate.vacNumber!!,
+            sourceReference = certificate.sourceReference,
+            applicationReference = certificate.applicationReference!!,
+            firstName = request2.firstName,
+            middleNames = request2.middleNames,
+            surname = request2.surname,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,

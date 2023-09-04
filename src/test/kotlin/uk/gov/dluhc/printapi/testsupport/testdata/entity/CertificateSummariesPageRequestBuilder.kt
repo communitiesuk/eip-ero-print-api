@@ -4,7 +4,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction
 
-fun buildVacPageRequest(
+fun buildCertificatePageRequest(
     page: Int = 1,
     size: Int = 100
 ): PageRequest {

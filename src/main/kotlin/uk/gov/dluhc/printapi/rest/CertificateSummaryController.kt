@@ -7,23 +7,23 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
+import uk.gov.dluhc.printapi.mapper.CertificateSearchQueryStringParametersMapper
 import uk.gov.dluhc.printapi.mapper.CertificateSummaryResponseMapper
-import uk.gov.dluhc.printapi.mapper.VacSearchQueryStringParametersMapper
-import uk.gov.dluhc.printapi.mapper.VacSummarySearchResponseMapper
+import uk.gov.dluhc.printapi.mapper.CertificateSummarySearchResponseMapper
+import uk.gov.dluhc.printapi.models.CertificateSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
-import uk.gov.dluhc.printapi.models.VacSearchSummaryResponse
+import uk.gov.dluhc.printapi.service.CertificateSummarySearchService
 import uk.gov.dluhc.printapi.service.CertificateSummaryService
-import uk.gov.dluhc.printapi.service.VacSummarySearchService
 import javax.validation.Valid
 
 @RestController
 @CrossOrigin
 class CertificateSummaryController(
     private val certificateSummaryService: CertificateSummaryService,
-    private val certificateSearchSummaryService: VacSummarySearchService,
+    private val certificateSearchSummaryService: CertificateSummarySearchService,
     private val certificateSummaryResponseMapper: CertificateSummaryResponseMapper,
-    private val vacSummarySearchResponseMapper: VacSummarySearchResponseMapper,
-    private val vacSearchQueryStringParametersMapper: VacSearchQueryStringParametersMapper
+    private val certificateSummarySearchResponseMapper: CertificateSummarySearchResponseMapper,
+    private val certificateSearchQueryStringParametersMapper: CertificateSearchQueryStringParametersMapper
 ) {
     @GetMapping("/eros/{eroId}/certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
@@ -39,15 +39,15 @@ class CertificateSummaryController(
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
     fun searchCertificates(
         @PathVariable eroId: String,
-        @Valid searchQueryStringParameters: VacSearchQueryStringParameters
-    ): VacSearchSummaryResponse {
+        @Valid searchQueryStringParameters: CertificateSearchQueryStringParameters
+    ): CertificateSearchSummaryResponse {
         val searchCriteriaDto =
-            vacSearchQueryStringParametersMapper.toVacSearchCriteriaDto(
+            certificateSearchQueryStringParametersMapper.toCertificateSearchCriteriaDto(
                 eroId = eroId,
                 searchQueryParameters = searchQueryStringParameters
             )
-        with(certificateSearchSummaryService.searchVacSummaries(searchCriteriaDto)) {
-            return vacSummarySearchResponseMapper.toVacSearchSummaryResponse(this)
+        with(certificateSearchSummaryService.searchCertificateSummaries(searchCriteriaDto)) {
+            return certificateSummarySearchResponseMapper.toCertificateSearchSummaryResponse(this)
         }
     }
 
