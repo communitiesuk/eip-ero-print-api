@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
+import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.ses.SesClient
 import uk.gov.dluhc.printapi.testsupport.buildS3Arn
 import java.net.InetAddress
@@ -84,16 +85,12 @@ class LocalStackContainerConfiguration {
     @Primary
     @Bean
     fun createS3BucketSettings(
-        awsCredentialsProvider: AwsCredentialsProvider?,
+        awsBasicCredentialsProvider: AwsCredentialsProvider,
         s3Properties: S3Properties
     ): S3Client {
         val s3Client = S3Client.builder()
             .endpointOverride(localStackContainer.getEndpointOverride())
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(DEFAULT_ACCESS_KEY_ID, DEFAULT_SECRET_KEY)
-                )
-            )
+            .credentialsProvider(awsBasicCredentialsProvider)
             .build()
 
         createS3BucketsRequiredForTesting(s3Client = s3Client, s3Properties = s3Properties)
@@ -101,6 +98,17 @@ class LocalStackContainerConfiguration {
 
         return s3Client
     }
+
+    @Primary
+    @Bean
+    fun configureS3Presigner(
+        awsBasicCredentialsProvider: AwsCredentialsProvider,
+        s3Properties: S3Properties
+    ): S3Presigner =
+        S3Presigner.builder()
+            .endpointOverride(localStackContainer.getEndpointOverride())
+            .credentialsProvider(awsBasicCredentialsProvider)
+            .build()
 
     private fun createS3BucketsRequiredForTesting(
         s3Client: S3Client,
