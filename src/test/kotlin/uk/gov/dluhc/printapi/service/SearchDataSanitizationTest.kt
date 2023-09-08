@@ -1,4 +1,4 @@
-package uk.gov.dluhc.printapi.service.aed
+package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest

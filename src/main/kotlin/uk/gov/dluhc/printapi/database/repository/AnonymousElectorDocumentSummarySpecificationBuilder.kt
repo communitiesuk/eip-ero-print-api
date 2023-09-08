@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentSummary
 import uk.gov.dluhc.printapi.dto.aed.AedSearchBy
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchCriteriaDto
-import uk.gov.dluhc.printapi.service.aed.sanitizeApplicationReference
-import uk.gov.dluhc.printapi.service.aed.sanitizeSurname
+import uk.gov.dluhc.printapi.service.sanitizeApplicationReference
+import uk.gov.dluhc.printapi.service.sanitizeSurname
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Root

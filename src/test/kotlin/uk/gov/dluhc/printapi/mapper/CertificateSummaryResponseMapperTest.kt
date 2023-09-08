@@ -63,6 +63,11 @@ class CertificateSummaryResponseMapperTest {
         val expected = with(dto) {
             CertificateSummaryResponse(
                 vacNumber = vacNumber,
+                sourceReference = sourceReference,
+                applicationReference = applicationReference,
+                firstName = firstName,
+                middleNames = middleNames,
+                surname = surname,
                 printRequestSummaries = listOf(expectedRequestSummary1, expectedRequestSummary2)
             )
         }

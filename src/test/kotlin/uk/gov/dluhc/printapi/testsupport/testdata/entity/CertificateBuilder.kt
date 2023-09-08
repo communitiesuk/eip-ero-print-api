@@ -12,6 +12,7 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAddressFormat
@@ -97,18 +98,21 @@ fun buildPrintRequest(
     requestDateTime: Instant? = aValidRequestDateTime(),
     eroEnglish: ElectoralRegistrationOffice = buildElectoralRegistrationOffice(),
     eroWelsh: ElectoralRegistrationOffice? = null,
-    delivery: Delivery = buildDelivery(),
+    delivery: Delivery? = buildDelivery(),
     batchId: String? = null,
     userId: String = aValidUserId(),
+    supportingInformationFormat: SupportingInformationFormat? = aValidSupportingInformationFormat(),
+    firstName: String = aValidFirstName(),
+    surname: String = aValidSurname()
 ): PrintRequest {
     val printRequest = PrintRequest(
         requestId = requestId,
         vacVersion = aValidVacVersion(),
         requestDateTime = requestDateTime,
-        firstName = aValidFirstName(),
-        surname = aValidSurname(),
+        firstName = firstName,
+        surname = surname,
         certificateLanguage = aValidCertificateLanguage(),
-        supportingInformationFormat = aValidSupportingInformationFormat(),
+        supportingInformationFormat = supportingInformationFormat,
         delivery = delivery,
         eroEnglish = eroEnglish,
         eroWelsh = eroWelsh,
