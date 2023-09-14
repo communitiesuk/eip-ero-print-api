@@ -9,6 +9,7 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.models.CertificateSearchBy
 import uk.gov.dluhc.printapi.models.CertificateSearchBy.APPLICATION_REFERENCE
+import uk.gov.dluhc.printapi.models.CertificateSearchBy.SURNAME
 import uk.gov.dluhc.printapi.models.CertificateSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
@@ -16,6 +17,7 @@ import uk.gov.dluhc.printapi.models.PrintRequestSummary
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
@@ -316,7 +318,6 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
 
         val vac1SourceReference = aValidSourceReference()
         val vac1ApplicationReference = aValidApplicationReference()
-        println(vac1ApplicationReference)
         val vac1Status = buildPrintRequestStatus(
             status = uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
             eventDateTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
@@ -386,6 +387,100 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
                     pageSize = 100,
                     searchBy = APPLICATION_REFERENCE,
                     searchValue = vac1ApplicationReference
+                )
+            )
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult(CertificateSearchSummaryResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual!!.results).isNotEmpty
+            .hasSize(1)
+            .usingRecursiveComparison()
+            .isEqualTo(expectedResults)
+    }
+
+    @Test
+    fun `should return summaries with print requests matching surname given searchBy surname specified`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val currentDate = LocalDate.now()
+
+        val vac1Surname = aValidSurname()
+        val vac1Status = buildPrintRequestStatus(
+            status = uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
+            eventDateTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        )
+        val vac1Request = buildPrintRequest(
+            surname = vac1Surname,
+            printRequestStatuses = listOf(vac1Status),
+            delivery = buildDelivery(deliveryAddressType = DeliveryAddressType.REGISTERED)
+        )
+        val vac1 = buildCertificate(
+            gssCode = GSS_CODE,
+            issueDate = currentDate.minusDays(5),
+            sourceType = SourceType.VOTER_CARD,
+            printRequests = listOf(vac1Request)
+        )
+
+        val vac2Surname = aValidSurname()
+        val vac2Status = buildPrintRequestStatus(
+            status = uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH,
+            eventDateTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        )
+        val vac2Request = buildPrintRequest(surname = vac2Surname, printRequestStatuses = listOf(vac2Status))
+        val vac2 = buildCertificate(
+            gssCode = GSS_CODE,
+            issueDate = currentDate.minusDays(10),
+            sourceType = SourceType.VOTER_CARD,
+            printRequests = listOf(vac2Request)
+        )
+
+        certificateRepository.saveAll(
+            listOf(
+                vac1,
+                vac2
+            )
+        )
+
+        val expectedResult1 = CertificateSummaryResponse(
+            vacNumber = vac1.vacNumber!!,
+            applicationReference = vac1.applicationReference!!,
+            sourceReference = vac1.sourceReference!!,
+            firstName = vac1Request.firstName,
+            middleNames = vac1Request.middleNames,
+            surname = vac1Request.surname,
+            printRequestSummaries = listOf(
+                PrintRequestSummary(
+                    status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+                    userId = vac1Request.userId!!,
+                    dateTime = vac1Status.eventDateTime!!.atOffset(ZoneOffset.UTC),
+                    message = vac1Status.message,
+                    deliveryAddressType = DeliveryAddressTypeResponse.REGISTERED
+                )
+            )
+        )
+        val expectedResults = listOf(expectedResult1)
+
+        // When
+        val response = webTestClient.get()
+            .uri(
+                buildUri(
+                    uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE,
+                    eroId = ERO_ID,
+                    page = 1,
+                    pageSize = 100,
+                    searchBy = SURNAME,
+                    searchValue = vac1Surname
                 )
             )
             .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))

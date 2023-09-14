@@ -1231,6 +1231,7 @@ components:
       description: An enumeration of search by fields for searching VACs
       type: string
       enum:
+        - surname
         - applicationReference
 
     SourceType:
