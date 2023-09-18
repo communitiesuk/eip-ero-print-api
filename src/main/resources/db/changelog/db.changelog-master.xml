@@ -36,4 +36,5 @@
     <include relativeToChangelogFile="true" file="ddl/0026_alter_delivery_add_collection_reason.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0027_update_aed_summary_view.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0028_alter_aed_contact_details_add_last_updated.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0029_alter_print_request_add_sanitized_surname.xml"/>
 </databaseChangeLog>
