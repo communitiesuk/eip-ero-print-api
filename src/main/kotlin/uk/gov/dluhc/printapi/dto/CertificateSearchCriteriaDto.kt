@@ -10,4 +10,5 @@ data class CertificateSearchCriteriaDto(
 
 enum class CertificateSearchBy {
     APPLICATION_REFERENCE,
+    SURNAME,
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="kirsty.land@softwire.com" id="0029a_alter_print_request_add_sanitized_surname" context="ddl">
+        <sql>
+            <comment>Resulted sanitized_surname is created from surname by uppercasing, replacing hyphen with space, removing any apostrophe, replacing multiple spaces to a single space</comment>
+            ALTER TABLE print_request ADD sanitized_surname VARCHAR(255) AS (TRIM(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(UPPER(surname),'-',' '),'\'',''),'[ ]{2,}',' '))) STORED AFTER surname;
+        </sql>
+
+        <createIndex tableName="print_request" indexName="print_request_sanitized_surname_idx">
+            <column name="sanitized_surname"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="print_request" indexName="print_request_sanitized_surname_idx"/>
+            <dropColumn tableName="print_request" columnName="sanitized_surname"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

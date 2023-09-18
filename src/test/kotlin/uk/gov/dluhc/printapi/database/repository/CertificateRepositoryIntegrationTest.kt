@@ -61,7 +61,7 @@ import java.time.temporal.ChronoUnit.SECONDS
 internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
     companion object {
-        private val IGNORED_FIELDS = arrayOf(".*dateCreated")
+        private val IGNORED_FIELDS = arrayOf(".*dateCreated", ".*sanitizedSurname")
     }
 
     @Nested
@@ -503,6 +503,27 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
 
             // Then
             assertThat(actual).containsExactlyInAnyOrder(expected1, expected2)
+        }
+    }
+
+    @Nested
+    inner class SanitizedSurname {
+
+        @Test
+        fun `should sanitize the surname when record is saved to the database`() {
+            // Given
+            val unsanitizedSurname = "D'Surname-Name   Name "
+            val expectedSanitizedSurname = "DSURNAME NAME NAME"
+
+            // When
+            val certificate = certificateRepository.save(
+                buildCertificate(printRequests = listOf(buildPrintRequest(surname = unsanitizedSurname)))
+            )
+
+            // Then
+            val savedCertificate = certificateRepository.findById(certificate.id!!)
+            val sanitizedSurname = savedCertificate.get().printRequests[0].sanitizedSurname
+            assertThat(sanitizedSurname).isEqualTo(expectedSanitizedSurname)
         }
     }
 }
