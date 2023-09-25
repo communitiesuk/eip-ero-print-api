@@ -38,7 +38,7 @@ class StatisticsUpdateAspect(
         pointcut = "execution(* org.springframework.data.repository.CrudRepository.save(..)) && args(anonymousElectorDocument)",
         returning = "saved"
     )
-    fun afterSaveTemporaryCertificate(joinPoint: JoinPoint, anonymousElectorDocument: AnonymousElectorDocument, saved: AnonymousElectorDocument) {
+    fun afterSaveAnonymousElectorDocument(joinPoint: JoinPoint, anonymousElectorDocument: AnonymousElectorDocument, saved: AnonymousElectorDocument) {
         statisticsUpdateService.triggerVoterCardStatisticsUpdate(saved.sourceReference)
     }
 
@@ -47,7 +47,6 @@ class StatisticsUpdateAspect(
         returning = "saved"
     )
     fun afterSaveAll(joinPoint: JoinPoint, saved: Iterable<Any>) {
-        // Type is erased and AOP is passed an iterable containing any type
         if (saved.any { it is Certificate }) {
             (saved as Iterable<Certificate>).forEach {
                 it.sourceReference?.also {
