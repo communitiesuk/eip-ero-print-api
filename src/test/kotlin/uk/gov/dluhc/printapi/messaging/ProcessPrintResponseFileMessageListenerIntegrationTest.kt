@@ -5,7 +5,9 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
+import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponses
 import java.util.concurrent.TimeUnit
 
@@ -18,6 +20,23 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
         val printResponses = buildPrintResponses()
         val printResponsesAsString = objectMapper.writeValueAsString(printResponses)
 
+        val certificates = printResponses.batchResponses.map {
+            buildCertificate(
+                status = PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER,
+                batchId = it.batchId
+            )
+        }
+        certificateRepository.saveAll(certificates)
+
+        // Clear messages from the queue in order to make the test valid
+        //
+        // Saving the certificates to the repository above will have triggered some
+        // statistics update messages, but these aren't the ones we want to test for.
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            certificates.forEach { assertUpdateStatisticsMessageSent(it.sourceReference!!) }
+        }
+        updateStatisticsMessageListenerStub.clear()
+
         writeContentToRemoteOutBoundDirectory(filenameToProcess, printResponsesAsString)
 
         val message = ProcessPrintResponseFileMessage(
@@ -29,8 +48,9 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
         processPrintResponseFileMessageQueue.submit(message)
 
         // Then
-        await.atMost(3, TimeUnit.SECONDS).untilAsserted {
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
             assertThat(hasFilesPresentInOutboundDirectory(listOf(filenameToProcess))).isFalse
+            certificates.forEach { assertUpdateStatisticsMessageSent(it.sourceReference!!) }
         }
 
         // todo assert db updates after completing service implementation

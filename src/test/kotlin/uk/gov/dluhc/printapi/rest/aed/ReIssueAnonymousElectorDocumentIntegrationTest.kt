@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.rest.aed
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -28,6 +29,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildReIssueAnonymousEle
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest() {
 
@@ -190,6 +192,10 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
             assertThat(text).containsIgnoringCase(newElectoralRollNumber)
             assertThat(text).doesNotContain(originalElectoralRollNumber)
+        }
+
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageSent(sourceReference)
         }
     }
 

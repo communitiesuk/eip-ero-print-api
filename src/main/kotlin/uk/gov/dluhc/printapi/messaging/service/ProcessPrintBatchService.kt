@@ -51,6 +51,7 @@ class ProcessPrintBatchService(
         val sftpFilename = filenameFactory.createZipFilename(batchId, certificates)
         sftpService.sendFile(sftpInputStream, sftpFilename)
         updateCertificates(batchId, certificates)
+        certificateRepository.saveAll(certificates)
     }
 
     private fun verifyPrintRequestCount(certificates: List<Certificate>, batchId: String, expectedCount: Int?) {

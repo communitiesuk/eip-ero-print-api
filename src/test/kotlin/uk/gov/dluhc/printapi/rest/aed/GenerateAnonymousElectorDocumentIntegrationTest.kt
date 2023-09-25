@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.rest.aed
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -36,6 +37,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
 import java.util.UUID.randomUUID
+import java.util.concurrent.TimeUnit
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddressTypeEntity
 import uk.gov.dluhc.printapi.models.DeliveryAddressType as DeliveryAddressTypeApi
 import uk.gov.dluhc.printapi.models.DeliveryClass as DeliveryClassApi
@@ -271,6 +273,10 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
             assertThat(text).doesNotContainIgnoringCase(request.surname)
+        }
+
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageSent(request.sourceReference)
         }
     }
 
