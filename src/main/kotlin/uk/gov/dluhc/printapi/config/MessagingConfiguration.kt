@@ -17,6 +17,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
+import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMessage
 
 @Configuration
 class MessagingConfiguration {
@@ -33,6 +34,9 @@ class MessagingConfiguration {
     @Value("\${sqs.remove-certificate-queue-name}")
     private lateinit var removeCertificateQueueName: String
 
+    @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
+    private lateinit var triggerVoterCardStatisticsUpdateQueueName: String
+
     @Bean
     fun processPrintRequestBatchQueue(queueMessagingTemplate: QueueMessagingTemplate) =
         MessageQueue<ProcessPrintRequestBatchMessage>(processPrintRequestBatchQueueName, queueMessagingTemplate)
@@ -48,6 +52,10 @@ class MessagingConfiguration {
     @Bean
     fun removeCertificateQueue(queueMessagingTemplate: QueueMessagingTemplate) =
         MessageQueue<RemoveCertificateMessage>(removeCertificateQueueName, queueMessagingTemplate)
+
+    @Bean
+    fun triggerVoterCardStatisticsUpdateQueue(queueMessagingTemplate: QueueMessagingTemplate) =
+        MessageQueue<UpdateStatisticsMessage>(triggerVoterCardStatisticsUpdateQueueName, queueMessagingTemplate)
 
     @Bean
     fun queueMessageHandlerFactory(

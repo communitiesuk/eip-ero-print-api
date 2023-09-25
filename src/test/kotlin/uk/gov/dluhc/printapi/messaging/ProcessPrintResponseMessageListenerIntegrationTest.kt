@@ -47,6 +47,15 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
         )
         certificateRepository.save(certificate)
 
+        // Clear messages from the queue in order to make the test valid
+        //
+        // Saving the certificates to the repository above will have triggered some
+        // statistics update messages, but these aren't the ones we want to test for.
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+        }
+        updateStatisticsMessageListenerStub.clear()
+
         val printResponse = buildPrintResponse(
             requestId = requestId,
             status = PrintResponse.Status.SUCCESS,
@@ -69,6 +78,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             val saved = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
             assertThat(saved).isNotNull
             assertThat(saved!!.status).isEqualTo(Status.IN_PRODUCTION)
+            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
         }
     }
 
