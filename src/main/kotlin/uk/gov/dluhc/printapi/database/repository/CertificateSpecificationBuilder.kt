@@ -3,11 +3,14 @@ package uk.gov.dluhc.printapi.database.repository
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Certificate
+import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.dto.CertificateSearchBy
 import uk.gov.dluhc.printapi.dto.CertificateSearchCriteriaDto
 import uk.gov.dluhc.printapi.service.sanitizeApplicationReference
+import uk.gov.dluhc.printapi.service.sanitizeSurname
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
+import javax.persistence.criteria.Join
 import javax.persistence.criteria.Root
 
 @Component
@@ -16,6 +19,7 @@ class CertificateSpecificationBuilder {
     companion object {
         private const val GSS_CODE: String = "gssCode"
         private const val APPLICATION_REFERENCE: String = "applicationReference"
+        private const val SANITIZED_SURNAME: String = "sanitizedSurname"
     }
 
     fun buildSpecification(
@@ -38,6 +42,7 @@ class CertificateSpecificationBuilder {
         }
 
         return when (searchBy) {
+            CertificateSearchBy.SURNAME -> hasSanitizedSurname(sanitizeSurname(searchValue))
             CertificateSearchBy.APPLICATION_REFERENCE -> hasApplicationReference(sanitizeApplicationReference(searchValue))
         }
     }
@@ -52,6 +57,14 @@ class CertificateSpecificationBuilder {
     private fun hasApplicationReference(applicationReference: String): Specification<Certificate> {
         return Specification<Certificate> { root: Root<Certificate?>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
             criteriaBuilder.equal(root.get<Any>(APPLICATION_REFERENCE), applicationReference)
+        }
+    }
+
+    private fun hasSanitizedSurname(surname: String): Specification<Certificate> {
+        return Specification<Certificate> { root: Root<Certificate?>, query: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
+            val printRequest: Join<PrintRequest, Certificate> = root.join("printRequests")
+            query?.distinct(true)
+            criteriaBuilder.equal(printRequest.get<Any>(SANITIZED_SURNAME), surname)
         }
     }
 }

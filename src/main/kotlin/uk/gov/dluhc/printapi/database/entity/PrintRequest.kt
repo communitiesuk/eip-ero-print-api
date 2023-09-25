@@ -10,6 +10,7 @@ import uk.gov.dluhc.printapi.database.repository.UseExistingOrGenerateUUID
 import java.time.Instant
 import java.util.UUID
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -58,6 +59,9 @@ class PrintRequest(
     @field:NotNull
     @field:Size(max = 255)
     var surname: String? = null,
+
+    @Column(nullable = true, insertable = false, updatable = false)
+    var sanitizedSurname: String? = null,
 
     @field:NotNull
     @Enumerated(EnumType.STRING)
