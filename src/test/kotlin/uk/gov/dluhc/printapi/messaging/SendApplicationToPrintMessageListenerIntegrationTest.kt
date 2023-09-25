@@ -94,6 +94,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
+            assertUpdateStatisticsMessageSent(payload.sourceReference)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
@@ -142,6 +143,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
+            assertUpdateStatisticsMessageSent(payload.sourceReference)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
@@ -203,6 +205,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
+            assertUpdateStatisticsMessageSent(payload.sourceReference)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]

@@ -45,6 +45,7 @@ import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
+import uk.gov.dluhc.printapi.messaging.stubs.UpdateStatisticsMessageListenerStub
 import uk.gov.dluhc.printapi.service.BankHolidaysDataService
 import uk.gov.dluhc.printapi.service.CertificateSummarySearchService
 import uk.gov.dluhc.printapi.service.SftpService
@@ -142,6 +143,9 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.remove-certificate-queue-name}")
     protected lateinit var removeCertificateQueueName: String
 
+    @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
+    protected lateinit var triggerStatisticsUpdateQueueName: String
+
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository
 
@@ -175,12 +179,20 @@ internal abstract class IntegrationTest {
     @Autowired
     protected lateinit var cacheManager: CacheManager
 
+    @Autowired
+    protected lateinit var updateStatisticsMessageListenerStub: UpdateStatisticsMessageListenerStub
+
     @Value("\${caching.time-to-live}")
     protected lateinit var timeToLive: Duration
 
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
+    }
+
+    @BeforeEach
+    fun clearMessagesFromStubs() {
+        updateStatisticsMessageListenerStub.clear()
     }
 
     @BeforeEach
@@ -281,6 +293,14 @@ internal abstract class IntegrationTest {
             Assertions.assertThat(foundMessage)
                 .`as` { "failed to find expectedEmailMessage[$expected], in list of messages[$messages]" }
                 .isTrue
+        }
+    }
+
+    protected fun assertUpdateStatisticsMessageSent(applicationId: String) {
+        val messages = updateStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).isNotEmpty
+        Assertions.assertThat(messages).anyMatch {
+            it.voterCardApplicationId == applicationId
         }
     }
 

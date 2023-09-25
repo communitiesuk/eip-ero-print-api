@@ -29,6 +29,7 @@ sqs:
   process-print-response-queue-name: process-print-response
   application-removed-queue-name: application-removed
   remove-certificate-queue-name: remove-certificate
+  trigger-voter-card-statistics-update-queue-name: trigger-voter-card-statistics-update.fifo
 
 s3:
   certificate-photos-target-bucket: localstack-vca-api-vca-target-bucket

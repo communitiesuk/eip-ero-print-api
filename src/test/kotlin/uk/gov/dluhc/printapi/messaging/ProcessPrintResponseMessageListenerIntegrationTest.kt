@@ -47,6 +47,12 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
         )
         certificateRepository.save(certificate)
 
+        // Clear rogue messages from the queue in order to make the test valid
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+        }
+        updateStatisticsMessageListenerStub.clear()
+
         val printResponse = buildPrintResponse(
             requestId = requestId,
             status = PrintResponse.Status.SUCCESS,
@@ -69,6 +75,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             val saved = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
             assertThat(saved).isNotNull
             assertThat(saved!!.status).isEqualTo(Status.IN_PRODUCTION)
+            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
         }
     }
 

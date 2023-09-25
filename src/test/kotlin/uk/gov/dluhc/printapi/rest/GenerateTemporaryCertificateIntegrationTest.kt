@@ -3,6 +3,7 @@ package uk.gov.dluhc.printapi.rest
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.util.ResourceUtils
@@ -26,6 +27,7 @@ import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
@@ -213,6 +215,10 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(localAuthorityName)
+        }
+
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageSent(request.sourceReference)
         }
     }
 
