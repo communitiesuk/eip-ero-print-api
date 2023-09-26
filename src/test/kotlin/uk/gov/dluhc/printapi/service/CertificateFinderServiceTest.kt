@@ -35,7 +35,7 @@ internal class CertificateFinderServiceTest {
     inner class GetCertificate {
 
         @Test
-        fun `should get Certificate as one exists for the provided details`() {
+        fun `should get Certificate as one exists for the provided details including ERO identifier`() {
             // Given
             val eroId = aValidRandomEroId()
             val sourceType = VOTER_CARD
@@ -56,7 +56,7 @@ internal class CertificateFinderServiceTest {
         }
 
         @Test
-        fun `should raise exception as no certificate exists for the provided details`() {
+        fun `should raise exception as no certificate exists for the provided details including ERO identifier`() {
             // Given
             val eroId = "camden-city-council"
             val sourceType = VOTER_CARD
@@ -78,6 +78,44 @@ internal class CertificateFinderServiceTest {
             assertThat(error)
                 .isNotNull
                 .hasMessage("Certificate for eroId = camden-city-council with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found")
+        }
+
+        @Test
+        fun `should get Certificate as one exists for the provided details excluding ERO identifier`() {
+            // Given
+            val sourceType = VOTER_CARD
+            val sourceReference = aValidSourceReference()
+
+            val certificate = buildCertificate()
+            given(certificateRepository.findBySourceTypeAndSourceReference(any(), any())).willReturn(certificate)
+
+            // When
+            val actual = certificateFinderService.getCertificate(sourceType, sourceReference)
+
+            // Then
+            verify(certificateRepository).findBySourceTypeAndSourceReference(sourceType, sourceReference)
+            assertThat(actual).isSameAs(certificate)
+        }
+
+        @Test
+        fun `should raise exception as no certificate exists for the provided details excluding ERO identifier`() {
+            // Given
+            val sourceType = VOTER_CARD
+            val sourceReference = "63774ff4bb4e7049b67182d9"
+
+            given(certificateRepository.findBySourceTypeAndSourceReference(any(), any())).willReturn(null)
+
+            // When
+            val error = Assertions.catchThrowableOfType(
+                { certificateFinderService.getCertificate(sourceType, sourceReference) },
+                CertificateNotFoundException::class.java
+            )
+
+            // Then
+            verify(certificateRepository).findBySourceTypeAndSourceReference(sourceType, sourceReference)
+            assertThat(error)
+                .isNotNull
+                .hasMessage("Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found")
         }
     }
 }

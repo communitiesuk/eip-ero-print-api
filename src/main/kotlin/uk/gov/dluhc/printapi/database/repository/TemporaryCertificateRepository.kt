@@ -14,6 +14,8 @@ interface TemporaryCertificateRepository : JpaRepository<TemporaryCertificate, U
 
     fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): List<TemporaryCertificate>
 
+    fun findBySourceTypeAndSourceReference(sourceType: SourceType, sourceReference: String): List<TemporaryCertificate>
+
     fun findBySourceTypeAndFinalRetentionRemovalDateBefore(sourceType: SourceType, finalRetentionRemovalDate: LocalDate): List<TemporaryCertificate>
 }
 
