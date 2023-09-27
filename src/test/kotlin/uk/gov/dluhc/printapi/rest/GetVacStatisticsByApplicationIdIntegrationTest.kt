@@ -3,7 +3,6 @@ package uk.gov.dluhc.printapi.rest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus.NOT_FOUND
-import org.springframework.http.MediaType
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
@@ -11,12 +10,10 @@ import uk.gov.dluhc.printapi.models.CertificateStatisticsStatus
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.StatisticsResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
-import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertificate
-import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import java.time.Instant
 import java.time.temporal.ChronoUnit.SECONDS
 
@@ -30,8 +27,6 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
     fun `should return bad request given request without applicationId query string parameter`() {
         webTestClient.get()
             .uri("/certificates/statistics")
-            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
-            .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
             .isBadRequest
@@ -42,8 +37,6 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
-            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
-            .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
             .isEqualTo(NOT_FOUND)
@@ -94,8 +87,6 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
-            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
-            .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
             .returnResult(StatisticsResponse::class.java)
@@ -137,8 +128,6 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
-            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
-            .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
             .returnResult(StatisticsResponse::class.java)
@@ -183,8 +172,6 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
-            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
-            .contentType(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
             .returnResult(StatisticsResponse::class.java)
