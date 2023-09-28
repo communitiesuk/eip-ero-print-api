@@ -31,6 +31,8 @@ interface CertificateRepository :
 
     fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): Certificate?
 
+    fun findBySourceTypeAndSourceReference(sourceType: SourceType, sourceReference: String): Certificate?
+
     fun findBySourceTypeAndInitialRetentionDataRemovedAndInitialRetentionRemovalDateBefore(
         sourceType: SourceType,
         initialRetentionDataRemoved: Boolean = false,

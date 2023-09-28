@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.21.0'
+  version: '1.22.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -276,6 +276,80 @@ paths:
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.applicationId: method.request.path.applicationId
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  #
+  # Voter Authority Certificate Statistics - anonymised statistics for a VAC
+  # --------------------------------------------------------------------------------
+  '/certificates/statistics':
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Voter Authority Certificates (VAC)
+        - Statistics
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Returns anonymised statistics for a Voter Authority Certificate application
+      description: Returns anonymised statistics for a Voter Authority Certificate application
+      tags:
+        - Voter Authority Certificates (VAC)
+        - Statistics
+      parameters:
+        - name: applicationId
+          description: An identifier of an Voter Authority Certificate application
+          schema:
+            type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Statistics'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: get-certificate-statistics-by-application-id
+      security:
+        - awsIamAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/certificates/statistics'
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -991,6 +1065,80 @@ paths:
         httpMethod: GET
 
   #
+  # Anonymous Elector Document Statistics - anonymised statistics for an AED
+  # --------------------------------------------------------------------------------
+  '/anonymous-elector-documents/statistics':
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Anonymous Elector Documents (AED)
+        - Statistics
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      summary: Returns anonymised statistics data for an Anonymous application
+      description: Returns anonymised statistics data for an Anonymous application
+      tags:
+        - Anonymous Elector Documents (AED)
+        - Statistics
+      parameters:
+        - name: applicationId
+          description: An identifier of an Anonymous Elector Document application
+          schema:
+            type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Statistics'
+        '404':
+          $ref: '#/components/responses/404ErrorResponse'
+      operationId: get-anonymous-elector-document-statistics-by-application-id
+      security:
+        - awsIamAuthorizer: [ ]
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: '${base_uri}/anonymous-elector-documents/statistics'
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: '${vpc_connection_id}'
+        httpMethod: GET
+
+  #
   # Anonymous Elector Document (AED) Explainer Document
   # --------------------------------------------------------------------------------
   '/eros/{eroId}/anonymous-elector-documents/{gssCode}/explainer-document':
@@ -1217,6 +1365,21 @@ components:
         - print-failed
         - dispatched
         - not-delivered
+    CertificateStatisticsStatus:
+      title: CertificateStatisticsStatus
+      type: string
+      enum:
+        - PENDING_ASSIGNMENT_TO_BATCH
+        - ASSIGNED_TO_BATCH
+        - SENT_TO_PRINT_PROVIDER
+        - RECEIVED_BY_PRINT_PROVIDER
+        - VALIDATED_BY_PRINT_PROVIDER
+        - IN_PRODUCTION
+        - DISPATCHED
+        - NOT_DELIVERED
+        - PRINT_PROVIDER_VALIDATION_FAILED
+        - PRINT_PROVIDER_PRODUCTION_FAILED
+        - PRINT_PROVIDER_DISPATCH_FAILED
 
     AedSearchBy:
       title: AedSearchBy
@@ -1734,6 +1897,22 @@ components:
         - issueDate
         - dateTimeCreated
 
+    StatisticsResponse:
+      title: StatisticsResponse
+      type: object
+      description: A response containing anonymised statistics for a VAC or AED application.
+      properties:
+        certificateStatus:
+          $ref: '#/components/schemas/CertificateStatisticsStatus'
+        temporaryCertificateIssued:
+          type: boolean
+        certificateReprinted:
+          type: boolean
+      required:
+        - certificateStatus
+        - certificateReprinted
+        - temporaryCertificateIssued
+
     GenerateAnonymousElectorDocumentRequest:
       title: GenerateAnonymousElectorDocumentRequest
       description: Request body to generate an Anonymous Elector Document (AED)
@@ -2023,6 +2202,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CertificateSearchSummaryResponse'
+    Statistics:
+      description: Response containing statistics for an application
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatisticsResponse'
     PreSignedUrlResource:
       description: Response containing an object detailing the pre-signed URL for the resource
       headers:
@@ -2079,3 +2274,8 @@ components:
         providerARNs:
           - '${cognito_ero_user_pool_arn}'
         type: cognito_user_pools
+    awsIamAuthorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: awsSigv4

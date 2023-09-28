@@ -51,7 +51,13 @@ class AnonymousElectorDocumentService(
             .firstOrNull() ?: throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
 
         val templateFilename = pdfTemplateDetailsFactory.getTemplateFilename(mostRecentAed.gssCode)
-        with(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(mostRecentAed, dto, templateFilename)) {
+        with(
+            reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(
+                mostRecentAed,
+                dto,
+                templateFilename
+            )
+        ) {
             return generatePdf()
                 .also { anonymousElectorDocumentRepository.save(this) }
         }
@@ -86,6 +92,14 @@ class AnonymousElectorDocumentService(
             .map { anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(it) }
     }
 
+    @Transactional(readOnly = true)
+    fun getAnonymousElectorDocumentsByApplicationId(applicationId: String): List<AnonymousElectorDocumentDto> {
+        return anonymousElectorDocumentRepository.findBySourceTypeAndSourceReference(
+            sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+            sourceReference = applicationId
+        ).map { anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(it) }
+    }
+
     private fun verifyGssCodeIsValidForEro(eroId: String, gssCode: String) {
         try {
             if (!eroService.isGssCodeValidForEro(gssCode = gssCode, eroIdToMatch = eroId)) {
@@ -96,7 +110,10 @@ class AnonymousElectorDocumentService(
         }
     }
 
-    private fun getAnonymousElectorDocumentsSortedByDate(gssCodes: List<String>, sourceReference: String): List<AnonymousElectorDocument> =
+    private fun getAnonymousElectorDocumentsSortedByDate(
+        gssCodes: List<String>,
+        sourceReference: String
+    ): List<AnonymousElectorDocument> =
         anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
             gssCodes = gssCodes,
             sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
