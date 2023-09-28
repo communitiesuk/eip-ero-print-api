@@ -20,4 +20,11 @@ class CertificateFinderService(
                 ?: throw CertificateNotFoundException(eroId, sourceType, sourceReference)
                     .also { logger.warn(it.message) }
         }
+
+    fun getCertificate(sourceType: SourceType, sourceReference: String) =
+        certificateRepository.findBySourceTypeAndSourceReference(sourceType, sourceReference)
+            ?: throw CertificateNotFoundException(sourceType, sourceReference)
+                .also {
+                    logger.warn(it.message)
+                }
 }

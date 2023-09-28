@@ -16,4 +16,7 @@ class TemporaryCertificateFinderService(
         eroService.lookupGssCodesForEro(eroId).let { gssCodes ->
             temporaryCertificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(gssCodes, sourceType, sourceReference)
         }
+
+    fun getTemporaryCertificates(sourceType: SourceType, sourceReference: String): List<TemporaryCertificate> =
+        temporaryCertificateRepository.findBySourceTypeAndSourceReference(sourceType, sourceReference)
 }

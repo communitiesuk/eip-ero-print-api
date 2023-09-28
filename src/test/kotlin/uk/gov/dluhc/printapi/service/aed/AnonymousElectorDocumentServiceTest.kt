@@ -232,6 +232,54 @@ internal class AnonymousElectorDocumentServiceTest {
     }
 
     @Nested
+    inner class GetAnonymousElectorDocumentsByApplicationId {
+        @Test
+        fun `should return empty list for an Anonymous Elector Document that doesn't exist`() {
+            // Given
+            val applicationId = aValidSourceReference()
+            given(anonymousElectorDocumentRepository.findBySourceTypeAndSourceReference(any(), any()))
+                .willReturn(emptyList())
+
+            // When
+            val actual = anonymousElectorDocumentService.getAnonymousElectorDocumentsByApplicationId(applicationId)
+
+            // Then
+            assertThat(actual).isNotNull.isEmpty()
+            verify(anonymousElectorDocumentRepository).findBySourceTypeAndSourceReference(ANONYMOUS_ELECTOR_DOCUMENT, applicationId)
+            verifyNoInteractions(anonymousElectorDocumentMapper)
+            verifyNoMoreInteractions(eroService, anonymousElectorDocumentRepository)
+        }
+
+        @Test
+        fun `should return summary list for matching Anonymous Elector Documents`() {
+            // Given
+            val applicationId = aValidSourceReference()
+            val firstAedEntity = buildAnonymousElectorDocument(sourceReference = applicationId)
+            val secondAedEntity = buildAnonymousElectorDocument(sourceReference = applicationId)
+
+            val expectedDto1 = buildAnonymousElectorDocumentDto()
+            val expectedDto2 = buildAnonymousElectorDocumentDto()
+
+            given(anonymousElectorDocumentRepository.findBySourceTypeAndSourceReference(any(), any()))
+                .willReturn(listOf(firstAedEntity, secondAedEntity))
+            given(anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(firstAedEntity)).willReturn(expectedDto1)
+            given(anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(secondAedEntity)).willReturn(expectedDto2)
+
+            // When
+            val actual = anonymousElectorDocumentService.getAnonymousElectorDocumentsByApplicationId(applicationId)
+
+            // Then
+            assertThat(actual).isNotNull.hasSize(2)
+                .usingRecursiveComparison()
+                .isEqualTo(listOf(expectedDto1, expectedDto2))
+            verify(anonymousElectorDocumentRepository).findBySourceTypeAndSourceReference(ANONYMOUS_ELECTOR_DOCUMENT, applicationId)
+            verify(anonymousElectorDocumentMapper).mapToAnonymousElectorDocumentDto(firstAedEntity)
+            verify(anonymousElectorDocumentMapper).mapToAnonymousElectorDocumentDto(secondAedEntity)
+            verifyNoMoreInteractions(eroService, anonymousElectorDocumentRepository, anonymousElectorDocumentMapper)
+        }
+    }
+
+    @Nested
     inner class ReIssueAnonymousElectorDocument {
 
         @Test

@@ -30,7 +30,7 @@ internal class TemporaryCertificateFinderServiceTest {
     private lateinit var temporaryCertificateFinderService: TemporaryCertificateFinderService
 
     @Test
-    fun `should get TemporaryCertificates given the provided details`() {
+    fun `should get TemporaryCertificates given the provided details including an ERO identifier`() {
         // Given
         val eroId = aValidRandomEroId()
         val sourceType = VOTER_CARD
@@ -54,6 +54,28 @@ internal class TemporaryCertificateFinderServiceTest {
         verify(eroService).lookupGssCodesForEro(eroId)
         verify(temporaryCertificateRepository).findByGssCodeInAndSourceTypeAndSourceReference(
             gssCodes,
+            sourceType,
+            sourceReference
+        )
+        assertThat(actual).isSameAs(temporaryCertificates)
+    }
+
+    @Test
+    fun `should get TemporaryCertificates given the provided details excluding an ERO identifier`() {
+        // Given
+        val sourceType = VOTER_CARD
+        val sourceReference = aValidSourceReference()
+
+        val temporaryCertificates = listOf(buildTemporaryCertificate())
+        given(
+            temporaryCertificateRepository.findBySourceTypeAndSourceReference(any(), any())
+        ).willReturn(temporaryCertificates)
+
+        // When
+        val actual = temporaryCertificateFinderService.getTemporaryCertificates(sourceType, sourceReference)
+
+        // Then
+        verify(temporaryCertificateRepository).findBySourceTypeAndSourceReference(
             sourceType,
             sourceReference
         )
