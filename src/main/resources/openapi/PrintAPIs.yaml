@@ -346,7 +346,7 @@ paths:
           $ref: '#/components/responses/404ErrorResponse'
       operationId: get-certificate-statistics-by-application-id
       security:
-        - AWS_IAM: [ ]
+        - awsIamAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
         uri: '${base_uri}/certificates/statistics'
@@ -1126,7 +1126,7 @@ paths:
           $ref: '#/components/responses/404ErrorResponse'
       operationId: get-anonymous-elector-document-statistics-by-application-id
       security:
-        - AWS_IAM: [ ]
+        - awsIamAuthorizer: [ ]
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
         uri: '${base_uri}/anonymous-elector-documents/statistics'
@@ -2274,3 +2274,8 @@ components:
         providerARNs:
           - '${cognito_ero_user_pool_arn}'
         type: cognito_user_pools
+    awsIamAuthorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: awsSigv4
