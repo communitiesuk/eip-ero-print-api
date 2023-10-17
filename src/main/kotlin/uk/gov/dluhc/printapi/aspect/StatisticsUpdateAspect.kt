@@ -9,6 +9,10 @@ import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.TemporaryCertificate
 
+/**
+ * See the comment on `StatisticsUpdateEventListener` for why this Aspect indirectly triggers a statistics update via
+ * the ApplicationEventPublisher rather than calling the StatisticsUpdateService directly.
+ */
 @Aspect
 @Component
 class StatisticsUpdateAspect(
