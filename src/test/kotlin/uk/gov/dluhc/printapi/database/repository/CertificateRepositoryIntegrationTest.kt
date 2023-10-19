@@ -343,6 +343,43 @@ internal class CertificateRepositoryIntegrationTest : IntegrationTest() {
     }
 
     @Nested
+    inner class FindBySourceTypeAndSourceReference {
+        @Test
+        fun `should find certificate given one exists for provided details`() {
+            // Given
+            val sourceType = aValidSourceType()
+            val sourceReference = aValidSourceReference()
+            var certificate = buildCertificate(
+                sourceType = sourceType,
+                sourceReference = sourceReference
+            )
+            certificate = certificateRepository.save(certificate)
+
+            // When
+            val actual = certificateRepository.findBySourceTypeAndSourceReference(sourceType, sourceReference)
+
+            // Then
+            assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(*IGNORED_FIELDS)
+                .isEqualTo(certificate)
+        }
+
+        @Test
+        fun `should fail to find certificate given none exists for provided details`() {
+            // Given
+            val sourceType = aValidSourceType()
+            val sourceReference = aValidSourceReference()
+
+            // When
+            val actual = certificateRepository.findBySourceTypeAndSourceReference(sourceType, sourceReference)
+
+            // Then
+            assertThat(actual).isNull()
+        }
+    }
+
+    @Nested
     inner class GetPrintRequestStatusCount {
         @Test
         fun `should find certificates for the given range and status`() {

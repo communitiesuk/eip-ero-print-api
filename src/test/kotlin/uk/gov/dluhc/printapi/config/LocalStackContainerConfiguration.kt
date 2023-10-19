@@ -182,7 +182,8 @@ class LocalStackContainerConfiguration {
         @Value("\${sqs.process-print-response-file-queue-name}") processPrintResponseFileQueueName: String,
         @Value("\${sqs.process-print-response-queue-name}") processPrintResponsesQueueName: String,
         @Value("\${sqs.application-removed-queue-name}") applicationRemovedQueueName: String,
-        @Value("\${sqs.remove-certificate-queue-name}") removeCertificateQueueName: String
+        @Value("\${sqs.remove-certificate-queue-name}") removeCertificateQueueName: String,
+        @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}") triggerVoterCardStatisticsUpdateQueueName: String,
     ): LocalStackContainerSettings {
         val queueUrlSendApplicationToPrint = localStackContainer.createSqsQueue(sendApplicationToPrintQueueName)
         val queueUrlProcessPrintBatchRequest = localStackContainer.createSqsQueue(processPrintRequestBatchQueueName)
@@ -190,6 +191,7 @@ class LocalStackContainerConfiguration {
         val queueUrlProcessPrintResponses = localStackContainer.createSqsQueue(processPrintResponsesQueueName)
         val queueUrlApplicationRemoved = localStackContainer.createSqsQueue(applicationRemovedQueueName)
         val queueUrlRemoveCertificate = localStackContainer.createSqsQueue(removeCertificateQueueName)
+        val queueUrlTriggerVoterCardStatisticsUpdate = localStackContainer.createSqsQueue(triggerVoterCardStatisticsUpdateQueueName)
         localStackContainer.createSqsQueue("correlation-id-test-queue")
 
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
@@ -205,14 +207,16 @@ class LocalStackContainerConfiguration {
             queueUrlProcessPrintResponseFile = queueUrlProcessPrintResponseFile,
             queueUrlProcessPrintResponses = queueUrlProcessPrintResponses,
             queueUrlApplicationRemoved = queueUrlApplicationRemoved,
-            queueUrlRemoveCertificate = queueUrlRemoveCertificate
+            queueUrlRemoveCertificate = queueUrlRemoveCertificate,
+            queueUrlTriggerVoterCardStatisticsUpdate = queueUrlTriggerVoterCardStatisticsUpdate,
         )
     }
 
     private fun GenericContainer<*>.createSqsQueue(queueName: String): String {
-        val execInContainer = execInContainer(
-            "awslocal", "sqs", "create-queue", "--queue-name", queueName
-        )
+        val isFifo = queueName.endsWith(".fifo")
+        val execInContainer =
+            if (isFifo) (execInContainer("awslocal", "sqs", "create-queue", "--queue-name", queueName, "--attributes", "FifoQueue=true"))
+            else execInContainer("awslocal", "sqs", "create-queue", "--queue-name", queueName)
         return execInContainer.stdout.let {
             objectMapper.readValue(it, Map::class.java)
         }.let {
@@ -228,6 +232,7 @@ class LocalStackContainerConfiguration {
         val queueUrlProcessPrintResponses: String,
         val queueUrlApplicationRemoved: String,
         val queueUrlRemoveCertificate: String,
+        val queueUrlTriggerVoterCardStatisticsUpdate: String,
     ) {
         val mappedQueueUrlSendApplicationToPrint: String = toMappedUrl(queueUrlSendApplicationToPrint, apiUrl)
         val mappedQueueUrlProcessPrintBatchRequest: String = toMappedUrl(queueUrlProcessPrintBatchRequest, apiUrl)
@@ -235,6 +240,7 @@ class LocalStackContainerConfiguration {
         val mappedQueueUrlProcessPrintResponses: String = toMappedUrl(queueUrlProcessPrintResponses, apiUrl)
         val mappedQueueUrlApplicationRemoved: String = toMappedUrl(queueUrlApplicationRemoved, apiUrl)
         val mappedQueueUrlRemoveCertificate: String = toMappedUrl(queueUrlRemoveCertificate, apiUrl)
+        val mappedQueueUrlTriggerVoterCardStatisticsUpdate: String = toMappedUrl(queueUrlTriggerVoterCardStatisticsUpdate, apiUrl)
         val sesMessagesUrl = "$apiUrl/_localstack/ses"
 
         private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {

@@ -69,6 +69,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             val saved = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
             assertThat(saved).isNotNull
             assertThat(saved!!.status).isEqualTo(Status.IN_PRODUCTION)
+            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
         }
     }
 
