@@ -177,7 +177,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
             buildLocalAuthorityResponse(
                 gssCode = request.gssCode,
-                contactDetailsEnglish = buildContactDetails(name = localAuthorityName)
+                contactDetailsEnglish = buildContactDetails(nameVac = localAuthorityName)
             )
         )
         val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID, localAuthorities = localAuthorities)

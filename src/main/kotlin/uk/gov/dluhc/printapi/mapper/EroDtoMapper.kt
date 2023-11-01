@@ -23,6 +23,7 @@ abstract class EroDtoMapper {
     }
 
     @Mapping(target = "emailAddress", source = "contactDetails.email")
+    @Mapping(target = "emailAddressVac", source = "contactDetails.emailVac")
     @Mapping(target = "phoneNumber", source = "contactDetails.phone")
     abstract fun toEroContactDetailsDto(contactDetails: ContactDetails): EroContactDetailsDto
 }

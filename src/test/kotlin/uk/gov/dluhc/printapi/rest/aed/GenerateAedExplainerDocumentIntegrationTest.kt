@@ -69,7 +69,7 @@ internal class GenerateAedExplainerDocumentIntegrationTest : IntegrationTest() {
         // Given
         val eroName = aValidLocalAuthorityName()
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
-            buildLocalAuthorityResponse(gssCode = GSS_CODE, contactDetailsEnglish = buildContactDetails(name = eroName))
+            buildLocalAuthorityResponse(gssCode = GSS_CODE, contactDetailsEnglish = buildContactDetails(nameVac = eroName))
         )
         val eroResponse = buildElectoralRegistrationOfficeResponse(id = OTHER_ERO_ID, localAuthorities = localAuthorities)
         wireMockService.stubCognitoJwtIssuerResponse()
@@ -98,7 +98,7 @@ internal class GenerateAedExplainerDocumentIntegrationTest : IntegrationTest() {
         // Given
         val eroName = aValidLocalAuthorityName()
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
-            buildLocalAuthorityResponse(gssCode = GSS_CODE, contactDetailsEnglish = buildContactDetails(name = eroName))
+            buildLocalAuthorityResponse(gssCode = GSS_CODE, contactDetailsEnglish = buildContactDetails(nameVac = eroName))
         )
         val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID, localAuthorities = localAuthorities)
         wireMockService.stubCognitoJwtIssuerResponse()

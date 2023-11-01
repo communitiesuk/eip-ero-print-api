@@ -22,9 +22,12 @@ class EroDtoMapperTest {
             englishContactDetails = with(localAuthority.contactDetailsEnglish) {
                 EroContactDetailsDto(
                     name = name,
+                    nameVac = nameVac,
                     emailAddress = email,
+                    emailAddressVac = emailVac,
                     phoneNumber = phone,
                     website = website,
+                    websiteVac = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,
@@ -60,9 +63,12 @@ class EroDtoMapperTest {
             englishContactDetails = with(localAuthority.contactDetailsEnglish) {
                 EroContactDetailsDto(
                     name = name,
+                    nameVac = nameVac,
                     emailAddress = email,
+                    emailAddressVac = emailVac,
                     phoneNumber = phone,
                     website = website,
+                    websiteVac = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,
@@ -79,9 +85,12 @@ class EroDtoMapperTest {
             welshContactDetails = with(localAuthority.contactDetailsWelsh!!) {
                 EroContactDetailsDto(
                     name = name,
+                    nameVac = nameVac,
                     emailAddress = email,
+                    emailAddressVac = emailVac,
                     phoneNumber = phone,
                     website = website,
+                    websiteVac = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,

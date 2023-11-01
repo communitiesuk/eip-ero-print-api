@@ -57,7 +57,7 @@ internal class TemporaryCertificateMapperTest {
                 sourceReference = sourceReference,
                 applicationReference = applicationReference,
                 certificateTemplateFilename = templateName,
-                issuingAuthority = ero.englishContactDetails.name,
+                issuingAuthority = ero.englishContactDetails.nameVac,
                 issuingAuthorityCy = null,
                 firstName = firstName,
                 middleNames = middleNames,

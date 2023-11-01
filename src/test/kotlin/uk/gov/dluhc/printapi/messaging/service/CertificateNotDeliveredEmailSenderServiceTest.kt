@@ -64,7 +64,7 @@ class CertificateNotDeliveredEmailSenderServiceTest {
         )
         val expectedGssCode = certificate.gssCode!!
 
-        val eroDto = buildEroDto(englishContactDetails = anEnglishEroContactDetails(emailAddress = localAuthorityEmailAddress))
+        val eroDto = buildEroDto(englishContactDetails = anEnglishEroContactDetails(emailAddressVac = localAuthorityEmailAddress))
         given(electoralRegistrationOfficeManagementApiClient.getEro(any())).willReturn(eroDto)
 
         val expectedSendCertificateNotDeliveredEmailRequest = SendCertificateNotDeliveredEmailRequest(

@@ -15,7 +15,7 @@ abstract class AbstractEmailSender(
 
     protected fun getLocalAuthorityEmailAddress(gssCode: String): String {
         val ero = electoralRegistrationOfficeManagementApiClient.getEro(gssCode)
-        return ero.englishContactDetails.emailAddress
+        return ero.englishContactDetails.emailAddressVac ?: ero.englishContactDetails.emailAddress
     }
 
     protected fun getRequestingUserEmailAddress(

@@ -14,11 +14,13 @@ import net.datafaker.providers.base.Address as FakerAddress
 fun buildLocalAuthorityResponse(
     gssCode: String = getRandomGssCode(),
     name: String = aValidLocalAuthorityName(),
+    displayName: String = aValidLocalAuthorityName(),
     contactDetailsEnglish: ContactDetails = buildContactDetails(),
     contactDetailsWelsh: ContactDetails? = null,
 ) = LocalAuthorityResponse(
     gssCode = gssCode,
     name = name,
+    displayName = displayName,
     contactDetailsEnglish = contactDetailsEnglish,
     contactDetailsWelsh = contactDetailsWelsh,
 )
@@ -29,12 +31,18 @@ fun buildContactDetails(
     phoneNumber: String = aValidPhoneNumber(),
     emailAddress: String = aValidEmailAddress(),
     address: Address = buildEroManagementAddress(),
+    nameVac: String = aValidLocalAuthorityName(),
+    websiteVac: String = aValidWebsite(),
+    emailAddressVac: String = aValidEmailAddress()
 ): ContactDetails =
     ContactDetails(
         name = name,
+        nameVac = nameVac,
         website = websiteAddress,
+        websiteVac = websiteVac,
         phone = phoneNumber,
         email = emailAddress,
+        emailVac = emailAddressVac,
         address = address
     )
 

@@ -94,13 +94,13 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
         )
         val expectedPlaceholders = with(eroDto.englishContactDetails) {
             mapOf(
-                ENGLISH_CONTACT_DETAIL_1 to name,
+                ENGLISH_CONTACT_DETAIL_1 to nameVac,
                 ENGLISH_CONTACT_DETAIL_2 to address.property,
                 ENGLISH_CONTACT_DETAIL_3 to address.street,
                 ENGLISH_CONTACT_DETAIL_4 to address.town,
                 ENGLISH_CONTACT_DETAIL_5 to address.area,
                 ENGLISH_CONTACT_DETAIL_6 to address.postcode,
-                ENGLISH_CONTACT_DETAIL_7 to emailAddress,
+                ENGLISH_CONTACT_DETAIL_7 to emailAddressVac,
                 ENGLISH_CONTACT_DETAIL_8 to phoneNumber,
             )
         }
@@ -130,13 +130,13 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
         )
         val expectedPlaceholders = with(eroDto.welshContactDetails!!) {
             mapOf(
-                WELSH_CONTACT_DETAIL_1 to name,
+                WELSH_CONTACT_DETAIL_1 to nameVac,
                 WELSH_CONTACT_DETAIL_2 to address.property,
                 WELSH_CONTACT_DETAIL_3 to address.street,
                 WELSH_CONTACT_DETAIL_4 to address.town,
                 WELSH_CONTACT_DETAIL_5 to address.area,
                 WELSH_CONTACT_DETAIL_6 to address.postcode,
-                WELSH_CONTACT_DETAIL_7 to emailAddress,
+                WELSH_CONTACT_DETAIL_7 to emailAddressVac,
                 WELSH_CONTACT_DETAIL_8 to phoneNumber,
             )
         }
@@ -166,10 +166,10 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
         )
         val expectedPlaceholders = with(eroDto.welshContactDetails!!) {
             mapOf(
-                WELSH_CONTACT_DETAIL_1 to name,
+                WELSH_CONTACT_DETAIL_1 to nameVac,
                 WELSH_CONTACT_DETAIL_2 to address.street,
                 WELSH_CONTACT_DETAIL_3 to address.postcode,
-                WELSH_CONTACT_DETAIL_4 to emailAddress,
+                WELSH_CONTACT_DETAIL_4 to emailAddressVac,
                 WELSH_CONTACT_DETAIL_5 to phoneNumber,
                 WELSH_CONTACT_DETAIL_6 to "",
                 WELSH_CONTACT_DETAIL_7 to "",
@@ -201,10 +201,10 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
         )
         val expectedPlaceholders = with(eroDto.welshContactDetails!!) {
             mapOf(
-                WELSH_CONTACT_DETAIL_1 to name,
+                WELSH_CONTACT_DETAIL_1 to nameVac,
                 WELSH_CONTACT_DETAIL_2 to address.street,
                 WELSH_CONTACT_DETAIL_3 to address.postcode,
-                WELSH_CONTACT_DETAIL_4 to emailAddress,
+                WELSH_CONTACT_DETAIL_4 to emailAddressVac,
                 WELSH_CONTACT_DETAIL_5 to phoneNumber,
                 WELSH_CONTACT_DETAIL_6 to "",
                 WELSH_CONTACT_DETAIL_7 to "",

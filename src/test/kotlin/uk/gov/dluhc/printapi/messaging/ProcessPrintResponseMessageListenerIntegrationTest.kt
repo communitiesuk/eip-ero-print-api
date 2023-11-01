@@ -107,7 +107,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             localAuthorities = listOf(
                 buildLocalAuthorityResponse(
                     gssCode = expectedGssCode,
-                    contactDetailsEnglish = buildContactDetails(emailAddress = "a-user@valtech.com")
+                    contactDetailsEnglish = buildContactDetails(emailAddressVac = "a-user@valtech.com")
                 ),
             )
         )
@@ -169,7 +169,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             localAuthorities = listOf(
                 buildLocalAuthorityResponse(
                     gssCode = expectedGssCode,
-                    contactDetailsEnglish = buildContactDetails(emailAddress = "a-user@valtech.com")
+                    contactDetailsEnglish = buildContactDetails(emailAddressVac = "a-user@valtech.com")
                 ),
             )
         )

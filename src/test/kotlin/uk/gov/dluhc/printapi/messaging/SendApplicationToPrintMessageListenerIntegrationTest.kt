@@ -79,8 +79,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 vacNumber = aValidVacNumber(),
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = localAuthority.contactDetailsEnglish.name,
-                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.name,
+                issuingAuthority = localAuthority.contactDetailsEnglish.nameVac,
+                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.nameVac,
                 issueDate = LocalDate.now(),
                 photoLocationArn = payloadPhotoLocationArn,
             )
