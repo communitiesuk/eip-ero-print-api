@@ -266,8 +266,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 ElectoralRegistrationOffice(
                     name = "Electoral Registration Officer",
                     phoneNumber = contactDetailsEnglish.phone,
-                    emailAddress = contactDetailsEnglish.email,
-                    website = contactDetailsEnglish.website,
+                    emailAddress = contactDetailsEnglish.emailVac,
+                    website = contactDetailsEnglish.websiteVac,
                     address = with(contactDetailsEnglish.address) {
                         Address(
                             street = street,
@@ -285,8 +285,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 ElectoralRegistrationOffice(
                     name = "Swyddog Cofrestru Etholiadol",
                     phoneNumber = contactDetailsWelsh!!.phone,
-                    emailAddress = contactDetailsWelsh!!.email,
-                    website = contactDetailsWelsh!!.website,
+                    emailAddress = contactDetailsWelsh!!.emailVac,
+                    website = contactDetailsWelsh!!.websiteVac,
                     address = with(contactDetailsWelsh!!.address) {
                         Address(
                             street = street,
