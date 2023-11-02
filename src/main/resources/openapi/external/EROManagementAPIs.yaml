@@ -3,7 +3,7 @@ security:
   - bearerAuth: []
 info:
   title: EROManagementAPIs
-  version: '1.2.1'
+  version: '1.8.0'
   description: API for viewing and managing ERO Users and ERO Details.
   contact:
     name: Krister Bone
@@ -216,16 +216,16 @@ paths:
       operationId: get-ero-users
       description: |-
         Secured by ERO Cognito User Pool 
-        - users need to be in ero-admin-{eroId} group to call the endpoint WITHOUT the "role" query parameter.
-        - users need to be in ero-vc-admin-{eroId} group to call the endpoint WITH the "role" query parameter. The groups attribute of returned users will only contain the role in the query parameter.
+        - users need to be in `ero-admin-{eroId}` group to call the endpoint WITHOUT the "role" query parameter.
+        - users need to be in either `ero-vc-admin-{eroId}` or `ero-vc-anonymous-admin-{eroId}` group to call the endpoint WITH the "role" query parameter. The groups attribute of returned users will only contain the role in the query parameter.
         
         Get list of users from Cognito within the ERO district base group and optionally filter users by role.
-        The only role that can be used as a filter is "vc-admin".
+        The only roles that can be used as a filter are `vc-admin` or `vc-anonymous-admin`.
         
         See https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListUsersInGroup.html
       parameters:
         - name: role
-          description: Filter by the user's role. Only a user in the `ero-vc-admin-{eroId}` group can pass the `role` query parameter. `vc-admin` is the only value supported by this parameter.
+          description: Filter by the user's role. Only a user in the `ero-vc-admin-{eroId}` or `ero-vc-anonymous-admin-{eroId}` group can pass the `role` query parameter. `vc-admin` and `vc-anonymous-admin` are the only values supported by this parameter.
           schema:
             $ref: '#/components/schemas/FilterUsersByRole'
           example: vc-admin
@@ -328,6 +328,38 @@ paths:
         connectionType: VPC_LINK
         connectionId: ${vpc_connection_id}
         httpMethod: GET
+    delete:
+      summary: Remove the user from all groups associated with the ERO and delete if they are not in any other EROs
+      tags:
+        - Electoral Registration Office Users
+      responses:
+        '204':
+          description: No Content
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified User was not found
+      description: |-
+        Secured by ERO Cognito User Pool 
+        - users need to be in ero-admin-{eroId} group to call the endpoint.
+        
+        Returns the User from all groups associated with the specified ERO.
+      security:
+        - eroUserCognitoUserPoolAuthorizer: []
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: ${base_uri}/eros/{eroId}/users/{userId}
+        requestParameters:
+          integration.request.path.eroId: "method.request.path.eroId"
+          integration.request.path.userId: "method.request.path.userId"
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: ${vpc_connection_id}
+        httpMethod: DELETE
+
 
   '/eros/{eroId}/users/{userId}/groups':
     parameters:
@@ -396,12 +428,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                groups:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/EroGroup'
+              type: array
+              items:
+                $ref: '#/components/schemas/EroGroup'
       description: Replaces the users groups for this ERO with the groups provided.
       security:
         - eroUserCognitoUserPoolAuthorizer: []
@@ -490,6 +519,7 @@ paths:
         connectionType: VPC_LINK
         connectionId: ${vpc_connection_id}
         httpMethod: POST
+
   '/users/{userId}':
     parameters:
       - schema:
@@ -566,6 +596,81 @@ paths:
         connectionType: VPC_LINK
         connectionId: ${vpc_connection_id}
         httpMethod: GET
+
+  '/users/{userId}/reinvite':
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - Users
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    parameters:
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    post:
+      summary: Reinvite user to ERO Cognito User Pool
+      operationId: reinvite-user
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/User'
+      description: |-
+        Secured by ERO Cognito User Pool
+        Reinvite a user to the ERO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserReinvitationRequest'
+      security:
+        - eroUserCognitoUserPoolAuthorizer: []
+      x-amazon-apigateway-integration:
+        type: HTTP_PROXY
+        uri: ${base_uri}/users/{userId}/reinvite
+        requestParameters:
+          integration.request.path.userId: "method.request.path.userId"
+        responseParameters:
+          method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+          method.response.header.Access-Control-Allow-Methods: '''*'''
+          method.response.header.Access-Control-Allow-Origin: '''*'''
+        connectionType: VPC_LINK
+        connectionId: ${vpc_connection_id}
+        httpMethod: POST
 
   #
   # Current user
@@ -654,6 +759,7 @@ components:
         groups: [
           oe-viewer
         ]
+        status: "CONFIRMED"
       properties:
         email:
           type: string
@@ -667,6 +773,8 @@ components:
           type: array
           items:
             type: string
+        status:
+          type: string
     UsersResponse:
       title: UsersResponse
       type: object
@@ -680,7 +788,8 @@ components:
             phoneNumber: '+44079701234566',
             groups: [
               oe-viewer
-            ]
+            ],
+            status: "CONFIRMED"
           },
           {
             firstName: John,
@@ -689,7 +798,8 @@ components:
             phoneNumber: '+44079701234566',
             groups: [
               oe-viewer, vc-admin
-            ]
+            ],
+            status: "UNCONFIRMED"
           }
         ]
       properties:
@@ -725,12 +835,26 @@ components:
         - email
         - firstName
         - surname
+    UserReinvitationRequest:
+      title: UserReinvitationRequest
+      type: object
+      description: Reinvite AWS Cognito User Request
+      example:
+        email: alice.smith@gmail.com
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
     EroGroup:
       title: EroGroup
       type: string
+      description: Enumeration of allowed ERO groups
       enum:
         - admin
         - vc-admin
+        - vc-anonymous-admin
         - vc-viewer
         - postal-admin
         - postal-viewer
@@ -738,7 +862,6 @@ components:
         - proxy-viewer
         - oe-admin
         - oe-viewer
-      description: Enumeration of allowed ERO groups
     LocalAuthorityResponse:
       title: LocalAuthorityResponse
       type: object
@@ -746,6 +869,9 @@ components:
       example:
         gssCode: 'W06000001'
         name: 'Isle of Anglesey County Council'
+        displayName: 'Isle of Anglesey County Council'
+        isActive: true,
+        custodianCode: 5570,
         contactDetailsEnglish:
           {
             name: "Isle of Anglesey County Council",
@@ -779,6 +905,25 @@ components:
           type: string
         name:
           type: string
+          description: Legal name of the Local Authority that must be included on the certificate, in English.
+        displayName:
+          type: string
+          description: Non-legal name of the Local Authority that can be used for display purposes, in English.
+        isActive:
+          type: boolean
+          default: true
+          description: >
+            If false, this LA can no longer receive applications, but might have
+            applications in progress or old applications stored.
+            This is intended to be used when a Local Authority has ceased to exist
+            due to a boundary change or a merger of multiple LAs.
+        custodianCode:
+          description: >
+            The "LOCAL_CUSTODIAN_CODE" that OSPlaces assigns to this Local Authority. Allows a postcode lookup
+            (using OSPlaces) of an elector's address to be matched against the correct Local Authority.
+            This is an optional field. Not all Local Authorities will have a custodian code assigned in IER, for example
+            in-active Local Authorities may not have a custodian code.
+          type: integer
         contactDetailsEnglish:
           $ref: '#/components/schemas/ContactDetails'
         contactDetailsWelsh:
@@ -786,6 +931,8 @@ components:
       required:
         - gssCode
         - name
+        - displayName
+        - isActive
         - contactDetailsEnglish
     ContactDetails:
       title: ContactDetails
@@ -794,21 +941,34 @@ components:
       properties:
         name:
           type: string
+          description: Common name of the Local Authority.
+          example: Isle of Anglesey County Council
+        nameVac:
+          type: string
+          description: The legal name of the Local Authority as it will appear on printed certificates.
           example: Isle of Anglesey County Council
         website:
           type: string
           example: "https://ero-address.com"
+        websiteVac:
+          type: string
+          example: "https://voter-id.ero-address.com"
         phone:
           type: string
           example: 01234 567890
         email:
           type: string
           example: fred.blogs@some-domain.co.uk
+        emailVac:
+          type: string
+          example: voterid@some-domain.co.uk
         address:
           $ref: '#/components/schemas/Address'
       required:
         - name
+        - nameVac
         - website
+        - websiteVac
         - phone
         - email
         - address
@@ -865,6 +1025,8 @@ components:
           {
             gssCode: 'W06000001',
             name: 'Isle of Anglesey County Council',
+            isActive: true,
+            custodianCode: 5570,
             contactDetailsEnglish:
               {
                 name: 'Isle of Anglesey County Council',
@@ -935,6 +1097,10 @@ components:
       description: Filters list of users
       enum:
         - vc-admin
+        - vc-anonymous-admin
+        - postal-admin
+        - proxy-admin
+        - oe-admin
   #
   # Response Body Definitions
   # --------------------------------------------------------------------------------
