@@ -20,8 +20,8 @@ abstract class CertificateMapper {
     protected lateinit var printRequestMapper: PrintRequestMapper
 
     @Mapping(target = "vacNumber", expression = "java( idFactory.vacNumber() )")
-    @Mapping(source = "ero.englishContactDetails.nameVac", target = "issuingAuthority")
-    @Mapping(source = "ero.welshContactDetails.nameVac", target = "issuingAuthorityCy")
+    @Mapping(source = "ero.englishContactDetails.name", target = "issuingAuthority")
+    @Mapping(source = "ero.welshContactDetails.name", target = "issuingAuthorityCy")
     @Mapping(source = "message.photoLocation", target = "photoLocationArn")
     abstract fun toCertificate(
         message: SendApplicationToPrintMessage,

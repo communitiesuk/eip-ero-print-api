@@ -21,13 +21,10 @@ class EroDtoMapperTest {
             eroId = eroId,
             englishContactDetails = with(localAuthority.contactDetailsEnglish) {
                 EroContactDetailsDto(
-                    name = name,
-                    nameVac = nameVac,
-                    emailAddress = email,
-                    emailAddressVac = emailVac,
+                    name = nameVac,
+                    emailAddress = emailVac!!,
                     phoneNumber = phone,
-                    website = website,
-                    websiteVac = websiteVac,
+                    website = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,
@@ -62,13 +59,10 @@ class EroDtoMapperTest {
             eroId = eroId,
             englishContactDetails = with(localAuthority.contactDetailsEnglish) {
                 EroContactDetailsDto(
-                    name = name,
-                    nameVac = nameVac,
-                    emailAddress = email,
-                    emailAddressVac = emailVac,
+                    name = nameVac,
+                    emailAddress = emailVac!!,
                     phoneNumber = phone,
-                    website = website,
-                    websiteVac = websiteVac,
+                    website = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,
@@ -84,13 +78,10 @@ class EroDtoMapperTest {
             },
             welshContactDetails = with(localAuthority.contactDetailsWelsh!!) {
                 EroContactDetailsDto(
-                    name = name,
-                    nameVac = nameVac,
-                    emailAddress = email,
-                    emailAddressVac = emailVac,
+                    name = nameVac,
+                    emailAddress = emailVac!!,
                     phoneNumber = phone,
-                    website = website,
-                    websiteVac = websiteVac,
+                    website = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,

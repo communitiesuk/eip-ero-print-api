@@ -36,13 +36,13 @@ class ExplainerPdfTemplateDetailsFactory(
         pdfPlaceholders: Placeholder,
     ): Map<String, String> {
         val orderedNonBlankValues = listOfNotNull(
-            eroContactDetails.nameVac,
+            eroContactDetails.name,
             eroContactDetails.address.property,
             eroContactDetails.address.street,
             eroContactDetails.address.town,
             eroContactDetails.address.area,
             eroContactDetails.address.postcode,
-            eroContactDetails.emailAddressVac ?: eroContactDetails.emailAddress,
+            eroContactDetails.emailAddress,
             eroContactDetails.phoneNumber
         ).filter { it.isNotBlank() }
 

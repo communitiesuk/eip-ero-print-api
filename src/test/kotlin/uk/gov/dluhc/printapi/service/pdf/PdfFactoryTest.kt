@@ -39,13 +39,13 @@ internal class PdfFactoryTest {
         val eroDetails = buildEroDto()
         val placeholders = with(eroDetails.englishContactDetails) {
             mapOf(
-                "ero-recipient" to nameVac,
+                "ero-recipient" to name,
                 "ero-contact-1" to address.property!!,
                 "ero-contact-2" to address.street,
                 "ero-contact-3" to address.town!!,
                 "ero-contact-4" to address.area!!,
                 "ero-contact-5" to address.postcode,
-                "ero-contact-6" to emailAddressVac!!,
+                "ero-contact-6" to emailAddress!!,
                 "ero-contact-7" to phoneNumber,
             )
         }
@@ -64,13 +64,13 @@ internal class PdfFactoryTest {
         val eroDetails = buildEroDto()
         val placeholders = with(eroDetails.welshContactDetails!!) {
             mapOf(
-                "ero-recipient" to nameVac,
+                "ero-recipient" to name,
                 "ero-contact-1" to address.property!!,
                 "ero-contact-2" to address.street,
                 "ero-contact-3" to address.town!!,
                 "ero-contact-4" to address.area!!,
                 "ero-contact-5" to address.postcode,
-                "ero-contact-6" to emailAddressVac!!,
+                "ero-contact-6" to emailAddress!!,
                 "ero-contact-7" to phoneNumber,
             )
         }

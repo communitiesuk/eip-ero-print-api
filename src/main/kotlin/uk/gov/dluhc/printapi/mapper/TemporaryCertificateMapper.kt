@@ -18,8 +18,8 @@ abstract class TemporaryCertificateMapper {
     protected lateinit var idFactory: IdFactory
 
     @Mapping(target = "photoLocationArn", source = "certificateRequest.photoLocation")
-    @Mapping(target = "issuingAuthority", source = "ero.englishContactDetails.nameVac")
-    @Mapping(target = "issuingAuthorityCy", source = "ero.welshContactDetails.nameVac")
+    @Mapping(target = "issuingAuthority", source = "ero.englishContactDetails.name")
+    @Mapping(target = "issuingAuthorityCy", source = "ero.welshContactDetails.name")
     @Mapping(target = "certificateNumber", expression = "java( idFactory.vacNumber() )")
     abstract fun toTemporaryCertificate(
         certificateRequest: GenerateTemporaryCertificateDto,

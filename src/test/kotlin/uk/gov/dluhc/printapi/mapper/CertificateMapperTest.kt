@@ -67,7 +67,7 @@ class CertificateMapperTest {
         given(idFactory.vacNumber()).willReturn(vacNumber)
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
-        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.nameVac)
+        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.name)
 
         val printRequest = with(message) {
             PrintRequest(
@@ -120,7 +120,7 @@ class CertificateMapperTest {
                 vacNumber = vacNumber,
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = ero.englishContactDetails.nameVac,
+                issuingAuthority = ero.englishContactDetails.name,
                 issuingAuthorityCy = null,
                 issueDate = LocalDate.now(),
                 printRequests = mutableListOf(printRequest),
@@ -153,8 +153,8 @@ class CertificateMapperTest {
         given(idFactory.vacNumber()).willReturn(vacNumber)
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
-        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.nameVac)
-        val welshEro = ero.welshContactDetails!!.toElectoralRegistrationOffice(ero.welshContactDetails!!.nameVac)
+        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.name)
+        val welshEro = ero.welshContactDetails!!.toElectoralRegistrationOffice(ero.welshContactDetails!!.name)
 
         val printRequest = with(message) {
             PrintRequest(
@@ -207,8 +207,8 @@ class CertificateMapperTest {
                 vacNumber = vacNumber,
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = ero.englishContactDetails.nameVac,
-                issuingAuthorityCy = ero.welshContactDetails!!.nameVac,
+                issuingAuthority = ero.englishContactDetails.name,
+                issuingAuthorityCy = ero.welshContactDetails!!.name,
                 issueDate = LocalDate.now(),
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
