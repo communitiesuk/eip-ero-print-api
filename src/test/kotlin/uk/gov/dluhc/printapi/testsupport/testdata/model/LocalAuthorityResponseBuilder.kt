@@ -33,7 +33,7 @@ fun buildContactDetails(
     address: Address = buildEroManagementAddress(),
     nameVac: String = aValidLocalAuthorityName(),
     websiteVac: String = aValidWebsite(),
-    emailAddressVac: String = aValidEmailAddress()
+    emailAddressVac: String? = aValidEmailAddress()
 ): ContactDetails =
     ContactDetails(
         name = name,
