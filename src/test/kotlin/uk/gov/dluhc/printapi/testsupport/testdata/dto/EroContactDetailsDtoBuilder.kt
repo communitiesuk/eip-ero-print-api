@@ -36,7 +36,7 @@ fun aWelshEroContactDetails(
         phoneNumber = "01766 771000",
         website = "https://www.gwynedd.llyw.cymru/cy/Cyngor/Cysylltu-%c3%a2-ni/Cysylltu-%c3%a2-ni.aspx",
         websiteVac = "https://www.gwynedd.llyw.cymru/cy/Cyngor/Cysylltu-%c3%a2-ni/Cysylltu-%c3%a2-ni.aspx",
-        emailAddress = "https://www.gwynedd.llyw.cymru/cy/Cyngor/Cysylltu-%c3%a2-ni/Cysylltu-%c3%a2-ni.aspx",
+        emailAddress = "TrethCyngor@gwynedd.llyw.cymru",
         emailAddressVac = "TrethCyngor@gwynedd.llyw.cymru",
         address = address
     )
