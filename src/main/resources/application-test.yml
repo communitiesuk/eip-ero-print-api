@@ -14,3 +14,7 @@ email:
     certificate-failed-to-print:
       email-body-template: email-templates/non-prod/certificate-failed-to-print.html
       send-to-requesting-user: true
+
+jobs:
+  batch-print-requests:
+    max-un-batched-records: 2500
