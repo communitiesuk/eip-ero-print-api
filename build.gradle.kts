@@ -89,7 +89,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     // later version of nimbus-jose-jwt than brought in transitively by spring security - earlier version triggers CVE-2023-1370
-    implementation("com.nimbusds:nimbus-jose-jwt:9.31")
+    implementation("com.nimbusds:nimbus-jose-jwt:9.37.3")
 
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
