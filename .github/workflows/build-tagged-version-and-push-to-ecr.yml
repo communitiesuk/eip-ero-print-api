@@ -1,0 +1,12 @@
+name: Build a tagged version and deploy to ECR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      version: ${{github.ref_name}}
+    secrets: inherit
