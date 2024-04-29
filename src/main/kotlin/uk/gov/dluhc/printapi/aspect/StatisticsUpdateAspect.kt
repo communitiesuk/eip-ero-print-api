@@ -39,14 +39,6 @@ class StatisticsUpdateAspect(
     }
 
     @AfterReturning(
-        pointcut = "execution(* org.springframework.data.repository.CrudRepository.save(..)) && args(anonymousElectorDocument)",
-        returning = "saved"
-    )
-    fun afterSaveAnonymousElectorDocument(joinPoint: JoinPoint, anonymousElectorDocument: AnonymousElectorDocument, saved: AnonymousElectorDocument) {
-        applicationEventPublisher.publishEvent(StatisticsUpdateEvent(saved.sourceReference))
-    }
-
-    @AfterReturning(
         pointcut = "execution(* org.springframework.data.repository.CrudRepository.saveAll(..))",
         returning = "saved"
     )
@@ -63,11 +55,6 @@ class StatisticsUpdateAspect(
                 it.sourceReference?.also {
                     applicationEventPublisher.publishEvent(StatisticsUpdateEvent(it))
                 }
-            }
-        }
-        if (saved.any { it is AnonymousElectorDocument }) {
-            (saved as Iterable<AnonymousElectorDocument>).forEach {
-                applicationEventPublisher.publishEvent(StatisticsUpdateEvent(it.sourceReference))
             }
         }
     }

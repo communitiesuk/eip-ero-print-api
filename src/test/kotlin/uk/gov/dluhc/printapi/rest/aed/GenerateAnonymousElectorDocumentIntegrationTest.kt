@@ -275,8 +275,8 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             assertThat(text).doesNotContainIgnoringCase(request.surname)
         }
 
-        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageSent(request.sourceReference)
+        await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageNotSent()
         }
     }
 

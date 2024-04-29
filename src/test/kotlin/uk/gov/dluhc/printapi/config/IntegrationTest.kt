@@ -304,6 +304,11 @@ internal abstract class IntegrationTest {
         }
     }
 
+    protected fun assertUpdateStatisticsMessageNotSent() {
+        val messages = updateStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).isEmpty()
+    }
+
     private fun getSftpInboundDirectoryFileNames() =
         getSftpDirectoryFileNames(sftpInboundTemplate, PRINT_REQUEST_UPLOAD_PATH)
 
