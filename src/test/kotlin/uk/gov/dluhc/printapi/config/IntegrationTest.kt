@@ -304,6 +304,11 @@ internal abstract class IntegrationTest {
         }
     }
 
+    protected fun assertNumberOfUpdateStatisticsMessagesSent(count: Int) {
+        val messages = updateStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).hasSize(count)
+    }
+
     protected fun assertUpdateStatisticsMessageNotSent() {
         val messages = updateStatisticsMessageListenerStub.getMessages()
         Assertions.assertThat(messages).isEmpty()

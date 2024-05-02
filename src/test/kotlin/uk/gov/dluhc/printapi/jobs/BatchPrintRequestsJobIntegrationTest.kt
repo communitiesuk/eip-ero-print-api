@@ -19,7 +19,7 @@ internal class BatchPrintRequestsJobIntegrationTest : IntegrationTest() {
 
     @Test
     @Transactional
-    fun `should send statistics update messages for each application in a batch`() {
+    fun `should send statistics update messages once for each application in a batch`() {
         // Given
         val s3Resource = "s3ResourceContents".encodeToByteArray()
         val s3Bucket = S3_BUCKET_CONTAINING_PHOTOS
@@ -71,16 +71,6 @@ internal class BatchPrintRequestsJobIntegrationTest : IntegrationTest() {
         TestTransaction.flagForCommit()
         TestTransaction.end()
 
-        // Clear messages from the queue in order to make the test valid
-        //
-        // Saving the certificates to the repository above will have triggered some
-        // statistics update messages, but these aren't the ones we want to test for.
-        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageSent(certificate1.sourceReference!!)
-            assertUpdateStatisticsMessageSent(certificate2.sourceReference!!)
-        }
-        updateStatisticsMessageListenerStub.clear()
-
         // When
         TestTransaction.start()
         batchPrintRequestsJob.run()
@@ -88,10 +78,12 @@ internal class BatchPrintRequestsJobIntegrationTest : IntegrationTest() {
         TestTransaction.end()
 
         // Then
-        TestTransaction.start()
-        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+        // One message will be sent for each certificate when the batch is taken off the queue and processed
+        // Messages should not be sent during the job itself
+        await.pollDelay(5, TimeUnit.SECONDS).atMost(8, TimeUnit.SECONDS).untilAsserted {
             assertUpdateStatisticsMessageSent(certificate1.sourceReference!!)
             assertUpdateStatisticsMessageSent(certificate2.sourceReference!!)
+            assertNumberOfUpdateStatisticsMessagesSent(2)
         }
     }
 }

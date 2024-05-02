@@ -16,6 +16,7 @@ import org.mockito.kotlin.inOrder
 import org.springframework.messaging.MessagingException
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.service.SftpService
+import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import java.io.IOException
 
@@ -29,6 +30,9 @@ internal class PrintResponseFileServiceTest {
 
     @Mock
     private lateinit var printResponseProcessingService: PrintResponseProcessingService
+
+    @Mock
+    private lateinit var statisticsUpdateService: StatisticsUpdateService
 
     @InjectMocks
     private lateinit var printResponseFileService: PrintResponseFileService
@@ -44,6 +48,7 @@ internal class PrintResponseFileServiceTest {
         val expectedPrintResponses = PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList())
         given(objectMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
+        given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
 
         // When
         printResponseFileService.processPrintResponseFile(directory, fileName)
@@ -68,6 +73,7 @@ internal class PrintResponseFileServiceTest {
         val expectedPrintResponses = PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList())
         given(objectMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
+        given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
         val messagingException = MessagingException(
             "Failed to remove file",
             IOException(SftpException(ChannelSftp.SSH_FX_NO_SUCH_FILE, "No such file"))
@@ -105,6 +111,7 @@ internal class PrintResponseFileServiceTest {
         val expectedPrintResponses = PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList())
         given(objectMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
+        given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
         val exception = IOException(MessagingException("Some error occurred"))
         given(sftpService.removeFileFromOutBoundDirectory(any(), any())).willThrow(exception)
         TestLogAppender.reset()

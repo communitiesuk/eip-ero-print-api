@@ -48,8 +48,8 @@ class PrintResponseProcessingService(
      * the print provider's batch response.
      */
     @Transactional
-    fun processBatchResponses(batchResponses: List<BatchResponse>) {
-        batchResponses.forEach { batchResponse ->
+    fun processBatchResponses(batchResponses: List<BatchResponse>): List<Certificate> {
+        return batchResponses.flatMap { batchResponse ->
             val certificates =
                 certificateRepository.findDistinctByPrintRequestStatusAndBatchId(
                     SENT_TO_PRINT_PROVIDER,
@@ -82,21 +82,21 @@ class PrintResponseProcessingService(
     }
 
     @Transactional
-    fun processPrintResponse(printResponse: ProcessPrintResponseMessage) {
+    fun processPrintResponse(printResponse: ProcessPrintResponseMessage): Certificate? {
         val newStatus: Status
 
         try {
             newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
         } catch (ex: IllegalArgumentException) {
             logger.error(ex.message)
-            return
+            return null
         }
 
         val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
 
         if (certificate == null) {
             logger.error("Certificate not found for the requestId ${printResponse.requestId}")
-            return
+            return null
         }
 
         with(printResponse) {
@@ -115,5 +115,7 @@ class PrintResponseProcessingService(
         } else if (printResponse.status == ProcessPrintResponseMessage.Status.FAILED) {
             certificateFailedToPrintEmailSenderService.send(printResponse, certificate)
         }
+
+        return certificate
     }
 }
