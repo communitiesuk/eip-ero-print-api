@@ -85,4 +85,4 @@ fun aValidWebsite(): String = "https://${aValidEroName().replaceSpacesWith("-")}
 
 fun aValidPrintRequestStatusEventDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
-fun aValidEventMessage(): String = faker.harryPotter().spell()
+fun aValidEventMessage(): String = faker.lorem().maxLengthSentence(255)
