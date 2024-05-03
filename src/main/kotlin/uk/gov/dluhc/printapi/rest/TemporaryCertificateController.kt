@@ -23,6 +23,7 @@ import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateSummaryMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
 import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
+import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateSummaryService
@@ -36,6 +37,7 @@ class TemporaryCertificateController(
     private val temporaryCertificateSummaryMapper: TemporaryCertificateSummaryMapper,
     @Qualifier("temporaryCertificateExplainerExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
     private val temporaryCertificateService: TemporaryCertificateService,
+    private val statisticsUpdateService: StatisticsUpdateService,
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
 ) {
 
@@ -81,7 +83,9 @@ class TemporaryCertificateController(
             generateTemporaryCertificateRequest,
             userId
         )
-        return temporaryCertificateService.generateTemporaryCertificate(eroId, dto).let { pdfFile ->
+        return temporaryCertificateService.generateTemporaryCertificate(eroId, dto).also {
+            statisticsUpdateService.triggerVoterCardStatisticsUpdate(dto.sourceReference)
+        }.let { pdfFile ->
             ResponseEntity.status(CREATED)
                 .headers(createPdfHttpHeaders(pdfFile))
                 .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))

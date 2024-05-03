@@ -194,8 +194,8 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             assertThat(text).doesNotContain(originalElectoralRollNumber)
         }
 
-        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageSent(sourceReference)
+        await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageNotSent()
         }
     }
 

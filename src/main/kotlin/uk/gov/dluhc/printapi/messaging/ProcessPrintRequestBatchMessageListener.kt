@@ -7,13 +7,15 @@ import org.springframework.stereotype.Component
 import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.messaging.service.ProcessPrintBatchService
+import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import javax.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 
 @Component
 class ProcessPrintRequestBatchMessageListener(
-    private val processPrintBatchService: ProcessPrintBatchService
+    private val processPrintBatchService: ProcessPrintBatchService,
+    private val statisticsUpdateService: StatisticsUpdateService,
 ) : MessageListener<ProcessPrintRequestBatchMessage> {
 
     @SqsListener("\${sqs.process-print-request-batch-queue-name}")
@@ -21,7 +23,10 @@ class ProcessPrintRequestBatchMessageListener(
         with(payload) {
             logger.info("Processing print batch request for batchId: $batchId")
 
-            processPrintBatchService.processBatch(batchId, printRequestCount)
+            val certificates = processPrintBatchService.processBatch(batchId, printRequestCount)
+            certificates.forEach {
+                statisticsUpdateService.triggerVoterCardStatisticsUpdate(it.sourceReference!!)
+            }
 
             logger.info("Successfully processed print request for batchId: $batchId")
         }

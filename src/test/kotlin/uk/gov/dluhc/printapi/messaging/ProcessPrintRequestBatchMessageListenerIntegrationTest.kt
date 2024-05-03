@@ -71,15 +71,6 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         TestTransaction.flagForCommit()
         TestTransaction.end()
 
-        // Clear messages from the queue in order to make the test valid
-        //
-        // Saving the certificates to the repository above will have triggered some
-        // statistics update messages, but these aren't the ones we want to test for.
-        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
-        }
-        updateStatisticsMessageListenerStub.clear()
-
         assertThat(filterListForName(batchId)).isEmpty()
 
         // add message to queue for processing
@@ -155,15 +146,6 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         certificate = certificateRepository.save(certificate)
         TestTransaction.flagForCommit()
         TestTransaction.end()
-
-        // Clear messages from the queue in order to make the test valid
-        //
-        // Saving the certificates to the repository above will have triggered some
-        // statistics update messages, but these aren't the ones we want to test for.
-        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
-        }
-        updateStatisticsMessageListenerStub.clear()
 
         assertThat(filterListForName(batchId)).isEmpty()
 

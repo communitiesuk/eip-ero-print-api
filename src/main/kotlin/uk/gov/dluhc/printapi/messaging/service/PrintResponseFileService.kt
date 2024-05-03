@@ -8,6 +8,7 @@ import org.springframework.messaging.MessagingException
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.service.SftpService
+import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import java.io.IOException
 
 private val logger = KotlinLogging.logger {}
@@ -16,14 +17,19 @@ private val logger = KotlinLogging.logger {}
 class PrintResponseFileService(
     val sftpService: SftpService,
     val objectMapper: ObjectMapper,
-    val printResponseProcessingService: PrintResponseProcessingService
+    val printResponseProcessingService: PrintResponseProcessingService,
+    val statisticsUpdateService: StatisticsUpdateService,
 ) {
     fun processPrintResponseFile(directory: String, fileName: String) {
         val printResponsesString = sftpService.fetchFileFromOutBoundDirectory(directory, fileName)
         val printResponses = parsePrintResponseContent(printResponsesString)
-        printResponseProcessingService.processBatchResponses(printResponses.batchResponses)
+        val certificates = printResponseProcessingService.processBatchResponses(printResponses.batchResponses)
         printResponseProcessingService.processPrintResponses(printResponses.printResponses)
         removeFile(directory, fileName)
+
+        certificates.forEach {
+            statisticsUpdateService.triggerVoterCardStatisticsUpdate(it.sourceReference!!)
+        }
     }
 
     private fun parsePrintResponseContent(printResponsesString: String): PrintResponses {
