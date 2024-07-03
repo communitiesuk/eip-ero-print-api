@@ -96,7 +96,7 @@ class TemporaryCertificateController(
         )
         return temporaryCertificateService.generateTemporaryCertificate(eroId, dto).also {
             if (it.contents.size > MAX_RESPONSE_FILE_SIZE && generateTemporaryCertificateRequest.allowLargeResponse != true) {
-                val s3Path = "temporary_certificates/${dto.gssCode}/${dto.applicationReference}"
+                val s3Path = "temporary_certificates/${dto.gssCode}/${dto.applicationReference}.pdf"
                 logger.warn {
                     "Response file for eroId = $eroId and sourceReference = ${dto.sourceReference} too large " +
                         "to return Temporary VAC - putting to S3 path $s3Path instead"
