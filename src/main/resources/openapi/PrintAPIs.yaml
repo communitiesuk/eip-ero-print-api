@@ -1577,6 +1577,8 @@ components:
           format: date
           description: The date that the Temporary Certificate is valid for.
           example: '2023-07-27'
+        allowLargeResponse:
+          type: boolean
       required:
         - gssCode
         - sourceType

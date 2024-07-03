@@ -4,9 +4,11 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import software.amazon.awssdk.core.exception.SdkException
+import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest
@@ -45,6 +47,20 @@ class S3PhotoService(
             }
         } catch (e: SdkException) {
             logger.warn { "Unable to delete photo with S3 arn [$photoS3Arn] due to error [${e.cause?.message ?: e.cause}]" }
+            throw e
+        }
+    }
+
+    fun putObjectToTargetBucketFromByteArray(path: String, data: ByteArray) {
+        var bucket = s3Properties.certificatePhotosTargetBucket
+        try {
+            s3Client.putObject(
+                PutObjectRequest.builder().bucket(bucket).key(path).build(),
+                RequestBody.fromBytes(data)
+            )
+            logger.debug { "Put object to S3 bucket [$bucket] with path [$path]" }
+        } catch (e: SdkException) {
+            logger.warn { "Unable to put object to S3 bucket [$bucket] with path [$path] due to error [${e.cause?.message ?: e.cause}]" }
             throw e
         }
     }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.util.ResourceUtils
 import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
@@ -37,7 +38,9 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         private const val GSS_CODE = "W06000023"
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
-        private const val MAX_SIZE_2_MB = 2 * 1024 * 1024
+        private const val LARGE_CERTIFICATE_SAMPLE_PHOTO =
+            "classpath:temporary-certificate-template/sample-too-large-certificate-photo.png"
+        private const val MAX_SIZE_20_MB = 20 * 1024 * 1024
     }
 
     @Test
@@ -171,7 +174,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
     @Test
     fun `should return temporary certificate pdf given valid request for authorised user`() {
         // Given
-        val photoLocationArn = addPhotoToS3()
+        val photoLocationArn = addPhotoToS3(CERTIFICATE_SAMPLE_PHOTO)
         val request = buildGenerateTemporaryCertificateRequest(photoLocation = photoLocationArn)
         val localAuthorityName = aValidLocalAuthorityName()
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
@@ -186,7 +189,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
         // When
         val response = webTestClient.mutate()
-            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_20_MB) }
             .build().post()
             .uri(URI_TEMPLATE, ERO_ID)
             .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
@@ -222,8 +225,116 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         }
     }
 
-    private fun addPhotoToS3(): String {
-        val s3Resource = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
+    @Test
+    fun `should return a payload too large error and put the temporary certificate S3 if the file generated is too large`() {
+        // Given
+        val photoLocationArn = addPhotoToS3(LARGE_CERTIFICATE_SAMPLE_PHOTO)
+        val request = buildGenerateTemporaryCertificateRequest(photoLocation = photoLocationArn)
+        val localAuthorityName = aValidLocalAuthorityName()
+        val localAuthorities: List<LocalAuthorityResponse> = listOf(
+            buildLocalAuthorityResponse(
+                gssCode = request.gssCode,
+                contactDetailsEnglish = buildContactDetails(nameVac = localAuthorityName)
+            )
+        )
+        val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID, localAuthorities = localAuthorities)
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByGssCode(eroResponse, request.gssCode)
+
+        // When
+        val response = webTestClient.mutate()
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_20_MB) }
+            .build().post()
+            .uri(URI_TEMPLATE, ERO_ID)
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
+            .contentType(MediaType.APPLICATION_JSON)
+            .withBody(request)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(413)
+            .returnResult(ErrorResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual)
+            .hasStatus(413)
+            .hasError("Payload Too Large")
+            .hasMessageContaining("Response file for eroId = $ERO_ID and sourceReference = ${request.sourceReference} too large to generate Temporary VAC")
+
+        val temporaryCertificates = temporaryCertificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+            listOf(request.gssCode),
+            VOTER_CARD,
+            request.sourceReference
+        )
+        assertThat(temporaryCertificates).hasSize(1)
+        val temporaryCertificate = temporaryCertificates[0]
+
+        val temporaryCertificateInS3 =
+            getObjectFromS3("temporary_certificates/${request.gssCode}/${request.applicationReference}/temporary-certificate-${temporaryCertificate.certificateNumber}.pdf")
+        assertThat(temporaryCertificateInS3).hasSizeGreaterThan(9 * 1024 * 1024)
+        PdfReader(temporaryCertificateInS3).use { reader ->
+            val text = PdfTextExtractor(reader).getTextFromPage(1)
+            assertThat(text).contains(localAuthorityName)
+        }
+    }
+
+    @Test
+    fun `should return temporary certificate pdf given large file and allowLargeResponse flag`() {
+        // Given
+        val photoLocationArn = addPhotoToS3(LARGE_CERTIFICATE_SAMPLE_PHOTO)
+        val request =
+            buildGenerateTemporaryCertificateRequest(photoLocation = photoLocationArn, allowLargeResponse = true)
+        val localAuthorityName = aValidLocalAuthorityName()
+        val localAuthorities: List<LocalAuthorityResponse> = listOf(
+            buildLocalAuthorityResponse(
+                gssCode = request.gssCode,
+                contactDetailsEnglish = buildContactDetails(nameVac = localAuthorityName)
+            )
+        )
+        val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID, localAuthorities = localAuthorities)
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByGssCode(eroResponse, request.gssCode)
+
+        // When
+        val response = webTestClient.mutate()
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_20_MB) }
+            .build().post()
+            .uri(URI_TEMPLATE, ERO_ID)
+            .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
+            .contentType(MediaType.APPLICATION_JSON)
+            .withBody(request)
+            .exchange()
+            .expectStatus().isCreated
+            .expectHeader().contentType(MediaType.APPLICATION_PDF)
+            .expectBody(ByteArray::class.java)
+            .returnResult()
+
+        // Then
+        val temporaryCertificates = temporaryCertificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+            listOf(request.gssCode),
+            VOTER_CARD,
+            request.sourceReference
+        )
+        assertThat(temporaryCertificates).hasSize(1)
+        val temporaryCertificate = temporaryCertificates[0]
+        val contentDisposition = response.responseHeaders.contentDisposition
+        assertThat(contentDisposition.filename)
+            .isEqualTo("temporary-certificate-${temporaryCertificate.certificateNumber}.pdf")
+
+        val pdfContent = response.responseBody
+        assertThat(pdfContent).isNotNull
+        PdfReader(pdfContent).use { reader ->
+            val text = PdfTextExtractor(reader).getTextFromPage(1)
+            assertThat(text).contains(localAuthorityName)
+        }
+
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageSent(request.sourceReference)
+        }
+    }
+
+    private fun addPhotoToS3(filepath: String): String {
+        val s3Resource = ResourceUtils.getFile(filepath).readBytes()
         val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
         val s3Path = "E09000007/0013a30ac9bae2ebb9b1239b/${UUID.randomUUID()}/8a53a30ac9bae2ebb9b1239b-test-photo.png"
 
@@ -236,5 +347,13 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             RequestBody.fromInputStream(ByteArrayInputStream(s3Resource), s3Resource.size.toLong())
         )
         return "arn:aws:s3:::$s3Bucket/$s3Path"
+    }
+
+    private fun getObjectFromS3(s3Path: String): ByteArray {
+        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+
+        return s3Client.getObjectAsBytes(
+            GetObjectRequest.builder().bucket(s3Bucket).key(s3Path).build()
+        ).asByteArray()
     }
 }
