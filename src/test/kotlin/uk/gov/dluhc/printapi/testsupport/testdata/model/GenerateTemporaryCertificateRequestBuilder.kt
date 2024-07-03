@@ -23,6 +23,7 @@ fun buildGenerateTemporaryCertificateRequest(
     certificateLanguage: CertificateLanguage = CertificateLanguage.EN,
     photoLocation: String = aPhotoArn(),
     validOnDate: LocalDate = aValidIssueDate(),
+    allowLargeResponse: Boolean? = null,
 ): GenerateTemporaryCertificateRequest =
     GenerateTemporaryCertificateRequest(
         gssCode = gssCode,
@@ -34,5 +35,6 @@ fun buildGenerateTemporaryCertificateRequest(
         surname = surname,
         certificateLanguage = certificateLanguage,
         photoLocation = photoLocation,
-        validOnDate = validOnDate
+        validOnDate = validOnDate,
+        allowLargeResponse = allowLargeResponse,
     )

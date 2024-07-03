@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_GATEWAY
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -99,6 +100,21 @@ class GlobalExceptionHandler(
         request: WebRequest
     ): ResponseEntity<Any> {
         return populateErrorResponseAndHandleExceptionInternal(e, BAD_REQUEST, request)
+    }
+
+    /**
+     * Exception handler to return a 413 Payload Too Large ErrorResponse
+     */
+    @ExceptionHandler(
+        value = [
+            ResponseFileTooLargeException::class,
+        ]
+    )
+    protected fun handleExceptionReturnContentTooLargeErrorResponse(
+        e: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<Any> {
+        return populateErrorResponseAndHandleExceptionInternal(e, PAYLOAD_TOO_LARGE, request)
     }
 
     /**
