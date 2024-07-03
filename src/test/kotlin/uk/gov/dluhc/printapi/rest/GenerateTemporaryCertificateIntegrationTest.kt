@@ -261,8 +261,16 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .hasError("Payload Too Large")
             .hasMessageContaining("Response file for eroId = $ERO_ID and sourceReference = ${request.sourceReference} too large to generate Temporary VAC")
 
+        val temporaryCertificates = temporaryCertificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+            listOf(request.gssCode),
+            VOTER_CARD,
+            request.sourceReference
+        )
+        assertThat(temporaryCertificates).hasSize(1)
+        val temporaryCertificate = temporaryCertificates[0]
+
         val temporaryCertificateInS3 =
-            getObjectFromS3("temporary_certificates/${request.gssCode}/${request.applicationReference}.pdf")
+            getObjectFromS3("temporary_certificates/${request.gssCode}/${request.applicationReference}/temporary-certificate-${temporaryCertificate.certificateNumber}.pdf")
         assertThat(temporaryCertificateInS3).hasSizeGreaterThan(9 * 1024 * 1024)
         PdfReader(temporaryCertificateInS3).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
