@@ -42,6 +42,7 @@ api:
     generate-temporary-certificate:
       valid-on-date:
         max-calendar-days-in-future: 30
+      upload-large-file-to-s3: false
     data-retention:
       # The legislation defines the first (initial) retention period as 28 working days from the date of "issue", which has been confirmed as the date the
       # certificate was printed, not when it was sent to the print provider (and therefore not the "issue date" that is currently printed on the certificate

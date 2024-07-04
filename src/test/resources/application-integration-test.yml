@@ -40,6 +40,8 @@ s3:
 api:
   print-api:
     base.url: http://localhost:8080
+    generate-temporary-certificate:
+      upload-large-file-to-s3: true
   ero-management:
     url: http://will-be-replaced-by-wireMockServer-bean
 
