@@ -6,16 +6,16 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "2.7.12"
-    id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.8.22"
-    kotlin("kapt") version "1.8.22"
-    kotlin("plugin.spring") version "1.8.22"
-    kotlin("plugin.jpa") version "1.8.22"
-    kotlin("plugin.allopen") version "1.8.22"
+    id("org.springframework.boot") version "3.2.5"
+    id("io.spring.dependency-management") version "1.1.3"
+    kotlin("jvm") version "1.9.10"
+    kotlin("kapt") version "1.9.10"
+    kotlin("plugin.spring") version "1.9.10"
+    kotlin("plugin.jpa") version "1.9.10"
+    kotlin("plugin.allopen") version "1.9.10"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
-    id("org.openapi.generator") version "6.2.1"
+    id("org.openapi.generator") version "7.0.1"
     id("org.owasp.dependencycheck") version "8.2.1"
     id("org.jsonschema2dataclass") version "4.5.0"
 }
@@ -25,8 +25,8 @@ version = "latest"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 ext["snakeyaml.version"] = "1.33"
-extra["springCloudVersion"] = "2.4.2"
-extra["awsSdkVersion"] = "2.18.9"
+extra["springCloudAwsVersion"] = "3.1.1"
+extra["awsSdkVersion"] = "2.23.6"
 
 allOpen {
     annotations("javax.persistence.Entity", "javax.persistence.MappedSuperclass", "javax.persistence.Embedabble")
@@ -63,8 +63,8 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
     implementation("org.apache.commons:commons-lang3:3.12.0")
-    implementation("org.mapstruct:mapstruct:1.5.3.Final")
-    kapt("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    kapt("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
     // internal libs
     implementation("uk.gov.dluhc:logging-library:2.3.1")
@@ -97,14 +97,21 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.1")
+    runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.10")
     runtimeOnly("software.amazon.awssdk:rds")
 
-    // AWS messaging
-    implementation("io.awspring.cloud:spring-cloud-starter-aws-messaging")
+    // AWS dependencies
+    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:${property("springCloudAwsVersion")}"))
+    testImplementation(platform("software.amazon.awssdk:bom:${property("awsSdkVersion")}"))
+    implementation("io.awspring.cloud:spring-cloud-aws-starter")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
 
-    // AWS v2 dependencies
+    // AWS library
     implementation("software.amazon.awssdk:s3")
+    testImplementation("software.amazon.awssdk:auth")
+    testImplementation("software.amazon.awssdk:sts")
+
     // email
     implementation("software.amazon.awssdk:ses")
 
@@ -126,26 +133,19 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.1")
+    testImplementation("org.testcontainers:testcontainers:1.19.1")
+    testImplementation("org.testcontainers:mysql:1.19.1")
+
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
-    testImplementation("org.testcontainers:testcontainers:1.17.6")
-    testImplementation("org.testcontainers:mysql:1.17.6")
-
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
+    testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.0")
     testImplementation("net.datafaker:datafaker:1.8.0")
 
     // Libraries to support creating JWTs in tests
     testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
     testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:${property("springCloudVersion")}")
-        mavenBom("software.amazon.awssdk:bom:${property("awsSdkVersion")}")
-    }
 }
 
 tasks.withType<KotlinCompile> {
@@ -179,9 +179,9 @@ tasks.withType<GenerateTask> {
     configOptions.set(
         mapOf(
             "dateLibrary" to "java8",
-            "serializationLibrary" to "jackson",
             "enumPropertyNaming" to "UPPERCASE",
             "useBeanValidation" to "true",
+            "useSpringBoot3" to "true",
         )
     )
 }
@@ -257,10 +257,12 @@ tasks.whenTaskAdded {
 }
 
 tasks.withType<BootBuildImage> {
-    environment = mapOf("BP_HEALTH_CHECKER_ENABLED" to "true")
-    buildpacks = listOf(
-        "urn:cnb:builder:paketo-buildpacks/java",
-        "gcr.io/paketo-buildpacks/health-checker",
+    environment.set(mapOf("BP_HEALTH_CHECKER_ENABLED" to "true"))
+    buildpacks.set(
+        listOf(
+            "urn:cnb:builder:paketo-buildpacks/java",
+            "gcr.io/paketo-buildpacks/health-checker",
+        )
     )
 }
 
