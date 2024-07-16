@@ -4,7 +4,7 @@ import io.awspring.cloud.messaging.listener.annotation.SqsListener
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMessage
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @Component
 class UpdateStatisticsMessageListenerStub : MessageListenerStub<UpdateStatisticsMessage>() {

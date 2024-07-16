@@ -13,7 +13,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import java.io.ByteArrayInputStream
 import java.util.concurrent.TimeUnit
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 internal class BatchPrintRequestsJobIntegrationTest : IntegrationTest() {
 

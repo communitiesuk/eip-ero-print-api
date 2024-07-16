@@ -17,8 +17,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiException
 import uk.gov.dluhc.printapi.config.ApiRequestErrorAttributes
 import uk.gov.dluhc.printapi.models.ErrorResponse
-import javax.servlet.RequestDispatcher.ERROR_MESSAGE
-import javax.servlet.RequestDispatcher.ERROR_STATUS_CODE
+import jakarta.servlet.RequestDispatcher.ERROR_MESSAGE
+import jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE
 
 /**
  * Global Exception Handler. Handles specific exceptions thrown by the application by returning a suitable [ErrorResponse]

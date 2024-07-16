@@ -7,7 +7,7 @@ import uk.gov.dluhc.printapi.mapper.CertificateMapper
 import uk.gov.dluhc.printapi.mapper.PrintRequestMapper
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient as EroClient
 
 @Service

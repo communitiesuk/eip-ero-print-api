@@ -14,7 +14,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.anAuthenticatedJwtAuthenticati
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import java.time.LocalDate
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 internal class AnonymousElectorDocumentRepositoryIntegrationTest : IntegrationTest() {
 

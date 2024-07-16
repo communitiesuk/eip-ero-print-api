@@ -30,7 +30,7 @@ import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateSummaryService
 import java.io.ByteArrayInputStream
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @RestController
 @CrossOrigin

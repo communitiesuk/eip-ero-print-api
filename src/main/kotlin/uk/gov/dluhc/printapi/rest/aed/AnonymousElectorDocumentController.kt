@@ -46,7 +46,7 @@ import java.beans.PropertyEditorSupport
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 private val logger = KotlinLogging.logger {}
 

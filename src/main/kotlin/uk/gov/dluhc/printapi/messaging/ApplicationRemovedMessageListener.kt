@@ -11,7 +11,7 @@ import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.TemporaryCertificateDataRetentionService
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 
