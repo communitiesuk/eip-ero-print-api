@@ -10,6 +10,7 @@ Configure your IDE with the code formatter (ktlint):
 $ ./gradlew ktlintApplyToIdea
 ```
 This only needs doing once to set up your IDE with the code styles.
+If you prefer, you can run `./gradlew addKtlintFormatPreCommitHook` to add a pre-commit hook to format your code on commit.
 
 #### AWS CodeArtifact Access Set Up
 

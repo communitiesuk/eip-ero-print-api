@@ -3,7 +3,6 @@ package uk.gov.dluhc.printapi.config
 import com.jcraft.jsch.ChannelSftp
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ByteArrayResource
@@ -53,7 +52,6 @@ class SftpConfiguration {
 }
 
 @ConfigurationProperties(prefix = "sftp")
-@ConstructorBinding
 data class SftpProperties(
     val host: String,
     val port: Int = 22,
