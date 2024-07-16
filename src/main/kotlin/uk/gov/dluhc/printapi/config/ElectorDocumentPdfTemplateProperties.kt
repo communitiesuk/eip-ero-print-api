@@ -1,13 +1,11 @@
 package uk.gov.dluhc.printapi.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.AnonymousElectorDocumentPlaceholder
 import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.EnglishTemporaryCertificatePlaceholder
 import uk.gov.dluhc.printapi.config.ElectorDocumentPdfTemplateProperties.WelshTemporaryCertificatePlaceholder
 
 @ConfigurationProperties(prefix = "temporary-certificate.certificate-pdf")
-@ConstructorBinding
 class TemporaryCertificatePdfTemplateProperties(
     english: English<EnglishTemporaryCertificatePlaceholder>,
     welsh: Welsh<WelshTemporaryCertificatePlaceholder>
@@ -17,7 +15,6 @@ class TemporaryCertificatePdfTemplateProperties(
 )
 
 @ConfigurationProperties(prefix = "anonymous-elector-document.certificate-pdf")
-@ConstructorBinding
 class AnonymousElectorDocumentPdfTemplateProperties(
     english: English<AnonymousElectorDocumentPlaceholder>,
     welsh: Welsh<AnonymousElectorDocumentPlaceholder>
