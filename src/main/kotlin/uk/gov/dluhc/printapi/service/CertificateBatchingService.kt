@@ -12,7 +12,7 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 private val logger = KotlinLogging.logger { }
 

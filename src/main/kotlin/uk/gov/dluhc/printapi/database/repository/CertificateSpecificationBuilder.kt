@@ -8,10 +8,10 @@ import uk.gov.dluhc.printapi.dto.CertificateSearchBy
 import uk.gov.dluhc.printapi.dto.CertificateSearchCriteriaDto
 import uk.gov.dluhc.printapi.service.sanitizeApplicationReference
 import uk.gov.dluhc.printapi.service.sanitizeSurname
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.Root
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.Root
 
 @Component
 class CertificateSpecificationBuilder {

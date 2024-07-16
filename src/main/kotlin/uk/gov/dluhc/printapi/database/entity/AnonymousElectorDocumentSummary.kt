@@ -6,11 +6,11 @@ import uk.gov.dluhc.printapi.database.repository.UUIDCharType
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.Id
-import javax.persistence.Table
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 
 @Table(name = "v_anonymous_elector_document_summary")
 @Entity

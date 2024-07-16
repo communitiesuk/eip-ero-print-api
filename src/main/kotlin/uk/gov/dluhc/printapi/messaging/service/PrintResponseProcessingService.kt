@@ -15,7 +15,7 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.service.IdFactory
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 private val logger = KotlinLogging.logger {}
 

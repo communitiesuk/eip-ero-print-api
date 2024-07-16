@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.service.PrintResponseFileService
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 

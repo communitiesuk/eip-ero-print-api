@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 /**
  * Implementation of [MessageListener] to handle [RemoveCertificateMessage] messages

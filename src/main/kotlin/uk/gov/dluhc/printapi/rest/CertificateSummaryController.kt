@@ -14,7 +14,7 @@ import uk.gov.dluhc.printapi.models.CertificateSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.service.CertificateSummarySearchService
 import uk.gov.dluhc.printapi.service.CertificateSummaryService
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @RestController
 @CrossOrigin

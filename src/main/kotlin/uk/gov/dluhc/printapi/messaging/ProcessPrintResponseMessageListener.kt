@@ -8,7 +8,7 @@ import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.service.PrintResponseProcessingService
 import uk.gov.dluhc.printapi.service.StatisticsUpdateService
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 

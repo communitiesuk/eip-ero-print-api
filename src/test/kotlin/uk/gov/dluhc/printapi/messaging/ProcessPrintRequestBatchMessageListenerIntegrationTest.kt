@@ -24,7 +24,7 @@ import java.io.ByteArrayInputStream
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : IntegrationTest() {
