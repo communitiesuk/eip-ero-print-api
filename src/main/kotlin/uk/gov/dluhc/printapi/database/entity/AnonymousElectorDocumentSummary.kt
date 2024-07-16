@@ -1,37 +1,50 @@
 package uk.gov.dluhc.printapi.database.entity
 
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import org.hibernate.Hibernate
-import org.hibernate.annotations.Type
-import uk.gov.dluhc.printapi.database.repository.UUIDCharType
+import org.hibernate.annotations.JdbcTypeCode
+import java.sql.Types
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.Id
-import javax.persistence.Table
 
 @Table(name = "v_anonymous_elector_document_summary")
 @Entity
 class AnonymousElectorDocumentSummary(
 
     @Id
-    @Type(type = UUIDCharType)
+    @JdbcTypeCode(Types.CHAR)
     val id: UUID,
+
     val gssCode: String,
+
     @Enumerated(EnumType.STRING)
     val sourceType: SourceType,
+
     val electoralRollNumber: String,
+
     val sanitizedElectoralRollNumber: String,
+
     val certificateNumber: String,
+
     val sourceReference: String,
+
     val applicationReference: String,
+
     val issueDate: LocalDate,
+
     val dateCreated: Instant,
+
     val firstName: String,
+
     val surname: String,
+
     val sanitizedSurname: String,
+
     val postcode: String
 ) {
     override fun equals(other: Any?): Boolean {

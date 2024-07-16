@@ -127,8 +127,8 @@ internal class AedDataRetentionServiceTest {
         @Test
         fun `should remove anonymous elector document final retention data`() {
             // Given
-            val aed1 = buildAnonymousElectorDocument(photoLocationArn = aPhotoArn())
-            val aed2 = buildAnonymousElectorDocument(photoLocationArn = anotherPhotoArn())
+            val aed1 = buildAnonymousElectorDocument(persisted = true, photoLocationArn = aPhotoArn())
+            val aed2 = buildAnonymousElectorDocument(persisted = true, photoLocationArn = anotherPhotoArn())
             val sourceType = ANONYMOUS_ELECTOR_DOCUMENT
             given(anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType)).willReturn(listOf(aed1, aed2))
 

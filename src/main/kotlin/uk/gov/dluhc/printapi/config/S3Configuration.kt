@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import software.amazon.awssdk.services.s3.S3Client
@@ -19,7 +18,6 @@ class S3Configuration {
 }
 
 @ConfigurationProperties(prefix = "s3")
-@ConstructorBinding
 data class S3Properties(
     val vcaTargetBucket: String,
     val vcaTargetBucketProxyEndpoint: String,

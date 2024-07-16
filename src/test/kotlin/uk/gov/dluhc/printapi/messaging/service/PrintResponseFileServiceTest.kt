@@ -2,8 +2,6 @@ package uk.gov.dluhc.printapi.messaging.service
 
 import ch.qos.logback.classic.Level
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jcraft.jsch.ChannelSftp
-import com.jcraft.jsch.SftpException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -14,13 +12,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.inOrder
 import org.springframework.messaging.MessagingException
+import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
-import java.io.IOException
 
 @ExtendWith(MockitoExtension::class)
 internal class PrintResponseFileServiceTest {
@@ -47,7 +45,11 @@ internal class PrintResponseFileServiceTest {
         val fileContent = "{\"BatchResponses\": [], \"PrintResponses\": []}"
 
         given(sftpService.fetchFileFromOutBoundDirectory(any(), any())).willReturn(fileContent)
-        val expectedPrintResponses = PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList())
+        val expectedPrintResponses =
+            PrintResponses.PrintResponsesBuilder()
+                .withBatchResponses(emptyList())
+                .withPrintResponses(emptyList<PrintResponse>())
+                .build()
         given(objectMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
         given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
@@ -75,9 +77,10 @@ internal class PrintResponseFileServiceTest {
         val fileContent = "TEST_JSON_CONTENT"
 
         val batchResponse = buildBatchResponse()
-        val printResponses = PrintResponses()
+        val printResponses = PrintResponses.PrintResponsesBuilder()
             .withBatchResponses(listOf(batchResponse))
-            .withPrintResponses(emptyList())
+            .withPrintResponses(emptyList<PrintResponse>())
+            .build()
         val firstCertificate = buildCertificate(batchId = batchResponse.batchId)
         val secondCertificate = buildCertificate(batchId = batchResponse.batchId)
 
@@ -110,16 +113,17 @@ internal class PrintResponseFileServiceTest {
         val fileContent = "{\"BatchResponses\": [], \"PrintResponses\": []}"
 
         given(sftpService.fetchFileFromOutBoundDirectory(any(), any())).willReturn(fileContent)
-        val expectedPrintResponses = PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList())
+        val expectedPrintResponses =
+            PrintResponses.PrintResponsesBuilder()
+                .withBatchResponses(emptyList())
+                .withPrintResponses(emptyList<PrintResponse>())
+                .build()
         given(objectMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
         given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
-        val messagingException = MessagingException(
-            "Failed to remove file",
-            IOException(SftpException(ChannelSftp.SSH_FX_NO_SUCH_FILE, "No such file"))
-        )
-        val exception = IOException(messagingException)
-        given(sftpService.removeFileFromOutBoundDirectory(any(), any())).willThrow(exception)
+
+        // Returns false when file not found
+        given(sftpService.removeFileFromOutBoundDirectory(any(), any())).willReturn(false)
         TestLogAppender.reset()
 
         // When
@@ -148,11 +152,15 @@ internal class PrintResponseFileServiceTest {
         val fileContent = "{\"BatchResponses\": [], \"PrintResponses\": []}"
 
         given(sftpService.fetchFileFromOutBoundDirectory(any(), any())).willReturn(fileContent)
-        val expectedPrintResponses = PrintResponses().withBatchResponses(emptyList()).withPrintResponses(emptyList())
+        val expectedPrintResponses =
+            PrintResponses.PrintResponsesBuilder()
+                .withBatchResponses(emptyList())
+                .withPrintResponses(emptyList<PrintResponse>())
+                .build()
         given(objectMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
         given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
-        val exception = IOException(MessagingException("Some error occurred"))
+        val exception = MessagingException("Some error occurred")
         given(sftpService.removeFileFromOutBoundDirectory(any(), any())).willThrow(exception)
         TestLogAppender.reset()
 
@@ -169,7 +177,7 @@ internal class PrintResponseFileServiceTest {
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
         assertThat(
             TestLogAppender.hasLogMatchingRegex(
-                "An error occurred when trying to remove file $fileName from the directory $directory. ${exception.cause!!.message}",
+                "An error occurred when trying to remove file $fileName from the directory $directory. ${exception.message}",
                 Level.ERROR
             )
         ).isTrue

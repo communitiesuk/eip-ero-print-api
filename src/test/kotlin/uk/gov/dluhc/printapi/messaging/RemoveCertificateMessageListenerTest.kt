@@ -31,7 +31,7 @@ internal class RemoveCertificateMessageListenerTest : IntegrationTest() {
         )
 
         // When
-        sqsMessagingTemplate.convertAndSend(removeCertificateQueueName, payload)
+        sqsTemplate.send(removeCertificateQueueName, payload)
 
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {

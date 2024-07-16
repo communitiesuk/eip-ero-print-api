@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.service
 
+import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.messagingsupport.MessageQueue
@@ -15,7 +16,6 @@ import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.service.IdFactory
-import javax.transaction.Transactional
 
 private val logger = KotlinLogging.logger {}
 
@@ -108,7 +108,8 @@ class PrintResponseProcessingService(
             )
         }
 
-        certificateRepository.save(certificate)
+        // Save and flush here to make sure that we avoid sending emails in the case of concurrency issues
+        certificateRepository.saveAndFlush(certificate)
 
         if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
             certificateNotDeliveredEmailSenderService.send(printResponse, certificate)

@@ -1,12 +1,12 @@
 package uk.gov.dluhc.printapi.rest
 
+import jakarta.validation.ConstraintViolation
+import jakarta.validation.Validation
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.dluhc.printapi.models.CertificateSearchBy
-import javax.validation.ConstraintViolation
-import javax.validation.Validation
 
 class CertificateSearchByParametersAreValidConstraintValidatorTest {
 

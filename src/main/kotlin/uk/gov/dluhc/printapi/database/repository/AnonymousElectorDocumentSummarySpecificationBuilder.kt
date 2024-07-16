@@ -1,5 +1,8 @@
 package uk.gov.dluhc.printapi.database.repository
 
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Root
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentSummary
@@ -7,9 +10,6 @@ import uk.gov.dluhc.printapi.dto.aed.AedSearchBy
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchCriteriaDto
 import uk.gov.dluhc.printapi.service.sanitizeApplicationReference
 import uk.gov.dluhc.printapi.service.sanitizeSurname
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Root
 
 @Component
 class AnonymousElectorDocumentSummarySpecificationBuilder {

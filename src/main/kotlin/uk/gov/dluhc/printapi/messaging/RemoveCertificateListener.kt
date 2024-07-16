@@ -1,12 +1,11 @@
 package uk.gov.dluhc.printapi.messaging
 
-import io.awspring.cloud.messaging.listener.annotation.SqsListener
+import io.awspring.cloud.sqs.annotation.SqsListener
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
-import javax.validation.Valid
 
 /**
  * Implementation of [MessageListener] to handle [RemoveCertificateMessage] messages
@@ -17,7 +16,7 @@ class RemoveCertificateListener(
 ) : MessageListener<RemoveCertificateMessage> {
 
     @SqsListener("\${sqs.remove-certificate-queue-name}")
-    override fun handleMessage(@Valid @Payload payload: RemoveCertificateMessage) {
+    override fun handleMessage(@Payload payload: RemoveCertificateMessage) {
         certificateDataRetentionService.removeFinalRetentionPeriodData(payload)
     }
 }

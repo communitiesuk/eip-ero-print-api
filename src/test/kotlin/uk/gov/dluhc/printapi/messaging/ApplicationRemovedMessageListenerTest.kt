@@ -42,7 +42,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
 
         // When
-        sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
+        sqsTemplate.send(applicationRemovedQueueName, payload)
 
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
@@ -68,7 +68,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         val expectedFinalRemovalDate = LocalDate.of(2024, JULY, 1)
 
         // When
-        sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
+        sqsTemplate.send(applicationRemovedQueueName, payload)
 
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
@@ -95,7 +95,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
 
         // When
-        sqsMessagingTemplate.convertAndSend(applicationRemovedQueueName, payload)
+        sqsTemplate.send(applicationRemovedQueueName, payload)
 
         // Then
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {

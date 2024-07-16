@@ -213,7 +213,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository).save(certificate)
+            verify(certificateRepository).saveAndFlush(certificate)
             verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
             verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
             assertThat(certificate.status).isEqualTo(expectedStatus)
@@ -262,7 +262,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository).save(certificate)
+            verify(certificateRepository).saveAndFlush(certificate)
             verify(certificateNotDeliveredEmailSenderService).send(response, certificate)
             verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
 
@@ -312,7 +312,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository).save(certificate)
+            verify(certificateRepository).saveAndFlush(certificate)
             verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
             verify(certificateFailedToPrintEmailSenderService).send(response, certificate)
 
@@ -344,7 +344,7 @@ class PrintResponseProcessingServiceTest {
             assertThat(TestLogAppender.hasLog("Certificate not found for the requestId $requestId", Level.ERROR)).isTrue
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository, never()).save(any())
+            verify(certificateRepository, never()).saveAndFlush(any())
         }
     }
 

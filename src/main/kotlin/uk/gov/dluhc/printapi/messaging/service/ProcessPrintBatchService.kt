@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.service
 
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
@@ -11,7 +12,6 @@ import uk.gov.dluhc.printapi.service.PrintFileDetailsFactory
 import uk.gov.dluhc.printapi.service.SftpInputStreamProvider
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.service.countPrintRequestsAssignedToBatch
-import javax.transaction.Transactional
 
 /**
  * Processes a print batch request by streaming a zip file containing manifest and photo images

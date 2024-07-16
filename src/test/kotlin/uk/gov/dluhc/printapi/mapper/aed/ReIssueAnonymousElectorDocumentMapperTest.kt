@@ -97,7 +97,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val sourceReference = aValidSourceReference()
         val originalElectoralRollNumber = "ORIGINAL ELECTORAL ROLL #"
         val previousAed = buildAnonymousElectorDocument(
-            id = UUID.randomUUID(),
+            persisted = true,
             sourceReference = sourceReference,
             certificateNumber = aValidVacNumber(),
             electoralRollNumber = originalElectoralRollNumber,
@@ -163,21 +163,21 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         assertThat(actual.delivery!!.id).isNull()
         assertThat(actual.delivery!!.createdBy).isNull()
         assertThat(actual.delivery!!.dateCreated).isNull()
-        assertThat(actual.delivery!!.version).isNull()
+        assertThat(actual.delivery!!.version).isEqualTo(0L)
         assertThat(actual.delivery!!.address.id).isNull()
         assertThat(actual.delivery!!.address.dateCreated).isNull()
         assertThat(actual.delivery!!.address.createdBy).isNull()
-        assertThat(actual.delivery!!.address.version).isNull()
+        assertThat(actual.delivery!!.address.version).isEqualTo(0L)
         assertThat(actual.contactDetails!!.id).isNull()
         assertThat(actual.contactDetails!!.dateCreated).isNull()
         assertThat(actual.contactDetails!!.createdBy).isNull()
         assertThat(actual.contactDetails!!.dateUpdated).isNull()
         assertThat(actual.contactDetails!!.updatedBy).isNull()
-        assertThat(actual.contactDetails!!.version).isNull()
+        assertThat(actual.contactDetails!!.version).isEqualTo(0L)
         assertThat(actual.contactDetails!!.address!!.id).isNull()
         assertThat(actual.contactDetails!!.address!!.dateCreated).isNull()
         assertThat(actual.contactDetails!!.address!!.createdBy).isNull()
-        assertThat(actual.contactDetails!!.address!!.version).isNull()
+        assertThat(actual.contactDetails!!.address!!.version).isEqualTo(0L)
         verify(idFactory).vacNumber()
         verify(aedMappingHelper).issueDate()
         verify(aedMappingHelper).requestDateTime()

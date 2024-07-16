@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.entity
 
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.TemporaryCertificate
@@ -23,7 +24,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 fun buildTemporaryCertificate(
-    id: UUID? = UUID.randomUUID(),
+    persisted: Boolean = false,
     certificateNumber: String = aValidVacNumber(),
     gssCode: String = aGssCode(),
     sourceType: SourceType = aValidSourceType(),
@@ -46,7 +47,7 @@ fun buildTemporaryCertificate(
     finalRetentionRemovalDate: LocalDate? = null
 ): TemporaryCertificate {
     return TemporaryCertificate(
-        id = id,
+        id = if (persisted) UUID.randomUUID() else null,
         certificateNumber = certificateNumber,
         gssCode = gssCode,
         sourceType = sourceType,
@@ -63,20 +64,24 @@ fun buildTemporaryCertificate(
         issueDate = issueDate,
         validOnDate = validOnDate,
         userId = userId,
-        finalRetentionRemovalDate = finalRetentionRemovalDate
+        finalRetentionRemovalDate = finalRetentionRemovalDate,
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     ).apply {
         this.statusHistory.addAll(statusHistory)
     }
 }
 
 fun buildTemporaryCertificateStatus(
+    persisted: Boolean = false,
     status: TemporaryCertificateStatus.Status = aValidTemporaryCertificateStatus(),
     userId: String = aValidUserId(),
-    dateCreated: Instant? = null
 ): TemporaryCertificateStatus {
     return TemporaryCertificateStatus(
+        id = if (persisted) UUID.randomUUID() else null,
         status = status,
         userId = userId,
-        dateCreated = dateCreated,
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     )
 }

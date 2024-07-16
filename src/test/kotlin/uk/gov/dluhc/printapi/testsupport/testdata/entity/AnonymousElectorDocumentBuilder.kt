@@ -30,7 +30,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 fun buildAnonymousElectorDocument(
-    id: UUID? = UUID.randomUUID(),
+    persisted: Boolean = false,
     gssCode: String = aGssCode(),
     sourceType: SourceType = anAnonymousElectorDocumentSourceType(),
     sourceReference: String = aValidSourceReference(),
@@ -53,7 +53,7 @@ fun buildAnonymousElectorDocument(
     finalRetentionRemovalDate: LocalDate? = null,
 ): AnonymousElectorDocument {
     return AnonymousElectorDocument(
-        id = id,
+        id = if (persisted) UUID.randomUUID() else null,
         gssCode = gssCode,
         sourceType = sourceType,
         sourceReference = sourceReference,
@@ -72,22 +72,29 @@ fun buildAnonymousElectorDocument(
         requestDateTime = requestDateTime,
         userId = userId,
         delivery = delivery,
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     ).also {
         aedStatuses.forEach { electorDocumentStatus -> it.addStatus(electorDocumentStatus) }
     }
 }
 
 fun buildAnonymousElectorDocumentStatus(
+    persisted: Boolean = false,
     status: AnonymousElectorDocumentStatus.Status = aValidAnonymousElectorDocumentStatus(),
     eventDateTime: Instant = aValidPrintRequestStatusEventDateTime(),
 ): AnonymousElectorDocumentStatus {
     return AnonymousElectorDocumentStatus(
+        id = if (persisted) UUID.randomUUID() else null,
         status = status,
         eventDateTime = eventDateTime,
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     )
 }
 
 fun buildAedContactDetails(
+    persisted: Boolean = false,
     firstName: String = aValidFirstName(),
     middleNames: String? = null,
     surname: String = aValidSurname(),
@@ -95,10 +102,15 @@ fun buildAedContactDetails(
     email: String = aValidEmailAddress(),
     phoneNumber: String = aValidPhoneNumber(),
 ): AedContactDetails = AedContactDetails(
+    id = if (persisted) UUID.randomUUID() else null,
     firstName = firstName,
     middleNames = middleNames,
     surname = surname,
     address = address,
     email = email,
     phoneNumber = phoneNumber,
+    dateCreated = if (persisted) Instant.now() else null,
+    createdBy = if (persisted) "system" else null,
+    dateUpdated = if (persisted) Instant.now() else null,
+    updatedBy = if (persisted) "system" else null,
 )

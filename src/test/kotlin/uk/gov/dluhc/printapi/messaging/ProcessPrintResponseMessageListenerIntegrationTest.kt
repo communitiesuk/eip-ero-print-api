@@ -25,6 +25,7 @@ import java.time.temporal.ChronoUnit.SECONDS
 import java.util.concurrent.TimeUnit
 
 internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationTest() {
+
     @Test
     fun `should process print response message`() {
         // Given

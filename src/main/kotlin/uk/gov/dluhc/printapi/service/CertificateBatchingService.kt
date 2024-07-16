@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
+import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
@@ -12,7 +13,6 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
-import javax.transaction.Transactional
 
 private val logger = KotlinLogging.logger { }
 

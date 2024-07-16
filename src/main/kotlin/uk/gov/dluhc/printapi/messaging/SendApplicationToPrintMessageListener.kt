@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.messaging
 
-import io.awspring.cloud.messaging.listener.annotation.SqsListener
+import io.awspring.cloud.sqs.annotation.SqsListener
 import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
@@ -8,7 +8,6 @@ import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.service.PrintService
 import uk.gov.dluhc.printapi.service.StatisticsUpdateService
-import javax.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 
@@ -19,11 +18,10 @@ private val logger = KotlinLogging.logger { }
 class SendApplicationToPrintMessageListener(
     private val printService: PrintService,
     private val statisticsUpdateService: StatisticsUpdateService,
-) :
-    MessageListener<SendApplicationToPrintMessage> {
+) : MessageListener<SendApplicationToPrintMessage> {
 
     @SqsListener("\${sqs.send-application-to-print-queue-name}")
-    override fun handleMessage(@Valid @Payload payload: SendApplicationToPrintMessage) {
+    override fun handleMessage(@Payload payload: SendApplicationToPrintMessage) {
         with(payload) {
             logger.info { "Print message with source reference [$sourceReference] received" }
             printService.savePrintMessage(payload).also {

@@ -1,9 +1,8 @@
 package uk.gov.dluhc.printapi.config
 
-import com.jcraft.jsch.ChannelSftp
+import org.apache.sshd.sftp.client.SftpClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ByteArrayResource
@@ -18,7 +17,7 @@ class SftpConfiguration {
     @Bean
     @Qualifier("sftpInboundTemplate")
     fun sftpInboundTemplate(
-        sessionFactory: SessionFactory<ChannelSftp.LsEntry>,
+        sessionFactory: SessionFactory<SftpClient.DirEntry>,
         properties: SftpProperties
     ): SftpRemoteFileTemplate {
         val template = SftpRemoteFileTemplate(sessionFactory)
@@ -30,7 +29,7 @@ class SftpConfiguration {
     @Bean
     @Qualifier("sftpOutboundTemplate")
     fun sftpOutboundTemplate(
-        sessionFactory: SessionFactory<ChannelSftp.LsEntry>,
+        sessionFactory: SessionFactory<SftpClient.DirEntry>,
         properties: SftpProperties
     ): SftpRemoteFileTemplate {
         val template = SftpRemoteFileTemplate(sessionFactory)
@@ -39,7 +38,7 @@ class SftpConfiguration {
     }
 
     @Bean
-    fun sftpSessionFactory(properties: SftpProperties): SessionFactory<ChannelSftp.LsEntry> =
+    fun sftpSessionFactory(properties: SftpProperties): SessionFactory<SftpClient.DirEntry> =
         with(properties) {
             DefaultSftpSessionFactory(true).apply {
                 setHost(host)
@@ -53,7 +52,6 @@ class SftpConfiguration {
 }
 
 @ConfigurationProperties(prefix = "sftp")
-@ConstructorBinding
 data class SftpProperties(
     val host: String,
     val port: Int = 22,

@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.messaging
 
-import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
@@ -24,7 +23,7 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.LARGE_MINUS_PRINT
-import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasLog
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasExceptionLogWithMessage
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
@@ -89,7 +88,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         }
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
@@ -138,7 +137,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         }
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
@@ -200,7 +199,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         }
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
@@ -220,11 +219,11 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val payload = buildSendApplicationToPrintMessage(gssCode = "ABC") // gssCode must be 9 characters
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
-            assertThat(hasLog("An exception occurred while invoking the handler method", Level.ERROR)).isTrue()
+            assertThat(hasExceptionLogWithMessage("handleMessage.arg0.gssCode: size must be between 9 and 9")).isTrue()
         }
     }
 
