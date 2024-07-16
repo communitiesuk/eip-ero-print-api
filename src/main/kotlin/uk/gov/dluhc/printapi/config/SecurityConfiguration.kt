@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.config
 
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod.OPTIONS
 import org.springframework.http.HttpStatus.FORBIDDEN
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 
+@Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 class SecurityConfiguration(
