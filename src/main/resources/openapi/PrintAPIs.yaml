@@ -89,6 +89,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -196,6 +197,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/certificates/search'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -276,6 +278,7 @@ paths:
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.applicationId: method.request.path.applicationId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -350,6 +353,8 @@ paths:
       x-amazon-apigateway-integration:
         type: HTTP_PROXY
         uri: '${base_uri}/certificates/statistics'
+        requestParameters:
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -432,6 +437,7 @@ paths:
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.applicationId: method.request.path.applicationId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -516,6 +522,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/temporary-certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -547,6 +554,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/temporary-certificates'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -638,6 +646,7 @@ paths:
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.gssCode: method.request.path.gssCode
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -749,6 +758,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/search'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -833,6 +843,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -862,6 +873,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -894,6 +906,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -978,6 +991,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/re-issue'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -1056,6 +1070,7 @@ paths:
         uri: '${base_uri}/eros/{eroId}/anonymous-elector-documents/photo'
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
@@ -1147,6 +1162,7 @@ paths:
         requestParameters:
           integration.request.path.eroId: method.request.path.eroId
           integration.request.path.gssCode: method.request.path.gssCode
+          integration.request.header.x-request-id: context.requestId
         responseParameters:
           method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
           method.response.header.Access-Control-Allow-Methods: '''*'''
