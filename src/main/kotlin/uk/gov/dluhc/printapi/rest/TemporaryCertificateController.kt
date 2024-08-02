@@ -52,7 +52,8 @@ class TemporaryCertificateController(
 
     companion object {
         // VAC cannot handle files of 10MB or more
-        const val MAX_RESPONSE_FILE_SIZE = 9 * 1024 * 1024
+        // Temporarily changed to 100MB or more to allow testing the failure case, not to be pushed to main.
+        const val MAX_RESPONSE_FILE_SIZE = 100 * 1024 * 1024
     }
 
     @GetMapping("/eros/{eroId}/temporary-certificates")
