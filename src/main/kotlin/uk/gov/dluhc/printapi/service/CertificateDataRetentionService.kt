@@ -21,7 +21,7 @@ class CertificateDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val certificateRepository: CertificateRepository,
     private val removalDateResolver: ElectorDocumentRemovalDateResolver,
-    private val s3CertificatePhotoService: S3Service,
+    private val s3CertificatePhotoService: S3AccessService,
     private val removeCertificateQueue: MessageQueue<RemoveCertificateMessage>,
     private val dataRetentionConfiguration: DataRetentionConfiguration
 ) {

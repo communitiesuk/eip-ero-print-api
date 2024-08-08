@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
 import mu.KotlinLogging
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import software.amazon.awssdk.core.exception.SdkException
@@ -21,7 +22,7 @@ import java.time.Duration
 private val logger = KotlinLogging.logger {}
 
 @Service
-class S3Service(
+class S3AccessService(
     private val s3Client: S3Client,
     private val s3Presigner: S3Presigner,
     private val s3Properties: S3Properties
@@ -54,15 +55,40 @@ class S3Service(
     }
 
     /**
-     * Puts an object into the S3 target bucket.
-     * Temporary objects should be tagged for deletion when they are created.
-     * Bucket lifecycle policies will then ensure they are deleted after 1 day.
+     * Uploads a Temporary Certificate to S3 and returns a presigned URL to access the object.
      */
-    fun putObjectToTargetBucketFromByteArray(key: String, data: ByteArray, tagObjectForDeletion: Boolean) {
+    fun uploadTemporaryCertificate(
+        gssCode: String,
+        applicationId: String,
+        fileName: String,
+        contents: ByteArray,
+    ): URI {
+        val s3Path = "$gssCode/$applicationId/$fileName"
+        putObjectToTargetBucket(
+            key = s3Path,
+            data = contents,
+            contentType = MediaType.APPLICATION_PDF,
+            tagObjectForDeletion = true
+        )
+        val s3Arn = buildS3Arn(s3Path)
+        return generateGetResourceUrl(s3Arn, s3Properties.temporaryCertificateAccessDuration)
+    }
+
+    private fun putObjectToTargetBucket(
+        key: String,
+        data: ByteArray,
+        contentType: MediaType,
+        tagObjectForDeletion: Boolean
+    ) {
         val bucket = s3Properties.vcaTargetBucket
         try {
             s3Client.putObject(
-                buildPutObjectRequest(key, bucket, tagObjectForDeletion),
+                buildPutObjectRequest(
+                    key = key,
+                    bucket = bucket,
+                    contentType = contentType,
+                    tagObjectForDeletion = tagObjectForDeletion,
+                ),
                 RequestBody.fromBytes(data)
             )
             logger.debug { "Put object to S3 bucket [$bucket] with path [$key]" }
@@ -71,13 +97,22 @@ class S3Service(
             throw e
         }
     }
+
     private fun buildPutObjectRequest(
         key: String,
         bucket: String,
-        tagTemporaryDocumentForDeletion: Boolean
+        contentType: MediaType?,
+        tagObjectForDeletion: Boolean
     ): PutObjectRequest {
-        val request = PutObjectRequest.builder().bucket(bucket).key(key)
-        if (tagTemporaryDocumentForDeletion) {
+        val request = PutObjectRequest.builder()
+            .bucket(bucket)
+            .key(key)
+
+        if (contentType != null) {
+            request.contentType(contentType.toString())
+        }
+
+        if (tagObjectForDeletion) {
             val deletionTag = Tag.builder().key("ToDelete").value("True").build()
             request.tagging(Tagging.builder().tagSet(deletionTag).build())
         }
@@ -110,5 +145,9 @@ class S3Service(
                 .build(true)
                 .toUri()
         }
+    }
+
+    private fun buildS3Arn(s3ObjectKey: String): String {
+        return "arn:aws:s3:::${s3Properties.vcaTargetBucket}/$s3ObjectKey"
     }
 }

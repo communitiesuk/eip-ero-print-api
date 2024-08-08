@@ -1,8 +1,6 @@
 package uk.gov.dluhc.printapi.rest
 
-import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
@@ -18,24 +16,21 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.database.entity.SourceType
-import uk.gov.dluhc.printapi.dto.GenerateTemporaryCertificateDto
 import uk.gov.dluhc.printapi.dto.PdfFile
-import uk.gov.dluhc.printapi.exception.ResponseFileTooLargeException
 import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateSummaryMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
+import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
-import uk.gov.dluhc.printapi.service.S3Service
 import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateSummaryService
 import java.io.ByteArrayInputStream
 import javax.validation.Valid
-
-private val logger = KotlinLogging.logger {}
 
 @RestController
 @CrossOrigin
@@ -45,15 +40,8 @@ class TemporaryCertificateController(
     @Qualifier("temporaryCertificateExplainerExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
     private val temporaryCertificateService: TemporaryCertificateService,
     private val statisticsUpdateService: StatisticsUpdateService,
-    private val s3Service: S3Service,
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
-    @Value("\${api.print-api.generate-temporary-certificate.upload-large-file-to-s3}") private val uploadLargeFileToS3: Boolean,
 ) {
-
-    companion object {
-        // VAC cannot handle files of 10MB or more
-        const val MAX_RESPONSE_FILE_SIZE = 9 * 1024 * 1024
-    }
 
     @GetMapping("/eros/{eroId}/temporary-certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
@@ -87,27 +75,21 @@ class TemporaryCertificateController(
 
     @PostMapping("/eros/{eroId}/temporary-certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
+    @ResponseStatus(CREATED)
     fun generateTemporaryCertificate(
         @PathVariable eroId: String,
         @RequestBody @Valid generateTemporaryCertificateRequest: GenerateTemporaryCertificateRequest,
         authentication: Authentication
-    ): ResponseEntity<InputStreamResource> {
+    ): PreSignedUrlResourceResponse {
         val userId = authentication.name
         val dto = generateTemporaryCertificateMapper.toGenerateTemporaryCertificateDto(
             generateTemporaryCertificateRequest,
             userId
         )
-        return temporaryCertificateService.generateTemporaryCertificate(eroId, dto).also {
-            if (it.contents.size > MAX_RESPONSE_FILE_SIZE && generateTemporaryCertificateRequest.allowLargeResponse != true) {
-                handleResponseFileTooLarge(it, eroId, dto)
-            }
-        }.also {
-            statisticsUpdateService.triggerVoterCardStatisticsUpdate(dto.sourceReference)
-        }.let { pdfFile ->
-            ResponseEntity.status(CREATED)
-                .headers(createPdfHttpHeaders(pdfFile))
-                .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
-        }
+        return temporaryCertificateService.generateTemporaryCertificate(eroId, dto)
+            .also {
+                statisticsUpdateService.triggerVoterCardStatisticsUpdate(dto.sourceReference)
+            }.let { presignedUrl -> PreSignedUrlResourceResponse(presignedUrl) }
     }
 
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
@@ -131,28 +113,5 @@ class TemporaryCertificateController(
         headers.contentType = APPLICATION_PDF
         headers.add(CONTENT_DISPOSITION, "inline; filename=${pdfFile.filename}")
         return headers
-    }
-
-    private fun handleResponseFileTooLarge(pdfFile: PdfFile, eroId: String, dto: GenerateTemporaryCertificateDto) {
-        logger.warn {
-            "Response file for eroId = $eroId and sourceReference = ${dto.sourceReference} too large to return Temporary VAC"
-        }
-        if (uploadLargeFileToS3) {
-            val s3Path = "temporary_certificates/${dto.gssCode}/${dto.applicationReference}/${pdfFile.filename}"
-            logger.warn {
-                "Uploaded Temporary Certificate for ${dto.sourceReference} to S3 path $s3Path"
-            }
-            s3Service.putObjectToTargetBucketFromByteArray(s3Path, pdfFile.contents, false)
-        } else {
-            logger.warn {
-                "Not uploading Temporary Certificate for ${dto.sourceReference} to S3 path"
-            }
-        }
-
-        throw ResponseFileTooLargeException(
-            eroId,
-            "Temporary VAC",
-            dto.sourceReference
-        )
     }
 }

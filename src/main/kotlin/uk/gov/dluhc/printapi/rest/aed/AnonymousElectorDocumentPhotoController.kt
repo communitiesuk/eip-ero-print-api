@@ -13,7 +13,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUME
 import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.rest.HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY
-import uk.gov.dluhc.printapi.service.S3Service
+import uk.gov.dluhc.printapi.service.S3AccessService
 import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
 
 @RestController
@@ -21,7 +21,7 @@ import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentService
 @RequestMapping("/eros/{eroId}/anonymous-elector-documents/photo")
 class AnonymousElectorDocumentPhotoController(
     private val anonymousElectorDocumentService: AnonymousElectorDocumentService,
-    private val s3Service: S3Service
+    private val s3AccessService: S3AccessService
 ) {
 
     @GetMapping
@@ -35,7 +35,7 @@ class AnonymousElectorDocumentPhotoController(
             .getAnonymousElectorDocuments(eroId, applicationId)
             .firstOrNull() ?: throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, applicationId)
 
-        val preSignedUrl = s3Service.generatePresignedGetCertificatePhotoUrl(aed.photoLocationArn)
+        val preSignedUrl = s3AccessService.generatePresignedGetCertificatePhotoUrl(aed.photoLocationArn)
         return PreSignedUrlResourceResponse(preSignedUrl = preSignedUrl)
     }
 }

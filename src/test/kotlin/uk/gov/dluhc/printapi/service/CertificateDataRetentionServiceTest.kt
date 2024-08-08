@@ -49,7 +49,7 @@ internal class CertificateDataRetentionServiceTest {
     private lateinit var certificateRepository: CertificateRepository
 
     @Mock
-    private lateinit var s3CertificatePhotoService: S3Service
+    private lateinit var s3CertificatePhotoService: S3AccessService
 
     @Mock
     private lateinit var removeCertificateQueue: MessageQueue<RemoveCertificateMessage>

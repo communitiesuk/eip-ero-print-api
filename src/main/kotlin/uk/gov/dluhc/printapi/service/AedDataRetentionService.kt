@@ -17,7 +17,7 @@ class AedDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository,
     private val removalDateResolver: ElectorDocumentRemovalDateResolver,
-    private val s3Service: S3Service,
+    private val s3AccessService: S3AccessService,
 ) {
 
     /**
@@ -65,7 +65,7 @@ class AedDataRetentionService(
         with(anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType)) {
             logger.info { "Found $size Anonymous Elector Documents with sourceType $sourceType to remove" }
             forEach {
-                s3Service.removeDocument(it.photoLocationArn)
+                s3AccessService.removeDocument(it.photoLocationArn)
                 anonymousElectorDocumentRepository.deleteById(it.id!!)
             }
         }

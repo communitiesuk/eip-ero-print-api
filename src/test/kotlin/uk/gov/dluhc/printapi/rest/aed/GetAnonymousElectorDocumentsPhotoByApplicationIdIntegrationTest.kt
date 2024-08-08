@@ -91,7 +91,7 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
         wireMockService.stubCognitoJwtIssuerResponse()
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
 
-        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
         val s3PathAedPhoto1 = aPhotoBucketPath()
         val anonymousElectorDocument1 = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
@@ -129,7 +129,7 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
         )
         wireMockService.stubCognitoJwtIssuerResponse()
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
-        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
         val photoObjectKey = "dir1/Jane+!@£$%^&*())))_+-=[]{}'\\|;;<>,.:?#`~§± Doe:Awesome Company Ltd:HEADSHOT.jpg"
         val anonymousElectorDocument1 = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,

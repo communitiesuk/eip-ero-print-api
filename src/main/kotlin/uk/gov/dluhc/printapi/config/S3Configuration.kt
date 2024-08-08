@@ -24,6 +24,7 @@ data class S3Properties(
     val vcaTargetBucket: String,
     val vcaTargetBucketProxyEndpoint: String,
     val certificatePhotoAccessDuration: Duration,
+    val temporaryCertificateAccessDuration: Duration,
     val bankHolidaysBucket: String,
     val bankHolidaysBucketObjectKey: String,
 )
