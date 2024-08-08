@@ -32,16 +32,15 @@ sqs:
   trigger-voter-card-statistics-update-queue-name: trigger-voter-card-statistics-update.fifo
 
 s3:
-  certificate-photos-target-bucket: localstack-vca-api-vca-target-bucket
-  certificate-photos-target-bucket-proxy-endpoint: localhost
+  temporary-certificate-access-duration: 5M
+  vca-target-bucket: localstack-vca-api-vca-target-bucket
+  vca-target-bucket-proxy-endpoint: localhost
   bank-holidays-bucket: test-bank-hols-bucket
   bank-holidays-bucket-object-key: test-bank-holidays.json
 
 api:
   print-api:
     base.url: http://localhost:8080
-    generate-temporary-certificate:
-      upload-large-file-to-s3: true
   ero-management:
     url: http://will-be-replaced-by-wireMockServer-bean
 

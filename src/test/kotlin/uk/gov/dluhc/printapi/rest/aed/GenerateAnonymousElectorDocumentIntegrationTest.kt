@@ -282,7 +282,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
 
     private fun addPhotoToS3(): String {
         val s3Resource = ResourceUtils.getFile(AED_SAMPLE_PHOTO).readBytes()
-        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
         val s3Path = "E09000007/0013a30ac9bae2ebb9b1239b/${randomUUID()}/8a53a30ac9bae2ebb9b1239b-test-photo.png"
 
         // add resource to S3

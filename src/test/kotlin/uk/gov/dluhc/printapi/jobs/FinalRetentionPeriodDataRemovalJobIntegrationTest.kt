@@ -22,7 +22,7 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
     @Test
     fun `should remove voter card certificate final retention period data`() {
         // Given
-        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
         val s3PathPhoto1 = aPhotoBucketPath()
         val certificate1 = buildCertificate(
             sourceReference = "6407b6158f529a11713a1e5c",
@@ -76,7 +76,7 @@ internal class FinalRetentionPeriodDataRemovalJobIntegrationTest : IntegrationTe
     @Test
     fun `should remove anonymous elector document final retention period data`() {
         // Given
-        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
         val s3PathAedPhoto1 = aPhotoBucketPath()
         val anonymousElectorDocument1 = buildAnonymousElectorDocument(
             sourceReference = "6407b6158f529a11713a1e5c",

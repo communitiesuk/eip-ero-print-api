@@ -6,7 +6,7 @@ import org.springframework.test.context.transaction.TestTransaction
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
+import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.VCA_TARGET_BUCKET
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
@@ -22,20 +22,20 @@ internal class BatchPrintRequestsJobIntegrationTest : IntegrationTest() {
     fun `should send statistics update messages once for each application in a batch`() {
         // Given
         val s3Resource = "s3ResourceContents".encodeToByteArray()
-        val s3Bucket = S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = VCA_TARGET_BUCKET
         val s3Prefix = "E09000007/0013a30ac9bae2ebb9b1239b"
 
         // Given - add resources to S3
         s3Client.putObject(
             PutObjectRequest.builder()
-                .bucket(S3_BUCKET_CONTAINING_PHOTOS)
+                .bucket(VCA_TARGET_BUCKET)
                 .key("$s3Prefix/photo1.png")
                 .build(),
             RequestBody.fromInputStream(ByteArrayInputStream(s3Resource), s3Resource.size.toLong())
         )
         s3Client.putObject(
             PutObjectRequest.builder()
-                .bucket(S3_BUCKET_CONTAINING_PHOTOS)
+                .bucket(VCA_TARGET_BUCKET)
                 .key("$s3Prefix/photo2.png")
                 .build(),
             RequestBody.fromInputStream(ByteArrayInputStream(s3Resource), s3Resource.size.toLong())

@@ -39,7 +39,7 @@ class LocalStackContainerConfiguration {
         const val DEFAULT_PORT = 4566
         const val DEFAULT_ACCESS_KEY_ID = "test"
         const val DEFAULT_SECRET_KEY = "test"
-        const val S3_BUCKET_CONTAINING_PHOTOS = "localstack-vca-api-vca-target-bucket"
+        const val VCA_TARGET_BUCKET = "localstack-vca-api-vca-target-bucket"
 
         val objectMapper = ObjectMapper()
         val localStackContainer: GenericContainer<*> = getInstance()
@@ -116,7 +116,7 @@ class LocalStackContainerConfiguration {
     ) {
         try {
             with(s3Properties) {
-                s3Client.createBucket(CreateBucketRequest.builder().bucket(certificatePhotosTargetBucket).build())
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(vcaTargetBucket).build())
                 s3Client.createBucket(CreateBucketRequest.builder().bucket(bankHolidaysBucket).build())
             }
         } catch (ex: S3Exception) {
