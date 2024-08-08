@@ -19,14 +19,14 @@ import java.time.Duration
 private val logger = KotlinLogging.logger {}
 
 @Service
-class S3PhotoService(
+class S3Service(
     private val s3Client: S3Client,
     private val s3Presigner: S3Presigner,
     private val s3Properties: S3Properties
 ) {
 
     private val bucketsToProxyEndpoints = mapOf(
-        s3Properties.certificatePhotosTargetBucket to s3Properties.certificatePhotosTargetBucketProxyEndpoint
+        s3Properties.vcaTargetBucket to s3Properties.vcaTargetBucketProxyEndpoint
     )
 
     /**
@@ -37,22 +37,22 @@ class S3PhotoService(
     }
 
     /**
-     * Removes the photo that is on the printed "Elector Document" (i.e. Certificate/AED) from S3.
+     * Removes the document with the given ARN from the S3 bucket.
      */
-    fun removePhoto(photoS3Arn: String) {
+    fun removeDocument(photoS3Arn: String) {
         try {
             with(parseS3Arn(photoS3Arn)) {
                 s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(path).build())
-                logger.debug { "Deleted photo with S3 arn [$photoS3Arn]" }
+                logger.debug { "Deleted object with S3 arn [$photoS3Arn]" }
             }
         } catch (e: SdkException) {
-            logger.warn { "Unable to delete photo with S3 arn [$photoS3Arn] due to error [${e.cause?.message ?: e.cause}]" }
+            logger.warn { "Unable to delete object with S3 arn [$photoS3Arn] due to error [${e.cause?.message ?: e.cause}]" }
             throw e
         }
     }
 
     fun putObjectToTargetBucketFromByteArray(path: String, data: ByteArray) {
-        var bucket = s3Properties.certificatePhotosTargetBucket
+        val bucket = s3Properties.vcaTargetBucket
         try {
             s3Client.putObject(
                 PutObjectRequest.builder().bucket(bucket).key(path).build(),

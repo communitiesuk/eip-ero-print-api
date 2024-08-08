@@ -32,8 +32,8 @@ sqs:
   trigger-voter-card-statistics-update-queue-name: trigger-voter-card-statistics-update.fifo
 
 s3:
-  certificate-photos-target-bucket: localstack-vca-api-vca-target-bucket
-  certificate-photos-target-bucket-proxy-endpoint: localhost
+  vca-target-bucket: localstack-vca-api-vca-target-bucket
+  vca-target-bucket-proxy-endpoint: localhost
   bank-holidays-bucket: test-bank-hols-bucket
   bank-holidays-bucket-object-key: test-bank-holidays.json
 

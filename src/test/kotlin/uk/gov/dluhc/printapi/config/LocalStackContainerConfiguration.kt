@@ -116,7 +116,7 @@ class LocalStackContainerConfiguration {
     ) {
         try {
             with(s3Properties) {
-                s3Client.createBucket(CreateBucketRequest.builder().bucket(certificatePhotosTargetBucket).build())
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(vcaTargetBucket).build())
                 s3Client.createBucket(CreateBucketRequest.builder().bucket(bankHolidaysBucket).build())
             }
         } catch (ex: S3Exception) {

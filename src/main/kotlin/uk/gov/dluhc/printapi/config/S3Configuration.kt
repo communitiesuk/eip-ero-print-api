@@ -21,8 +21,8 @@ class S3Configuration {
 @ConfigurationProperties(prefix = "s3")
 @ConstructorBinding
 data class S3Properties(
-    val certificatePhotosTargetBucket: String,
-    val certificatePhotosTargetBucketProxyEndpoint: String,
+    val vcaTargetBucket: String,
+    val vcaTargetBucketProxyEndpoint: String,
     val certificatePhotoAccessDuration: Duration,
     val bankHolidaysBucket: String,
     val bankHolidaysBucketObjectKey: String,

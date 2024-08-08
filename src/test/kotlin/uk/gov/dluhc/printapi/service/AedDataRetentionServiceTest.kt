@@ -41,7 +41,7 @@ internal class AedDataRetentionServiceTest {
     private lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
 
     @Mock
-    private lateinit var s3PhotoService: S3PhotoService
+    private lateinit var s3Service: S3Service
 
     @InjectMocks
     private lateinit var aedDataRetentionService: AedDataRetentionService
@@ -137,8 +137,8 @@ internal class AedDataRetentionServiceTest {
 
             // Then
             verify(anonymousElectorDocumentRepository).findPendingRemovalOfFinalRetentionData(sourceType)
-            verify(s3PhotoService).removePhoto(aed1.photoLocationArn)
-            verify(s3PhotoService).removePhoto(aed2.photoLocationArn)
+            verify(s3Service).removeDocument(aed1.photoLocationArn)
+            verify(s3Service).removeDocument(aed2.photoLocationArn)
             verify(anonymousElectorDocumentRepository).deleteById(aed1.id!!)
             verify(anonymousElectorDocumentRepository).deleteById(aed2.id!!)
         }

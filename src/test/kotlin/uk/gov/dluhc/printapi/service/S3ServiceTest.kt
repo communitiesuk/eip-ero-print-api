@@ -21,7 +21,7 @@ import java.net.URL
 import java.time.Duration
 
 @ExtendWith(MockitoExtension::class)
-internal class S3PhotoServiceTest {
+internal class S3ServiceTest {
 
     @Mock
     private lateinit var s3Client: S3Client
@@ -32,7 +32,7 @@ internal class S3PhotoServiceTest {
     @Mock
     private lateinit var s3Properties: S3Properties
 
-    private lateinit var s3PhotoService: S3PhotoService
+    private lateinit var s3Service: S3Service
 
     companion object {
         private const val S3_CERTIFICATE_PHOTO_TARGET_BUCKET = "secure-certificate-photos"
@@ -44,10 +44,10 @@ internal class S3PhotoServiceTest {
     @BeforeEach
     fun setupService() {
         given(s3Properties.certificatePhotoAccessDuration).willReturn(Duration.ofSeconds(CERTIFICATE_PHOTO_ACCESS_TIME_IN_SECONDS))
-        given(s3Properties.certificatePhotosTargetBucket).willReturn(S3_CERTIFICATE_PHOTO_TARGET_BUCKET)
-        given(s3Properties.certificatePhotosTargetBucketProxyEndpoint).willReturn(CUSTOM_DOMAIN_FILE_PROXY_URL)
+        given(s3Properties.vcaTargetBucket).willReturn(S3_CERTIFICATE_PHOTO_TARGET_BUCKET)
+        given(s3Properties.vcaTargetBucketProxyEndpoint).willReturn(CUSTOM_DOMAIN_FILE_PROXY_URL)
 
-        s3PhotoService = S3PhotoService(
+        s3Service = S3Service(
             s3Client,
             s3Presigner,
             s3Properties,
@@ -57,11 +57,11 @@ internal class S3PhotoServiceTest {
     @Test
     fun `should generate pre-signed URL to get certificate photo`() {
         // Given
-        val bucketName = s3Properties.certificatePhotosTargetBucket
+        val bucketName = s3Properties.vcaTargetBucket
         val key = "gssCode/key"
         val s3Arn = "arn:aws:s3:::$bucketName/$key"
-        val presignedUrl = "https://${s3Properties.certificatePhotosTargetBucket}/$key?$S3_QUERY_PARAMS"
-        val transformedUrl = "https://${s3Properties.certificatePhotosTargetBucketProxyEndpoint}/$key?$S3_QUERY_PARAMS"
+        val presignedUrl = "https://${s3Properties.vcaTargetBucket}/$key?$S3_QUERY_PARAMS"
+        val transformedUrl = "https://${s3Properties.vcaTargetBucketProxyEndpoint}/$key?$S3_QUERY_PARAMS"
         val expectedPresignRequest: GetObjectPresignRequest = GetObjectPresignRequest.builder()
             .signatureDuration(Duration.ofSeconds(CERTIFICATE_PHOTO_ACCESS_TIME_IN_SECONDS))
             .getObjectRequest(GetObjectRequest.builder().bucket(bucketName).key(key).build())
@@ -72,7 +72,7 @@ internal class S3PhotoServiceTest {
         val expectedUri = URI.create(transformedUrl)
 
         // When
-        val location = s3PhotoService.generatePresignedGetCertificatePhotoUrl(s3Arn)
+        val location = s3Service.generatePresignedGetCertificatePhotoUrl(s3Arn)
 
         // Then
         assertThat(location).isEqualTo(expectedUri)

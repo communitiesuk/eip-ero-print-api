@@ -49,7 +49,7 @@ internal class CertificateDataRetentionServiceTest {
     private lateinit var certificateRepository: CertificateRepository
 
     @Mock
-    private lateinit var s3CertificatePhotoService: S3PhotoService
+    private lateinit var s3CertificatePhotoService: S3Service
 
     @Mock
     private lateinit var removeCertificateQueue: MessageQueue<RemoveCertificateMessage>
@@ -239,7 +239,7 @@ internal class CertificateDataRetentionServiceTest {
             certificateDataRetentionService.removeFinalRetentionPeriodData(message)
 
             // Then
-            verify(s3CertificatePhotoService).removePhoto(message.certificatePhotoArn)
+            verify(s3CertificatePhotoService).removeDocument(message.certificatePhotoArn)
             verify(certificateRepository).deleteById(message.certificateId)
         }
     }

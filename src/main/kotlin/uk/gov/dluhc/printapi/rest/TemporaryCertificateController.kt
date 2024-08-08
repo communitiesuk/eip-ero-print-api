@@ -27,7 +27,7 @@ import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateSummaryMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
 import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
-import uk.gov.dluhc.printapi.service.S3PhotoService
+import uk.gov.dluhc.printapi.service.S3Service
 import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
@@ -45,7 +45,7 @@ class TemporaryCertificateController(
     @Qualifier("temporaryCertificateExplainerExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
     private val temporaryCertificateService: TemporaryCertificateService,
     private val statisticsUpdateService: StatisticsUpdateService,
-    private val s3Service: S3PhotoService,
+    private val s3Service: S3Service,
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
     @Value("\${api.print-api.generate-temporary-certificate.upload-large-file-to-s3}") private val uploadLargeFileToS3: Boolean,
 ) {

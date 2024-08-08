@@ -21,7 +21,7 @@ class CertificateDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val certificateRepository: CertificateRepository,
     private val removalDateResolver: ElectorDocumentRemovalDateResolver,
-    private val s3CertificatePhotoService: S3PhotoService,
+    private val s3CertificatePhotoService: S3Service,
     private val removeCertificateQueue: MessageQueue<RemoveCertificateMessage>,
     private val dataRetentionConfiguration: DataRetentionConfiguration
 ) {
@@ -99,7 +99,7 @@ class CertificateDataRetentionService(
     @Transactional
     fun removeFinalRetentionPeriodData(message: RemoveCertificateMessage) {
         with(message) {
-            s3CertificatePhotoService.removePhoto(certificatePhotoArn)
+            s3CertificatePhotoService.removeDocument(certificatePhotoArn)
             certificateRepository.deleteById(certificateId)
         }
     }
