@@ -142,7 +142,7 @@ class TemporaryCertificateController(
             logger.warn {
                 "Uploaded Temporary Certificate for ${dto.sourceReference} to S3 path $s3Path"
             }
-            s3Service.putObjectToTargetBucketFromByteArray(s3Path, pdfFile.contents)
+            s3Service.putObjectToTargetBucketFromByteArray(s3Path, pdfFile.contents, false)
         } else {
             logger.warn {
                 "Not uploading Temporary Certificate for ${dto.sourceReference} to S3 path"

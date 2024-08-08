@@ -9,6 +9,8 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.Tag
+import software.amazon.awssdk.services.s3.model.Tagging
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest
@@ -39,30 +41,47 @@ class S3Service(
     /**
      * Removes the document with the given ARN from the S3 bucket.
      */
-    fun removeDocument(photoS3Arn: String) {
+    fun removeDocument(s3Arn: String) {
         try {
-            with(parseS3Arn(photoS3Arn)) {
+            with(parseS3Arn(s3Arn)) {
                 s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(path).build())
-                logger.debug { "Deleted object with S3 arn [$photoS3Arn]" }
+                logger.debug { "Deleted object with S3 arn [$s3Arn]" }
             }
         } catch (e: SdkException) {
-            logger.warn { "Unable to delete object with S3 arn [$photoS3Arn] due to error [${e.cause?.message ?: e.cause}]" }
+            logger.warn { "Unable to delete object with S3 arn [$s3Arn] due to error [${e.cause?.message ?: e.cause}]" }
             throw e
         }
     }
 
-    fun putObjectToTargetBucketFromByteArray(path: String, data: ByteArray) {
+    /**
+     * Puts an object into the S3 target bucket.
+     * Temporary objects should be tagged for deletion when they are created.
+     * Bucket lifecycle policies will then ensure they are deleted after 1 day.
+     */
+    fun putObjectToTargetBucketFromByteArray(key: String, data: ByteArray, tagObjectForDeletion: Boolean) {
         val bucket = s3Properties.vcaTargetBucket
         try {
             s3Client.putObject(
-                PutObjectRequest.builder().bucket(bucket).key(path).build(),
+                buildPutObjectRequest(key, bucket, tagObjectForDeletion),
                 RequestBody.fromBytes(data)
             )
-            logger.debug { "Put object to S3 bucket [$bucket] with path [$path]" }
+            logger.debug { "Put object to S3 bucket [$bucket] with path [$key]" }
         } catch (e: SdkException) {
-            logger.warn { "Unable to put object to S3 bucket [$bucket] with path [$path] due to error [${e.cause?.message ?: e.cause}]" }
+            logger.warn { "Unable to put object to S3 bucket [$bucket] with path [$key] due to error [${e.cause?.message ?: e.cause}]" }
             throw e
         }
+    }
+    private fun buildPutObjectRequest(
+        key: String,
+        bucket: String,
+        tagTemporaryDocumentForDeletion: Boolean
+    ): PutObjectRequest {
+        val request = PutObjectRequest.builder().bucket(bucket).key(key)
+        if (tagTemporaryDocumentForDeletion) {
+            val deletionTag = Tag.builder().key("ToDelete").value("True").build()
+            request.tagging(Tagging.builder().tagSet(deletionTag).build())
+        }
+        return request.build()
     }
 
     private fun generateGetResourceUrl(s3arn: String, accessDuration: Duration): URI {
