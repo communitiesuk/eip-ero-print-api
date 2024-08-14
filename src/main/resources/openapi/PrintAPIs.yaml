@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.22.0'
+  version: '1.23.0'
   description: Print APIs
   contact:
     name: Krister Bone
@@ -1145,13 +1145,7 @@ paths:
         - Anonymous Elector Documents (AED) Explainer Document
       responses:
         '201':
-          description: created
-          headers:
-            Content-Disposition:
-              description: Content-Disposition header
-              schema:
-                type: string
-                example: attachment; filename="aed-explainer-document-E09000007.pdf"
+          $ref: '#/components/responses/PreSignedUrlResource'
         '404':
           $ref: '#/components/responses/404ErrorResponse'
       security:

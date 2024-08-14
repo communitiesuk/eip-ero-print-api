@@ -10,7 +10,7 @@ import org.springframework.test.context.transaction.TestTransaction
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
+import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.VCA_TARGET_BUCKET
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
@@ -36,7 +36,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         val batchId = aValidBatchId()
         val requestId = aValidRequestId()
         val s3ResourceContents = "S3 Object Contents"
-        val s3Bucket = S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = VCA_TARGET_BUCKET
         val s3Path =
             "E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
 
@@ -102,7 +102,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         val firstRequestId = aValidRequestId()
         val secondRequestId = aValidRequestId()
         val s3ResourceContents = "S3 Object Contents"
-        val s3Bucket = S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = VCA_TARGET_BUCKET
         val s3Path =
             "E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
 
