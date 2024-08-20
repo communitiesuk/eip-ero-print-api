@@ -4,7 +4,7 @@ import liquibase.repackaged.org.apache.commons.text.StringSubstitutor.replace
 import mu.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
-import uk.gov.dluhc.emailnotifications.EmailClient
+import uk.gov.dluhc.email.EmailClient
 import uk.gov.dluhc.printapi.config.EmailContentConfiguration
 import uk.gov.dluhc.printapi.config.EmailContentProperties
 import uk.gov.dluhc.printapi.dto.SendCertificateFailedToPrintEmailRequest
