@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain
 import software.amazon.awssdk.services.ses.SesClient
-import uk.gov.dluhc.emailnotifications.SesEmailClient
+import uk.gov.dluhc.email.SesEmailClient
 
 /**
  * Configuration class exposing a configured email client bean to send emails via AWS's SES service.

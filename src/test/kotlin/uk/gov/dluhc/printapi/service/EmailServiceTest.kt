@@ -12,7 +12,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
-import uk.gov.dluhc.emailnotifications.EmailClient
+import uk.gov.dluhc.email.EmailClient
 import uk.gov.dluhc.printapi.config.EmailContentConfiguration
 import uk.gov.dluhc.printapi.config.EmailContentProperties
 import uk.gov.dluhc.printapi.dto.SendCertificateFailedToPrintEmailRequest
