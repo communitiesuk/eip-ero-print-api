@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.messaging
 
 import io.awspring.cloud.messaging.listener.annotation.SqsListener
+import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
@@ -11,7 +12,6 @@ import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.TemporaryCertificateDataRetentionService
-import jakarta.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 

@@ -1,5 +1,9 @@
 package uk.gov.dluhc.printapi.database.repository
 
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.Root
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -8,10 +12,6 @@ import uk.gov.dluhc.printapi.dto.CertificateSearchBy
 import uk.gov.dluhc.printapi.dto.CertificateSearchCriteriaDto
 import uk.gov.dluhc.printapi.service.sanitizeApplicationReference
 import uk.gov.dluhc.printapi.service.sanitizeSurname
-import jakarta.persistence.criteria.CriteriaBuilder
-import jakarta.persistence.criteria.CriteriaQuery
-import jakarta.persistence.criteria.Join
-import jakarta.persistence.criteria.Root
 
 @Component
 class CertificateSpecificationBuilder {

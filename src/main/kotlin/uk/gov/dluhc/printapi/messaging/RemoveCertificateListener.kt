@@ -1,12 +1,12 @@
 package uk.gov.dluhc.printapi.messaging
 
 import io.awspring.cloud.messaging.listener.annotation.SqsListener
+import jakarta.validation.Valid
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
-import jakarta.validation.Valid
 
 /**
  * Implementation of [MessageListener] to handle [RemoveCertificateMessage] messages

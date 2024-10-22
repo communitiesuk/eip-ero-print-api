@@ -1,10 +1,10 @@
 package uk.gov.dluhc.printapi.messaging.stubs
 
 import io.awspring.cloud.messaging.listener.annotation.SqsListener
+import jakarta.validation.Valid
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMessage
-import jakarta.validation.Valid
 
 @Component
 class UpdateStatisticsMessageListenerStub : MessageListenerStub<UpdateStatisticsMessage>() {

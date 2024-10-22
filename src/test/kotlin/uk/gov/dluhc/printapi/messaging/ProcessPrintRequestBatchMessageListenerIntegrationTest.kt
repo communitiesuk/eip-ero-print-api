@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.messaging
 
 import com.jcraft.jsch.ChannelSftp
+import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
@@ -24,7 +25,6 @@ import java.io.ByteArrayInputStream
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
-import jakarta.transaction.Transactional
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : IntegrationTest() {

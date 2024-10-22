@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.messaging
 
 import io.awspring.cloud.messaging.listener.annotation.SqsListener
+import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
@@ -8,7 +9,6 @@ import uk.gov.dluhc.messagingsupport.MessageListener
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.service.PrintResponseProcessingService
 import uk.gov.dluhc.printapi.service.StatisticsUpdateService
-import jakarta.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 
