@@ -6,13 +6,13 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "3.2.5"
-    id("io.spring.dependency-management") version "1.1.3"
-    kotlin("jvm") version "1.9.10"
-    kotlin("kapt") version "1.9.10"
-    kotlin("plugin.spring") version "1.9.10"
-    kotlin("plugin.jpa") version "1.9.10"
-    kotlin("plugin.allopen") version "1.9.10"
+    id("org.springframework.boot") version "3.3.4"
+    id("io.spring.dependency-management") version "1.1.6"
+    kotlin("jvm") version "1.9.25"
+    kotlin("kapt") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    kotlin("plugin.jpa") version "1.9.25"
+    kotlin("plugin.allopen") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
     id("org.openapi.generator") version "7.0.1"
@@ -241,7 +241,8 @@ sourceSets["main"].java {
 tasks.withType<KtLintCheckTask> {
     dependsOn(tasks.withType<GenerateTask>())
 }
-/* Linting is also dependent on Js2pGenerationTask but the dependency cannot be declared in the above manner because
+
+/* Linting and compilation are also dependent on Js2pGenerationTask but the dependency cannot be declared in the above manner because
    `Js2pGenerationTask` is an internal class (so we cannot import and reference it), its abstract, and it's implementation
    `Js2pGenerationTask_Decorated` appears to be dynamically generated. Over and above the task class being dynamically
    generated, the task instantiation is handled by the plugin class `Js2pPlugin`.
@@ -251,6 +252,9 @@ tasks.whenTaskAdded {
     if (this.javaClass.name == "org.jsonschema2dataclass.js2p.Js2pGenerationTask_Decorated") {
         val jsonschema2dataclassTask = this
         tasks.withType<KtLintCheckTask> {
+            dependsOn(jsonschema2dataclassTask)
+        }
+        tasks.withType<KotlinCompile> {
             dependsOn(jsonschema2dataclassTask)
         }
     }
