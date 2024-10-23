@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType.ERO_COLLECTION
@@ -16,6 +17,7 @@ import uk.gov.dluhc.printapi.dto.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.models.DeliveryAddressType.ERO_MINUS_COLLECTION
+import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.deepCopy
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidElectoralRollNumber
@@ -54,6 +56,9 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
     @Mock
     private lateinit var aedMappingHelper: AedMappingHelper
+
+    @Mock
+    private lateinit var electorDocumentRemovalDateResolver: ElectorDocumentRemovalDateResolver
 
     @Test
     fun `should map to ReIssueAnonymousElectorDocumentDto DTO given API Request`() {
@@ -178,5 +183,62 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         verify(aedMappingHelper).requestDateTime()
         verify(aedMappingHelper).statusHistory(AnonymousElectorDocumentStatus.Status.PRINTED)
         verify(deliveryAddressTypeMapper).mapDtoToEntity(REGISTERED)
+    }
+
+    @Test
+    fun `should set initialRetentionRemovalDate to be null if not set for previous AED`() {
+        // Given
+        val sourceReference = aValidSourceReference()
+        val previousAed = buildAnonymousElectorDocument(
+            sourceReference = sourceReference,
+            initialRetentionRemovalDate = null,
+        )
+        val templateFilename = aTemplateFilename()
+        val newCertificateNumber = aValidVacNumber()
+        given(idFactory.vacNumber()).willReturn(newCertificateNumber)
+        given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE)
+
+        val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
+
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+
+        // When
+        val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
+
+        // Then
+        assertThat(actual.initialRetentionRemovalDate).isNull()
+        verifyNoInteractions(electorDocumentRemovalDateResolver)
+    }
+
+    @Test
+    fun `should set initialRetentionRemovalDate based on new issue date if already set for previous AED`() {
+        // Given
+        val sourceReference = aValidSourceReference()
+
+        val previousRemovalTime = LocalDate.parse("2023-01-01")
+        val previousAed = buildAnonymousElectorDocument(
+            sourceReference = sourceReference,
+            initialRetentionRemovalDate = previousRemovalTime,
+        )
+        val templateFilename = aTemplateFilename()
+        val newCertificateNumber = aValidVacNumber()
+        given(idFactory.vacNumber()).willReturn(newCertificateNumber)
+        given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE)
+
+        val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
+
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+
+        val newRemovalTime = FIXED_DATE.plusMonths(15)
+        given(electorDocumentRemovalDateResolver.getAedInitialRetentionPeriodRemovalDate(FIXED_DATE)).willReturn(newRemovalTime)
+
+        // When
+        val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
+
+        // Then
+        assertThat(actual.initialRetentionRemovalDate).isEqualTo(newRemovalTime)
+        verify(electorDocumentRemovalDateResolver).getAedInitialRetentionPeriodRemovalDate(FIXED_DATE)
     }
 }
