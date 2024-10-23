@@ -10,6 +10,7 @@ import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.models.ReIssueAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
 import uk.gov.dluhc.printapi.service.IdFactory
 
 @Mapper(
@@ -30,6 +31,9 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
 
     @Autowired
     protected lateinit var deliveryAddressTypeMapper: DeliveryAddressTypeMapper
+
+    @Autowired
+    protected lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
 
     abstract fun toReIssueAnonymousElectorDocumentDto(
         apiRequest: ReIssueAnonymousElectorDocumentRequest,
@@ -77,5 +81,15 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
         dto: ReIssueAnonymousElectorDocumentDto,
     ) {
         aed.delivery?.deliveryAddressType = deliveryAddressTypeMapper.mapDtoToEntity(dto.deliveryAddressType)
+    }
+
+    @AfterMapping
+    protected fun setDataRetentionDates(
+        @MappingTarget aed: AnonymousElectorDocument,
+        previousAed: AnonymousElectorDocument
+    ) {
+        if (previousAed.initialRetentionRemovalDate != null) {
+            aed.initialRetentionRemovalDate = removalDateResolver.getAedInitialRetentionPeriodRemovalDate(aed.issueDate)
+        }
     }
 }
