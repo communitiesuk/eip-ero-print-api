@@ -33,7 +33,8 @@ allOpen {
 }
 
 val awsProfile = System.getenv("AWS_PROFILE_ARG") ?: "--profile code-artifact"
-val codeArtifactToken = "aws codeartifact get-authorization-token --domain erop-artifacts --domain-owner 063998039290 --query authorizationToken --output text $awsProfile".runCommand()
+val codeArtifactToken =
+    "aws codeartifact get-authorization-token --domain erop-artifacts --domain-owner 063998039290 --query authorizationToken --output text $awsProfile".runCommand()
 
 repositories {
     mavenCentral()
@@ -81,7 +82,11 @@ dependencies {
         exclude("commons-collections", "commons-collections")
         exclude("org.apache.commons", "commons-text")
     }
-    implementation("org.springframework.integration:spring-integration-sftp")
+    implementation("org.springframework.integration:spring-integration-sftp") {
+        exclude(group = "com.jcraft", module = "jsch")
+    }
+
+    implementation("com.github.mwiede:jsch:0.2.20")
 
     // Logging
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.3")
