@@ -81,7 +81,14 @@ dependencies {
         exclude("commons-collections", "commons-collections")
         exclude("org.apache.commons", "commons-text")
     }
-    implementation("org.springframework.integration:spring-integration-sftp")
+
+    // EROPSPT-392 replaced jsch with a newer forked version.
+    // We should remove the exclusion and the inclusion of jsch below when we've upgrade springboot.
+    implementation("org.springframework.integration:spring-integration-sftp") {
+        exclude(group = "com.jcraft", module = "jsch")
+    }
+
+    implementation("com.github.mwiede:jsch:0.2.20")
 
     // Logging
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.3")
