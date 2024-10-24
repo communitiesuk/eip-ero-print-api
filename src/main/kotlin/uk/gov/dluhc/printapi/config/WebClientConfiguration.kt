@@ -10,7 +10,10 @@ import uk.gov.dluhc.logging.rest.CorrelationIdWebClientMdcExchangeFilter
 class WebClientConfiguration {
 
     @Bean
-    fun eroManagementWebClient(@Value("\${api.ero-management.url}") eroManagementApiUrl: String, correlationIdExchangeFilter: CorrelationIdWebClientMdcExchangeFilter): WebClient =
+    fun eroManagementWebClient(
+        @Value("\${api.ero-management.url}") eroManagementApiUrl: String,
+        correlationIdExchangeFilter: CorrelationIdWebClientMdcExchangeFilter,
+    ): WebClient =
         WebClient.builder()
             .baseUrl(eroManagementApiUrl)
             .filter(correlationIdExchangeFilter)
