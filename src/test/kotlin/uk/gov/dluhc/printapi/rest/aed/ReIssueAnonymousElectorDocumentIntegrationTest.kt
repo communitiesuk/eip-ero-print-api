@@ -297,9 +297,9 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             sourceReference
         )
         assertThat(electorDocuments)
-            .hasSize(2) // Exactly 2 AEDs expected in the database for this sourceReference
+            .hasSize(3) // Exactly 3 AEDs expected in the database for this sourceReference (one removed, one previous and one reissue)
             .anyMatch { aed ->
-                // Of the 2 AEDs in the database the response PDF filename will match only one of them.
+                // Of the 3 AEDs in the database the response PDF filename will match only one of them.
                 contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
             }
 
