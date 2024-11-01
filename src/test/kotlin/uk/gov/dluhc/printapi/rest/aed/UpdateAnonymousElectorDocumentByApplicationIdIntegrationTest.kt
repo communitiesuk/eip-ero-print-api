@@ -104,6 +104,43 @@ internal class UpdateAnonymousElectorDocumentByApplicationIdIntegrationTest : In
     }
 
     @Test
+    fun `should return not found given AED has initial retention period data deleted`() {
+        // Given
+        wireMockService.stubCognitoJwtIssuerResponse()
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val aed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = APPLICATION_ID,
+            contactDetails = buildAedContactDetails()
+        )
+        aed.removeInitialRetentionPeriodData()
+        anonymousElectorDocumentRepository.save(aed)
+
+        // When
+        val response = webTestClient.patch()
+            .uri(URI_TEMPLATE, ERO_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .withBody(buildUpdateAnonymousElectorDocumentRequest(sourceReference = aed.sourceReference))
+            .exchange()
+            .expectStatus()
+            .isNotFound
+            .returnResult(ErrorResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        ErrorResponseAssert.assertThat(actual)
+            .hasStatus(404)
+            .hasError("Not Found")
+            .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${aed.sourceReference} not found")
+    }
+
+    @Test
     fun `should update elector's email and phone number`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
@@ -246,6 +283,56 @@ internal class UpdateAnonymousElectorDocumentByApplicationIdIntegrationTest : In
         val updated2 = anonymousElectorDocumentRepository.findById(aed2.id!!).get()
         assertThat(updated1.contactDetails!!.email).isEqualTo(newEmailAddress)
         assertThat(updated1.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
+        assertThat(updated2.contactDetails!!.email).isEqualTo(newEmailAddress)
+        assertThat(updated2.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
+    }
+
+    @Test
+    fun `should only update elector's email and phone number on AEDs that have not had initial retention period data deleted `() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+        val originalEmailAddress = aValidEmailAddress()
+        val originalPhoneNumber = aValidPhoneNumber()
+        val aed1 = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = APPLICATION_ID,
+            contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
+        )
+        aed1.removeInitialRetentionPeriodData()
+        val aed2 = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = APPLICATION_ID,
+            contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
+        )
+        anonymousElectorDocumentRepository.saveAll(listOf(aed1, aed2))
+
+        val newEmailAddress = anotherValidEmailAddress()
+        val newPhoneNumber = anotherValidPhoneNumber()
+        val updateAedRequest = buildUpdateAnonymousElectorDocumentRequest(
+            sourceReference = APPLICATION_ID,
+            email = newEmailAddress,
+            phoneNumber = newPhoneNumber
+        )
+
+        // When
+        webTestClient.patch()
+            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .withBody(updateAedRequest)
+            .exchange()
+            .expectStatus().isNoContent
+
+        // Then
+        val updated1 = anonymousElectorDocumentRepository.findById(aed1.id!!).get()
+        val updated2 = anonymousElectorDocumentRepository.findById(aed2.id!!).get()
+        assertThat(updated1.contactDetails!!.email).isNull()
+        assertThat(updated1.contactDetails!!.phoneNumber).isNull()
         assertThat(updated2.contactDetails!!.email).isEqualTo(newEmailAddress)
         assertThat(updated2.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
     }
