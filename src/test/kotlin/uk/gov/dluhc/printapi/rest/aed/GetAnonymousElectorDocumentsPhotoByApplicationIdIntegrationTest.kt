@@ -21,7 +21,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoBucketPath
 
 internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest : IntegrationTest() {
     companion object {
-        private const val URI_TEMPLATE = "/eros/{ERO_ID}/anonymous-elector-documents/photo?applicationId={APPLICATION_ID}"
+        private const val URI_TEMPLATE =
+            "/eros/{ERO_ID}/anonymous-elector-documents/photo?applicationId={APPLICATION_ID}"
         private const val APPLICATION_ID = "6407b6158f529a11713a1e5c"
         private const val GSS_CODE = "W06000099"
     }
@@ -102,7 +103,6 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
         anonymousElectorDocumentRepository.save(anonymousElectorDocument1)
         s3Client.addCertificatePhotoToS3(s3Bucket, s3PathAedPhoto1)
 
-
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
@@ -120,7 +120,6 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
             .hasError("Not Found")
             .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = $APPLICATION_ID not found")
     }
-
 
     @Test
     fun `should return a presigned url for the AED photo`() {
@@ -206,7 +205,6 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
         }
     }
 
-
     @Test
     fun `should return a presigned url for the AED photo given object key contains special characters`() {
         // Given
@@ -225,7 +223,8 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
         )
         anonymousElectorDocumentRepository.save(anonymousElectorDocument1)
         s3Client.addCertificatePhotoToS3(s3Bucket, photoObjectKey)
-        val expectedEncodedPath = "dir1/Jane%2B%21%40%C2%A3%24%25%5E%26%2A%28%29%29%29%29_%2B-%3D%5B%5D%7B%7D%27%5C%7C%3B%3B%3C%3E%2C.%3A%3F%23%60~%C2%A7%C2%B1%20Doe%3AAwesome%20Company%20Ltd%3AHEADSHOT.jpg"
+        val expectedEncodedPath =
+            "dir1/Jane%2B%21%40%C2%A3%24%25%5E%26%2A%28%29%29%29%29_%2B-%3D%5B%5D%7B%7D%27%5C%7C%3B%3B%3C%3E%2C.%3A%3F%23%60~%C2%A7%C2%B1%20Doe%3AAwesome%20Company%20Ltd%3AHEADSHOT.jpg"
 
         // When
         val response = webTestClient.get()
