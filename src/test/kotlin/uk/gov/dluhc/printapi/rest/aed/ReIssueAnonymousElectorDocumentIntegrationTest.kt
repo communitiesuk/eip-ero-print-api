@@ -120,6 +120,42 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
     }
 
     @Test
+    fun `should return not found given AED has initial retention period data deleted`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val previousAed = buildAnonymousElectorDocument(gssCode = GSS_CODE)
+        previousAed.removeInitialRetentionPeriodData()
+        anonymousElectorDocumentRepository.save(previousAed)
+        val requestBody = buildReIssueAnonymousElectorDocumentRequest(
+            sourceReference = previousAed.sourceReference
+        )
+
+        // When
+        val response = webTestClient.post()
+            .uri(URI_TEMPLATE, ERO_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .withBody(requestBody)
+            .exchange()
+            .expectStatus()
+            .isNotFound
+            .returnResult(ErrorResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual)
+            .hasStatus(404)
+            .hasError("Not Found")
+            .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${previousAed.sourceReference} not found")
+    }
+
+    @Test
     fun `should return AED PDF given specified application has previously issued AED`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
@@ -175,6 +211,96 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .hasSize(2) // Exactly 2 AEDs expected in the database for this sourceReference
             .anyMatch { aed ->
                 // Of the 2 AEDs in the database the response PDF filename will match only one of them.
+                contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            }
+
+        val newlyCreatedAed = electorDocuments.first { aed -> // Get the new AED that this test would have created
+            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+        }
+        assertThat(newlyCreatedAed)
+            .hasId()
+            .statusHistory {
+                it.hasSize(1)
+                it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
+            }
+
+        PdfReader(pdfContent).use { reader ->
+            val text = PdfTextExtractor(reader).getTextFromPage(1)
+            assertThat(text).contains(newlyCreatedAed.certificateNumber)
+            assertThat(text).containsIgnoringCase(newElectoralRollNumber)
+            assertThat(text).doesNotContain(originalElectoralRollNumber)
+        }
+
+        await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageNotSent()
+        }
+    }
+
+    @Test
+    fun `should return AED PDF given specified application has multiple previously issued AED, including some with initial data removed`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val sourceReference = aValidSourceReference()
+        val photoLocationArn = addPhotoToS3()
+
+        val originalElectoralRollNumber = "ORIGINAL ELECTORAL ROLL #"
+
+        val oldPreviouslyIssuedAed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = sourceReference,
+            photoLocationArn = photoLocationArn,
+            electoralRollNumber = originalElectoralRollNumber,
+        )
+        oldPreviouslyIssuedAed.removeInitialRetentionPeriodData()
+
+        val moreRecentAed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = sourceReference,
+            photoLocationArn = photoLocationArn,
+            electoralRollNumber = originalElectoralRollNumber,
+        )
+        anonymousElectorDocumentRepository.saveAll(listOf(oldPreviouslyIssuedAed, moreRecentAed))
+
+        val newElectoralRollNumber = aValidElectoralRollNumber()
+        val requestBody = buildReIssueAnonymousElectorDocumentRequest(
+            sourceReference = sourceReference,
+            electoralRollNumber = newElectoralRollNumber,
+        )
+
+        // When
+        val response = webTestClient.mutate()
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
+            .build()
+            .post()
+            .uri(URI_TEMPLATE, ERO_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .withBody(requestBody)
+            .exchange()
+            .expectStatus().isCreated
+            .expectHeader().contentType(MediaType.APPLICATION_PDF)
+            .expectBody(ByteArray::class.java)
+            .returnResult()
+
+        // Then
+        val pdfContent = response.responseBody
+        val contentDisposition = response.responseHeaders.contentDisposition
+
+        val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
+            GSS_CODE,
+            ANONYMOUS_ELECTOR_DOCUMENT,
+            sourceReference
+        )
+        assertThat(electorDocuments)
+            .hasSize(3) // Exactly 3 AEDs expected in the database for this sourceReference (one removed, one previous and one reissue)
+            .anyMatch { aed ->
+                // Of the 3 AEDs in the database the response PDF filename will match only one of them.
                 contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
             }
 

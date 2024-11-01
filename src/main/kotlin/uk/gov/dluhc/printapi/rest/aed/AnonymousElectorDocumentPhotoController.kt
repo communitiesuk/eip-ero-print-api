@@ -32,7 +32,7 @@ class AnonymousElectorDocumentPhotoController(
         @RequestParam applicationId: String,
     ): PreSignedUrlResourceResponse {
         val aed = anonymousElectorDocumentService
-            .getAnonymousElectorDocuments(eroId, applicationId)
+            .getFullyRetainedAnonymousElectorDocuments(eroId, applicationId)
             .firstOrNull() ?: throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, applicationId)
 
         val preSignedUrl = s3AccessService.generatePresignedGetCertificatePhotoUrl(aed.photoLocationArn)

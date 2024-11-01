@@ -46,6 +46,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.messaging.stubs.UpdateStatisticsMessageListenerStub
+import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.BankHolidaysDataService
 import uk.gov.dluhc.printapi.service.CertificateSummarySearchService
 import uk.gov.dluhc.printapi.service.SftpService
@@ -175,6 +176,9 @@ internal abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var bankHolidaysDataService: BankHolidaysDataService
+
+    @Autowired
+    protected lateinit var aedDataRetentionService: AedDataRetentionService
 
     @Autowired
     protected lateinit var cacheManager: CacheManager
