@@ -1,0 +1,68 @@
+services:
+  localstack:
+    container_name: "localstack_print"
+    image: localstack/localstack:3.8.1
+    ports:
+      - "54566:4566"
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - SERVICES=sqs,ses,s3
+      - EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3002
+    volumes:
+      - "./docker/localstack-init/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "./docker/localstack-init/init-files:/home/localstack/init-files:ro"
+      - "./docker/volumes/localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  sqs-admin:
+    container_name: "sqs_admin_print"
+    image: pacovk/sqs-admin:latest
+    ports:
+      - "53999:3999"
+    environment:
+      - SQS_ENDPOINT_URL=http://localstack:4566
+      - SQS_AWS_REGION=us-east-1
+  mysql:
+    container_name: "mysql_print"
+    image: mysql:8
+    ports:
+      - "53306:3306"
+    volumes:
+      - "./docker/mysql-init:/docker-entrypoint-initdb.d"
+      - "./docker/volumes/mysql:/var/lib/mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+  wiremock:
+    container_name: "wiremock_print"
+    image: wiremock/wiremock
+    command: "--global-response-templating --verbose"
+    ports:
+      - "58080:8080"
+    volumes:
+      - "./docker/wiremock-init:/home/wiremock"
+  sftp:
+    container_name: "sftp_print"
+    image: atmoz/sftp:latest
+    command: "user::1001:100:EROP/Dev/InBound,EROP/Dev/OutBound"
+    ports:
+      - "52222:22"
+    volumes:
+      - "./src/test/resources/ssh/printer_rsa.pub:/home/user/.ssh/keys/id_rsa.pub:ro"
+      - "./docker/volumes/sftp/EROP:/home/user/EROP"
+  print-api:
+    container_name: "print_api"
+    image: eip-ero-print-api:latest
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+    ports:
+      - "8085:8085"
+      - "9085:9085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local-docker
+      - AWS_REGION=us-east-1
+      - BPL_JMX_ENABLED=true
+      - BPL_JMX_PORT=9085
+      - AWS_ACCESS_KEY_ID=foo
+      - AWS_SECRET_ACCESS_KEY=bar

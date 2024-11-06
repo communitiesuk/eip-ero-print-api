@@ -1,6 +1,15 @@
 spring:
   application:
     name: 'eip-ero-print-api'
+  profiles:
+    group:
+      local:
+        - local
+        - local-oauth
+      local-docker:
+        - local
+        - local-oauth
+        - docker
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/print_application
     username: ${MYSQL_USER}

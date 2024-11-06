@@ -1,0 +1,10 @@
+# This file should be duplicated and renamed to "application-local-oauth.yml" and the values populated
+#
+# "application-local-oauth.yml" is git ignored, as the values in this file should not be committed
+#
+# "COGNITO_USER_POOL_ID" should be populated with the ID for the EROP user pool found in cognito in AWS console
+#
+# The environment used for the above IDs should match the environment you use to generate the auth token
+# If using with local EROP UI, this is most likely DEV2 unless it's been changed
+
+COGNITO_USER_POOL_ID:
