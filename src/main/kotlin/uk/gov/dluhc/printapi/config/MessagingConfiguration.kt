@@ -20,6 +20,9 @@ import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMe
 @Configuration
 class MessagingConfiguration {
 
+    @Value("\${sqs.maximum-number-of-concurrent-messages}")
+    private lateinit var maximumNumberOfConcurrentMessages: Number
+
     @Value("\${sqs.process-print-request-batch-queue-name}")
     private lateinit var processPrintRequestBatchQueueName: String
 
@@ -79,6 +82,6 @@ class MessagingConfiguration {
     ) = MessagingConfigurationHelper.defaultSqsListenerContainerFactory(
         sqsAsyncClient,
         sqsMessagingMessageConverter,
-        5, // TODO EIP1-9472: Configurable?
+        maximumNumberOfConcurrentMessages.toInt(),
     )
 }

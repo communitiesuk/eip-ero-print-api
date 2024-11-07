@@ -30,6 +30,7 @@ spring:
         order_inserts: true
 
 sqs:
+  maximum-number-of-concurrent-messages: 5
   send-application-to-print-queue-name: ${SQS_SEND_APPLICATION_TO_PRINT_QUEUE_NAME}
   process-print-request-batch-queue-name: ${SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME}
   process-print-response-file-queue-name: ${SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME}
