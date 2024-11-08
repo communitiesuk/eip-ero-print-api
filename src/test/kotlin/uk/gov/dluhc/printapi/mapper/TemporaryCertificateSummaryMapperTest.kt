@@ -79,8 +79,9 @@ class TemporaryCertificateSummaryMapperTest {
         val statusHistory = listOf(
             buildTemporaryCertificateStatus(
                 status = TemporaryCertificateStatus.Status.GENERATED,
+            ).apply {
                 dateCreated = dateTimeGenerated
-            )
+            }
         )
         val entity = buildTemporaryCertificate(
             certificateNumber = certificateNumber,

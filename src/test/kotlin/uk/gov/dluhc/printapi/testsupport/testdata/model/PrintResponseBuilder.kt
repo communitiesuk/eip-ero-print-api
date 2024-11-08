@@ -14,20 +14,22 @@ fun buildPrintResponses(
     batchResponses: List<BatchResponse> = listOf(buildBatchResponse()),
     printResponses: List<PrintResponse> = listOf(buildPrintResponse()),
 ): PrintResponses =
-    PrintResponses()
+    PrintResponses.PrintResponsesBuilder()
         .withBatchResponses(batchResponses)
         .withPrintResponses(printResponses)
+        .build()
 
 fun buildBatchResponse(
     batchId: String = aValidBatchId(),
     status: BatchResponse.Status = BatchResponse.Status.SUCCESS,
     message: String? = if (status == BatchResponse.Status.SUCCESS) null else aValidEventMessage(),
     timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
-): BatchResponse = BatchResponse()
+): BatchResponse = BatchResponse.BatchResponseBuilder()
     .withBatchId(batchId)
     .withMessage(message)
     .withStatus(status)
     .withTimestamp(timestamp)
+    .build()
 
 fun buildPrintResponse(
     requestId: String = aValidRequestId(),
@@ -35,9 +37,10 @@ fun buildPrintResponse(
     status: PrintResponse.Status = PrintResponse.Status.SUCCESS,
     message: String? = if (status == PrintResponse.Status.SUCCESS) null else aValidEventMessage(),
     timestamp: OffsetDateTime = Instant.now().atOffset(ZoneOffset.UTC),
-): PrintResponse = PrintResponse()
+): PrintResponse = PrintResponse.PrintResponseBuilder()
     .withMessage(message)
     .withRequestId(requestId)
     .withStatusStep(statusStep)
     .withStatus(status)
     .withTimestamp(timestamp)
+    .build()

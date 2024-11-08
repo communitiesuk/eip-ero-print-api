@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.config
 
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod.OPTIONS
 import org.springframework.http.HttpStatus.FORBIDDEN
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 
+@Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 class SecurityConfiguration(
@@ -36,12 +38,12 @@ class SecurityConfiguration(
                 .cors { }
                 .formLogin { it.disable() }
                 .httpBasic { it.disable() }
-                .authorizeRequests {
-                    it.antMatchers(OPTIONS).permitAll()
-                    it.antMatchers("/actuator/**").permitAll()
+                .authorizeHttpRequests {
+                    it.requestMatchers(OPTIONS).permitAll()
+                    it.requestMatchers("/actuator/**").permitAll()
 
                     // These requests are authenticated through the API gateway using IAM
-                    it.antMatchers("/certificates/statistics", "/anonymous-elector-documents/statistics")
+                    it.requestMatchers("/certificates/statistics", "/anonymous-elector-documents/statistics")
                         .permitAll()
 
                     it.anyRequest().authenticated()

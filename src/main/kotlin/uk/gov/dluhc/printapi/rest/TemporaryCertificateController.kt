@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rest
 
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
@@ -30,7 +31,6 @@ import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateSummaryService
 import java.io.ByteArrayInputStream
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin

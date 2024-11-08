@@ -1,15 +1,12 @@
 package uk.gov.dluhc.printapi.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConfigurationProperties(prefix = "temporary-certificate.explainer-pdf")
-@ConstructorBinding
 class TemporaryCertificateExplainerPdfTemplateProperties(downloadFilenamePrefix: String, english: English, welsh: Welsh) :
     ExplainerPdfTemplateProperties(downloadFilenamePrefix, english, welsh)
 
 @ConfigurationProperties(prefix = "anonymous-elector-document.explainer-pdf")
-@ConstructorBinding
 class AnonymousElectorDocumentExplainerPdfTemplateProperties(downloadFilenamePrefix: String, english: English, welsh: Welsh) :
     ExplainerPdfTemplateProperties(downloadFilenamePrefix, english, welsh)
 

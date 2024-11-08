@@ -1,11 +1,11 @@
 package uk.gov.dluhc.printapi.config
 
-import com.amazonaws.services.sqs.AmazonSQSAsync
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate
+import io.awspring.cloud.sqs.support.converter.SqsMessagingMessageConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.DependsOn
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import uk.gov.dluhc.messagingsupport.MessagingConfigurationHelper
 
 @Configuration
 class SqsSenderConfiguration {
@@ -22,9 +22,8 @@ class SqsSenderConfiguration {
      */
     @Bean
     @DependsOn("localStackContainerSettings")
-    fun sqsMessagingTemplate(
-        amazonSQSAsync: AmazonSQSAsync,
-        objectMapper: ObjectMapper
-    ): QueueMessagingTemplate =
-        QueueMessagingTemplate(amazonSQSAsync, null, objectMapper)
+    fun sqsTemplate(
+        sqsAsyncClient: SqsAsyncClient,
+        sqsMessagingMessageConverter: SqsMessagingMessageConverter
+    ) = MessagingConfigurationHelper.sqsTemplate(sqsAsyncClient, sqsMessagingMessageConverter)
 }

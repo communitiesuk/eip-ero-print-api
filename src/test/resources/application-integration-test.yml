@@ -1,20 +1,18 @@
-cloud:
-  aws:
-    region:
-      static: eu-west-2
-    credentials:
-      access-key: test
-      secret-key: test
-    sqs:
-      endpoint: http://replaced-by-localStackContainerSettings-bean
-
 spring:
   datasource:
     username: root
     password: password
   liquibase:
     contexts: ddl
-
+  cloud:
+    aws:
+      region:
+        static: eu-west-2
+      credentials:
+        access-key: test
+        secret-key: test
+      sqs:
+        endpoint: http://replaced-by-localStackContainerSettings-bean
   jpa:
     properties:
       hibernate:

@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.jobs
 
+import jakarta.transaction.Transactional
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.transaction.TestTransaction
@@ -13,7 +14,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import java.io.ByteArrayInputStream
 import java.util.concurrent.TimeUnit
-import javax.transaction.Transactional
 
 internal class BatchPrintRequestsJobIntegrationTest : IntegrationTest() {
 

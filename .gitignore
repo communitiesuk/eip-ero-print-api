@@ -46,3 +46,5 @@ cypress/screenshots
 openapi/reference/test
 .env
 .envrc
+docker/volumes
+src/main/resources/application-local-oauth.yml

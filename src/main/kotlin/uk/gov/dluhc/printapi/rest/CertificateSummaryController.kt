@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rest
 
+import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,7 +15,6 @@ import uk.gov.dluhc.printapi.models.CertificateSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.service.CertificateSummarySearchService
 import uk.gov.dluhc.printapi.service.CertificateSummaryService
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin

@@ -1,11 +1,10 @@
 package uk.gov.dluhc.printapi.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jcraft.jsch.ChannelSftp
-import com.jcraft.jsch.ChannelSftp.LsEntry
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate
+import io.awspring.cloud.sqs.operations.SqsTemplate
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
+import org.apache.sshd.sftp.client.SftpClient
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -83,7 +82,7 @@ internal abstract class IntegrationTest {
     protected lateinit var localstackEmailMessagesSentClient: LocalstackEmailMessagesSentClient
 
     @Autowired
-    protected lateinit var sqsMessagingTemplate: QueueMessagingTemplate
+    protected lateinit var sqsTemplate: SqsTemplate
 
     @Autowired
     protected lateinit var sftpService: SftpService
@@ -246,7 +245,7 @@ internal abstract class IntegrationTest {
     class IntegrationTestConfiguration {
         @Bean
         @Primary
-        fun testSftpSessionFactory(properties: SftpProperties): SessionFactory<ChannelSftp.LsEntry> {
+        fun testSftpSessionFactory(properties: SftpProperties): SessionFactory<SftpClient.DirEntry> {
             val factory = DefaultSftpSessionFactory(true)
             factory.setHost(properties.host)
             factory.setPort(sftpContainer.getMappedPort(SftpContainerConfiguration.DEFAULT_SFTP_PORT))
@@ -326,7 +325,7 @@ internal abstract class IntegrationTest {
         directory: String
     ): List<String> {
         return sftpTemplate.list(directory)
-            .map(LsEntry::getFilename)
+            .map { it.filename }
             .filterNot { path -> path.equals(".") }
             .filterNot { path -> path.equals("..") }
             .toList()

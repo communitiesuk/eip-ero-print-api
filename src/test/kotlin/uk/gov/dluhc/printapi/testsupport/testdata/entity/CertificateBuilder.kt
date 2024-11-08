@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.testsupport.testdata.entity
 
 import org.apache.commons.lang3.RandomStringUtils
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.AddressFormat
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -45,12 +46,11 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidWebsite
 import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
 import java.util.UUID.randomUUID
 import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildCertificate(
-    id: UUID? = randomUUID(),
+    persisted: Boolean = false,
     vacNumber: String = aValidVacNumber(),
     status: Status = aValidCertificateStatus(),
     batchId: String = aValidBatchId(),
@@ -72,7 +72,7 @@ fun buildCertificate(
     finalRetentionRemovalDate: LocalDate? = null,
 ): Certificate {
     val certificate = Certificate(
-        id = id,
+        id = if (persisted) randomUUID() else null,
         vacNumber = vacNumber,
         sourceType = sourceType,
         sourceReference = sourceReference,
@@ -86,13 +86,16 @@ fun buildCertificate(
         status = status,
         initialRetentionRemovalDate = initialRetentionRemovalDate,
         initialRetentionDataRemoved = initialRetentionDataRemoved,
-        finalRetentionRemovalDate = finalRetentionRemovalDate
+        finalRetentionRemovalDate = finalRetentionRemovalDate,
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate
 }
 
 fun buildPrintRequest(
+    persisted: Boolean = false,
     requestId: String = aValidRequestId(),
     printRequestStatuses: List<PrintRequestStatus> = listOf(buildPrintRequestStatus()),
     requestDateTime: Instant? = aValidRequestDateTime(),
@@ -106,6 +109,7 @@ fun buildPrintRequest(
     surname: String = aValidSurname()
 ): PrintRequest {
     val printRequest = PrintRequest(
+        id = if (persisted) randomUUID() else null,
         requestId = requestId,
         vacVersion = aValidVacVersion(),
         requestDateTime = requestDateTime,
@@ -117,39 +121,49 @@ fun buildPrintRequest(
         eroEnglish = eroEnglish,
         eroWelsh = eroWelsh,
         userId = userId,
-        batchId = batchId
+        batchId = batchId,
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     )
     printRequestStatuses.forEach { printRequestStatus -> printRequest.addPrintRequestStatus(printRequestStatus) }
     return printRequest
 }
 
 fun buildPrintRequestStatus(
+    persisted: Boolean = false,
     status: Status = aValidCertificateStatus(),
     eventDateTime: Instant = aValidPrintRequestStatusEventDateTime(),
     message: String? = null
 ): PrintRequestStatus {
     return PrintRequestStatus(
+        id = if (persisted) randomUUID() else null,
         status = status,
         eventDateTime = eventDateTime,
-        message = message
+        message = message,
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     )
 }
 
 fun buildElectoralRegistrationOffice(
+    persisted: Boolean = false,
     name: String = aValidEroName(),
     address: Address = buildAddress()
 ): ElectoralRegistrationOffice {
     return ElectoralRegistrationOffice(
+        id = if (persisted) randomUUID() else null,
         address = address,
         name = name,
         phoneNumber = aValidPhoneNumber(),
         emailAddress = aValidEmailAddress(),
-        website = aValidWebsite()
+        website = aValidWebsite(),
+        dateCreated = if (persisted) Instant.now() else null,
+        createdBy = if (persisted) "system" else null,
     )
 }
 
 fun buildAddress(
-    id: UUID? = randomUUID(),
+    persisted: Boolean = false,
     fakeAddress: DataFakerAddress = faker.address(),
     street: String = fakeAddress.streetName(),
     postcode: String = fakeAddress.postcode(),
@@ -159,7 +173,7 @@ fun buildAddress(
     area: String? = fakeAddress.state(),
     uprn: String? = RandomStringUtils.randomNumeric(12)
 ) = Address(
-    id = id,
+    id = if (persisted) randomUUID() else null,
     street = street,
     postcode = postcode,
     property = property,
@@ -167,10 +181,12 @@ fun buildAddress(
     town = town,
     area = area,
     uprn = uprn,
+    dateCreated = if (persisted) Instant.now() else null,
+    createdBy = if (persisted) "system" else null,
 )
 
 fun buildDelivery(
-    id: UUID? = randomUUID(),
+    persisted: Boolean = false,
     addressee: String = aValidDeliveryName(),
     address: Address = buildAddress(),
     deliveryClass: DeliveryClass = aValidDeliveryClass(),
@@ -178,11 +194,13 @@ fun buildDelivery(
     collectionReason: String? = null,
     addressFormat: AddressFormat = aValidAddressFormat(),
 ): Delivery = Delivery(
-    id = id,
+    id = if (persisted) randomUUID() else null,
     addressee = addressee,
     address = address,
     deliveryClass = deliveryClass,
     deliveryAddressType = deliveryAddressType,
     collectionReason = collectionReason,
     addressFormat = addressFormat,
+    dateCreated = if (persisted) Instant.now() else null,
+    createdBy = if (persisted) "system" else null,
 )

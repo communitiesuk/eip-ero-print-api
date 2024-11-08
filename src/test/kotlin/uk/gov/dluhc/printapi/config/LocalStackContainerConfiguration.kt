@@ -52,10 +52,10 @@ class LocalStackContainerConfiguration {
         fun getInstance(): GenericContainer<*> {
             if (container == null) {
                 container = GenericContainer(
-                    DockerImageName.parse("localstack/localstack:1.2.0")
+                    DockerImageName.parse("localstack/localstack:3.8.1")
                 ).withEnv(
                     mapOf(
-                        "SERVICES" to "sqs, ses",
+                        "SERVICES" to "sqs, ses, s3",
                         "AWS_DEFAULT_REGION" to DEFAULT_REGION,
                     )
                 )
@@ -197,7 +197,7 @@ class LocalStackContainerConfiguration {
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
 
         TestPropertyValues.of(
-            "cloud.aws.sqs.endpoint=$apiUrl",
+            "spring.cloud.aws.sqs.endpoint=$apiUrl",
         ).applyTo(applicationContext)
 
         return LocalStackContainerSettings(
@@ -213,10 +213,17 @@ class LocalStackContainerConfiguration {
     }
 
     private fun GenericContainer<*>.createSqsQueue(queueName: String): String {
-        val isFifo = queueName.endsWith(".fifo")
-        val execInContainer =
-            if (isFifo) (execInContainer("awslocal", "sqs", "create-queue", "--queue-name", queueName, "--attributes", "FifoQueue=true"))
-            else execInContainer("awslocal", "sqs", "create-queue", "--queue-name", queueName)
+        val attributes = mutableListOf("VisibilityTimeout=1")
+        if (queueName.endsWith(".fifo")) {
+            attributes.add("FifoQueue=true")
+        }
+        val execInContainer = execInContainer(
+            "awslocal",
+            "sqs",
+            "create-queue",
+            "--queue-name", queueName,
+            "--attributes", attributes.joinToString(","),
+        )
         return execInContainer.stdout.let {
             objectMapper.readValue(it, Map::class.java)
         }.let {
@@ -241,7 +248,7 @@ class LocalStackContainerConfiguration {
         val mappedQueueUrlApplicationRemoved: String = toMappedUrl(queueUrlApplicationRemoved, apiUrl)
         val mappedQueueUrlRemoveCertificate: String = toMappedUrl(queueUrlRemoveCertificate, apiUrl)
         val mappedQueueUrlTriggerVoterCardStatisticsUpdate: String = toMappedUrl(queueUrlTriggerVoterCardStatisticsUpdate, apiUrl)
-        val sesMessagesUrl = "$apiUrl/_localstack/ses"
+        val sesMessagesUrl = "$apiUrl/_aws/ses"
 
         private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {
             val rawUrl = URI.create(rawUrlString)

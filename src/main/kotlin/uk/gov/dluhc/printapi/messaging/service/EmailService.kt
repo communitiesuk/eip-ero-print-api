@@ -1,8 +1,8 @@
 package uk.gov.dluhc.printapi.messaging.service
 
-import liquibase.repackaged.org.apache.commons.text.StringSubstitutor.replace
 import mu.KotlinLogging
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.text.StringSubstitutor.replace
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.email.EmailClient
 import uk.gov.dluhc.printapi.config.EmailContentConfiguration

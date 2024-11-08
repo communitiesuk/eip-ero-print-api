@@ -1,11 +1,11 @@
 package uk.gov.dluhc.printapi.rest
 
+import jakarta.validation.Constraint
+import jakarta.validation.ConstraintValidator
+import jakarta.validation.ConstraintValidatorContext
+import jakarta.validation.Payload
 import uk.gov.dluhc.printapi.models.CertificateSearchBy
 import java.beans.ConstructorProperties
-import javax.validation.Constraint
-import javax.validation.ConstraintValidator
-import javax.validation.ConstraintValidatorContext
-import javax.validation.Payload
 import kotlin.reflect.KClass
 
 @CertificateSearchByParametersAreValid

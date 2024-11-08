@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.database.repository
 
+import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,7 +15,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.anAuthenticatedJwtAuthenticati
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import java.time.LocalDate
-import javax.transaction.Transactional
 
 internal class AnonymousElectorDocumentRepositoryIntegrationTest : IntegrationTest() {
 

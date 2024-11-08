@@ -1,0 +1,67 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/ero-management-api/eros\\?gssCode=.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "eros": [
+        {
+          "id": "camden-london-borough-council",
+          "name": "Test ERO",
+          "displayName": "Test ERO",
+          "localAuthorities": [
+            {
+              "gssCode": "$gssCode",
+              "name": "Local Authority 1",
+              "displayName": "Local Authority 1",
+              "contactDetailsEnglish": {
+                "name": "Isle of Anglesey County Council",
+                "nameVac": "Testing House",
+                "phone": "01248 752548",
+                "website": "http://www.anglesey.gov.uk/council-and-democracy/councillors-democracy-and-elections/electoral-register-elections-and-voting-/",
+                "websiteVac": "http://www.anglesey.gov.uk",
+                "email": "shxcs@ynysmon.gov.uk",
+                "address": {
+                  "street": "Isle of Anglesey County Council",
+                  "property": "Council offices",
+                  "town": "Llangefni",
+                  "area": "Anglesey",
+                  "locality": "Crigyll",
+                  "uprn" : "873249237231",
+                  "postcode": "LL77 7TW"
+                }
+              }
+            },
+            {
+              "gssCode": "E09000007",
+              "name": "Local Authority 2",
+              "displayName": "Local Authority 2",
+              "contactDetailsEnglish": {
+                "name": "Testing House",
+                "nameVac": "Testing House",
+                "phone": "0117 4960123",
+                "website": "https://www.example.com",
+                "websiteVac": "https://www.example.com",
+                "email": "tester@noemail.invalid",
+                "address": {
+                  "street": "Test Street",
+                  "property": "Testing House",
+                  "town": "Test Town",
+                  "area": "Test Area",
+                  "locality": "Test Locality",
+                  "postcode": "BR3 3AG",
+                  "uprn" : "123456789012"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

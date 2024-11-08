@@ -1,18 +1,16 @@
 package uk.gov.dluhc.printapi.config
 
-import io.awspring.cloud.messaging.config.QueueMessageHandlerFactory
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate
-import io.awspring.cloud.messaging.listener.support.AcknowledgmentHandlerMethodArgumentResolver
-import io.awspring.cloud.messaging.listener.support.VisibilityHandlerMethodArgumentResolver
-import io.awspring.cloud.messaging.support.NotificationSubjectArgumentResolver
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.awspring.cloud.sqs.operations.SqsTemplate
+import io.awspring.cloud.sqs.support.converter.SqsMessagingMessageConverter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.messaging.converter.MappingJackson2MessageConverter
-import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver
-import org.springframework.messaging.handler.annotation.support.PayloadMethodArgumentResolver
-import org.springframework.validation.Validator
+import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.dluhc.messagingsupport.MessageQueue
+import uk.gov.dluhc.messagingsupport.MessagingConfigurationHelper
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
@@ -21,6 +19,9 @@ import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMe
 
 @Configuration
 class MessagingConfiguration {
+
+    @Value("\${sqs.maximum-number-of-concurrent-messages}")
+    private lateinit var maximumNumberOfConcurrentMessages: Number
 
     @Value("\${sqs.process-print-request-batch-queue-name}")
     private lateinit var processPrintRequestBatchQueueName: String
@@ -37,40 +38,50 @@ class MessagingConfiguration {
     @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
     private lateinit var triggerVoterCardStatisticsUpdateQueueName: String
 
+    /**
+     * We also construct an sqsTemplate when running integration tests, and this
+     * definition conflicts with it, so hide this Bean if running under test.
+     */
     @Bean
-    fun processPrintRequestBatchQueue(queueMessagingTemplate: QueueMessagingTemplate) =
-        MessageQueue<ProcessPrintRequestBatchMessage>(processPrintRequestBatchQueueName, queueMessagingTemplate)
+    @Primary
+    @Profile("!integration-test")
+    fun sqsTemplate(
+        sqsAsyncClient: SqsAsyncClient,
+        sqsMessagingMessageConverter: SqsMessagingMessageConverter
+    ) = MessagingConfigurationHelper.sqsTemplate(sqsAsyncClient, sqsMessagingMessageConverter)
 
     @Bean
-    fun processPrintResponseFileQueue(queueMessagingTemplate: QueueMessagingTemplate) =
-        MessageQueue<ProcessPrintResponseFileMessage>(processPrintResponseFileQueueName, queueMessagingTemplate)
+    fun processPrintRequestBatchQueue(sqsTemplate: SqsTemplate) =
+        MessageQueue<ProcessPrintRequestBatchMessage>(processPrintRequestBatchQueueName, sqsTemplate)
 
     @Bean
-    fun processPrintResponseQueue(queueMessagingTemplate: QueueMessagingTemplate) =
-        MessageQueue<ProcessPrintResponseMessage>(processPrintResponseQueueName, queueMessagingTemplate)
+    fun processPrintResponseFileQueue(sqsTemplate: SqsTemplate) =
+        MessageQueue<ProcessPrintResponseFileMessage>(processPrintResponseFileQueueName, sqsTemplate)
 
     @Bean
-    fun removeCertificateQueue(queueMessagingTemplate: QueueMessagingTemplate) =
-        MessageQueue<RemoveCertificateMessage>(removeCertificateQueueName, queueMessagingTemplate)
+    fun processPrintResponseQueue(sqsTemplate: SqsTemplate) =
+        MessageQueue<ProcessPrintResponseMessage>(processPrintResponseQueueName, sqsTemplate)
 
     @Bean
-    fun triggerVoterCardStatisticsUpdateQueue(queueMessagingTemplate: QueueMessagingTemplate) =
-        MessageQueue<UpdateStatisticsMessage>(triggerVoterCardStatisticsUpdateQueueName, queueMessagingTemplate)
+    fun removeCertificateQueue(sqsTemplate: SqsTemplate) =
+        MessageQueue<RemoveCertificateMessage>(removeCertificateQueueName, sqsTemplate)
 
     @Bean
-    fun queueMessageHandlerFactory(
-        jacksonMessageConverter: MappingJackson2MessageConverter,
-        hibernateValidator: Validator
-    ): QueueMessageHandlerFactory =
-        QueueMessageHandlerFactory().apply {
-            setArgumentResolvers(
-                listOf(
-                    HeadersMethodArgumentResolver(),
-                    NotificationSubjectArgumentResolver(),
-                    AcknowledgmentHandlerMethodArgumentResolver("Acknowledgment"),
-                    VisibilityHandlerMethodArgumentResolver("Visibility"),
-                    PayloadMethodArgumentResolver(jacksonMessageConverter, hibernateValidator)
-                )
-            )
-        }
+    fun triggerVoterCardStatisticsUpdateQueue(sqsTemplate: SqsTemplate) =
+        MessageQueue<UpdateStatisticsMessage>(triggerVoterCardStatisticsUpdateQueueName, sqsTemplate)
+
+    @Bean
+    fun sqsMessagingMessageConverter(
+        objectMapper: ObjectMapper
+    ) = MessagingConfigurationHelper.sqsMessagingMessageConverter(objectMapper)
+
+    @Bean
+    fun defaultSqsListenerContainerFactory(
+        sqsAsyncClient: SqsAsyncClient,
+        sqsMessagingMessageConverter: SqsMessagingMessageConverter,
+    ) = MessagingConfigurationHelper.defaultSqsListenerContainerFactory(
+        sqsAsyncClient,
+        sqsMessagingMessageConverter,
+        maximumNumberOfConcurrentMessages.toInt(),
+    )
 }

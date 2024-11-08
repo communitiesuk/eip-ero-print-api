@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.messaging
 
-import io.awspring.cloud.messaging.listener.annotation.SqsListener
+import io.awspring.cloud.sqs.annotation.SqsListener
 import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
@@ -11,7 +11,6 @@ import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
 import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.TemporaryCertificateDataRetentionService
-import javax.validation.Valid
 
 private val logger = KotlinLogging.logger { }
 
@@ -26,7 +25,7 @@ class ApplicationRemovedMessageListener(
 ) : MessageListener<ApplicationRemovedMessage> {
 
     @SqsListener("\${sqs.application-removed-queue-name}")
-    override fun handleMessage(@Valid @Payload payload: ApplicationRemovedMessage) {
+    override fun handleMessage(@Payload payload: ApplicationRemovedMessage) {
         with(payload) {
             logger.info { "ApplicationRemovedMessage for application with source type [$sourceType] and source reference [$sourceReference] and gssCode [$gssCode]" }
             when (sourceType) {

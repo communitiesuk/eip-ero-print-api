@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rest.aed
 
+import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
@@ -46,7 +47,6 @@ import java.beans.PropertyEditorSupport
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import javax.validation.Valid
 
 private val logger = KotlinLogging.logger {}
 
