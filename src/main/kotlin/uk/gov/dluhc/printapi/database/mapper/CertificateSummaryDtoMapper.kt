@@ -23,10 +23,11 @@ class CertificateSummaryDtoMapper {
             vacNumber = certificate.vacNumber!!,
             applicationReference = certificate.applicationReference!!,
             sourceReference = certificate.sourceReference!!,
+            photoLocationArn = certificate.photoLocationArn!!,
             firstName = mostRecentPrintRequest.firstName!!,
             middleNames = mostRecentPrintRequest.middleNames,
             surname = mostRecentPrintRequest.surname!!,
-            printRequests = toPrintRequests(certificate.printRequests)
+            printRequests = toPrintRequests(certificate.printRequests),
         )
     }
 

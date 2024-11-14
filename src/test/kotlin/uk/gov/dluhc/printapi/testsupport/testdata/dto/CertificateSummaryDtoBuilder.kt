@@ -12,6 +12,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSurname
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aPhotoArn
 import java.time.Instant
 
 fun buildCertificateSummaryDto(
@@ -21,6 +22,7 @@ fun buildCertificateSummaryDto(
     firstName: String = aValidFirstName(),
     surname: String = aValidSurname(),
     middleNames: String? = null,
+    photoLocationArn: String = aPhotoArn(),
     printRequests: List<PrintRequestSummaryDto> = mutableListOf(buildPrintRequestSummaryDto())
 ) = CertificateSummaryDto(
     vacNumber = vacNumber,
@@ -29,7 +31,8 @@ fun buildCertificateSummaryDto(
     firstName = firstName,
     surname = surname,
     middleNames = middleNames,
-    printRequests = printRequests
+    printRequests = printRequests,
+    photoLocationArn = photoLocationArn,
 )
 
 fun buildPrintRequestSummaryDto(
