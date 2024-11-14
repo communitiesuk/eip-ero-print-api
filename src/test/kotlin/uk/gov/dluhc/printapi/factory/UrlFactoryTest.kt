@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.factory
 
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.dto.SourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroId
