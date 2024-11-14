@@ -35,7 +35,7 @@ class CertificateSummaryController(
         @RequestParam applicationId: String,
     ): CertificateSummaryResponse {
         return certificateSummaryService.getCertificateSummary(eroId, VOTER_CARD, applicationId)
-            .let { certificateSummaryResponseMapper.toCertificateSummaryResponse(it) }
+            .let { certificateSummaryResponseMapper.toCertificateSummaryResponse(it, eroId) }
     }
 
     @GetMapping("/eros/{eroId}/certificates/photo")
@@ -61,7 +61,7 @@ class CertificateSummaryController(
                 searchQueryParameters = searchQueryStringParameters
             )
         with(certificateSearchSummaryService.searchCertificateSummaries(searchCriteriaDto)) {
-            return certificateSummarySearchResponseMapper.toCertificateSearchSummaryResponse(this)
+            return certificateSummarySearchResponseMapper.toCertificateSearchSummaryResponse(this, eroId)
         }
     }
 

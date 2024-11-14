@@ -1317,10 +1317,17 @@ components:
           description: List of print request summaries for the certificate.
           items:
             $ref: '#/components/schemas/PrintRequestSummary'
+        photoUrl:
+          type: string
+          description: |
+            The URL of the Elector's Certificate photo. 
+            This is the photo that has been prepared and approved for the Certificate by the ERO, rather than the photo that the applicant uploaded as part of their original application.
+          example: 'http://localhost:8080/eros/city-council/certificates/photo?applicationId=507f1f77bcf86cd799439011'
       required:
         - vacNumber
         - applicationReference
         - printRequestSummaries
+        - photoUrl
     CertificateSearchSummaryResponse:
       title: CertificateSearchSummaryResponse
       description: Response containing the meta data and results of searching for Voter Authority Certificate summaries
