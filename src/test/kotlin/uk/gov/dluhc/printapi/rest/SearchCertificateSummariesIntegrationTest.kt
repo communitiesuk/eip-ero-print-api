@@ -26,6 +26,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aVacPhotoUrl
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -171,7 +172,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
                 vac3
             )
         )
-
+        val expectedPhotoUrl1 = aVacPhotoUrl(ERO_ID, vac1SourceReference)
         val expectedResult1 = CertificateSummaryResponse(
             vacNumber = vac1.vacNumber!!,
             applicationReference = vac1ApplicationReference,
@@ -179,6 +180,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             firstName = vac1Request.firstName,
             middleNames = vac1Request.middleNames,
             surname = vac1Request.surname,
+            photoUrl = expectedPhotoUrl1,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
@@ -189,6 +191,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
                 )
             )
         )
+        val expectedPhotoUrl2 = aVacPhotoUrl(ERO_ID, vac2SourceReference)
         val expectedResult2 = CertificateSummaryResponse(
             vacNumber = vac2.vacNumber!!,
             applicationReference = vac2ApplicationReference,
@@ -196,6 +199,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             firstName = vac2Request.firstName,
             middleNames = vac2Request.middleNames,
             surname = vac2Request.surname,
+            photoUrl = expectedPhotoUrl2,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
@@ -266,7 +270,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
         )
 
         certificateRepository.save(vac)
-
+        val expectedPhotoUrl = aVacPhotoUrl(ERO_ID, vacSourceReference)
         val expectedResult = CertificateSummaryResponse(
             vacNumber = vac.vacNumber!!,
             applicationReference = vacApplicationReference,
@@ -274,6 +278,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             firstName = vacRequest.firstName,
             middleNames = vacRequest.middleNames,
             surname = vacRequest.surname,
+            photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
@@ -358,6 +363,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             )
         )
 
+        val expectedPhotoUrl = aVacPhotoUrl(ERO_ID, vac1SourceReference)
         val expectedResult1 = CertificateSummaryResponse(
             vacNumber = vac1.vacNumber!!,
             applicationReference = vac1ApplicationReference,
@@ -365,6 +371,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             firstName = vac1Request.firstName,
             middleNames = vac1Request.middleNames,
             surname = vac1Request.surname,
+            photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
@@ -452,6 +459,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             )
         )
 
+        val expectedPhotoUrl = aVacPhotoUrl(ERO_ID, vac1.sourceReference!!)
         val expectedResult1 = CertificateSummaryResponse(
             vacNumber = vac1.vacNumber!!,
             applicationReference = vac1.applicationReference!!,
@@ -459,6 +467,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             firstName = vac1Request.firstName,
             middleNames = vac1Request.middleNames,
             surname = vac1Request.surname,
+            photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,

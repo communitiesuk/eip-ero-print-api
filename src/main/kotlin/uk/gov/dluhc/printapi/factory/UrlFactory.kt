@@ -16,7 +16,7 @@ class UrlFactory(
     fun createPhotoUrl(eroId: String, sourceType: SourceType, applicationId: String): String {
         return when (sourceType) {
             ANONYMOUS_ELECTOR_DOCUMENT -> "$printApiBaseUrl/eros/$eroId/anonymous-elector-documents/photo?applicationId=$applicationId"
-            VOTER_CARD -> throw UnsupportedOperationException("print-api does not currently support returning the URL of VAC or Temporary Certificate photos")
+            VOTER_CARD -> "$printApiBaseUrl/eros/$eroId/certificates/photo?applicationId=$applicationId"
         }
     }
 }
