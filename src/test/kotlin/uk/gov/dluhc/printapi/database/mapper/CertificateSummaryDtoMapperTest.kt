@@ -51,6 +51,7 @@ internal class CertificateSummaryDtoMapperTest {
                 firstName = printRequest.firstName!!,
                 middleNames = printRequest.middleNames,
                 surname = printRequest.surname!!,
+                photoLocationArn = certificate.photoLocationArn!!,
                 printRequests = listOf(
                     buildPrintRequestSummaryDto(
                         userId = printRequest.userId!!,
@@ -155,6 +156,7 @@ internal class CertificateSummaryDtoMapperTest {
                 firstName = printRequest2.firstName!!,
                 middleNames = printRequest2.middleNames,
                 surname = printRequest2.surname!!,
+                photoLocationArn = certificate.photoLocationArn!!,
                 printRequests = listOf(
                     PrintRequestSummaryDto(
                         status = PrintRequestStatusDto.valueOf(expectedStatus2.name),

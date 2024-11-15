@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.factory
 
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.dto.SourceType
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEroId
@@ -26,19 +25,16 @@ class UrlFactoryTest {
     }
 
     @Test
-    fun `should not create photo URL given source type VOTER_CARD`() {
+    fun `should create photo URL given source type VOTER_CARD`() {
         // Given
         val eroId = aValidEroId()
         val sourceReference = aValidSourceReference()
         val sourceType = SourceType.VOTER_CARD
 
         // When
-        val exception = catchThrowableOfType(
-            { factory.createPhotoUrl(eroId, sourceType, sourceReference) },
-            UnsupportedOperationException::class.java
-        )
+        val actual = factory.createPhotoUrl(eroId, sourceType, sourceReference)
 
         // Then
-        assertThat(exception).hasMessage("print-api does not currently support returning the URL of VAC or Temporary Certificate photos")
+        assertThat(actual).isEqualTo("http://localhost:8080/eros/$eroId/certificates/photo?applicationId=$sourceReference")
     }
 }

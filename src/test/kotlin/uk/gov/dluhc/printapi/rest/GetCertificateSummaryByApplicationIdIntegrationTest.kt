@@ -21,6 +21,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aVacPhotoUrl
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit.SECONDS
@@ -126,6 +127,7 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
         )
 
         certificateRepository.save(certificate)
+        val expectedPhotoUrl = aVacPhotoUrl(ERO_ID, APPLICATION_ID)
         val expected = CertificateSummaryResponse(
             vacNumber = certificate.vacNumber!!,
             sourceReference = certificate.sourceReference,
@@ -133,6 +135,7 @@ internal class GetCertificateSummaryByApplicationIdIntegrationTest : Integration
             firstName = request2.firstName,
             middleNames = request2.middleNames,
             surname = request2.surname,
+            photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,

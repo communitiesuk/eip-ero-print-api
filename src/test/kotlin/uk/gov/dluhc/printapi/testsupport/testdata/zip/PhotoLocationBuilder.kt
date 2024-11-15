@@ -35,3 +35,8 @@ fun anAedPhotoUrl(
     eroId: String = aValidEroId(),
     sourceReference: String = aValidSourceReference()
 ) = "http://localhost:8080/eros/$eroId/anonymous-elector-documents/photo?applicationId=$sourceReference"
+
+fun aVacPhotoUrl(
+    eroId: String = aValidEroId(),
+    sourceReference: String = aValidSourceReference()
+) = "http://localhost:8080/eros/$eroId/certificates/photo?applicationId=$sourceReference"
