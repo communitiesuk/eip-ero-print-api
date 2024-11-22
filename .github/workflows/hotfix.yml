@@ -1,4 +1,4 @@
-name: "Hotfix: Tag and deploy to Test"
+name: "Hotfix: Tag and build"
 
 on:
   push:
@@ -68,15 +68,5 @@ jobs:
     needs: tag
     uses: ./.github/workflows/build-and-push.yml
     with:
-      version: ${{ needs.tag.outputs.version }}
-    secrets: inherit
-
-  deploy:
-    needs:
-      - tag
-      - build-and-push
-    uses: ./.github/workflows/deploy.yml
-    with:
-      deploy_environment: test
       version: ${{ needs.tag.outputs.version }}
     secrets: inherit
