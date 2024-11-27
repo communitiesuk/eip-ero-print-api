@@ -24,6 +24,11 @@ interface AnonymousElectorDocumentRepository : JpaRepository<AnonymousElectorDoc
         sourceType: SourceType,
         finalRetentionRemovalDate: LocalDate
     ): List<AnonymousElectorDocument>
+
+    fun existsByPhotoLocationArnEqualsAndFinalRetentionRemovalDateGreaterThanEqual(
+        photoLocationArn: String,
+        finalRetentionRemovalDate: LocalDate
+    ): Boolean
 }
 
 object AnonymousElectorDocumentRepositoryExtensions {
@@ -38,6 +43,13 @@ object AnonymousElectorDocumentRepositoryExtensions {
     fun AnonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType: SourceType): List<AnonymousElectorDocument> {
         return findBySourceTypeAndFinalRetentionRemovalDateBefore(
             sourceType = sourceType,
+            finalRetentionRemovalDate = LocalDate.now()
+        )
+    }
+
+    fun AnonymousElectorDocumentRepository.shouldRetainPhoto(photoLocationArn: String): Boolean {
+        return existsByPhotoLocationArnEqualsAndFinalRetentionRemovalDateGreaterThanEqual(
+            photoLocationArn = photoLocationArn,
             finalRetentionRemovalDate = LocalDate.now()
         )
     }
