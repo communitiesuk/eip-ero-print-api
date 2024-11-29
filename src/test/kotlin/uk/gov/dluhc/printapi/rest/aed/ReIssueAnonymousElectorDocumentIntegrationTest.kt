@@ -5,6 +5,11 @@ import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.given
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.util.ResourceUtils
@@ -14,6 +19,7 @@ import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
+import uk.gov.dluhc.printapi.mapper.aed.AedMappingHelper
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
@@ -31,6 +37,7 @@ import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import java.util.stream.Stream
 
 internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest() {
 
@@ -39,7 +46,28 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         private const val GSS_CODE = "W06000099"
         private const val AED_SAMPLE_PHOTO = "classpath:temporary-certificate-template/sample-certificate-photo.png"
         private const val MAX_SIZE_2_MB = 2 * 1024 * 1024
+
+        @JvmStatic
+        private fun monthsAndRetentionYears(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(1, 9),
+                Arguments.of(2, 9),
+                Arguments.of(3, 9),
+                Arguments.of(4, 9),
+                Arguments.of(5, 9),
+                Arguments.of(6, 9),
+                Arguments.of(7, 10),
+                Arguments.of(8, 10),
+                Arguments.of(9, 10),
+                Arguments.of(10, 10),
+                Arguments.of(11, 10),
+                Arguments.of(12, 10),
+            )
+        }
     }
+
+    @SpyBean
+    private lateinit var aedMappingHelper: AedMappingHelper
 
     @Test
     fun `should return forbidden given user with bearer token missing required group to access service`() {
@@ -449,6 +477,142 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         }
 
         assertThat(newlyCreatedAed).hasInitialRetentionRemovalDate(null)
+    }
+
+    @ParameterizedTest
+    @MethodSource("monthsAndRetentionYears")
+    fun `should set final data retention date for new AED given previously issued AED has final data retention date set`(
+        month: Int,
+        retentionYears: Int
+    ) {
+        // Given
+
+        // The value of the final retention date depends on what month the certificate is issued/re-issued.
+        // We're effectively mocking the date of "today" and check that the result is correct for all months.
+        val issueDate = LocalDate.now()
+            .withMonth(month)
+            .withDayOfMonth(1)
+        given(aedMappingHelper.issueDate()).willReturn(issueDate)
+
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val sourceReference = aValidSourceReference()
+        val photoLocationArn = addPhotoToS3()
+        val originalRetentionRemovalDate = LocalDate.now().minusMonths(4)
+
+        val originalElectoralRollNumber = "ORIGINAL ELECTORAL ROLL #"
+        val previousAed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = sourceReference,
+            photoLocationArn = photoLocationArn,
+            electoralRollNumber = originalElectoralRollNumber,
+            finalRetentionRemovalDate = originalRetentionRemovalDate,
+        )
+        anonymousElectorDocumentRepository.save(previousAed)
+
+        val newElectoralRollNumber = aValidElectoralRollNumber()
+        val requestBody = buildReIssueAnonymousElectorDocumentRequest(
+            sourceReference = sourceReference,
+            electoralRollNumber = newElectoralRollNumber,
+        )
+
+        // When
+        val response = webTestClient.mutate()
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
+            .build()
+            .post()
+            .uri(URI_TEMPLATE, ERO_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .withBody(requestBody)
+            .exchange()
+            .expectStatus().isCreated
+            .expectHeader().contentType(MediaType.APPLICATION_PDF)
+            .expectBody(ByteArray::class.java)
+            .returnResult()
+
+        // Then
+        val contentDisposition = response.responseHeaders.contentDisposition
+
+        val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
+            GSS_CODE,
+            ANONYMOUS_ELECTOR_DOCUMENT,
+            sourceReference
+        )
+
+        // Get the new AED that this test would have created
+        val newlyCreatedAed = electorDocuments.first { aed ->
+            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+        }
+
+        val expectedNewRetentionDate = LocalDate.of(issueDate.year + retentionYears, 7, 1)
+        assertThat(newlyCreatedAed).hasFinalRetentionRemovalDate(expectedNewRetentionDate)
+    }
+
+    @Test
+    fun `should not set final data retention date for new AED given previously issued AED does not have the final data retention date set`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val sourceReference = aValidSourceReference()
+        val photoLocationArn = addPhotoToS3()
+
+        val originalElectoralRollNumber = "ORIGINAL ELECTORAL ROLL #"
+        val previousAed = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = sourceReference,
+            photoLocationArn = photoLocationArn,
+            electoralRollNumber = originalElectoralRollNumber,
+            finalRetentionRemovalDate = null,
+        )
+        anonymousElectorDocumentRepository.save(previousAed)
+
+        val newElectoralRollNumber = aValidElectoralRollNumber()
+        val requestBody = buildReIssueAnonymousElectorDocumentRequest(
+            sourceReference = sourceReference,
+            electoralRollNumber = newElectoralRollNumber,
+        )
+
+        // When
+        val response = webTestClient.mutate()
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
+            .build()
+            .post()
+            .uri(URI_TEMPLATE, ERO_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .withBody(requestBody)
+            .exchange()
+            .expectStatus().isCreated
+            .expectHeader().contentType(MediaType.APPLICATION_PDF)
+            .expectBody(ByteArray::class.java)
+            .returnResult()
+
+        // Then
+        val contentDisposition = response.responseHeaders.contentDisposition
+
+        val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
+            GSS_CODE,
+            ANONYMOUS_ELECTOR_DOCUMENT,
+            sourceReference
+        )
+
+        // Get the new AED that this test would have created
+        val newlyCreatedAed = electorDocuments.first { aed ->
+            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+        }
+
+        assertThat(newlyCreatedAed).hasFinalRetentionRemovalDate(null)
     }
 
     private fun addPhotoToS3(): String {

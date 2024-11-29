@@ -91,5 +91,9 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
         if (previousAed.initialRetentionRemovalDate != null) {
             aed.initialRetentionRemovalDate = removalDateResolver.getAedInitialRetentionPeriodRemovalDate(aed.issueDate)
         }
+
+        if (previousAed.finalRetentionRemovalDate != null) {
+            aed.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(aed.issueDate)
+        }
     }
 }
