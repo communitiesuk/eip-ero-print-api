@@ -28,6 +28,7 @@ fun anotherPhotoArn(
 fun aPhotoBucket() = VCA_TARGET_BUCKET
 fun aPhotoBucketPath() = "E99999999/6407b6158f529a11713a1e5c/certificate-photos/0d77b2ad-64e7-4aa9-b4de-d58380392962_certificate-photo-1.png"
 fun anotherPhotoBucketPath() = "E99999999/2304v5134f529a11713a1e6a/certificate-photos/0d21c6de-72d4-5aa2-c4da-c33456252922_certificate-photo-1.png"
+fun anotherPhotoBucketPath2() = "E99999999/dhea5vf8gocm1bj9s7mvs940/certificate-photos/v6afark2-o4hx-wr3c-s6gt-a6n2dy2x1iuo_certificate-photo-2.png"
 
 fun aPhotoZipPath() = "05372cf5339447b39f98b248c2217b9f-635abede7c432c0aaeeeba47.png"
 

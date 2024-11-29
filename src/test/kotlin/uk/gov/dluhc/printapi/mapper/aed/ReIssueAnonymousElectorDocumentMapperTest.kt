@@ -38,9 +38,13 @@ import java.util.UUID
 class ReIssueAnonymousElectorDocumentMapperTest {
 
     companion object {
-        private const val FIXED_DATE_STRING = "2022-10-18"
-        private val FIXED_DATE = LocalDate.parse(FIXED_DATE_STRING)
-        private val FIXED_TIME = Instant.parse("${FIXED_DATE_STRING}T11:22:32.123Z")
+        private const val FIXED_DATE_IN_OCT_STRING = "2022-10-18"
+        private val FIXED_DATE_IN_OCT = LocalDate.parse(FIXED_DATE_IN_OCT_STRING)
+
+        private const val FIXED_DATE_IN_MAR_STRING = "2022-03-18"
+        private val FIXED_DATE_IN_MAR = LocalDate.parse(FIXED_DATE_IN_MAR_STRING)
+
+        private val FIXED_TIME = Instant.parse("${FIXED_DATE_IN_OCT_STRING}T11:22:32.123Z")
         private val IGNORED_FIELDS =
             arrayOf(".*id", ".*dateCreated", ".*createdBy", ".*dateUpdated", ".*updatedBy", ".*version")
     }
@@ -123,7 +127,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val newCertificateNumber = aValidVacNumber()
         given(idFactory.vacNumber()).willReturn(newCertificateNumber)
         given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
-        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_OCT)
         val expectedStatusHistory = listOf(
             AnonymousElectorDocumentStatus(
                 status = AnonymousElectorDocumentStatus.Status.PRINTED,
@@ -146,7 +150,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val expected = previousAed.deepCopy().apply {
             certificateNumber = newCertificateNumber
             requestDateTime = FIXED_TIME
-            issueDate = FIXED_DATE
+            issueDate = FIXED_DATE_IN_OCT
             statusHistory = expectedStatusHistory.toMutableList()
             electoralRollNumber = newElectoralRollNumber
             delivery?.deliveryAddressType = DeliveryAddressType.REGISTERED
@@ -197,7 +201,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val newCertificateNumber = aValidVacNumber()
         given(idFactory.vacNumber()).willReturn(newCertificateNumber)
         given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
-        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_OCT)
 
         val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
 
@@ -225,20 +229,108 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val newCertificateNumber = aValidVacNumber()
         given(idFactory.vacNumber()).willReturn(newCertificateNumber)
         given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
-        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_OCT)
 
         val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
 
         given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
 
-        val newRemovalTime = FIXED_DATE.plusMonths(15)
-        given(electorDocumentRemovalDateResolver.getAedInitialRetentionPeriodRemovalDate(FIXED_DATE)).willReturn(newRemovalTime)
+        val newRemovalTime = FIXED_DATE_IN_OCT.plusMonths(15)
+        given(electorDocumentRemovalDateResolver.getAedInitialRetentionPeriodRemovalDate(FIXED_DATE_IN_OCT)).willReturn(newRemovalTime)
 
         // When
         val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
 
         // Then
         assertThat(actual.initialRetentionRemovalDate).isEqualTo(newRemovalTime)
-        verify(electorDocumentRemovalDateResolver).getAedInitialRetentionPeriodRemovalDate(FIXED_DATE)
+        verify(electorDocumentRemovalDateResolver).getAedInitialRetentionPeriodRemovalDate(FIXED_DATE_IN_OCT)
+    }
+
+    @Test
+    fun `should set finalRetentionRemovalDate to be null if not set for previous AED`() {
+        // Given
+        val sourceReference = aValidSourceReference()
+        val previousAed = buildAnonymousElectorDocument(
+            sourceReference = sourceReference,
+            finalRetentionRemovalDate = null,
+        )
+        val templateFilename = aTemplateFilename()
+        val newCertificateNumber = aValidVacNumber()
+        given(idFactory.vacNumber()).willReturn(newCertificateNumber)
+        given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_OCT)
+
+        val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
+
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+
+        // When
+        val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
+
+        // Then
+        assertThat(actual.finalRetentionRemovalDate).isNull()
+        verifyNoInteractions(electorDocumentRemovalDateResolver)
+    }
+
+    @Test
+    fun `should set finalRetentionRemovalDate to 9 years from new issue date if already set for previous AED and issued in first half of the year`() {
+        // Given
+        val sourceReference = aValidSourceReference()
+
+        val previousRemovalTime = LocalDate.parse("2023-01-01")
+        val previousAed = buildAnonymousElectorDocument(
+            sourceReference = sourceReference,
+            finalRetentionRemovalDate = previousRemovalTime,
+        )
+        val templateFilename = aTemplateFilename()
+        val newCertificateNumber = aValidVacNumber()
+        given(idFactory.vacNumber()).willReturn(newCertificateNumber)
+        given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_MAR)
+
+        val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
+
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+
+        val newRemovalTime = FIXED_DATE_IN_MAR.plusYears(9)
+        given(electorDocumentRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(FIXED_DATE_IN_MAR)).willReturn(newRemovalTime)
+
+        // When
+        val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
+
+        // Then
+        assertThat(actual.finalRetentionRemovalDate).isEqualTo(newRemovalTime)
+        verify(electorDocumentRemovalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(FIXED_DATE_IN_MAR)
+    }
+
+    @Test
+    fun `should set finalRetentionRemovalDate to 10 years from new issue date if already set for previous AED and issued in second half of the year`() {
+        // Given
+        val sourceReference = aValidSourceReference()
+
+        val previousRemovalTime = LocalDate.parse("2023-01-01")
+        val previousAed = buildAnonymousElectorDocument(
+            sourceReference = sourceReference,
+            finalRetentionRemovalDate = previousRemovalTime,
+        )
+        val templateFilename = aTemplateFilename()
+        val newCertificateNumber = aValidVacNumber()
+        given(idFactory.vacNumber()).willReturn(newCertificateNumber)
+        given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_OCT)
+
+        val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
+
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+
+        val newRemovalTime = FIXED_DATE_IN_OCT.plusYears(10)
+        given(electorDocumentRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(FIXED_DATE_IN_OCT)).willReturn(newRemovalTime)
+
+        // When
+        val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
+
+        // Then
+        assertThat(actual.finalRetentionRemovalDate).isEqualTo(newRemovalTime)
+        verify(electorDocumentRemovalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(FIXED_DATE_IN_OCT)
     }
 }
