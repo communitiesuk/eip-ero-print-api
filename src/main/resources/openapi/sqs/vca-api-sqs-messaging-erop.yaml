@@ -69,6 +69,15 @@ paths:
       responses:
         '204':
           description: No response content.
+  '/trigger-application-statistics-update':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateApplicationStatisticsMessage'
+      responses:
+        '204':
+          description: No response content.
 components:
   #
   # Schema and Enum Definitions
@@ -267,6 +276,17 @@ components:
           example: 1f0f76a9a66f438b9bb33070
       required:
         - voterCardApplicationId
+    UpdateApplicationStatisticsMessage:
+      title: TriggerApplicationStatisticsUpdateMessage
+      type: object
+      description: SQS Message for initiating a statistics update for an application api
+      properties:
+        applicationId:
+          type: string
+          description: The identifier of the Application
+          example: 1f0f76a9a66f438b9bb33070
+      required:
+        - applicationId
 
   #
   # Response Body Definitions
@@ -292,3 +312,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateStatisticsMessage'
+    UpdateApplicationStatisticsMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateApplicationStatisticsMessage'

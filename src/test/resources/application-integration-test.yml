@@ -28,6 +28,7 @@ sqs:
   application-removed-queue-name: application-removed
   remove-certificate-queue-name: remove-certificate
   trigger-voter-card-statistics-update-queue-name: trigger-voter-card-statistics-update.fifo
+  trigger-application-statistics-update-queue-name: trigger-application-statistics-update.fifo
 
 s3:
   temporary-certificate-access-duration: 5M

@@ -146,6 +146,9 @@ components:
           maxLength: 1024
           description: The userId (email address) of the EROP user requesting the print
           example: fred.bloggs@some-domain.co.uk
+        isFromApplicationsApi:
+          type: boolean
+          description: It indicates that the message comes from Applications Api or not
       required:
         - sourceReference
         - sourceType
@@ -323,6 +326,9 @@ components:
         printRequestCount:
           type: integer
           description: The number of print requests included in the batch
+        isFromApplicationsApi:
+          type: boolean
+          description: It indicates that the message comes from Applications Api or not
       required:
         - batchId
 
@@ -336,6 +342,9 @@ components:
         fileName:
           type: string
           description: The file name to be processed
+        isFromApplicationsApi:
+          type: boolean
+          description: It indicates that the message comes from Applications Api or not
       required:
         - directory
         - fileName
@@ -373,6 +382,9 @@ components:
           type: string
           maxLength: 255
           description: Error description. Only populated if `status` is `FAILED`
+        isFromApplicationsApi:
+          type: boolean
+          description: It indicates that the message comes from Applications Api or not
       required:
         - requestId
         - timestamp

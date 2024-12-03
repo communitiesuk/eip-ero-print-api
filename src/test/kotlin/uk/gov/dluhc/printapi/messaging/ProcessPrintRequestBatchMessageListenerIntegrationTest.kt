@@ -96,6 +96,71 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
 
     @Test
     @Transactional
+    fun `should process print request batch message and send it to application api`() {
+        // Given
+        val batchId = aValidBatchId()
+        val requestId = aValidRequestId()
+        val s3ResourceContents = "S3 Object Contents"
+        val s3Bucket = VCA_TARGET_BUCKET
+        val s3Path =
+            "E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
+
+        // add resource to S3
+        val s3Resource = s3ResourceContents.encodeToByteArray()
+        s3Client.putObject(
+            PutObjectRequest.builder()
+                .bucket(s3Bucket)
+                .key(s3Path)
+                .build(),
+            RequestBody.fromInputStream(ByteArrayInputStream(s3Resource), s3Resource.size.toLong())
+        )
+
+        // save certificates in MySQL
+        var certificate = buildCertificate(
+            status = ASSIGNED_TO_BATCH,
+            photoLocationArn = "arn:aws:s3:::$s3Bucket/$s3Path",
+            printRequests = mutableListOf(
+                buildPrintRequest(
+                    batchId = batchId,
+                    requestId = requestId,
+                    printRequestStatuses = listOf(
+                        buildPrintRequestStatus(
+                            status = ASSIGNED_TO_BATCH,
+                            eventDateTime = Instant.now().minusSeconds(10)
+                        )
+                    )
+                )
+            )
+        )
+        certificate = certificateRepository.save(certificate)
+        TestTransaction.flagForCommit()
+        TestTransaction.end()
+
+        assertThat(filterListForName(batchId)).isEmpty()
+
+        // add message to queue for processing
+        val payload = buildProcessPrintRequestBatchMessage(batchId = batchId, isFromApplicationsApi = true)
+
+        // When
+        TestTransaction.start()
+        sqsTemplate.send(processPrintRequestBatchQueueName, payload)
+        TestTransaction.flagForCommit()
+        TestTransaction.end()
+
+        // Then
+        TestTransaction.start()
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            val sftpDirectoryList = filterListForName(batchId)
+            assertThat(sftpDirectoryList).hasSize(1)
+            verifySftpZipFile(sftpDirectoryList, batchId, listOf(requestId), s3ResourceContents)
+            val processedCertificate = certificateRepository.findById(certificate.id!!).get()
+            assertThat(processedCertificate.status).isEqualTo(SENT_TO_PRINT_PROVIDER)
+            assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
+        }
+    }
+
+    @Test
+    @Transactional
     fun `should process print request batch message with multiple print requests pending in same batch`() {
         // Given
         val batchId = aValidBatchId()

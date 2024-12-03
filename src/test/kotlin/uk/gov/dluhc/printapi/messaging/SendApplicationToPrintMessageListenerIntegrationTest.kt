@@ -102,6 +102,59 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
     }
 
     @Test
+    fun `should process message received on queue and send message to application api`() {
+        // Given
+        val ero = buildElectoralRegistrationOfficeResponse(
+            localAuthorities = mutableListOf(
+                buildLocalAuthorityResponse(),
+                buildLocalAuthorityResponse(contactDetailsWelsh = buildContactDetails())
+            )
+        )
+        val localAuthority = ero.localAuthorities[1]
+        val gssCode = localAuthority.gssCode
+        val payload = buildSendApplicationToPrintMessage(
+            gssCode = gssCode,
+            supportingInformationFormat = EASY_MINUS_READ,
+            certificateLanguage = SqsCertificateLanguage.CY,
+            isFromApplicationsApi = true
+        )
+
+        val payloadPhotoLocationArn = payload.photoLocation
+        wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
+
+        val expected = with(payload) {
+            val certificate = Certificate(
+                id = UUID.randomUUID(),
+                sourceReference = sourceReference,
+                applicationReference = applicationReference,
+                sourceType = VOTER_CARD,
+                vacNumber = aValidVacNumber(),
+                applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
+                gssCode = gssCode,
+                issuingAuthority = localAuthority.contactDetailsEnglish.nameVac,
+                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.nameVac,
+                issueDate = LocalDate.now(),
+                photoLocationArn = payloadPhotoLocationArn,
+            )
+            val printRequest = toPrintRequest(localAuthority, SupportingInformationFormat.EASY_READ, CertificateLanguage.CY)
+            certificate.addPrintRequest(printRequest)
+        }
+
+        // When
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
+
+        // Then
+        await.atMost(5, SECONDS).untilAsserted {
+            wireMockService.verifyEroManagementGetEro(gssCode)
+            assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
+            val response = certificateRepository.findAll()
+            assertThat(response).hasSize(1)
+            val saved = response[0]
+            assertSavedCertificate(saved, expected)
+        }
+    }
+
+    @Test
     fun `should process message received on queue given certificate exists`() {
         // Given
         val ero = buildElectoralRegistrationOfficeResponse(

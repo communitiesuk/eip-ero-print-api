@@ -24,7 +24,10 @@ class ProcessPrintResponseMessageListener(
     override fun handleMessage(@Payload payload: ProcessPrintResponseMessage) {
         logger.info { "Begin processing PrintResponse with requestId ${payload.requestId}" }
         printResponseProcessingService.processPrintResponse(payload)?.also {
-            statisticsUpdateService.triggerVoterCardStatisticsUpdate(it.sourceReference!!)
+            if (payload.isFromApplicationsApi == true)
+                statisticsUpdateService.triggerApplicationStatisticsUpdate(it.sourceReference!!)
+            else
+                statisticsUpdateService.triggerVoterCardStatisticsUpdate(it.sourceReference!!)
         }
     }
 }

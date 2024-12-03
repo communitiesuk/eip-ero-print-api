@@ -46,4 +46,37 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
 
         // todo assert db updates after completing service implementation
     }
+
+    @Test
+    fun `should fetch remote print response file and send message to application api`() {
+        // Given
+        val filenameToProcess = "status-20220928235441999.json"
+        val printResponses = buildPrintResponses()
+        val printResponsesAsString = objectMapper.writeValueAsString(printResponses)
+
+        val certificates = printResponses.batchResponses.map {
+            buildCertificate(
+                status = PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER,
+                batchId = it.batchId
+            )
+        }
+        certificateRepository.saveAll(certificates)
+
+        writeContentToRemoteOutBoundDirectory(filenameToProcess, printResponsesAsString)
+
+        val message = ProcessPrintResponseFileMessage(
+            directory = PRINT_RESPONSE_DOWNLOAD_PATH,
+            fileName = filenameToProcess,
+            isFromApplicationsApi = true,
+        )
+
+        // When
+        processPrintResponseFileMessageQueue.submit(message)
+
+        // Then
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertThat(hasFilesPresentInOutboundDirectory(listOf(filenameToProcess))).isFalse
+            certificates.forEach { assertUpdateApplicationStatisticsMessageSent(it.sourceReference!!) }
+        }
+    }
 }

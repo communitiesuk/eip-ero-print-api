@@ -15,6 +15,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
+import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateApplicationStatisticsMessage
 import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMessage
 
 @Configuration
@@ -37,6 +38,9 @@ class MessagingConfiguration {
 
     @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
     private lateinit var triggerVoterCardStatisticsUpdateQueueName: String
+
+    @Value("\${sqs.trigger-application-statistics-update-queue-name}")
+    private lateinit var triggerApplicationStatisticsUpdateQueueName: String
 
     /**
      * We also construct an sqsTemplate when running integration tests, and this
@@ -69,6 +73,10 @@ class MessagingConfiguration {
     @Bean
     fun triggerVoterCardStatisticsUpdateQueue(sqsTemplate: SqsTemplate) =
         MessageQueue<UpdateStatisticsMessage>(triggerVoterCardStatisticsUpdateQueueName, sqsTemplate)
+
+    @Bean
+    fun triggerApplicationStatisticsUpdateQueue(sqsTemplate: SqsTemplate) =
+        MessageQueue<UpdateApplicationStatisticsMessage>(triggerApplicationStatisticsUpdateQueueName, sqsTemplate)
 
     @Bean
     fun sqsMessagingMessageConverter(
