@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Voter Card Application API SQS Message Types for EROP Clients
-  version: '1.5.1'
+  version: '1.5.2'
   description: |-
     Voter Card application API SQS Message Types for EROP Clients
     
