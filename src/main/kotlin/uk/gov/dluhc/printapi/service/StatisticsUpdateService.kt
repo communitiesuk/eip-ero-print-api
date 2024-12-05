@@ -11,6 +11,13 @@ class StatisticsUpdateService(
     private val triggerVoterCardStatisticsUpdateQueue: MessageQueue<UpdateStatisticsMessage>,
     private val triggerApplicationStatisticsUpdateQueue: MessageQueue<UpdateApplicationStatisticsMessage>,
 ) {
+
+    fun updateStatistics(applicationId: String, isFromApplicationsApi: Boolean? = null) {
+        if (isFromApplicationsApi == true)
+            triggerApplicationStatisticsUpdate(applicationId)
+        else
+            triggerVoterCardStatisticsUpdate(applicationId)
+    }
     fun triggerVoterCardStatisticsUpdate(applicationId: String) {
         triggerVoterCardStatisticsUpdateQueue.submit(
             UpdateStatisticsMessage(voterCardApplicationId = applicationId),

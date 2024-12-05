@@ -24,10 +24,7 @@ class PrintResponseFileService(
         removeFile(directory, fileName)
 
         certificates.forEach {
-            if (isFromApplicationsApi == true)
-                statisticsUpdateService.triggerApplicationStatisticsUpdate(it.sourceReference!!)
-            else
-                statisticsUpdateService.triggerVoterCardStatisticsUpdate(it.sourceReference!!)
+            statisticsUpdateService.updateStatistics(it.sourceReference!!, isFromApplicationsApi)
         }
     }
 

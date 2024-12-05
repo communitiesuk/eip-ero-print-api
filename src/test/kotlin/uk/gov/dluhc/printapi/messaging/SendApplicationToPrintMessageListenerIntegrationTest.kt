@@ -3,6 +3,8 @@ package uk.gov.dluhc.printapi.messaging
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
@@ -49,60 +51,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildAddress a
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
-    @Test
-    fun `should process message received on queue`() {
-        // Given
-        val ero = buildElectoralRegistrationOfficeResponse(
-            localAuthorities = mutableListOf(
-                buildLocalAuthorityResponse(),
-                buildLocalAuthorityResponse(contactDetailsWelsh = buildContactDetails())
-            )
-        )
-        val localAuthority = ero.localAuthorities[1]
-        val gssCode = localAuthority.gssCode
-        val payload = buildSendApplicationToPrintMessage(
-            gssCode = gssCode,
-            supportingInformationFormat = EASY_MINUS_READ,
-            certificateLanguage = SqsCertificateLanguage.CY
-        )
-
-        val payloadPhotoLocationArn = payload.photoLocation
-        wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
-
-        val expected = with(payload) {
-            val certificate = Certificate(
-                id = UUID.randomUUID(),
-                sourceReference = sourceReference,
-                applicationReference = applicationReference,
-                sourceType = VOTER_CARD,
-                vacNumber = aValidVacNumber(),
-                applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
-                gssCode = gssCode,
-                issuingAuthority = localAuthority.contactDetailsEnglish.nameVac,
-                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.nameVac,
-                issueDate = LocalDate.now(),
-                photoLocationArn = payloadPhotoLocationArn,
-            )
-            val printRequest = toPrintRequest(localAuthority, SupportingInformationFormat.EASY_READ, CertificateLanguage.CY)
-            certificate.addPrintRequest(printRequest)
-        }
-
-        // When
-        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
-
-        // Then
-        await.atMost(5, SECONDS).untilAsserted {
-            wireMockService.verifyEroManagementGetEro(gssCode)
-            assertUpdateStatisticsMessageSent(payload.sourceReference)
-            val response = certificateRepository.findAll()
-            assertThat(response).hasSize(1)
-            val saved = response[0]
-            assertSavedCertificate(saved, expected)
-        }
-    }
-
-    @Test
-    fun `should process message received on queue and send message to application api`() {
+    @ParameterizedTest
+    @MethodSource("uk.gov.dluhc.printapi.testsupport.testdata.ApplicationsApiTestSource#isFromApplicationsApiTestSource")
+    fun `should process message received on queue`(isFromApplicationsApi: Boolean) {
         // Given
         val ero = buildElectoralRegistrationOfficeResponse(
             localAuthorities = mutableListOf(
@@ -116,7 +67,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             gssCode = gssCode,
             supportingInformationFormat = EASY_MINUS_READ,
             certificateLanguage = SqsCertificateLanguage.CY,
-            isFromApplicationsApi = true
+            isFromApplicationsApi = isFromApplicationsApi
         )
 
         val payloadPhotoLocationArn = payload.photoLocation
@@ -146,7 +97,11 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
-            assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
+            if (isFromApplicationsApi) {
+                assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
+            } else {
+                assertUpdateStatisticsMessageSent(payload.sourceReference)
+            }
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]

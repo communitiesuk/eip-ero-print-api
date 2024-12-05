@@ -279,7 +279,7 @@ components:
     UpdateApplicationStatisticsMessage:
       title: TriggerApplicationStatisticsUpdateMessage
       type: object
-      description: SQS Message for initiating a statistics update for an application api
+      description: SQS message for initiating a statistics update for an application
       properties:
         applicationId:
           type: string
