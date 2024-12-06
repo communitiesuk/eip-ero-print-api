@@ -28,6 +28,7 @@ sqs:
   application-removed-queue-name: ${SQS_APPLICATION_REMOVED_QUEUE_NAME}
   remove-certificate-queue-name: ${SQS_REMOVE_CERTIFICATE_QUEUE_NAME}
   trigger-voter-card-statistics-update-queue-name: ${SQS_TRIGGER_VOTER_CARD_STATISTICS_UPDATE_QUEUE_NAME}
+  trigger-application-statistics-update-queue-name: ${SQS_TRIGGER_APPLICATION_STATISTICS_UPDATE_QUEUE_NAME}
 
 s3:
   certificate-photo-access-duration: 1M

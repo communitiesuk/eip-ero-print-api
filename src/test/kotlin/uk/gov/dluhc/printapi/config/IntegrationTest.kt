@@ -45,6 +45,7 @@ import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
+import uk.gov.dluhc.printapi.messaging.stubs.UpdateApplicationStatisticsMessageListenerStub
 import uk.gov.dluhc.printapi.messaging.stubs.UpdateStatisticsMessageListenerStub
 import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.BankHolidaysDataService
@@ -147,6 +148,9 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
     protected lateinit var triggerStatisticsUpdateQueueName: String
 
+    @Value("\${sqs.trigger-application-statistics-update-queue-name}")
+    protected lateinit var triggerApplicationStatisticsUpdateQueueName: String
+
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository
 
@@ -186,6 +190,9 @@ internal abstract class IntegrationTest {
     @Autowired
     protected lateinit var updateStatisticsMessageListenerStub: UpdateStatisticsMessageListenerStub
 
+    @Autowired
+    protected lateinit var updateApplicationStatisticsMessageListenerStub: UpdateApplicationStatisticsMessageListenerStub
+
     @Value("\${caching.time-to-live}")
     protected lateinit var timeToLive: Duration
 
@@ -197,6 +204,7 @@ internal abstract class IntegrationTest {
     @BeforeEach
     fun clearMessagesFromStubs() {
         updateStatisticsMessageListenerStub.clear()
+        updateApplicationStatisticsMessageListenerStub.clear()
     }
 
     @BeforeEach
@@ -305,6 +313,14 @@ internal abstract class IntegrationTest {
         Assertions.assertThat(messages).isNotEmpty
         Assertions.assertThat(messages).anyMatch {
             it.voterCardApplicationId == applicationId
+        }
+    }
+
+    protected fun assertUpdateApplicationStatisticsMessageSent(applicationId: String) {
+        val messages = updateApplicationStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).isNotEmpty
+        Assertions.assertThat(messages).anyMatch {
+            it.applicationId == applicationId
         }
     }
 

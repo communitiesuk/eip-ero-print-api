@@ -1,67 +1,101 @@
 package uk.gov.dluhc.printapi.service
 
-import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.capture
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
+import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateApplicationStatisticsMessage
 import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMessage
 
-@ExtendWith(MockitoExtension::class)
 class StatisticsUpdateServiceTest {
 
-    @InjectMocks
-    private lateinit var statisticsUpdateService: StatisticsUpdateService
+    private val triggerVoterCardStatisticsUpdateQueue: MessageQueue<UpdateStatisticsMessage> = mock()
+    private val triggerApplicationStatisticsUpdateQueue: MessageQueue<UpdateApplicationStatisticsMessage> = mock()
 
-    @Mock
-    private lateinit var triggerUpdateStatisticsMessageQueue: MessageQueue<UpdateStatisticsMessage>
-
-    @Captor
-    private lateinit var headersArgumentCaptor: ArgumentCaptor<Map<String, Any>>
+    private val statisticsUpdateService = StatisticsUpdateService(
+        triggerVoterCardStatisticsUpdateQueue,
+        triggerApplicationStatisticsUpdateQueue
+    )
 
     @Test
-    fun `should send a message containing the application ID to the queue`() {
-
-        // Given
+    fun `should trigger voter card statistics update when isFromApplicationsApi is false or null`() {
         val applicationId = aValidSourceReference()
 
-        // When
-        statisticsUpdateService.triggerVoterCardStatisticsUpdate(applicationId)
+        statisticsUpdateService.updateStatistics(applicationId)
 
-        // Then
-        verify(triggerUpdateStatisticsMessageQueue).submit(
-            eq(UpdateStatisticsMessage(applicationId)),
-            any(),
+        verify(triggerVoterCardStatisticsUpdateQueue).submit(
+            argThat { voterCardApplicationId == applicationId },
+            any()
         )
-        verifyNoMoreInteractions(triggerUpdateStatisticsMessageQueue)
+
+        statisticsUpdateService.updateStatistics(applicationId, false)
+
+        verify(triggerVoterCardStatisticsUpdateQueue, times(2)).submit(
+            argThat { voterCardApplicationId == applicationId },
+            any()
+        )
     }
 
     @Test
-    fun `should include message-group-id and message-deduplication-id headers on the message`() {
+    fun `should trigger application statistics update when isFromApplicationsApi is true`() {
+        val id = aValidSourceReference()
 
-        // Given
+        statisticsUpdateService.updateStatistics(id, true)
+
+        verify(triggerApplicationStatisticsUpdateQueue).submit(
+            argThat { applicationId == id },
+            any()
+        )
+    }
+
+    @Test
+    fun `should generate unique message-deduplication-id`() {
         val applicationId = aValidSourceReference()
 
-        // When
+        statisticsUpdateService.updateStatistics(applicationId)
+
+        val argumentCaptor = argumentCaptor<Map<String, String>>()
+        verify(triggerVoterCardStatisticsUpdateQueue).submit(any(), argumentCaptor.capture())
+
+        val headers = argumentCaptor.firstValue
+        val deduplicationId = headers["message-deduplication-id"]
+
+        assertNotNull(deduplicationId)
+        assertEquals(36, deduplicationId?.length) // UUID length
+    }
+
+    @Test
+    fun `should trigger voter card statistics update with correct parameters`() {
+        val applicationId = aValidSourceReference()
+
         statisticsUpdateService.triggerVoterCardStatisticsUpdate(applicationId)
 
-        // Then
-        verify(triggerUpdateStatisticsMessageQueue).submit(
-            any(),
-            capture(headersArgumentCaptor),
+        verify(triggerVoterCardStatisticsUpdateQueue).submit(
+            argThat { voterCardApplicationId == applicationId },
+            argThat { headers ->
+                headers["message-group-id"] == applicationId && headers.containsKey("message-deduplication-id") // Checking headers
+            }
         )
-        assertThat(headersArgumentCaptor.value.get("message-group-id")).isEqualTo(applicationId)
-        assertThat(headersArgumentCaptor.value.get("message-deduplication-id")).isNotNull
-        verifyNoMoreInteractions(triggerUpdateStatisticsMessageQueue)
+    }
+
+    @Test
+    fun `should trigger application statistics update with correct parameters`() {
+        val id = aValidSourceReference()
+
+        statisticsUpdateService.triggerApplicationStatisticsUpdate(id)
+
+        verify(triggerApplicationStatisticsUpdateQueue).submit(
+            argThat { applicationId == id },
+            argThat { headers ->
+                headers["message-group-id"] == id && headers.containsKey("message-deduplication-id") // Checking headers
+            }
+        )
     }
 }

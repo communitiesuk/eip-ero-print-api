@@ -5,6 +5,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import org.springframework.integration.file.remote.InputStreamCallback
 import org.springframework.test.context.transaction.TestTransaction
 import software.amazon.awssdk.core.sync.RequestBody
@@ -29,9 +32,11 @@ import javax.transaction.Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : IntegrationTest() {
 
-    @Test
     @Transactional
-    fun `should process print request batch message`() {
+    @ParameterizedTest
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should process print request batch message`(isFromApplicationsApi: Boolean?) {
         // Given
         val batchId = aValidBatchId()
         val requestId = aValidRequestId()
@@ -74,7 +79,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         assertThat(filterListForName(batchId)).isEmpty()
 
         // add message to queue for processing
-        val payload = buildProcessPrintRequestBatchMessage(batchId = batchId)
+        val payload = buildProcessPrintRequestBatchMessage(batchId = batchId, isFromApplicationsApi = isFromApplicationsApi)
 
         // When
         TestTransaction.start()
@@ -90,7 +95,11 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
             verifySftpZipFile(sftpDirectoryList, batchId, listOf(requestId), s3ResourceContents)
             val processedCertificate = certificateRepository.findById(certificate.id!!).get()
             assertThat(processedCertificate.status).isEqualTo(SENT_TO_PRINT_PROVIDER)
-            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+            if (isFromApplicationsApi == true) {
+                assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
+            } else {
+                assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+            }
         }
     }
 
