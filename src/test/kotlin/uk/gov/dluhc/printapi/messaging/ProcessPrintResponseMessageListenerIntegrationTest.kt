@@ -3,6 +3,9 @@ package uk.gov.dluhc.printapi.messaging
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
@@ -26,8 +29,10 @@ import java.util.concurrent.TimeUnit
 
 internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationTest() {
 
-    @Test
-    fun `should process print response message`() {
+    @ParameterizedTest
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should process print response message`(isFromApplicationsApi: Boolean?) {
         // Given
         val requestId = aValidRequestId()
         val batchId = aValidBatchId()
@@ -60,6 +65,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             status = ProcessPrintResponseMessage.Status.SUCCESS,
             statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
             message = printResponse.message,
+            isFromApplicationsApi = isFromApplicationsApi
         )
 
         // When
@@ -70,7 +76,11 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             val saved = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
             assertThat(saved).isNotNull
             assertThat(saved!!.status).isEqualTo(Status.IN_PRODUCTION)
-            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+            if (isFromApplicationsApi == true) {
+                assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
+            } else {
+                assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+            }
         }
     }
 

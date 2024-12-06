@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Voter Card Application API SQS Message Types for EROP Clients
-  version: '1.5.1'
+  version: '1.5.2'
   description: |-
     Voter Card application API SQS Message Types for EROP Clients
     
@@ -66,6 +66,15 @@ paths:
         - SQS Queues
       requestBody:
         $ref: '#/components/requestBodies/UpdateStatisticsMessage'
+      responses:
+        '204':
+          description: No response content.
+  '/trigger-application-statistics-update':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateApplicationStatisticsMessage'
       responses:
         '204':
           description: No response content.
@@ -267,6 +276,17 @@ components:
           example: 1f0f76a9a66f438b9bb33070
       required:
         - voterCardApplicationId
+    UpdateApplicationStatisticsMessage:
+      title: TriggerApplicationStatisticsUpdateMessage
+      type: object
+      description: SQS message for initiating a statistics update for an application
+      properties:
+        applicationId:
+          type: string
+          description: The identifier of the Application
+          example: 1f0f76a9a66f438b9bb33070
+      required:
+        - applicationId
 
   #
   # Response Body Definitions
@@ -292,3 +312,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateStatisticsMessage'
+    UpdateApplicationStatisticsMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateApplicationStatisticsMessage'

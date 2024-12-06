@@ -25,7 +25,7 @@ class SendApplicationToPrintMessageListener(
         with(payload) {
             logger.info { "Print message with source reference [$sourceReference] received" }
             printService.savePrintMessage(payload).also {
-                statisticsUpdateService.triggerVoterCardStatisticsUpdate(it.sourceReference!!)
+                statisticsUpdateService.updateStatistics(it.sourceReference!!, payload.isFromApplicationsApi)
             }
             logger.info { "Print message with source reference [$sourceReference] saved" }
         }

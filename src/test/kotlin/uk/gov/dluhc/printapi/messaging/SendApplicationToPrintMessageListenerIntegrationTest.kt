@@ -3,6 +3,9 @@ package uk.gov.dluhc.printapi.messaging
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
@@ -49,8 +52,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildAddress a
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
-    @Test
-    fun `should process message received on queue`() {
+    @ParameterizedTest
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should process message received on queue`(isFromApplicationsApi: Boolean?) {
         // Given
         val ero = buildElectoralRegistrationOfficeResponse(
             localAuthorities = mutableListOf(
@@ -63,7 +68,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val payload = buildSendApplicationToPrintMessage(
             gssCode = gssCode,
             supportingInformationFormat = EASY_MINUS_READ,
-            certificateLanguage = SqsCertificateLanguage.CY
+            certificateLanguage = SqsCertificateLanguage.CY,
+            isFromApplicationsApi = isFromApplicationsApi
         )
 
         val payloadPhotoLocationArn = payload.photoLocation
@@ -93,7 +99,11 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
-            assertUpdateStatisticsMessageSent(payload.sourceReference)
+            if (isFromApplicationsApi == true) {
+                assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
+            } else {
+                assertUpdateStatisticsMessageSent(payload.sourceReference)
+            }
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
