@@ -7,7 +7,8 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import org.springframework.integration.file.remote.InputStreamCallback
 import org.springframework.test.context.transaction.TestTransaction
 import software.amazon.awssdk.core.sync.RequestBody
@@ -33,8 +34,9 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
 
     @Transactional
     @ParameterizedTest
-    @MethodSource("uk.gov.dluhc.printapi.testsupport.testdata.ApplicationsApiTestSource#isFromApplicationsApiTestSource")
-    fun `should process print request batch message`(isFromApplicationsApi: Boolean) {
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should process print request batch message`(isFromApplicationsApi: Boolean?) {
         // Given
         val batchId = aValidBatchId()
         val requestId = aValidRequestId()
@@ -93,7 +95,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
             verifySftpZipFile(sftpDirectoryList, batchId, listOf(requestId), s3ResourceContents)
             val processedCertificate = certificateRepository.findById(certificate.id!!).get()
             assertThat(processedCertificate.status).isEqualTo(SENT_TO_PRINT_PROVIDER)
-            if (isFromApplicationsApi) {
+            if (isFromApplicationsApi == true) {
                 assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
             } else {
                 assertUpdateStatisticsMessageSent(certificate.sourceReference!!)

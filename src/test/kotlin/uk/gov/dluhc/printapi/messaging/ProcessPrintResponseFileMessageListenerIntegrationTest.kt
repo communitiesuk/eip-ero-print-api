@@ -5,7 +5,8 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
@@ -19,8 +20,9 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
 
     // @Test
     @ParameterizedTest
-    @MethodSource("uk.gov.dluhc.printapi.testsupport.testdata.ApplicationsApiTestSource#isFromApplicationsApiTestSource")
-    fun `should fetch remote print response file and send message to application api`(isFromApplicationsApi: Boolean) {
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should fetch remote print response file and send message to application api`(isFromApplicationsApi: Boolean?) {
         // Given
         val filenameToProcess = "status-20220928235441999.json"
         val printResponses = buildPrintResponses()
@@ -49,7 +51,7 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
             assertThat(hasFilesPresentInOutboundDirectory(listOf(filenameToProcess))).isFalse
             certificates.forEach {
-                if (isFromApplicationsApi) {
+                if (isFromApplicationsApi == true) {
                     assertUpdateApplicationStatisticsMessageSent(it.sourceReference!!)
                 } else {
                     assertUpdateStatisticsMessageSent(it.sourceReference!!)

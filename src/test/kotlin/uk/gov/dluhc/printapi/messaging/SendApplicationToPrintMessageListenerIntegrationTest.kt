@@ -4,7 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
@@ -52,8 +53,9 @@ import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildAddress a
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
     @ParameterizedTest
-    @MethodSource("uk.gov.dluhc.printapi.testsupport.testdata.ApplicationsApiTestSource#isFromApplicationsApiTestSource")
-    fun `should process message received on queue`(isFromApplicationsApi: Boolean) {
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should process message received on queue`(isFromApplicationsApi: Boolean?) {
         // Given
         val ero = buildElectoralRegistrationOfficeResponse(
             localAuthorities = mutableListOf(
@@ -97,7 +99,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
-            if (isFromApplicationsApi) {
+            if (isFromApplicationsApi == true) {
                 assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
             } else {
                 assertUpdateStatisticsMessageSent(payload.sourceReference)
