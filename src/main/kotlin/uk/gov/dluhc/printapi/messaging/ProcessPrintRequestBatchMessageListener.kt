@@ -24,7 +24,10 @@ class ProcessPrintRequestBatchMessageListener(
 
             val certificates = processPrintBatchService.processBatch(batchId, printRequestCount)
             certificates.forEach {
-                statisticsUpdateService.updateStatistics(it.sourceReference!!, payload.isFromApplicationsApi)
+                statisticsUpdateService.updateStatistics(
+                    it.sourceReference!!,
+                    it.isFromApplicationsApi == true
+                )
             }
 
             logger.info("Successfully processed print request for batchId: $batchId")
