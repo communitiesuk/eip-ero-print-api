@@ -38,4 +38,5 @@
     <include relativeToChangelogFile="true" file="ddl/0028_alter_aed_contact_details_add_last_updated.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0029_alter_print_request_add_sanitized_surname.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0030_add_index_for_source_reference_to_certificate_and_temporary_certificate.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0031_EIP1-11169_add_is_from_applications_api_to_certificate.xml"/>
 </databaseChangeLog>
