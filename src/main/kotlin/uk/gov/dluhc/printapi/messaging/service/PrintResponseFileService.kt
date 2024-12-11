@@ -16,7 +16,7 @@ class PrintResponseFileService(
     val printResponseProcessingService: PrintResponseProcessingService,
     val statisticsUpdateService: StatisticsUpdateService,
 ) {
-    fun processPrintResponseFile(directory: String, fileName: String, isFromApplicationsApi: Boolean? = null) {
+    fun processPrintResponseFile(directory: String, fileName: String) {
         val printResponsesString = sftpService.fetchFileFromOutBoundDirectory(directory, fileName)
         val printResponses = parsePrintResponseContent(printResponsesString)
         val certificates = printResponseProcessingService.processBatchResponses(printResponses.batchResponses)
@@ -24,7 +24,7 @@ class PrintResponseFileService(
         removeFile(directory, fileName)
 
         certificates.forEach {
-            statisticsUpdateService.updateStatistics(it.sourceReference!!, isFromApplicationsApi)
+            statisticsUpdateService.updateStatistics(it.sourceReference!!, it.isFromApplicationsApi)
         }
     }
 
