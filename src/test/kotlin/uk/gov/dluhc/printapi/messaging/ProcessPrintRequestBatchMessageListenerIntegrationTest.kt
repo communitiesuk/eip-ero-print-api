@@ -70,7 +70,8 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
                         )
                     )
                 )
-            )
+            ),
+            isFromApplicationsApi = isFromApplicationsApi
         )
         certificate = certificateRepository.save(certificate)
         TestTransaction.flagForCommit()
@@ -79,7 +80,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         assertThat(filterListForName(batchId)).isEmpty()
 
         // add message to queue for processing
-        val payload = buildProcessPrintRequestBatchMessage(batchId = batchId, isFromApplicationsApi = isFromApplicationsApi)
+        val payload = buildProcessPrintRequestBatchMessage(batchId = batchId)
 
         // When
         TestTransaction.start()

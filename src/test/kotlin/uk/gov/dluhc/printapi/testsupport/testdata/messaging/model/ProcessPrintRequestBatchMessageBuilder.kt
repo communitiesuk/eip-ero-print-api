@@ -5,8 +5,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 
 fun buildProcessPrintRequestBatchMessage(
     batchId: String = aValidBatchId(),
-    isFromApplicationsApi: Boolean? = null,
 ) = ProcessPrintRequestBatchMessage(
     batchId = batchId,
-    isFromApplicationsApi = isFromApplicationsApi,
 )

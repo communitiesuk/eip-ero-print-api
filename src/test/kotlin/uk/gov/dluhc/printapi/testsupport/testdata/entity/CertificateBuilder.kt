@@ -70,6 +70,7 @@ fun buildCertificate(
     initialRetentionRemovalDate: LocalDate? = null,
     initialRetentionDataRemoved: Boolean = false,
     finalRetentionRemovalDate: LocalDate? = null,
+    isFromApplicationsApi: Boolean? = null,
 ): Certificate {
     val certificate = Certificate(
         id = id,
@@ -86,7 +87,8 @@ fun buildCertificate(
         status = status,
         initialRetentionRemovalDate = initialRetentionRemovalDate,
         initialRetentionDataRemoved = initialRetentionDataRemoved,
-        finalRetentionRemovalDate = finalRetentionRemovalDate
+        finalRetentionRemovalDate = finalRetentionRemovalDate,
+        isFromApplicationsApi = isFromApplicationsApi,
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate

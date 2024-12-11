@@ -94,6 +94,12 @@ class Certificate(
     var finalRetentionRemovalDate: LocalDate? = null,
 
     /**
+     * Set to true when the certificate is associated with an application from the Applications API, rather than the
+     * legacy Voter Card Applications API
+     */
+    var isFromApplicationsApi: Boolean? = false,
+
+    /**
      * Certificate status corresponds to the current status of the most recent
      * [PrintRequest], based on the requestDateTime that is included in the
      * [uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage].

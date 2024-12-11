@@ -23,7 +23,7 @@ class ProcessPrintResponseFileMessageListener(
     override fun handleMessage(@Valid @Payload payload: ProcessPrintResponseFileMessage) {
         with(payload) {
             logger.info { "Begin processing PrintResponse file [$fileName] from directory [$directory]" }
-            printResponseFileService.processPrintResponseFile(directory, fileName, payload.isFromApplicationsApi)
+            printResponseFileService.processPrintResponseFile(directory, fileName)
             logger.info { "Completed processing PrintResponse file [$fileName] from directory [$directory]" }
         }
     }

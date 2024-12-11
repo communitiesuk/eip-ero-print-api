@@ -49,7 +49,8 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
                         )
                     )
                 )
-            )
+            ),
+            isFromApplicationsApi = isFromApplicationsApi
         )
         certificateRepository.save(certificate)
 
@@ -65,7 +66,6 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             status = ProcessPrintResponseMessage.Status.SUCCESS,
             statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
             message = printResponse.message,
-            isFromApplicationsApi = isFromApplicationsApi
         )
 
         // When
