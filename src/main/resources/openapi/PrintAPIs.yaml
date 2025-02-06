@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.23.2'
+  version: '1.23.3'
   description: Print APIs
 #
 # --------------------------------------------------------------------------------
@@ -1893,7 +1893,7 @@ components:
           example: Blogs
         postcode:
           type: string
-          description: The applicant's postcode
+          description: The applicant's postcode. A null postcode indicates that the AED has passed it's initial retention period.
           example: AA1 1AA
         issueDate:
           type: string
@@ -1914,7 +1914,6 @@ components:
         - status
         - firstName
         - surname
-        - postcode
         - issueDate
         - dateTimeCreated
 
