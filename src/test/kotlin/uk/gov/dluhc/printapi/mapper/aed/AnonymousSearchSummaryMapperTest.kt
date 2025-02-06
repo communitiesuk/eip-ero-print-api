@@ -13,7 +13,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import uk.gov.dluhc.printapi.mapper.InstantMapper
 import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
-import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus.PRINTED
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocumentSummaryEntity
@@ -31,9 +31,36 @@ class AnonymousSearchSummaryMapperTest {
     private lateinit var mapper: AnonymousSearchSummaryMapperImpl
 
     @Test
-    fun `should map AnonymousElectorDocumentSummary Entity to an AnonymousSearchSummaryDto`() {
+    fun `should map AnonymousElectorDocumentSummaryEntity to an AnonymousSearchSummaryDto`() {
         // Given
         val entity = buildAnonymousElectorDocumentSummaryEntity()
+        val expected = with(entity) {
+            buildAnonymousSearchSummaryDto(
+                gssCode = gssCode,
+                sourceReference = sourceReference,
+                applicationReference = applicationReference,
+                certificateNumber = certificateNumber,
+                electoralRollNumber = electoralRollNumber,
+                firstName = firstName,
+                surname = surname,
+                postcode = postcode,
+                issueDate = issueDate,
+                dateTimeCreated = dateCreated,
+            )
+        }
+
+        // When
+        val actual = mapper.toAnonymousSearchSummaryDto(entity)
+
+        // Then
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+        verifyNoInteractions(instantMapper)
+    }
+
+    @Test
+    fun `should map AnonymousElectorDocumentSummaryEntity with null postcode to an AnonymousSearchSummaryDto`() {
+        // Given
+        val entity = buildAnonymousElectorDocumentSummaryEntity(postcode = null)
         val expected = with(entity) {
             buildAnonymousSearchSummaryDto(
                 gssCode = gssCode,
@@ -72,7 +99,40 @@ class AnonymousSearchSummaryMapperTest {
                 applicationReference = applicationReference,
                 certificateNumber = certificateNumber,
                 electoralRollNumber = electoralRollNumber,
-                status = PRINTED,
+                status = AnonymousElectorDocumentStatus.PRINTED,
+                firstName = firstName,
+                surname = surname,
+                postcode = postcode,
+                issueDate = issueDate,
+                dateTimeCreated = expectedOffsetDateTime,
+            )
+        }
+
+        // When
+        val actual = mapper.toAedSearchSummaryApi(dto)
+
+        // Then
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+        verify(instantMapper).toOffsetDateTime(dto.dateTimeCreated)
+        verifyNoMoreInteractions(instantMapper)
+    }
+
+    @Test
+    fun `should map AnonymousSearchSummaryDto with null postcode to an AedSearchSummary Api`() {
+        // Given
+        val dto = buildAnonymousSearchSummaryDto(postcode = null)
+        val expectedOffsetDateTime = OffsetDateTime.now()
+
+        given(instantMapper.toOffsetDateTime(any())).willReturn(expectedOffsetDateTime)
+
+        val expected = with(dto) {
+            buildAedSearchSummaryApi(
+                gssCode = gssCode,
+                sourceReference = sourceReference,
+                applicationReference = applicationReference,
+                certificateNumber = certificateNumber,
+                electoralRollNumber = electoralRollNumber,
+                status = AnonymousElectorDocumentStatus.EXPIRED,
                 firstName = firstName,
                 surname = surname,
                 postcode = postcode,
