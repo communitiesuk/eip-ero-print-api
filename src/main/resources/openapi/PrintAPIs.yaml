@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.23.2'
+  version: '1.23.3'
   description: Print APIs
 #
 # --------------------------------------------------------------------------------
@@ -1754,6 +1754,7 @@ components:
           format: date
           description: The date on which the AED was issued
           example: '2023-01-15'
+      #        TODO
       required:
         - certificateNumber
         - electoralRollNumber
@@ -1893,7 +1894,7 @@ components:
           example: Blogs
         postcode:
           type: string
-          description: The applicant's postcode
+          description: The applicant's postcode. A null postcode indicates that the AED has passed it's initial retention period.
           example: AA1 1AA
         issueDate:
           type: string
@@ -1914,7 +1915,6 @@ components:
         - status
         - firstName
         - surname
-        - postcode
         - issueDate
         - dateTimeCreated
 
