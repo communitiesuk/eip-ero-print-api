@@ -6,6 +6,7 @@ import org.mapstruct.Mapping
 import org.mapstruct.MappingTarget
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentDelivery
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
@@ -80,7 +81,13 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
         @MappingTarget aed: AnonymousElectorDocument,
         dto: ReIssueAnonymousElectorDocumentDto,
     ) {
-        aed.delivery?.deliveryAddressType = deliveryAddressTypeMapper.mapDtoToEntity(dto.deliveryAddressType)
+        val deliveryAddressTypeEntity = deliveryAddressTypeMapper.mapDtoToEntity(dto.deliveryAddressType)
+
+        if (aed.delivery != null) {
+            aed.delivery?.deliveryAddressType = deliveryAddressTypeEntity
+        } else {
+            aed.delivery = AnonymousElectorDocumentDelivery(deliveryAddressType = deliveryAddressTypeEntity)
+        }
     }
 
     @AfterMapping
