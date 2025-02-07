@@ -31,8 +31,8 @@ fun buildAnonymousElectorDocumentApi(
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     certificateLanguage: CertificateLanguage = CertificateLanguage.EN,
-    supportingInformationFormat: AnonymousSupportingInformationFormat = AnonymousSupportingInformationFormat.STANDARD,
-    deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
+    supportingInformationFormat: AnonymousSupportingInformationFormat? = AnonymousSupportingInformationFormat.STANDARD,
+    deliveryAddressType: DeliveryAddressType? = DeliveryAddressType.REGISTERED,
     collectionReason: String? = null,
     elector: AnonymousElector = buildAnonymousElectorApi(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,
@@ -63,7 +63,7 @@ fun buildAnonymousElectorApi(
     middleNames: String? = null,
     surname: String = aValidSurname(),
     addressee: String = aValidDeliveryName(),
-    registeredAddress: Address = buildValidAddress(),
+    registeredAddress: Address? = buildValidAddress(),
     email: String? = aValidEmailAddress(),
     phoneNumber: String? = aValidPhoneNumber()
 ): AnonymousElector = AnonymousElector(

@@ -83,45 +83,6 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
     }
 
     @Test
-    fun `should return not found given AED has initial retention period data deleted`() {
-        // Given
-        val eroResponse = buildElectoralRegistrationOfficeResponse(
-            id = ERO_ID,
-            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
-        )
-        wireMockService.stubCognitoJwtIssuerResponse()
-        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
-
-        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
-        val s3PathAedPhoto1 = aPhotoBucketPath()
-        val anonymousElectorDocument1 = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE,
-            sourceReference = APPLICATION_ID,
-            photoLocationArn = buildS3Arn(s3Bucket, s3PathAedPhoto1)
-        )
-        anonymousElectorDocument1.removeInitialRetentionPeriodData()
-        anonymousElectorDocumentRepository.save(anonymousElectorDocument1)
-        s3Client.addCertificatePhotoToS3(s3Bucket, s3PathAedPhoto1)
-
-        // When
-        val response = webTestClient.get()
-            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
-            .contentType(APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound
-            .returnResult(ErrorResponse::class.java)
-
-        // Then
-        val actual = response.responseBody.blockFirst()
-        ErrorResponseAssert.assertThat(actual)
-            .hasStatus(404)
-            .hasError("Not Found")
-            .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = $APPLICATION_ID not found")
-    }
-
-    @Test
     fun `should return a presigned url for the AED photo`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
@@ -161,7 +122,7 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
     }
 
     @Test
-    fun `should return a presigned url for the AED photo,  including some with initial data removed`() {
+    fun `should return a presigned url for the AED photo, including some with initial data removed`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -239,5 +200,45 @@ internal class GetAnonymousElectorDocumentsPhotoByApplicationIdIntegrationTest :
         // Then
         val actual = response.responseBody.blockFirst()
         assertThat(actual!!.preSignedUrl.rawPath).isEqualTo("/$s3Bucket/$expectedEncodedPath")
+    }
+
+    @Test
+    fun `should return a presigned url for the AED photo, when all documents have had initial data removed`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
+        val s3PathAedPhoto1 = aPhotoBucketPath()
+        val anonymousElectorDocument1 = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = APPLICATION_ID,
+            photoLocationArn = buildS3Arn(s3Bucket, s3PathAedPhoto1)
+        )
+        anonymousElectorDocument1.removeInitialRetentionPeriodData()
+        anonymousElectorDocumentRepository.save(anonymousElectorDocument1)
+        s3Client.addCertificatePhotoToS3(s3Bucket, s3PathAedPhoto1)
+
+        // When
+        val response = webTestClient.get()
+            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .returnResult(PreSignedUrlResourceResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        val expectedUrl = matchingPreSignedAwsS3GetUrl(s3PathAedPhoto1)
+        assertThat(actual!!.preSignedUrl).matches {
+            it.toString()
+                .matches(expectedUrl)
+        }
     }
 }
