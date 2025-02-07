@@ -3,7 +3,6 @@ package uk.gov.dluhc.printapi.rest.aed
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
-import org.springframework.data.jpa.domain.AbstractAuditable_.createdBy
 import org.springframework.http.MediaType.APPLICATION_JSON
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.models.ErrorResponse
@@ -147,7 +146,7 @@ internal class UpdateAnonymousElectorDocumentByApplicationIdIntegrationTest : In
         )
 
         // When
-         webTestClient.patch()
+        webTestClient.patch()
             .uri(URI_TEMPLATE, ERO_ID)
             .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
             .contentType(APPLICATION_JSON)
