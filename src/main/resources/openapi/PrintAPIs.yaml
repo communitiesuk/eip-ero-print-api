@@ -1059,6 +1059,8 @@ paths:
           $ref: '#/components/responses/400ErrorResponse'
         '404':
           $ref: '#/components/responses/404ErrorResponse'
+        '409':
+          $ref: '#/components/responses/409ErrorResponse'
       operationId: re-issue-anonymous-elector-document
       security:
         - eroUserCognitoUserPoolAuthorizer: [ ]
@@ -1754,7 +1756,6 @@ components:
           format: date
           description: The date on which the AED was issued
           example: '2023-01-15'
-      #        TODO
       required:
         - certificateNumber
         - electoralRollNumber
@@ -1762,8 +1763,6 @@ components:
         - sourceReference
         - applicationReference
         - certificateLanguage
-        - supportingInformationFormat
-        - deliveryAddressType
         - elector
         - status
         - photoUrl
@@ -1810,7 +1809,6 @@ components:
         - firstName
         - surname
         - addressee
-        - registeredAddress
 
     AnonymousElectorDocumentStatus:
       title: AnonymousElectorDocumentStatus

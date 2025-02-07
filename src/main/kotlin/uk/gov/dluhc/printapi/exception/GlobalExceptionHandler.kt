@@ -5,6 +5,7 @@ import jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus.BAD_GATEWAY
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE
 import org.springframework.http.HttpStatusCode
@@ -115,6 +116,22 @@ class GlobalExceptionHandler(
         request: WebRequest,
     ): ResponseEntity<Any>? {
         return populateErrorResponseAndHandleExceptionInternal(e, PAYLOAD_TOO_LARGE, request)
+    }
+
+    /**
+     * Exception handler to return a 409 Conflict ErrorResponse
+     */
+    @ExceptionHandler(
+        value = [
+            CertificateInitialDataRemovedException::class,
+        ]
+    )
+    protected fun handleExceptionReturnConflictResponse(
+        e: RuntimeException,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        logger.warn("conflict", e)
+        return populateErrorResponseAndHandleExceptionInternal(e, CONFLICT, request)
     }
 
     /**

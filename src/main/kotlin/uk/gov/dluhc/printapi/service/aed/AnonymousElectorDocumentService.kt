@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service.aed
 
+import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
@@ -11,6 +12,7 @@ import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.dto.aed.UpdateAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.exception.CertificateInitialDataRemovedException
 import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
@@ -18,6 +20,8 @@ import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.ReIssueAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
+
+private val logger = KotlinLogging.logger {}
 
 @Service
 class AnonymousElectorDocumentService(
@@ -47,8 +51,17 @@ class AnonymousElectorDocumentService(
     @Transactional
     fun reIssueAnonymousElectorDocument(eroId: String, dto: ReIssueAnonymousElectorDocumentDto): PdfFile {
         val gssCodes = eroService.lookupGssCodesForEro(eroId)
-        val mostRecentAed = getFullyRetainedAnonymousElectorDocumentsSortedByDate(gssCodes, dto.sourceReference)
+        val mostRecentAed = getAnonymousElectorDocumentsSortedByDate(gssCodes, dto.sourceReference)
             .firstOrNull() ?: throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
+
+        if (mostRecentAed.initialRetentionDataRemoved) {
+            throw CertificateInitialDataRemovedException(
+                eroId,
+                ANONYMOUS_ELECTOR_DOCUMENT,
+                dto.sourceReference,
+                mostRecentAed.certificateNumber
+            )
+        }
 
         val templateFilename = pdfTemplateDetailsFactory.getTemplateFilename(mostRecentAed.gssCode)
         with(
@@ -64,14 +77,19 @@ class AnonymousElectorDocumentService(
     }
 
     @Transactional
-    fun updateFullyRetainedAnonymousElectorDocuments(eroId: String, updateAedDto: UpdateAnonymousElectorDocumentDto) {
+    fun updateAnonymousElectorDocuments(eroId: String, updateAedDto: UpdateAnonymousElectorDocumentDto) {
         with(updateAedDto) {
             val gssCodes = eroService.lookupGssCodesForEro(eroId)
-            val anonymousElectorDocuments = getFullyRetainedAnonymousElectorDocumentsSortedByDate(gssCodes, sourceReference)
+            val anonymousElectorDocuments = getAnonymousElectorDocumentsSortedByDate(gssCodes, sourceReference)
             if (anonymousElectorDocuments.isEmpty()) {
                 throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, sourceReference)
             }
             anonymousElectorDocuments.forEach {
+                if (it.initialRetentionDataRemoved) {
+                    logger.info { "Skipping update for certificate ${it.certificateNumber} as it has passed the initial retention period" }
+                    return@forEach
+                }
+
                 if (valueHasChanged(email, it.contactDetails!!.email)) {
                     it.contactDetails!!.email = email
                 }
@@ -83,12 +101,10 @@ class AnonymousElectorDocumentService(
     }
 
     @Transactional(readOnly = true)
-    fun getFullyRetainedAnonymousElectorDocuments(
-        eroId: String,
-        applicationId: String
-    ): List<AnonymousElectorDocumentDto> {
+    fun getAnonymousElectorDocuments(eroId: String, applicationId: String): List<AnonymousElectorDocumentDto> {
         val gssCodes = eroService.lookupGssCodesForEro(eroId)
-        return getFullyRetainedAnonymousElectorDocumentsSortedByDate(gssCodes, applicationId)
+
+        return getAnonymousElectorDocumentsSortedByDate(gssCodes, applicationId)
             .map { anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(it) }
     }
 
@@ -102,15 +118,14 @@ class AnonymousElectorDocumentService(
         }
     }
 
-    private fun getFullyRetainedAnonymousElectorDocumentsSortedByDate(
+    private fun getAnonymousElectorDocumentsSortedByDate(
         gssCodes: List<String>,
         sourceReference: String
     ): List<AnonymousElectorDocument> =
-        anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+        anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
             gssCodes = gssCodes,
             sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
             sourceReference = sourceReference,
-            initialRetentionDataRemoved = false,
         ).sortedByDescending { it.dateCreated }
 
     private fun AnonymousElectorDocument.generatePdf(): PdfFile {

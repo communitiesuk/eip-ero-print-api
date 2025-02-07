@@ -2,11 +2,13 @@ package uk.gov.dluhc.printapi.mapper.aed
 
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
+import org.mapstruct.NullValueCheckStrategy
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.dto.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.aed.AnonymousElectorDto
 import uk.gov.dluhc.printapi.factory.UrlFactory
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
@@ -32,9 +34,10 @@ abstract class AnonymousElectorDocumentMapper {
     abstract fun mapToApiAnonymousElectorDocument(dto: AnonymousElectorDocumentDto, eroId: String): AnonymousElectorDocumentApi
 
     @Mapping(target = "elector", source = "aedEntity.contactDetails")
-    @Mapping(target = "status", constant = "PRINTED")
-    @Mapping(target = "deliveryAddressType", source = "aedEntity.delivery.deliveryAddressType")
+    @Mapping(target = "status", expression = "java(getAedStatusByInitialRetentionDataRemoved(aedEntity))")
+    @Mapping(target = "deliveryAddressType", source = "aedEntity.delivery.deliveryAddressType", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "collectionReason", source = "aedEntity.delivery.collectionReason")
+    @Mapping(target = "supportingInformationFormat", source = "aedEntity.supportingInformationFormat", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     abstract fun mapToAnonymousElectorDocumentDto(aedEntity: AnonymousElectorDocument): AnonymousElectorDocumentDto
 
     @Mapping(target = "addressee", expression = "java(getAssigneeName(aedContactDetailsEntity))")
@@ -53,4 +56,11 @@ abstract class AnonymousElectorDocumentMapper {
 
     protected fun getPhotoUrl(eroId: String, dto: AnonymousElectorDocumentDto): String =
         urlFactory.createPhotoUrl(eroId, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
+
+    protected fun getAedStatusByInitialRetentionDataRemoved(aedEntity: AnonymousElectorDocument): AnonymousElectorDocumentStatus =
+        if (aedEntity.initialRetentionDataRemoved) {
+            AnonymousElectorDocumentStatus.EXPIRED
+        } else {
+            AnonymousElectorDocumentStatus.PRINTED
+        }
 }
