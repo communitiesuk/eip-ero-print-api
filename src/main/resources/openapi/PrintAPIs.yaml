@@ -1819,6 +1819,7 @@ components:
       enum:
         - generated
         - printed
+        - expired
 
     AedSearchSummaryResponse:
       title: AedSearchSummaryResponse
