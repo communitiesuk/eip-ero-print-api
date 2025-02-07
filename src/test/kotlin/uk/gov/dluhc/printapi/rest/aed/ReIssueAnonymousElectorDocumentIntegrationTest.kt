@@ -148,7 +148,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
     }
 
     @Test
-    fun `should return not found given AED has initial retention period data deleted`() {
+    fun `should return conflict given AED has initial retention period data deleted`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -172,15 +172,15 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus()
-            .isNotFound
+            .is4xxClientError
             .returnResult(ErrorResponse::class.java)
 
         // Then
         val actual = response.responseBody.blockFirst()
         assertThat(actual)
-            .hasStatus(404)
-            .hasError("Not Found")
-            .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${previousAed.sourceReference} not found")
+            .hasStatus(409)
+            .hasError("Conflict")
+            .hasMessage("Certificate for eroId = $ERO_ID with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${previousAed.sourceReference} and certificateNumber = ${previousAed.certificateNumber} has passed the initial retention period")
     }
 
     @Test

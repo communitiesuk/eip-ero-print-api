@@ -309,7 +309,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
     }
 
     @Test
-    fun `should return all summaries including AEDs past the initial retention period`() {
+    fun `should return all summaries including AEDs passed the initial retention period`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -323,7 +323,7 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
 
         val aed1SourceReference = aValidSourceReference()
         val aed1ApplicationReference = aValidApplicationReference()
-        val application1AedPastInitialRetentionPeriod = buildAnonymousElectorDocument(
+        val application1AedPassedInitialRetentionPeriod = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
             sourceReference = aed1SourceReference,
             applicationReference = aed1ApplicationReference,
@@ -337,15 +337,15 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
             applicationReference = aed1ApplicationReference,
             issueDate = currentDate.minusDays(9),
             requestDateTime = currentDateTimeInstant, // View will return this latest record as it has latest requestDateTime
-            contactDetails = application1AedPastInitialRetentionPeriod.contactDetails!!
+            contactDetails = application1AedPassedInitialRetentionPeriod.contactDetails!!
         )
 
-        application1AedPastInitialRetentionPeriod.removeInitialRetentionPeriodData()
+        application1AedPassedInitialRetentionPeriod.removeInitialRetentionPeriodData()
 
         val application2AedDocument = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate)
 
         anonymousElectorDocumentRepository.saveAll(
-            listOf(application1AedPastInitialRetentionPeriod, application1LatestAed, application2AedDocument)
+            listOf(application1AedPassedInitialRetentionPeriod, application1LatestAed, application2AedDocument)
         )
 
         val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(application2AedDocument)

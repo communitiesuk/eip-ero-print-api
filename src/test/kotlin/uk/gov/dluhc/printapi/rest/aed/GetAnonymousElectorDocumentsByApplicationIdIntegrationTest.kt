@@ -8,9 +8,9 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentsResponse
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.LARGE_MINUS_PRINT
-import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.STANDARD
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
@@ -63,7 +63,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
     }
 
     @Test
-    fun `should return fully retained anonymous elector documents by application ID`() {
+    fun `should return both fully retained and initial data removed anonymous elector documents by application ID`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,
@@ -85,14 +85,18 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
         // We want to return the records in descending order of [dateCreated].
         Thread.sleep(1000)
 
-        val aedMatchingDocument2 = buildAnonymousElectorDocument(
+        val aedMatchingDocument2WithInitialDataRemoved = buildAnonymousElectorDocument(
             gssCode = GSS_CODE,
             sourceReference = APPLICATION_ID,
             applicationReference = APPLICATION_REFERENCE,
             supportingInformationFormat = SupportingInformationFormat.STANDARD,
-            contactDetails = buildAedContactDetails(firstName = "Mike", middleNames = "William Brown", surname = "Johnson"),
+            contactDetails = buildAedContactDetails(
+                firstName = "Mike",
+                middleNames = "William Brown",
+                surname = "Johnson"
+            ),
             delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
-        )
+        ).also { it.removeInitialRetentionPeriodData() }
         val aedDocumentWithDifferentApplicationId = buildAnonymousElectorDocument(
             gssCode = GSS_CODE, sourceReference = aValidSourceReference()
         )
@@ -102,46 +106,36 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
         val aedDocumentWithDifferentSourceType = buildAnonymousElectorDocument(
             gssCode = GSS_CODE, sourceType = SourceType.VOTER_CARD, sourceReference = APPLICATION_ID
         )
-        val aedDocumentWithInitialDataRemoved = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE, sourceType = SourceType.ANONYMOUS_ELECTOR_DOCUMENT, sourceReference = APPLICATION_ID
-        )
-        aedDocumentWithInitialDataRemoved.removeInitialRetentionPeriodData()
         anonymousElectorDocumentRepository.saveAll(
             listOf(
-                aedMatchingDocument2, aedDocumentWithDifferentApplicationId,
+                aedMatchingDocument2WithInitialDataRemoved, aedDocumentWithDifferentApplicationId,
                 aedDocumentWithDifferentGssCode, aedDocumentWithDifferentSourceType,
-                aedDocumentWithInitialDataRemoved,
             )
         )
 
         val expectedPhotoUrl = "http://localhost:8080/eros/$ERO_ID/anonymous-elector-documents/photo?applicationId=$APPLICATION_ID"
 
-        val expectedFirstRecord = with(aedMatchingDocument2) {
+        val expectedFirstRecord = with(aedMatchingDocument2WithInitialDataRemoved) {
             buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
-                gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
-                collectionReason = delivery!!.collectionReason,
+                gssCode = gssCode, deliveryAddressType = null,
+                collectionReason = null,
                 sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
                     buildAnonymousElectorApi(
                         firstName = firstName, middleNames = middleNames, surname = surname,
                         addressee = "Mike William Brown Johnson",
-                        registeredAddress = with(address!!) {
-                            buildValidAddress(
-                                property = property, street = street!!,
-                                town = town, area = area, locality = locality,
-                                uprn = uprn, postcode = postcode!!
-                            )
-                        },
-                        email = email,
-                        phoneNumber = phoneNumber
+                        registeredAddress = null,
+                        email = null,
+                        phoneNumber = null
                     )
                 },
                 photoUrl = expectedPhotoUrl,
                 issueDate = issueDate,
                 userId = userId,
                 dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
-                supportingInformationFormat = STANDARD
+                supportingInformationFormat = null,
+                status = AnonymousElectorDocumentStatus.EXPIRED,
             )
         }
         val expectedSecondRecord = with(aedMatchingDocument1) {
@@ -199,37 +193,6 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
         )
         wireMockService.stubCognitoJwtIssuerResponse()
         wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
-
-        // When
-        val response = webTestClient.get()
-            .uri(URI_TEMPLATE, ERO_ID, APPLICATION_ID)
-            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
-            .contentType(APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk
-            .returnResult(AnonymousElectorDocumentsResponse::class.java)
-
-        // Then
-        val actual = response.responseBody.blockFirst()
-        assertThat(actual!!.anonymousElectorDocuments).isEmpty()
-    }
-
-    @Test
-    fun `should return empty list given AED has had initial data removed`() {
-        // Given
-        val eroResponse = buildElectoralRegistrationOfficeResponse(
-            id = ERO_ID,
-            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE), buildLocalAuthorityResponse())
-        )
-        wireMockService.stubCognitoJwtIssuerResponse()
-        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
-
-        val aedDocument = buildAnonymousElectorDocument(
-            gssCode = GSS_CODE,
-            sourceReference = APPLICATION_ID,
-        )
-        aedDocument.removeInitialRetentionPeriodData()
-        anonymousElectorDocumentRepository.save(aedDocument)
 
         // When
         val response = webTestClient.get()
