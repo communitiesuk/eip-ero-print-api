@@ -1,0 +1,20 @@
+name: Build image and deploy to int
+
+on: push
+
+jobs:
+  build-and-push:
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      version: ${{github.ref_name}}
+    secrets: inherit
+
+  deploy:
+    needs:
+      - build-and-push
+    uses: ./.github/workflows/deploy.yml
+    with:
+      deploy_environment: int
+      version: ${{github.ref_name}}
+    secrets: inherit
