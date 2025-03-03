@@ -9,6 +9,7 @@ import uk.gov.dluhc.printapi.models.AedSearchBy
 import uk.gov.dluhc.printapi.models.AedSearchBy.APPLICATION_REFERENCE
 import uk.gov.dluhc.printapi.models.AedSearchBy.SURNAME
 import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
+import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidApplicationReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
@@ -305,6 +306,68 @@ internal class SearchAedSummariesIntegrationTest : IntegrationTest() {
             .usingRecursiveComparison()
             .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
             .isEqualTo(expectedResults)
+    }
+
+    @Test
+    fun `should return all summaries including AEDs passed the initial retention period`() {
+        // Given
+        val eroResponse = buildElectoralRegistrationOfficeResponse(
+            id = ERO_ID,
+            localAuthorities = listOf(buildLocalAuthorityResponse(gssCode = GSS_CODE))
+        )
+        wireMockService.stubCognitoJwtIssuerResponse()
+        wireMockService.stubEroManagementGetEroByEroId(eroResponse, ERO_ID)
+
+        val currentDate = LocalDate.now()
+        val currentDateTimeInstant = Instant.now()
+
+        val aed1SourceReference = aValidSourceReference()
+        val aed1ApplicationReference = aValidApplicationReference()
+        val application1AedPassedInitialRetentionPeriod = buildAnonymousElectorDocument(
+            gssCode = GSS_CODE,
+            sourceReference = aed1SourceReference,
+            applicationReference = aed1ApplicationReference,
+            issueDate = currentDate.minusDays(10),
+            requestDateTime = currentDateTimeInstant.minusSeconds(10),
+            surname = "AAA",
+        ).also { it.removeInitialRetentionPeriodData() }
+
+        val application2AedDocument = buildAnonymousElectorDocument(gssCode = GSS_CODE, issueDate = currentDate)
+
+        anonymousElectorDocumentRepository.saveAll(
+            listOf(application1AedPassedInitialRetentionPeriod, application2AedDocument)
+        )
+
+        val expectedSummaryRecord1 = buildAedSearchSummaryApiFromAedEntity(application2AedDocument)
+        val expectedSummaryRecord2 = buildAedSearchSummaryApiFromAedEntity(
+            application1AedPassedInitialRetentionPeriod,
+            status = AnonymousElectorDocumentStatus.EXPIRED
+        )
+        val expectedResultsInExactOrder = listOf(expectedSummaryRecord1, expectedSummaryRecord2)
+
+        // When
+        val response = webTestClient.get()
+            .uri(buildUri(uriTemplate = SEARCH_SUMMARY_URI_TEMPLATE, eroId = ERO_ID))
+            .bearerToken(getVCAnonymousAdminBearerToken(eroId = ERO_ID))
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult(AedSearchSummaryResponse::class.java)
+
+        // Then
+        val actual = response.responseBody.blockFirst()
+        assertThat(actual).isNotNull
+        with(actual!!) {
+            assertThat(page).isEqualTo(1)
+            assertThat(pageSize).isEqualTo(100)
+            assertThat(totalPages).isEqualTo(1)
+            assertThat(totalResults).isEqualTo(2)
+            assertThat(results).isNotEmpty
+                .hasSize(2)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*dateTimeCreated")
+                .isEqualTo(expectedResultsInExactOrder)
+        }
     }
 
     private fun buildUri(
