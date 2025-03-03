@@ -1894,7 +1894,7 @@ components:
           example: Blogs
         postcode:
           type: string
-          description: The applicant's postcode. A null postcode indicates that the AED has passed it's initial retention period.
+          description: The applicant's postcode. A null postcode indicates that the AED has passed its initial retention period.
           example: AA1 1AA
         issueDate:
           type: string
