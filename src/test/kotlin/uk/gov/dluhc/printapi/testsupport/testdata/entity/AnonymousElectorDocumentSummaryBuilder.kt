@@ -31,6 +31,7 @@ fun buildAnonymousElectorDocumentSummaryEntity(
     firstName: String = aValidFirstName(),
     surname: String = aValidSurname(),
     postcode: String? = faker.address().postcode(),
+    initialRetentionDataRemoved: Boolean = false,
 ): AnonymousElectorDocumentSummary {
     return AnonymousElectorDocumentSummary(
         id = id,
@@ -46,6 +47,7 @@ fun buildAnonymousElectorDocumentSummaryEntity(
         firstName = firstName,
         surname = surname,
         sanitizedSurname = buildSanitizedSurname(surname),
-        postcode = postcode
+        postcode = postcode,
+        initialRetentionDataRemoved = initialRetentionDataRemoved
     )
 }

@@ -6,7 +6,6 @@ import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryDto
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSearchSummaryResults
 import uk.gov.dluhc.printapi.mapper.InstantMapper
 import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
-import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentSummary as AnonymousElectorDocumentSummaryEntity
 import uk.gov.dluhc.printapi.models.AedSearchSummary as AedSearchSummaryApi
 
@@ -18,12 +17,6 @@ abstract class AnonymousSearchSummaryMapper {
 
     abstract fun toAedSearchSummaryResponse(aedSummaryResultsDto: AnonymousSearchSummaryResults): AedSearchSummaryResponse
 
-    @Mapping(target = "status", expression = "java(determineAedSummaryStatusBasedOnPostcode(dto))")
+    @Mapping(target = "status", expression = "java(dto.getInitialRetentionDataRemoved() ? AnonymousElectorDocumentStatus.EXPIRED : AnonymousElectorDocumentStatus.PRINTED)")
     protected abstract fun toAedSearchSummaryApi(dto: AnonymousSearchSummaryDto): AedSearchSummaryApi
-
-    protected fun determineAedSummaryStatusBasedOnPostcode(dto: AnonymousSearchSummaryDto) = if (dto.postcode != null) {
-        AnonymousElectorDocumentStatus.PRINTED
-    } else {
-        AnonymousElectorDocumentStatus.EXPIRED
-    }
 }

@@ -22,4 +22,5 @@ data class AnonymousSearchSummaryDto(
     val postcode: String?,
     val issueDate: LocalDate,
     val dateTimeCreated: Instant,
+    val initialRetentionDataRemoved: Boolean
 )

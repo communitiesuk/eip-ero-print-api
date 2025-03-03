@@ -118,9 +118,9 @@ class AnonymousSearchSummaryMapperTest {
     }
 
     @Test
-    fun `should map AnonymousSearchSummaryDto with null postcode to an AedSearchSummary Api`() {
+    fun `should map AnonymousSearchSummaryDto with initialRetentionDataRemoved to an AedSearchSummary Api`() {
         // Given
-        val dto = buildAnonymousSearchSummaryDto(postcode = null)
+        val dto = buildAnonymousSearchSummaryDto(postcode = null, initialRetentionDataRemoved = true)
         val expectedOffsetDateTime = OffsetDateTime.now()
 
         given(instantMapper.toOffsetDateTime(any())).willReturn(expectedOffsetDateTime)

@@ -22,7 +22,8 @@
             contact.first_name,
             contact.surname,
             contact.sanitized_surname,
-            addr.postcode
+            addr.postcode,
+            aed.initial_retention_data_removed
             FROM anonymous_elector_document aed
             JOIN aed_contact_details contact ON aed.aed_contact_details_id = contact.id
             LEFT JOIN address addr on contact.address_id = addr.id

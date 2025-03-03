@@ -45,7 +45,9 @@ class AnonymousElectorDocumentSummary(
 
     val sanitizedSurname: String,
 
-    val postcode: String?
+    val postcode: String?,
+
+    val initialRetentionDataRemoved: Boolean
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
