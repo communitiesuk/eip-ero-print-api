@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentDelivery
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.Delivery
@@ -72,6 +73,17 @@ object Assertions : Assertions() {
     @CheckReturnValue
     fun assertThat(actual: Delivery?): DeliveryAssert {
         return DeliveryAssert(actual)
+    }
+
+    /**
+     * Creates a new instance of `[AnonymousElectorDocumentDeliveryAssert]`.
+     *
+     * @param actual the actual value.
+     * @return the created assertion object.
+     */
+    @CheckReturnValue
+    fun assertThat(actual: AnonymousElectorDocumentDelivery?): AnonymousElectorDocumentDeliveryAssert {
+        return AnonymousElectorDocumentDeliveryAssert(actual)
     }
 
     /**

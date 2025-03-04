@@ -91,7 +91,7 @@ class AnonymousElectorDocument(
     var userId: String,
 
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
-    var delivery: Delivery? = null,
+    var delivery: AnonymousElectorDocumentDelivery? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "aed_id", nullable = false)

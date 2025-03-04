@@ -166,6 +166,9 @@ internal abstract class IntegrationTest {
     protected lateinit var testDeliveryRepository: TestDeliveryRepository
 
     @Autowired
+    protected lateinit var testAnonymousElectorDocumentDeliveryRepository: TestAnonymousElectorDocumentDeliveryRepository
+
+    @Autowired
     protected lateinit var testAddressRepository: TestAddressRepository
 
     @Autowired

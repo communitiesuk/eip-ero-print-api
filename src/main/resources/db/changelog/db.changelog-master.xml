@@ -41,4 +41,5 @@
     <include relativeToChangelogFile="true" file="ddl/0031_EIP1-11169_add_is_from_applications_api_to_certificate.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0032_EROPSPT-397_update_aed_summary_view_include_aeds_after_15_months.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0033_EROPSPT-397_create_anonymous_elector_document_delivery_table.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0034_EROPSPT-397_update_anonymous_elector_document_to_use_new_delivery_table.xml"/>
 </databaseChangeLog>

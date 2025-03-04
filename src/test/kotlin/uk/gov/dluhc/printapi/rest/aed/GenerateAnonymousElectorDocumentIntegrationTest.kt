@@ -27,7 +27,7 @@ import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponse
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApiCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
@@ -211,7 +211,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         wireMockService.stubEroManagementGetEroByGssCode(eroResponse, request.gssCode)
 
         val expectedDelivery = with(request.delivery) {
-            buildDelivery(
+            buildAedDelivery(
                 addressee = addressee,
                 address = with(deliveryAddress) {
                     buildAddress(

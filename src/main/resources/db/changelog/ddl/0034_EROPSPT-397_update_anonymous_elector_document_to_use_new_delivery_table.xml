@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="0034_EROPSPT-397_update_anonymous_elector_document_to_use_new_delivery_table"
+               author="alex.yip@softwire.com"
+               context="ddl">
+        <comment>Switch AED foreign keys to use the new anonymous_elector_document_delivery table</comment>
+
+        <dropForeignKeyConstraint baseTableName="anonymous_elector_document"
+                                  constraintName="fk_aed_certificate_delivery"/>
+
+        <addForeignKeyConstraint baseTableName="anonymous_elector_document"
+                                 baseColumnNames="delivery_id"
+                                 constraintName="fk_aed_certificate_delivery"
+                                 referencedColumnNames="id"
+                                 referencedTableName="anonymous_elector_document_delivery"/>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="anonymous_elector_document"
+                                      constraintName="fk_aed_certificate_delivery"/>
+
+            <addForeignKeyConstraint baseTableName="anonymous_elector_document"
+                                     baseColumnNames="delivery_id"
+                                     constraintName="fk_aed_certificate_delivery"
+                                     referencedColumnNames="id"
+                                     referencedTableName="delivery"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

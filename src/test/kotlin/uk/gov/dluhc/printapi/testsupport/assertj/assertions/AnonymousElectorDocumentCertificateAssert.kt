@@ -3,7 +3,7 @@ package uk.gov.dluhc.printapi.testsupport.assertj.assertions
 import org.assertj.core.api.AbstractObjectAssert
 import org.assertj.core.api.Assertions
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
-import uk.gov.dluhc.printapi.database.entity.Delivery
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentDelivery
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import java.time.LocalDate
@@ -143,10 +143,10 @@ class AnonymousElectorDocumentCertificateAssert
         return this
     }
 
-    fun hasDelivery(expectedDelivery: Delivery): AnonymousElectorDocumentCertificateAssert {
+    fun hasDelivery(expectedDelivery: AnonymousElectorDocumentDelivery): AnonymousElectorDocumentCertificateAssert {
         isNotNull
 
-        DeliveryAssert(actual!!.delivery)
+        AnonymousElectorDocumentDeliveryAssert(actual!!.delivery)
             .hasId()
             .hasAddressee(expectedDelivery.addressee)
             .hasAddress(expectedDelivery.address)
