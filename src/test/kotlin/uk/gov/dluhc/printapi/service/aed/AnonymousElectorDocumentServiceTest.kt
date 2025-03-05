@@ -38,8 +38,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildGenerateAnonymous
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildUpdateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.buildTemplateDetails
 import java.time.Instant
@@ -208,19 +208,19 @@ internal class AnonymousElectorDocumentServiceTest {
             val firstAedEntity =
                 buildAnonymousElectorDocument(
                     sourceReference = applicationId,
-                    delivery = buildDelivery(deliveryAddressType = DeliveryAddressType.REGISTERED)
+                    delivery = buildAedDelivery(deliveryAddressType = DeliveryAddressType.REGISTERED)
                 ).also { it.dateCreated = Instant.now() }
 
             val secondAedEntity =
                 buildAnonymousElectorDocument(
                     sourceReference = applicationId,
-                    delivery = buildDelivery(deliveryAddressType = DeliveryAddressType.REGISTERED)
+                    delivery = buildAedDelivery(deliveryAddressType = DeliveryAddressType.REGISTERED)
                 ).also { it.dateCreated = Instant.now().plusSeconds(1) }
 
             val aedEntityWithLatestDateCreated =
                 buildAnonymousElectorDocument(
                     sourceReference = applicationId,
-                    delivery = buildDelivery(deliveryAddressType = DeliveryAddressType.ERO_COLLECTION)
+                    delivery = buildAedDelivery(deliveryAddressType = DeliveryAddressType.ERO_COLLECTION)
                 ).also { it.dateCreated = Instant.now().plusSeconds(2) }
 
             val expectedDto1 = buildAnonymousElectorDocumentDto()

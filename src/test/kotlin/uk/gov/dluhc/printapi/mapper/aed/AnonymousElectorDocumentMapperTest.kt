@@ -32,8 +32,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorD
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
@@ -155,7 +155,7 @@ class AnonymousElectorDocumentMapperTest {
                     middleNames = "J",
                     surname = "Bloggs"
                 ),
-                delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
+                delivery = buildAedDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
             )
             given(certificateLanguageMapper.mapEntityToDto(any())).willReturn(DtoCertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapEntityToDto(any())).willReturn(AnonymousSupportingInformationFormatDtoEnum.BRAILLE)

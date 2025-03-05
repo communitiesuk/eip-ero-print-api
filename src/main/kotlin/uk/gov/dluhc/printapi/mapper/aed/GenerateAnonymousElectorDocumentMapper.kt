@@ -5,8 +5,8 @@ import org.mapstruct.Mapping
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentDelivery
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
-import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.dto.CertificateDelivery
 import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
@@ -55,5 +55,5 @@ abstract class GenerateAnonymousElectorDocumentMapper {
     protected abstract fun toAedContactDetailsEntity(aedDto: GenerateAnonymousElectorDocumentDto): AedContactDetails
 
     @Mapping(target = "address", source = "deliveryAddress")
-    protected abstract fun fromDeliveryDtoToDeliveryEntity(deliveryDto: CertificateDelivery): Delivery
+    protected abstract fun fromDeliveryDtoToAnonymousElectorDocumentDeliveryEntity(deliveryDto: CertificateDelivery): AnonymousElectorDocumentDelivery
 }

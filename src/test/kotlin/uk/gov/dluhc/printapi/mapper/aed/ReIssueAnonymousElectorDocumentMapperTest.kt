@@ -25,8 +25,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildReIssueAnonymousElectorDocumentDto
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildReIssueAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
 import java.time.Instant
@@ -105,7 +105,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
             sourceReference = sourceReference,
             certificateNumber = aValidVacNumber(),
             electoralRollNumber = originalElectoralRollNumber,
-            delivery = buildDelivery(
+            delivery = buildAedDelivery(
                 deliveryAddressType = DeliveryAddressType.ERO_COLLECTION,
                 collectionReason = "There is a postal strike"
             ),
@@ -168,10 +168,10 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         assertThat(actual.delivery!!.createdBy).isNull()
         assertThat(actual.delivery!!.dateCreated).isNull()
         assertThat(actual.delivery!!.version).isEqualTo(0L)
-        assertThat(actual.delivery!!.address.id).isNull()
-        assertThat(actual.delivery!!.address.dateCreated).isNull()
-        assertThat(actual.delivery!!.address.createdBy).isNull()
-        assertThat(actual.delivery!!.address.version).isEqualTo(0L)
+        assertThat(actual.delivery!!.address!!.id).isNull()
+        assertThat(actual.delivery!!.address!!.dateCreated).isNull()
+        assertThat(actual.delivery!!.address!!.createdBy).isNull()
+        assertThat(actual.delivery!!.address!!.version).isEqualTo(0L)
         assertThat(actual.contactDetails!!.id).isNull()
         assertThat(actual.contactDetails!!.dateCreated).isNull()
         assertThat(actual.contactDetails!!.createdBy).isNull()

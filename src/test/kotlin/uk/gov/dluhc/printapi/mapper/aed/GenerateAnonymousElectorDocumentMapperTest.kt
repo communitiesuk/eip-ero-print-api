@@ -32,7 +32,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildGenerateAnonymous
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildDtoCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApiCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildGenerateAnonymousElectorDocumentRequest
 import java.time.Instant
@@ -149,7 +149,7 @@ class GenerateAnonymousElectorDocumentMapperTest {
                         )
                     ),
                     delivery = with(delivery) {
-                        buildDelivery(
+                        buildAedDelivery(
                             addressee = addressee,
                             address = with(deliveryAddress) {
                                 buildAddress(
@@ -168,7 +168,6 @@ class GenerateAnonymousElectorDocumentMapperTest {
                             addressFormat = uk.gov.dluhc.printapi.database.entity.AddressFormat.UK,
                         )
                     }
-
                 )
             }
 
@@ -226,10 +225,10 @@ class GenerateAnonymousElectorDocumentMapperTest {
     }
 
     @Nested
-    inner class FromDeliveryDtoToDeliveryEntity {
+    inner class FromDeliveryDtoToAnonymousElectorDocumentDeliveryEntity {
 
         @Test
-        fun `should map to Delivery entity given CertificateDelivery Dto`() {
+        fun `should map to AnonymousElectorDocumentDelivery entity given CertificateDelivery Dto`() {
             // Given
             val dto = buildDtoCertificateDelivery(
                 deliveryAddressType = DeliveryAddressTypeDto.ERO_COLLECTION,
@@ -238,7 +237,7 @@ class GenerateAnonymousElectorDocumentMapperTest {
             given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.ERO_COLLECTION)
 
             val expected = with(dto) {
-                buildDelivery(
+                buildAedDelivery(
                     addressee = addressee,
                     addressFormat = uk.gov.dluhc.printapi.database.entity.AddressFormat.UK,
                     deliveryClass = uk.gov.dluhc.printapi.database.entity.DeliveryClass.STANDARD,
@@ -259,7 +258,7 @@ class GenerateAnonymousElectorDocumentMapperTest {
             }
 
             // When
-            val actual = mapper.fromDeliveryDtoToDeliveryEntity(dto)
+            val actual = mapper.fromDeliveryDtoToAnonymousElectorDocumentDeliveryEntity(dto)
 
             // Then
             assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)

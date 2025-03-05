@@ -16,8 +16,8 @@ import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
@@ -78,7 +78,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             applicationReference = APPLICATION_REFERENCE,
             supportingInformationFormat = SupportingInformationFormat.LARGE_PRINT,
             contactDetails = buildAedContactDetails(firstName = "John", middleNames = null, surname = "Jacob"),
-            delivery = buildDelivery(deliveryAddressType = REGISTERED)
+            delivery = buildAedDelivery(deliveryAddressType = REGISTERED)
         )
         anonymousElectorDocumentRepository.save(aedMatchingDocument1)
 
@@ -91,7 +91,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
             applicationReference = APPLICATION_REFERENCE,
             supportingInformationFormat = SupportingInformationFormat.STANDARD,
             contactDetails = buildAedContactDetails(firstName = "Mike", middleNames = "William Brown", surname = "Johnson"),
-            delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
+            delivery = buildAedDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
         )
         val aedDocumentWithDifferentApplicationId = buildAnonymousElectorDocument(
             gssCode = GSS_CODE, sourceReference = aValidSourceReference()
