@@ -13,8 +13,8 @@ class AnonymousElectorDocumentDto(
     val sourceReference: String,
     val applicationReference: String,
     val certificateLanguage: CertificateLanguage,
-    val supportingInformationFormat: AnonymousSupportingInformationFormat,
-    val deliveryAddressType: DeliveryAddressType,
+    val supportingInformationFormat: AnonymousSupportingInformationFormat?,
+    val deliveryAddressType: DeliveryAddressType?,
     val collectionReason: String?,
     val elector: AnonymousElectorDto,
     val status: AnonymousElectorDocumentStatus,
@@ -29,7 +29,7 @@ class AnonymousElectorDto(
     val middleNames: String?,
     val surname: String,
     val addressee: String,
-    val registeredAddress: AddressDto,
+    val registeredAddress: AddressDto?,
     val email: String?,
     val phoneNumber: String?
 )
@@ -37,6 +37,7 @@ class AnonymousElectorDto(
 enum class AnonymousElectorDocumentStatus {
     GENERATED,
     PRINTED,
+    EXPIRED,
 }
 
 enum class AnonymousSupportingInformationFormat {

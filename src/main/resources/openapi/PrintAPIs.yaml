@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.23.3'
+  version: '1.23.4'
   description: Print APIs
 #
 # --------------------------------------------------------------------------------
@@ -1761,8 +1761,6 @@ components:
         - sourceReference
         - applicationReference
         - certificateLanguage
-        - supportingInformationFormat
-        - deliveryAddressType
         - elector
         - status
         - photoUrl
@@ -1809,7 +1807,6 @@ components:
         - firstName
         - surname
         - addressee
-        - registeredAddress
 
     AnonymousElectorDocumentStatus:
       title: AnonymousElectorDocumentStatus
