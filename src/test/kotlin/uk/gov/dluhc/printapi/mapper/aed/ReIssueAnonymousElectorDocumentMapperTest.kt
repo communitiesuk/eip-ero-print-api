@@ -212,6 +212,28 @@ class ReIssueAnonymousElectorDocumentMapperTest {
     }
 
     @Test
+    fun `should map to new Anonymous Elector Document with initialRetentionDataRemoved as false, given a previous AED with initial data removed`() {
+        // Given
+        val previousAed = buildAnonymousElectorDocument().also { it.removeInitialRetentionPeriodData() }
+
+        given(idFactory.vacNumber()).willReturn(aValidVacNumber())
+        given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
+        given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_OCT)
+        given(aedMappingHelper.statusHistory(any())).willReturn(listOf())
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
+
+        // When
+        val actual = mapper.toNewAnonymousElectorDocument(
+            previousAed,
+            buildReIssueAnonymousElectorDocumentDto(),
+            aTemplateFilename()
+        )
+
+        // Then
+        assertThat(actual.initialRetentionDataRemoved).isFalse()
+    }
+
+    @Test
     fun `should set initialRetentionRemovalDate to be null if not set for previous AED`() {
         // Given
         val sourceReference = aValidSourceReference()

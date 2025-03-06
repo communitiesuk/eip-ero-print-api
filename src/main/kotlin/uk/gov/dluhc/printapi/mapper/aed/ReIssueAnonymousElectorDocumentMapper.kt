@@ -70,6 +70,7 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
     @Mapping(target = "contactDetails.address.dateCreated", ignore = true)
     @Mapping(target = "contactDetails.address.createdBy", ignore = true)
     @Mapping(target = "contactDetails.address.version", ignore = true)
+    @Mapping(target = "initialRetentionDataRemoved", ignore = true)
     abstract fun toNewAnonymousElectorDocument(
         previousAed: AnonymousElectorDocument,
         dto: ReIssueAnonymousElectorDocumentDto,
