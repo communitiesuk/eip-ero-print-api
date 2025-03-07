@@ -54,7 +54,7 @@ fun buildAnonymousElectorDocument(
     aedStatuses: List<AnonymousElectorDocumentStatus> = listOf(buildAnonymousElectorDocumentStatus()),
     requestDateTime: Instant = aValidRequestDateTime(),
     userId: String = aValidUserId(),
-    delivery: AnonymousElectorDocumentDelivery = buildAedDelivery(),
+    delivery: AnonymousElectorDocumentDelivery? = buildAedDelivery(),
     initialRetentionRemovalDate: LocalDate? = null,
     initialRetentionDataRemoved: Boolean = false,
     finalRetentionRemovalDate: LocalDate? = null,

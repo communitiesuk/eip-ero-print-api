@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.service.aed
 
+import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowableOfType
@@ -21,11 +22,13 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUME
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.exception.GenerateAnonymousElectorDocumentValidationException
+import uk.gov.dluhc.printapi.exception.UpdateAnonymousElectorDocumentAllInitialDataRemovedException
 import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.ReIssueAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.service.EroService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEmailAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidPhoneNumber
@@ -165,9 +168,9 @@ internal class AnonymousElectorDocumentServiceTest {
     }
 
     @Nested
-    inner class GetFullyRetainedAnonymousElectorDocumentSummaries {
+    inner class GetAnonymousElectorDocument {
         @Test
-        fun `should return empty summaries for a non existing Anonymous Elector Document pdf`() {
+        fun `should return empty list for a non existing Anonymous Elector Document pdf`() {
             // Given
             val eroId = aValidRandomEroId()
             val applicationId = aValidSourceReference()
@@ -175,32 +178,30 @@ internal class AnonymousElectorDocumentServiceTest {
 
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     anyList(),
                     any(),
                     any(),
-                    any()
                 )
             ).willReturn(emptyList())
 
             // When
-            val actual = anonymousElectorDocumentService.getFullyRetainedAnonymousElectorDocuments(eroId, applicationId)
+            val actual = anonymousElectorDocumentService.getAnonymousElectorDocuments(eroId, applicationId)
 
             // Then
             assertThat(actual).isNotNull.isEmpty()
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 applicationId,
-                false
             )
             verifyNoInteractions(anonymousElectorDocumentMapper)
             verifyNoMoreInteractions(eroService, anonymousElectorDocumentRepository)
         }
 
         @Test
-        fun `should return summary list in descending order of dateCreated for matching Anonymous Elector Documents`() {
+        fun `should return list in descending order of dateCreated for matching Anonymous Elector Documents`() {
             // Given
             val eroId = aValidRandomEroId()
             val applicationId = aValidSourceReference()
@@ -229,14 +230,13 @@ internal class AnonymousElectorDocumentServiceTest {
 
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     anyList(),
                     any(),
                     any(),
-                    any()
                 )
             )
-                .willReturn(listOf(firstAedEntity, secondAedEntity, aedEntityWithLatestDateCreated))
+                .willReturn(listOf(aedEntityWithLatestDateCreated, secondAedEntity, firstAedEntity))
             given(anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(firstAedEntity)).willReturn(
                 expectedDto1
             )
@@ -248,18 +248,17 @@ internal class AnonymousElectorDocumentServiceTest {
             )
 
             // When
-            val actual = anonymousElectorDocumentService.getFullyRetainedAnonymousElectorDocuments(eroId, applicationId)
+            val actual = anonymousElectorDocumentService.getAnonymousElectorDocuments(eroId, applicationId)
 
             // Then
             assertThat(actual).isNotNull.hasSize(3)
                 .usingRecursiveComparison()
                 .isEqualTo(listOf(expectedDto3, expectedDto2, expectedDto1))
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 applicationId,
-                false
             )
             verify(anonymousElectorDocumentMapper).mapToAnonymousElectorDocumentDto(firstAedEntity)
             verify(anonymousElectorDocumentMapper).mapToAnonymousElectorDocumentDto(secondAedEntity)
@@ -293,14 +292,13 @@ internal class AnonymousElectorDocumentServiceTest {
                 dateCreated = Instant.now().minus(2, ChronoUnit.DAYS)
             }
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
-                    any()
                 )
             )
-                .willReturn(listOf(firstIssuedAed, mostRecentIssueAed))
+                .willReturn(listOf(mostRecentIssueAed, firstIssuedAed))
 
             val templateFilename = aTemplateFilename()
             given(pdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
@@ -330,11 +328,65 @@ internal class AnonymousElectorDocumentServiceTest {
             verify(pdfTemplateDetailsFactory).getTemplateDetails(newlyIssuedAed)
             verify(pdfFactory).createPdfContents(templateDetails)
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 dto.sourceReference,
-                false
+            )
+            verify(reIssueAnonymousElectorDocumentMapper).toNewAnonymousElectorDocument(
+                mostRecentIssueAed,
+                dto,
+                templateFilename
+            )
+            verify(anonymousElectorDocumentRepository).save(newlyIssuedAed)
+        }
+
+        @Test
+        fun `should re-issue AED given previous AED has passed initial data retention period`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+            val sourceReference = aValidSourceReference()
+            val mostRecentIssueAed =
+                buildAnonymousElectorDocument(gssCode = gssCodes.first(), sourceReference = sourceReference)
+                    .also { it.removeInitialRetentionPeriodData() }
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+            given(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(any(), any(), any())
+            ).willReturn(listOf(mostRecentIssueAed))
+
+            val templateFilename = aTemplateFilename()
+            given(pdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
+            val templateDetails = buildTemplateDetails()
+            given(pdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
+            val contents = Random.Default.nextBytes(10)
+            given(pdfFactory.createPdfContents(any())).willReturn(contents)
+
+            val certificateNumber = "ZlxBCBxpjseZU5i3ccyL"
+            val newlyIssuedAed = buildAnonymousElectorDocument(
+                certificateNumber = certificateNumber
+            )
+            given(reIssueAnonymousElectorDocumentMapper.toNewAnonymousElectorDocument(any(), any(), any()))
+                .willReturn(newlyIssuedAed)
+
+            val dto = buildReIssueAnonymousElectorDocumentDto(
+                sourceReference = sourceReference
+            )
+
+            // When
+            val actual = anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto)
+
+            // Then
+            assertThat(actual.filename).isEqualTo("anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf")
+            assertThat(actual.contents).isSameAs(contents)
+            verify(pdfTemplateDetailsFactory).getTemplateFilename(gssCodes.first())
+            verify(pdfTemplateDetailsFactory).getTemplateDetails(newlyIssuedAed)
+            verify(pdfFactory).createPdfContents(templateDetails)
+            verify(eroService).lookupGssCodesForEro(eroId)
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
+                gssCodes,
+                ANONYMOUS_ELECTOR_DOCUMENT,
+                dto.sourceReference,
             )
             verify(reIssueAnonymousElectorDocumentMapper).toNewAnonymousElectorDocument(
                 mostRecentIssueAed,
@@ -353,11 +405,10 @@ internal class AnonymousElectorDocumentServiceTest {
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
 
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
-                    any()
                 )
             )
                 .willReturn(emptyList())
@@ -374,17 +425,16 @@ internal class AnonymousElectorDocumentServiceTest {
             assertThat(exception)
                 .hasMessage("Certificate for eroId = $eroId with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${dto.sourceReference} not found")
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 dto.sourceReference,
-                false
             )
         }
     }
 
     @Nested
-    inner class UpdateFullyRetainedAnonymousElectorDocuments {
+    inner class UpdateAnonymousElectorDocuments {
         @Test
         fun `should update elector's email address on single AED`() {
             // Given
@@ -404,16 +454,15 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
-                    any()
                 )
             ).willReturn(listOf(aed))
 
             // When
-            anonymousElectorDocumentService.updateFullyRetainedAnonymousElectorDocuments(eroId, updateAedDto)
+            anonymousElectorDocumentService.updateAnonymousElectorDocuments(eroId, updateAedDto)
 
             // Then
             assertThat(aed.contactDetails!!.email).isEqualTo(newEmailAddress)
@@ -439,16 +488,15 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
-                    any()
                 )
             ).willReturn(listOf(aed))
 
             // When
-            anonymousElectorDocumentService.updateFullyRetainedAnonymousElectorDocuments(eroId, updateAedDto)
+            anonymousElectorDocumentService.updateAnonymousElectorDocuments(eroId, updateAedDto)
 
             // Then
             assertThat(aed.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
@@ -475,16 +523,15 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
-                    any()
                 )
             ).willReturn(listOf(aed))
 
             // When
-            anonymousElectorDocumentService.updateFullyRetainedAnonymousElectorDocuments(eroId, updateAedDto)
+            anonymousElectorDocumentService.updateAnonymousElectorDocuments(eroId, updateAedDto)
 
             // Then
             assertThat(aed.contactDetails!!.email).isEqualTo(newEmailAddress)
@@ -518,22 +565,107 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
-                    any()
                 )
             ).willReturn(listOf(aed1, aed2))
 
             // When
-            anonymousElectorDocumentService.updateFullyRetainedAnonymousElectorDocuments(eroId, updateAedDto)
+            anonymousElectorDocumentService.updateAnonymousElectorDocuments(eroId, updateAedDto)
 
             // Then
             assertThat(aed1.contactDetails!!.email).isEqualTo(newEmailAddress)
             assertThat(aed1.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
             assertThat(aed2.contactDetails!!.email).isEqualTo(newEmailAddress)
             assertThat(aed2.contactDetails!!.phoneNumber).isEqualTo(newPhoneNumber)
+        }
+
+        @Test
+        fun `should skip updating AEDs that have passed the initial retention period`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val gssCodes = listOf(aGssCode(), aGssCode())
+
+            val originalEmailAddress = aValidEmailAddress()
+            val originalPhoneNumber = aValidPhoneNumber()
+            val aed1 = buildAnonymousElectorDocument(
+                gssCode = gssCodes.first(),
+                contactDetails = buildAedContactDetails(email = originalEmailAddress, phoneNumber = originalPhoneNumber)
+            )
+            val aed2InitialDataRemoved =
+                buildAnonymousElectorDocument(
+                    gssCode = gssCodes.first(),
+                    sourceReference = aed1.sourceReference,
+                ).also { it.removeInitialRetentionPeriodData() }
+
+            val newEmailAddress = anotherValidEmailAddress()
+            val updateAedDto = buildUpdateAnonymousElectorDocumentDto(
+                sourceReference = aed1.sourceReference,
+                email = newEmailAddress,
+                phoneNumber = null
+            )
+            given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
+            given(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
+                    any(),
+                    any(),
+                    any(),
+                )
+            ).willReturn(listOf(aed1, aed2InitialDataRemoved))
+            TestLogAppender.reset()
+
+            // When
+            anonymousElectorDocumentService.updateAnonymousElectorDocuments(eroId, updateAedDto)
+
+            // Then
+            assertThat(aed1.contactDetails!!.email).isEqualTo(newEmailAddress)
+            assertThat(aed1.contactDetails!!.phoneNumber).isEqualTo(originalPhoneNumber)
+            assertThat(aed2InitialDataRemoved.contactDetails!!.email).isNull()
+            assertThat(aed2InitialDataRemoved.contactDetails!!.phoneNumber).isNull()
+
+            assertThat(
+                TestLogAppender.hasLog(
+                    "Skipping update for certificate ${aed2InitialDataRemoved.certificateNumber} as it has passed the initial retention period",
+                    Level.INFO
+                )
+            ).isTrue
+        }
+
+        @Test
+        fun `should not update AEDs if all certificates have expired`() {
+            // Given
+            val eroId = aValidRandomEroId()
+            val aed1 = buildAnonymousElectorDocument()
+                .also { it.removeInitialRetentionPeriodData() }
+            val aed2 = buildAnonymousElectorDocument()
+                .also { it.removeInitialRetentionPeriodData() }
+            val updateAedDto = buildUpdateAnonymousElectorDocumentDto(
+                sourceReference = aValidSourceReference()
+            )
+
+            given(eroService.lookupGssCodesForEro(any())).willReturn(listOf(aGssCode(), aGssCode()))
+            given(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
+                    any(),
+                    any(),
+                    any(),
+                )
+            ).willReturn(listOf(aed1, aed2))
+
+            TestLogAppender.reset()
+
+            // When
+            val ex = catchThrowableOfType({
+                anonymousElectorDocumentService.updateAnonymousElectorDocuments(
+                    eroId,
+                    updateAedDto
+                )
+            }, UpdateAnonymousElectorDocumentAllInitialDataRemovedException::class.java)
+
+            // Then
+            assertThat(ex.message).isEqualTo("All certificate for eroId = $eroId with sourceReference = ${updateAedDto.sourceReference} have pass the initial retention period and cannot be updated.")
         }
     }
 }
