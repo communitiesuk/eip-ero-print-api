@@ -175,7 +175,7 @@ internal class UpdateAnonymousElectorDocumentByApplicationIdIntegrationTest : In
             contactDetails = buildAedContactDetails()
         ).also { it.removeInitialRetentionPeriodData() }
         anonymousElectorDocumentRepository.save(aed1WithInitialDataRemoved)
-        Thread.sleep(1000)
+        Thread.sleep(1500)
 
         val dateUpdated1 = aed1WithInitialDataRemoved.contactDetails!!.dateUpdated!!
         val updatedBy1 = aed1WithInitialDataRemoved.contactDetails!!.updatedBy!!
