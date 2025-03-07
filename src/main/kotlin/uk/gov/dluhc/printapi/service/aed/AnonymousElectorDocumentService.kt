@@ -116,11 +116,11 @@ class AnonymousElectorDocumentService(
         gssCodes: List<String>,
         sourceReference: String
     ): List<AnonymousElectorDocument> =
-        anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+        anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
             gssCodes = gssCodes,
             sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
             sourceReference = sourceReference,
-        ).sortedByDescending { it.dateCreated }
+        )
 
     private fun AnonymousElectorDocument.generatePdf(): PdfFile {
         val templateDetails = pdfTemplateDetailsFactory.getTemplateDetails(this)

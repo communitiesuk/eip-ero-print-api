@@ -64,7 +64,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
     }
 
     @Test
-    fun `should return both fully retained and initial data removed anonymous elector documents by application ID`() {
+    fun `should return both fully retained and initial data removed anonymous elector documents by application ID, with newest documents first`() {
         // Given
         val eroResponse = buildElectoralRegistrationOfficeResponse(
             id = ERO_ID,

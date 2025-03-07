@@ -178,7 +178,7 @@ internal class AnonymousElectorDocumentServiceTest {
 
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     anyList(),
                     any(),
                     any(),
@@ -191,7 +191,7 @@ internal class AnonymousElectorDocumentServiceTest {
             // Then
             assertThat(actual).isNotNull.isEmpty()
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 applicationId,
@@ -230,13 +230,13 @@ internal class AnonymousElectorDocumentServiceTest {
 
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     anyList(),
                     any(),
                     any(),
                 )
             )
-                .willReturn(listOf(firstAedEntity, secondAedEntity, aedEntityWithLatestDateCreated))
+                .willReturn(listOf(aedEntityWithLatestDateCreated, secondAedEntity, firstAedEntity))
             given(anonymousElectorDocumentMapper.mapToAnonymousElectorDocumentDto(firstAedEntity)).willReturn(
                 expectedDto1
             )
@@ -255,7 +255,7 @@ internal class AnonymousElectorDocumentServiceTest {
                 .usingRecursiveComparison()
                 .isEqualTo(listOf(expectedDto3, expectedDto2, expectedDto1))
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 applicationId,
@@ -292,13 +292,13 @@ internal class AnonymousElectorDocumentServiceTest {
                 dateCreated = Instant.now().minus(2, ChronoUnit.DAYS)
             }
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
                 )
             )
-                .willReturn(listOf(firstIssuedAed, mostRecentIssueAed))
+                .willReturn(listOf(mostRecentIssueAed, firstIssuedAed))
 
             val templateFilename = aTemplateFilename()
             given(pdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
@@ -328,7 +328,7 @@ internal class AnonymousElectorDocumentServiceTest {
             verify(pdfTemplateDetailsFactory).getTemplateDetails(newlyIssuedAed)
             verify(pdfFactory).createPdfContents(templateDetails)
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 dto.sourceReference,
@@ -352,7 +352,7 @@ internal class AnonymousElectorDocumentServiceTest {
                     .also { it.removeInitialRetentionPeriodData() }
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(any(), any(), any())
             ).willReturn(listOf(mostRecentIssueAed))
 
             val templateFilename = aTemplateFilename()
@@ -383,7 +383,7 @@ internal class AnonymousElectorDocumentServiceTest {
             verify(pdfTemplateDetailsFactory).getTemplateDetails(newlyIssuedAed)
             verify(pdfFactory).createPdfContents(templateDetails)
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 dto.sourceReference,
@@ -405,7 +405,7 @@ internal class AnonymousElectorDocumentServiceTest {
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
 
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
@@ -425,7 +425,7 @@ internal class AnonymousElectorDocumentServiceTest {
             assertThat(exception)
                 .hasMessage("Certificate for eroId = $eroId with sourceType = ANONYMOUS_ELECTOR_DOCUMENT and sourceReference = ${dto.sourceReference} not found")
             verify(eroService).lookupGssCodesForEro(eroId)
-            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReference(
+            verify(anonymousElectorDocumentRepository).findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                 gssCodes,
                 ANONYMOUS_ELECTOR_DOCUMENT,
                 dto.sourceReference,
@@ -454,7 +454,7 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
@@ -488,7 +488,7 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
@@ -523,7 +523,7 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
@@ -565,7 +565,7 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
@@ -608,7 +608,7 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(eroService.lookupGssCodesForEro(any())).willReturn(gssCodes)
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
@@ -647,7 +647,7 @@ internal class AnonymousElectorDocumentServiceTest {
 
             given(eroService.lookupGssCodesForEro(any())).willReturn(listOf(aGssCode(), aGssCode()))
             given(
-                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReference(
+                anonymousElectorDocumentRepository.findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(
                     any(),
                     any(),
                     any(),
