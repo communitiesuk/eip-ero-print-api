@@ -16,65 +16,82 @@ import java.time.temporal.ChronoUnit
 internal class CertificateTest {
 
     @Nested
-    inner class GetPrintRequestsByStatus {
+    inner class GetPrintRequestsByStatusAndBatchId {
 
         @Test
-        fun `should getPrintRequestsByStatus for Certificate with no Print Requests`() {
+        fun `should getPrintRequestsByStatusAndBatchId for Certificate with no Print Requests`() {
             // Given
             val certificate = buildCertificate(printRequests = emptyList())
 
             // When
-            val actual = certificate.getPrintRequestsByStatus(SENT_TO_PRINT_PROVIDER)
+            val actual = certificate.getPrintRequestsByStatusAndBatchId(SENT_TO_PRINT_PROVIDER, aValidBatchId())
 
             // Then
             assertThat(actual).isEmpty()
         }
 
         @Test
-        fun `should getPrintRequestsByStatus for Certificate with no matching Print Requests`() {
+        fun `should getPrintRequestsByStatusAndBatchId for Certificate with no matching Print Requests`() {
             // Given
             val printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
-            val currentPrintRequest = buildPrintRequest(printRequestStatuses = printRequestStatuses)
+            val batchId = aValidBatchId()
+            val currentPrintRequest =
+                buildPrintRequest(printRequestStatuses = printRequestStatuses, batchId = batchId)
             val certificate = buildCertificate(printRequests = listOf(currentPrintRequest))
 
             // When
-            val actual = certificate.getPrintRequestsByStatus(SENT_TO_PRINT_PROVIDER)
+            val actual = certificate.getPrintRequestsByStatusAndBatchId(SENT_TO_PRINT_PROVIDER, batchId)
 
             // Then
             assertThat(actual).isEmpty()
         }
 
         @Test
-        fun `should getPrintRequestsByStatus for Certificate with one matching Print Request`() {
+        fun `should getPrintRequestsByStatusAndBatchId for Certificate with one matching Print Request`() {
             // Given
+            val batchId = aValidBatchId()
             val request = buildPrintRequest(
-                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH)),
+                batchId = batchId,
             )
             val certificate = buildCertificate(printRequests = listOf(request))
 
             // When
-            val actual = certificate.getPrintRequestsByStatus(PENDING_ASSIGNMENT_TO_BATCH)
+            val actual = certificate.getPrintRequestsByStatusAndBatchId(PENDING_ASSIGNMENT_TO_BATCH, batchId)
 
             // Then
             assertThat(actual).containsExactly(request)
         }
 
         @Test
-        fun `should getPrintRequestsByStatus for Certificate with several matching Print Requests`() {
+        fun `should getPrintRequestsByStatusAndBatchId for Certificate with several matching Print Requests`() {
             // Given
+            val batchId = aValidBatchId()
+            val anotherBatchId = aValidBatchId()
             val request1 = buildPrintRequest(
-                printRequestStatuses = listOf(buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER))
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER)),
+                batchId = batchId,
             )
             val request2 = buildPrintRequest(
-                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH)),
+                batchId = batchId,
             )
             val request3 = buildPrintRequest(
-                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH))
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH)),
+                batchId = batchId,
             )
-            val certificate = buildCertificate(printRequests = listOf(request1, request2, request3))
+            val request4 = buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = PENDING_ASSIGNMENT_TO_BATCH)),
+                batchId = anotherBatchId,
+            )
+            val request5 = buildPrintRequest(
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = SENT_TO_PRINT_PROVIDER)),
+                batchId = anotherBatchId,
+            )
+            val certificate = buildCertificate(printRequests = listOf(request1, request2, request3, request4, request5))
 
             // When
-            val actual = certificate.getPrintRequestsByStatus(PENDING_ASSIGNMENT_TO_BATCH)
+            val actual = certificate.getPrintRequestsByStatusAndBatchId(PENDING_ASSIGNMENT_TO_BATCH, batchId)
 
             // Then
             assertThat(actual).containsExactly(request2, request3)

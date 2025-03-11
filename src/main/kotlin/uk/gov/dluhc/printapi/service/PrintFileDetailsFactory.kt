@@ -15,7 +15,7 @@ class PrintFileDetailsFactory(
 ) {
 
     fun createFileDetailsFromCertificates(batchId: String, certificates: List<Certificate>): FileDetails {
-        val fileContents = createFromCertificates(certificates)
+        val fileContents = createFromCertificates(certificates, batchId)
         return FileDetails(
             printRequestsFilename = filenameFactory.createPrintRequestsFilename(batchId, certificates),
             printRequests = fileContents.printRequests,
@@ -23,19 +23,20 @@ class PrintFileDetailsFactory(
         )
     }
 
-    private fun createFromCertificates(certificates: List<Certificate>): FileContents {
+    private fun createFromCertificates(certificates: List<Certificate>, batchId: String): FileContents {
         val printRequests = mutableListOf<PrintRequest>()
         val photoLocations = mutableListOf<PhotoLocation>()
-        certificates.forEach { certificate -> parseCertificate(certificate, printRequests, photoLocations) }
+        certificates.forEach { certificate -> parseCertificate(certificate, printRequests, photoLocations, batchId) }
         return FileContents(printRequests, photoLocations)
     }
 
     private fun parseCertificate(
         certificate: Certificate,
         requests: MutableList<PrintRequest>,
-        photos: MutableList<PhotoLocation>
+        photos: MutableList<PhotoLocation>,
+        batchId: String,
     ) {
-        certificate.getPrintRequestsByStatus(Status.ASSIGNED_TO_BATCH)
+        certificate.getPrintRequestsByStatusAndBatchId(Status.ASSIGNED_TO_BATCH, batchId)
             .forEach { requestInBatch -> processPrintRequest(requestInBatch, certificate, requests, photos) }
     }
 
