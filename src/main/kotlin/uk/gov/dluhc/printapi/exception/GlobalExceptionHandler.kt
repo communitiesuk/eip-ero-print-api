@@ -92,7 +92,8 @@ class GlobalExceptionHandler(
         value = [
             GenerateTemporaryCertificateValidationException::class,
             GenerateAnonymousElectorDocumentValidationException::class,
-            UpdateAnonymousElectorDocumentValidationException::class
+            UpdateAnonymousElectorDocumentValidationException::class,
+            UpdateAnonymousElectorDocumentAllInitialDataRemovedException::class,
         ]
     )
     protected fun handleExceptionReturnBadRequestErrorResponse(

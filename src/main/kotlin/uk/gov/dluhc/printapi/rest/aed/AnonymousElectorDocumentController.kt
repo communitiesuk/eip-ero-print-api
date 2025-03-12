@@ -116,7 +116,7 @@ class AnonymousElectorDocumentController(
         authentication: Authentication
     ) {
         updateRequest.validate()
-        anonymousElectorDocumentService.updateFullyRetainedAnonymousElectorDocuments(
+        anonymousElectorDocumentService.updateAnonymousElectorDocuments(
             eroId, updateAnonymousElectorDocumentMapper.toUpdateAedDto(updateRequest)
         )
     }
@@ -129,7 +129,7 @@ class AnonymousElectorDocumentController(
         @RequestParam applicationId: String,
     ): AnonymousElectorDocumentsResponse {
         val anonymousElectorDocuments = anonymousElectorDocumentService
-            .getFullyRetainedAnonymousElectorDocuments(eroId, applicationId)
+            .getAnonymousElectorDocuments(eroId, applicationId)
             .map { anonymousElectorDocumentMapper.mapToApiAnonymousElectorDocument(it, eroId) }
         return AnonymousElectorDocumentsResponse(anonymousElectorDocuments = anonymousElectorDocuments)
     }

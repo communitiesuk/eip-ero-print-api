@@ -12,7 +12,7 @@ interface AnonymousElectorDocumentRepository : JpaRepository<AnonymousElectorDoc
 
     fun findByGssCodeAndSourceTypeAndSourceReference(gssCode: String, sourceType: SourceType, sourceReference: String): List<AnonymousElectorDocument>
 
-    fun findByGssCodeInAndSourceTypeAndSourceReferenceAndInitialRetentionDataRemoved(gssCodes: List<String>, sourceType: SourceType, sourceReference: String, initialRetentionDataRemoved: Boolean): List<AnonymousElectorDocument>
+    fun findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): List<AnonymousElectorDocument>
 
     fun findBySourceTypeAndInitialRetentionDataRemovedAndInitialRetentionRemovalDateBefore(
         sourceType: SourceType,
