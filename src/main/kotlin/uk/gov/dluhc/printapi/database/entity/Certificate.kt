@@ -136,8 +136,8 @@ class Certificate(
         return this
     }
 
-    fun getPrintRequestsByStatus(printRequestStatus: PrintRequestStatus.Status) =
-        printRequests.filter { it.getCurrentStatus().status == printRequestStatus }
+    fun getPrintRequestsByStatusAndBatchId(printRequestStatus: PrintRequestStatus.Status, batchId: String) =
+        printRequests.filter { it.getCurrentStatus().status == printRequestStatus && it.batchId == batchId }
 
     fun addPrintRequestToBatch(printRequest: PrintRequest, batchId: String) {
         processPrintRequestUpdate {
