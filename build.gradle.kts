@@ -16,7 +16,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
     id("org.openapi.generator") version "7.9.0"
-    id("org.owasp.dependencycheck") version "10.0.4"
+    id("org.owasp.dependencycheck") version "12.1.0"
     id("org.jsonschema2dataclass") version "6.0.0"
 }
 
@@ -80,8 +80,8 @@ dependencies {
     implementation("com.opencsv:opencsv:5.9")
 
     constraints {
-        implementation("org.webjars:swagger-ui:5.17.14") {
-            because("Lower version (imported by org.springdoc:springdoc-openapi-ui:1.8.0) triggers CVE-2024-45801, CVE-2024-47875")
+        implementation("org.webjars:swagger-ui:5.20.0") {
+            because("Lower versions (imported by org.springdoc:springdoc-openapi-ui:1.8.0) triggers CVE-2024-45801, CVE-2024-47875, CVE-2025-26791")
         }
     }
 
@@ -309,4 +309,19 @@ dependencyCheck {
     analyzers.centralEnabled = true
     format = HTML.name
     suppressionFiles = listOf("owasp.suppressions.xml")
+}
+
+/**
+ * The following is to patch vulnerabilities CVE-2025-25193 and CVE-2025-24970,
+ * which are transitively depended on via:
+ * - org.springframework.boot:spring-boot-starter-webflux -> 3.3.8
+ * - io.awspring.cloud:spring-cloud-aws-starter-sqs -> 3.2.0
+ *
+ * In the future, we should reevaluate whether upgrading the above dependencies will resolve the vulnerability.
+ */
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("io.netty:netty-handler")).using(module("io.netty:netty-handler:4.1.118.Final"))
+        substitute(module("io.netty:netty-common")).using(module("io.netty:netty-common:4.1.118.Final"))
+    }
 }
