@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.given
 import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.util.ResourceUtils
 import software.amazon.awssdk.core.sync.RequestBody
@@ -21,9 +20,11 @@ import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.mapper.aed.AedMappingHelper
 import uk.gov.dluhc.printapi.models.ErrorResponse
+import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
+import uk.gov.dluhc.printapi.testsupport.matchingPreSignedAwsS3GetUrl
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidElectoralRollNumber
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
@@ -34,6 +35,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityRespo
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildReIssueAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
+import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -186,13 +188,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val pdfContent = response.responseBody
-        val contentDisposition = response.responseHeaders.contentDisposition
+        val responseBody = response.responseBody.blockFirst()
+        val presignedUrl = responseBody!!.preSignedUrl
 
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             GSS_CODE,
@@ -202,12 +202,12 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         assertThat(electorDocuments)
             .hasSize(2) // Exactly 2 AEDs expected in the database for this sourceReference
             .anyMatch { aed ->
-                // Of the 2 AEDs in the database the response PDF filename will match only one of them.
-                contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+                // Of the 2 AEDs in the database the response URL will match only one of them.
+                aedMatchesPresignedUrl(aed, presignedUrl)
             }
 
         val newlyCreatedAed = electorDocuments.first { aed -> // Get the new AED that this test would have created
-            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            aedMatchesPresignedUrl(aed, presignedUrl)
         }
         assertThat(newlyCreatedAed)
             .hasId()
@@ -216,6 +216,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
                 it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
             }
 
+        val s3Key = "$GSS_CODE/$sourceReference/anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf"
+        val aedFromS3 = getObjectFromS3(s3Key)
+        val pdfContent = aedFromS3.bytes
+
+        assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
@@ -276,13 +281,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val pdfContent = response.responseBody
-        val contentDisposition = response.responseHeaders.contentDisposition
+        val responseBody = response.responseBody.blockFirst()
+        val presignedUrl = responseBody!!.preSignedUrl
 
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             GSS_CODE,
@@ -292,12 +295,12 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         assertThat(electorDocuments)
             .hasSize(3) // Exactly 3 AEDs expected in the database for this sourceReference (one removed, one previous and one reissue)
             .anyMatch { aed ->
-                // Of the 3 AEDs in the database the response PDF filename will match only one of them.
-                contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+                // Of the 3 AEDs in the database the response URL will match only one of them.
+                aedMatchesPresignedUrl(aed, presignedUrl)
             }
 
         val newlyCreatedAed = electorDocuments.first { aed -> // Get the new AED that this test would have created
-            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            aedMatchesPresignedUrl(aed, presignedUrl)
         }
         assertThat(newlyCreatedAed)
             .hasId()
@@ -306,6 +309,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
                 it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
             }
 
+        val s3Key = "$GSS_CODE/$sourceReference/anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf"
+        val aedFromS3 = getObjectFromS3(s3Key)
+        val pdfContent = aedFromS3.bytes
+
+        assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
@@ -366,13 +374,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val pdfContent = response.responseBody
-        val contentDisposition = response.responseHeaders.contentDisposition
+        val responseBody = response.responseBody.blockFirst()
+        val presignedUrl = responseBody!!.preSignedUrl
 
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             GSS_CODE,
@@ -383,11 +389,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .hasSize(3) // Exactly 3 AEDs expected in the database for this sourceReference (two removed and one reissue)
             .anyMatch { aed ->
                 // Of the 3 AEDs in the database the response PDF filename will match only one of them.
-                contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+                aedMatchesPresignedUrl(aed, presignedUrl)
             }
 
         val newlyCreatedAed = electorDocuments.first { aed -> // Get the new AED that this test would have created
-            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            aedMatchesPresignedUrl(aed, presignedUrl)
         }
         assertThat(newlyCreatedAed)
             .hasId()
@@ -396,6 +402,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
                 it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
             }
 
+        val s3Key = "$GSS_CODE/$sourceReference/anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf"
+        val aedFromS3 = getObjectFromS3(s3Key)
+        val pdfContent = aedFromS3.bytes
+
+        assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
@@ -449,12 +460,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val contentDisposition = response.responseHeaders.contentDisposition
+        val responseBody = response.responseBody.blockFirst()
+        val presignedUrl = responseBody!!.preSignedUrl
 
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             GSS_CODE,
@@ -464,7 +474,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
 
         // Get the new AED that this test would have created
         val newlyCreatedAed = electorDocuments.first { aed ->
-            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            aedMatchesPresignedUrl(aed, presignedUrl)
         }
 
         val expectedNewRetentionDate = LocalDate.now().plusMonths(15)
@@ -512,12 +522,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val contentDisposition = response.responseHeaders.contentDisposition
+        val responseBody = response.responseBody.blockFirst()
+        val presignedUrl = responseBody!!.preSignedUrl
 
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             GSS_CODE,
@@ -527,7 +536,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
 
         // Get the new AED that this test would have created
         val newlyCreatedAed = electorDocuments.first { aed ->
-            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            aedMatchesPresignedUrl(aed, presignedUrl)
         }
 
         assertThat(newlyCreatedAed).hasInitialRetentionRemovalDate(null)
@@ -586,12 +595,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val contentDisposition = response.responseHeaders.contentDisposition
+        val responseBody = response.responseBody.blockFirst()
+        val presignedUrl = responseBody!!.preSignedUrl
 
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             GSS_CODE,
@@ -601,7 +609,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
 
         // Get the new AED that this test would have created
         val newlyCreatedAed = electorDocuments.first { aed ->
-            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            aedMatchesPresignedUrl(aed, presignedUrl)
         }
 
         val expectedNewRetentionDate = LocalDate.of(issueDate.year + retentionYears, 7, 1)
@@ -648,12 +656,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             .withBody(requestBody)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val contentDisposition = response.responseHeaders.contentDisposition
+        val responseBody = response.responseBody.blockFirst()
+        val presignedUrl = responseBody!!.preSignedUrl
 
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             GSS_CODE,
@@ -663,7 +670,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
 
         // Get the new AED that this test would have created
         val newlyCreatedAed = electorDocuments.first { aed ->
-            contentDisposition.filename == "anonymous-elector-document-${aed.certificateNumber}.pdf"
+            aedMatchesPresignedUrl(aed, presignedUrl)
         }
 
         assertThat(newlyCreatedAed).hasFinalRetentionRemovalDate(null)
@@ -683,5 +690,11 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
             RequestBody.fromInputStream(ByteArrayInputStream(s3Resource), s3Resource.size.toLong())
         )
         return "arn:aws:s3:::$s3Bucket/$s3Path"
+    }
+
+    private fun aedMatchesPresignedUrl(aed: uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument, presignedUrl: URI): Boolean {
+        val s3Key = "${aed.gssCode}/${aed.sourceReference}/anonymous-elector-document-${aed.certificateNumber}.pdf"
+        val expectedUrl = matchingPreSignedAwsS3GetUrl(s3Key)
+        return presignedUrl.toString().matches(expectedUrl)
     }
 }

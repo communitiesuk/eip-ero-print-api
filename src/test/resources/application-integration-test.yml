@@ -32,6 +32,7 @@ sqs:
 
 s3:
   temporary-certificate-access-duration: 5M
+  aed-access-duration: 5M
   vca-target-bucket: localstack-vca-api-vca-target-bucket
   vca-target-bucket-proxy-endpoint: localhost
   bank-holidays-bucket: test-bank-hols-bucket

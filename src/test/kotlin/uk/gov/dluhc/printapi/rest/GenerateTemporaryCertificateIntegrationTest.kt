@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.util.ResourceUtils
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.GetObjectRequest
-import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.Tag
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
@@ -256,20 +254,4 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         )
         return "arn:aws:s3:::$s3Bucket/$s3Path"
     }
-
-    private fun getObjectFromS3(s3Path: String): S3ObjectData {
-        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
-        val getObjectRequest = GetObjectRequest.builder().bucket(s3Bucket).key(s3Path).build()
-        val objectBytes = s3Client.getObjectAsBytes(getObjectRequest).asByteArray()
-        val objectResponse = s3Client.getObject(getObjectRequest).response()
-        val objectTags =
-            s3Client.getObjectTagging(GetObjectTaggingRequest.builder().bucket(s3Bucket).key(s3Path).build())
-        return S3ObjectData(objectBytes, objectResponse.contentType(), objectTags.tagSet())
-    }
-
-    private class S3ObjectData(
-        val bytes: ByteArray,
-        val contentType: String,
-        val tags: List<Tag>,
-    )
 }

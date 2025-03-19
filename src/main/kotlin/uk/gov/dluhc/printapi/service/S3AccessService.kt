@@ -54,14 +54,30 @@ class S3AccessService(
         }
     }
 
-    /**
-     * Uploads a Temporary Certificate to S3 and returns a presigned URL to access the object.
-     */
     fun uploadTemporaryCertificate(
         gssCode: String,
         applicationId: String,
         fileName: String,
         contents: ByteArray,
+    ): URI = uploadDownloadablePdf(gssCode, applicationId, fileName, contents, s3Properties.temporaryCertificateAccessDuration)
+
+    fun uploadAed(
+        gssCode: String,
+        applicationId: String,
+        fileName: String,
+        contents: ByteArray,
+    ): URI = uploadDownloadablePdf(gssCode, applicationId, fileName, contents, s3Properties.aedAccessDuration)
+
+    /**
+     * Uploads a downloadable PDF - either a Temporary Certificate or an AED - to S3 and
+     * returns a presigned URL to access the object.
+     */
+    private fun uploadDownloadablePdf(
+        gssCode: String,
+        applicationId: String,
+        fileName: String,
+        contents: ByteArray,
+        accessDuration: Duration
     ): URI {
         val s3Path = "$gssCode/$applicationId/$fileName"
         putObjectToTargetBucket(
@@ -71,7 +87,7 @@ class S3AccessService(
             tagObjectForDeletion = true
         )
         val s3Arn = buildS3Arn(s3Path)
-        return generateGetResourceUrl(s3Arn, s3Properties.temporaryCertificateAccessDuration)
+        return generateGetResourceUrl(s3Arn, accessDuration)
     }
 
     private fun putObjectToTargetBucket(

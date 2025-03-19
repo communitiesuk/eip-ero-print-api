@@ -29,6 +29,9 @@ import org.springframework.integration.support.MessageBuilder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest
+import software.amazon.awssdk.services.s3.model.Tag
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDataClient
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
@@ -335,6 +338,22 @@ internal abstract class IntegrationTest {
         val messages = updateStatisticsMessageListenerStub.getMessages()
         Assertions.assertThat(messages).isEmpty()
     }
+
+    protected fun getObjectFromS3(s3Path: String): S3ObjectData {
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
+        val getObjectRequest = GetObjectRequest.builder().bucket(s3Bucket).key(s3Path).build()
+        val objectBytes = s3Client.getObjectAsBytes(getObjectRequest).asByteArray()
+        val objectResponse = s3Client.getObject(getObjectRequest).response()
+        val objectTags =
+            s3Client.getObjectTagging(GetObjectTaggingRequest.builder().bucket(s3Bucket).key(s3Path).build())
+        return S3ObjectData(objectBytes, objectResponse.contentType(), objectTags.tagSet())
+    }
+
+    protected class S3ObjectData(
+        val bytes: ByteArray,
+        val contentType: String,
+        val tags: List<Tag>,
+    )
 
     private fun getSftpInboundDirectoryFileNames() =
         getSftpDirectoryFileNames(sftpInboundTemplate, PRINT_REQUEST_UPLOAD_PATH)
