@@ -10,6 +10,7 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.util.ResourceUtils
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.Tag
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
@@ -22,9 +23,11 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
+import uk.gov.dluhc.printapi.testsupport.matchingPreSignedAwsS3GetUrl
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
@@ -241,14 +244,9 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             .withBody(request)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val pdfContent = response.responseBody
-        val contentDisposition = response.responseHeaders.contentDisposition
-
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             request.gssCode,
             ANONYMOUS_ELECTOR_DOCUMENT,
@@ -267,13 +265,30 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                 it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
             }
 
-        assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf")
+        val responseBody = response.responseBody.blockFirst()
+        val expectedS3Key =
+            "${request.gssCode}/${request.sourceReference}/anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf"
+        val expectedUrl = matchingPreSignedAwsS3GetUrl(expectedS3Key)
+        assertThat(responseBody!!.preSignedUrl).matches {
+            it.toString()
+                .matches(expectedUrl)
+        }
 
+        val aedFromS3 = getObjectFromS3(expectedS3Key)
+        val pdfContent = aedFromS3.bytes
+        assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
             assertThat(text).doesNotContainIgnoringCase(request.surname)
         }
+
+        assertThat(aedFromS3.contentType)
+            .isEqualTo(MediaType.APPLICATION_PDF_VALUE)
+
+        assertThat(aedFromS3.tags).isEqualTo(
+            listOf(Tag.builder().key("ToDelete").value("True").build())
+        )
 
         await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
             assertUpdateStatisticsMessageNotSent()

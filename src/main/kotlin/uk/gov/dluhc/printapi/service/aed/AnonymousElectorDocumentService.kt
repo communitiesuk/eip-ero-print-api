@@ -19,7 +19,9 @@ import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.ReIssueAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.service.EroService
+import uk.gov.dluhc.printapi.service.S3AccessService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
+import java.net.URI
 
 private val logger = KotlinLogging.logger {}
 
@@ -31,7 +33,8 @@ class AnonymousElectorDocumentService(
     private val reIssueAnonymousElectorDocumentMapper: ReIssueAnonymousElectorDocumentMapper,
     private val anonymousElectorDocumentMapper: AnonymousElectorDocumentMapper,
     private val pdfTemplateDetailsFactory: AedPdfTemplateDetailsFactory,
-    private val pdfFactory: PdfFactory
+    private val pdfFactory: PdfFactory,
+    private val s3AccessService: S3AccessService
 ) {
 
     companion object {
@@ -39,17 +42,25 @@ class AnonymousElectorDocumentService(
     }
 
     @Transactional
-    fun generateAnonymousElectorDocument(eroId: String, dto: GenerateAnonymousElectorDocumentDto): PdfFile {
+    fun generateAnonymousElectorDocument(eroId: String, dto: GenerateAnonymousElectorDocumentDto): URI {
         verifyGssCodeIsValidForEro(eroId, dto.gssCode)
         val templateFilename = pdfTemplateDetailsFactory.getTemplateFilename(dto.gssCode)
         with(generateAnonymousElectorDocumentMapper.toAnonymousElectorDocument(dto, templateFilename)) {
             return generatePdf()
+                .let {
+                    s3AccessService.uploadAed(
+                        gssCode = gssCode,
+                        applicationId = sourceReference,
+                        fileName = it.filename,
+                        contents = it.contents
+                    )
+                }
                 .also { anonymousElectorDocumentRepository.save(this) }
         }
     }
 
     @Transactional
-    fun reIssueAnonymousElectorDocument(eroId: String, dto: ReIssueAnonymousElectorDocumentDto): PdfFile {
+    fun reIssueAnonymousElectorDocument(eroId: String, dto: ReIssueAnonymousElectorDocumentDto): URI {
         val gssCodes = eroService.lookupGssCodesForEro(eroId)
         val mostRecentAed = getAnonymousElectorDocumentsSortedByDate(gssCodes, dto.sourceReference)
             .firstOrNull() ?: throw CertificateNotFoundException(eroId, ANONYMOUS_ELECTOR_DOCUMENT, dto.sourceReference)
@@ -63,6 +74,14 @@ class AnonymousElectorDocumentService(
             )
         ) {
             return generatePdf()
+                .let {
+                    s3AccessService.uploadAed(
+                        gssCode = gssCode,
+                        applicationId = sourceReference,
+                        fileName = it.filename,
+                        contents = it.contents
+                    )
+                }
                 .also { anonymousElectorDocumentRepository.save(this) }
         }
     }

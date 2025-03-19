@@ -37,6 +37,7 @@ import uk.gov.dluhc.printapi.mapper.aed.UpdateAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.models.AedSearchSummaryResponse
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentsResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.models.ReIssueAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.models.UpdateAnonymousElectorDocumentRequest
 import uk.gov.dluhc.printapi.rest.HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY
@@ -73,38 +74,36 @@ class AnonymousElectorDocumentController(
 
     @PostMapping
     @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
+    @ResponseStatus(CREATED)
     fun generateAnonymousElectorDocument(
         @PathVariable eroId: String,
         @RequestBody @Valid generateAnonymousElectorDocumentRequest: GenerateAnonymousElectorDocumentRequest,
         authentication: Authentication
-    ): ResponseEntity<InputStreamResource> {
+    ): PreSignedUrlResourceResponse {
         val dto = generateAnonymousElectorDocumentMapper.toGenerateAnonymousElectorDocumentDto(
             apiRequest = generateAnonymousElectorDocumentRequest,
             userId = authentication.name
         )
-        return anonymousElectorDocumentService.generateAnonymousElectorDocument(eroId, dto).let { pdfFile ->
-            ResponseEntity.status(CREATED)
-                .headers(createPdfHttpHeaders(pdfFile))
-                .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
-        }
+        return PreSignedUrlResourceResponse(
+            anonymousElectorDocumentService.generateAnonymousElectorDocument(eroId, dto)
+        )
     }
 
     @PostMapping("/re-issue")
     @PreAuthorize(HAS_ERO_VC_ANONYMOUS_ADMIN_AUTHORITY)
+    @ResponseStatus(CREATED)
     fun reIssueAnonymousElectorDocument(
         @PathVariable eroId: String,
         @RequestBody @Valid reIssueAnonymousElectorDocumentRequest: ReIssueAnonymousElectorDocumentRequest,
         authentication: Authentication
-    ): ResponseEntity<InputStreamResource> {
+    ): PreSignedUrlResourceResponse {
         val dto = reIssueAnonymousElectorDocumentMapper.toReIssueAnonymousElectorDocumentDto(
             apiRequest = reIssueAnonymousElectorDocumentRequest,
             userId = authentication.name
         )
-        return anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto).let { pdfFile ->
-            ResponseEntity.status(CREATED)
-                .headers(createPdfHttpHeaders(pdfFile))
-                .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
-        }
+        return PreSignedUrlResourceResponse(
+            anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto)
+        )
     }
 
     @PatchMapping

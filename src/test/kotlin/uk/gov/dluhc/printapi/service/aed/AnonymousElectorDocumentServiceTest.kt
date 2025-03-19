@@ -27,6 +27,7 @@ import uk.gov.dluhc.printapi.mapper.aed.AnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.GenerateAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.mapper.aed.ReIssueAnonymousElectorDocumentMapper
 import uk.gov.dluhc.printapi.service.EroService
+import uk.gov.dluhc.printapi.service.S3AccessService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aGssCode
@@ -45,6 +46,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.buildTemplateDetails
+import java.net.URI
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.random.Random
@@ -72,6 +74,9 @@ internal class AnonymousElectorDocumentServiceTest {
     @Mock
     private lateinit var pdfFactory: PdfFactory
 
+    @Mock
+    private lateinit var s3AccessService: S3AccessService
+
     @InjectMocks
     private lateinit var anonymousElectorDocumentService: AnonymousElectorDocumentService
 
@@ -87,6 +92,7 @@ internal class AnonymousElectorDocumentServiceTest {
             val templateDetails = buildTemplateDetails()
             val anonymousElectorDocument = buildAnonymousElectorDocument(certificateNumber = certificateNumber)
             val contents = Random.Default.nextBytes(10)
+            val presignedUrl = URI.create("https://localhost/test-url")
 
             given(eroService.isGssCodeValidForEro(any(), any())).willReturn(true)
             given(pdfTemplateDetailsFactory.getTemplateFilename(any())).willReturn(templateFilename)
@@ -95,6 +101,7 @@ internal class AnonymousElectorDocumentServiceTest {
             )
             given(pdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
             given(pdfFactory.createPdfContents(any())).willReturn(contents)
+            given(s3AccessService.uploadAed(any(), any(), any(), any())).willReturn(presignedUrl)
 
             // When
             val actual = anonymousElectorDocumentService.generateAnonymousElectorDocument(eroId, request)
@@ -106,8 +113,13 @@ internal class AnonymousElectorDocumentServiceTest {
             verify(pdfTemplateDetailsFactory).getTemplateDetails(anonymousElectorDocument)
             verify(pdfFactory).createPdfContents(templateDetails)
             verify(anonymousElectorDocumentRepository).save(anonymousElectorDocument)
-            assertThat(actual.filename).isEqualTo("anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf")
-            assertThat(actual.contents).isSameAs(contents)
+            verify(s3AccessService).uploadAed(
+                anonymousElectorDocument.gssCode,
+                anonymousElectorDocument.sourceReference,
+                "anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf",
+                contents
+            )
+            assertThat(actual).isEqualTo(presignedUrl)
         }
 
         @Test
@@ -135,6 +147,7 @@ internal class AnonymousElectorDocumentServiceTest {
                 generateAnonymousElectorDocumentMapper,
                 pdfTemplateDetailsFactory,
                 pdfFactory,
+                s3AccessService,
                 anonymousElectorDocumentRepository
             )
             assertThat(exception).hasMessage("Anonymous Elector Document gssCode 'N06000012' does not exist")
@@ -160,6 +173,7 @@ internal class AnonymousElectorDocumentServiceTest {
                 generateAnonymousElectorDocumentMapper,
                 pdfTemplateDetailsFactory,
                 pdfFactory,
+                s3AccessService,
                 anonymousElectorDocumentRepository
             )
             assertThat(exception)
@@ -306,6 +320,8 @@ internal class AnonymousElectorDocumentServiceTest {
             given(pdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
             val contents = Random.Default.nextBytes(10)
             given(pdfFactory.createPdfContents(any())).willReturn(contents)
+            val presignedUrl = URI.create("https://localhost/test-url")
+            given(s3AccessService.uploadAed(any(), any(), any(), any())).willReturn(presignedUrl)
 
             val certificateNumber = "ZlxBCBxpjseZU5i3ccyL"
             val newlyIssuedAed = buildAnonymousElectorDocument(
@@ -322,8 +338,13 @@ internal class AnonymousElectorDocumentServiceTest {
             val actual = anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto)
 
             // Then
-            assertThat(actual.filename).isEqualTo("anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf")
-            assertThat(actual.contents).isSameAs(contents)
+            assertThat(actual).isEqualTo(presignedUrl)
+            verify(s3AccessService).uploadAed(
+                newlyIssuedAed.gssCode,
+                newlyIssuedAed.sourceReference,
+                "anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf",
+                contents
+            )
             verify(pdfTemplateDetailsFactory).getTemplateFilename(gssCodes.first())
             verify(pdfTemplateDetailsFactory).getTemplateDetails(newlyIssuedAed)
             verify(pdfFactory).createPdfContents(templateDetails)
@@ -361,6 +382,8 @@ internal class AnonymousElectorDocumentServiceTest {
             given(pdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
             val contents = Random.Default.nextBytes(10)
             given(pdfFactory.createPdfContents(any())).willReturn(contents)
+            val presignedUrl = URI.create("https://localhost/test-url")
+            given(s3AccessService.uploadAed(any(), any(), any(), any())).willReturn(presignedUrl)
 
             val certificateNumber = "ZlxBCBxpjseZU5i3ccyL"
             val newlyIssuedAed = buildAnonymousElectorDocument(
@@ -377,8 +400,13 @@ internal class AnonymousElectorDocumentServiceTest {
             val actual = anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto)
 
             // Then
-            assertThat(actual.filename).isEqualTo("anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf")
-            assertThat(actual.contents).isSameAs(contents)
+            assertThat(actual).isEqualTo(presignedUrl)
+            verify(s3AccessService).uploadAed(
+                newlyIssuedAed.gssCode,
+                newlyIssuedAed.sourceReference,
+                "anonymous-elector-document-ZlxBCBxpjseZU5i3ccyL.pdf",
+                contents
+            )
             verify(pdfTemplateDetailsFactory).getTemplateFilename(gssCodes.first())
             verify(pdfTemplateDetailsFactory).getTemplateDetails(newlyIssuedAed)
             verify(pdfFactory).createPdfContents(templateDetails)

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.23.4'
+  version: '1.24.0'
   description: Print APIs
 #
 # --------------------------------------------------------------------------------
@@ -579,13 +579,7 @@ paths:
         $ref: '#/components/requestBodies/GenerateTemporaryCertificate'
       responses:
         '201':
-          description: created
-          headers:
-            Content-Disposition:
-              description: Content-Disposition header
-              schema:
-                type: string
-                example: attachment; filename="temporary-certificate-DGFF4E6420YHWPJYX560.pdf"
+          $ref: '#/components/responses/PreSignedUrlResource'
         '400':
           $ref: '#/components/responses/400ErrorResponse'
         '404':
@@ -900,13 +894,7 @@ paths:
         $ref: '#/components/requestBodies/GenerateAnonymousElectorDocument'
       responses:
         '201':
-          description: created
-          headers:
-            Content-Disposition:
-              description: Content-Disposition header
-              schema:
-                type: string
-                example: attachment; filename="anonymous-elector-document-DGFF4E6420YHWPJYX560.pdf"
+          $ref: '#/components/responses/PreSignedUrlResource'
         '400':
           $ref: '#/components/responses/400ErrorResponse'
         '404':
@@ -1048,13 +1036,7 @@ paths:
         $ref: '#/components/requestBodies/ReIssueAnonymousElectorDocument'
       responses:
         '201':
-          description: created
-          headers:
-            Content-Disposition:
-              description: Content-Disposition header
-              schema:
-                type: string
-                example: attachment; filename="anonymous-elector-document-DGFF4E6420YHWPJYX560.pdf"
+          $ref: '#/components/responses/PreSignedUrlResource'
         '400':
           $ref: '#/components/responses/400ErrorResponse'
         '404':
