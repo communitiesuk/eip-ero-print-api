@@ -1,5 +1,5 @@
 # Print Provider Schema
-# v1.0.0
+# v1.1.0
 This folder contains the Print Provider schema files.
 
 The schema is defined in `yamlschema`. Each type is defined in its own file.
@@ -13,6 +13,7 @@ The schema is defined in `yamlschema`. Each type is defined in its own file.
 | 0.0.4       | 04/11/2022 | Corrected `requestId` data type. Updated descriptions and examples.                                                  |
 | 0.0.5       | 17/11/2022 | Removed `cardVersion` min/max length constraints; set example to 'A' to reflect data sent.                           |
 | 1.0.0       | 29/11/2022 | Changed to semantic versioning of the spec. Updated `certificateFormat` with options `easy-print` and `large-print`  |
+| 1.1.0       | 09/05/2023 | Updated to move responsibilty from Issue Date and Suggested Expiry Date to Print Provider.                      |
 
 ## Audience
 The intended audience / users of these schema files are the Print Provider, and EROP.
