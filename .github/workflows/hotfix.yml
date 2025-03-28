@@ -1,4 +1,4 @@
-name: "Hotfix: Tag and build"
+name: "Hotfix: Build, tag, and push hotfix image"
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
           MATCHING_TAGS=$(git tag --contains HEAD)
           echo "Matching tags: $MATCHING_TAGS"
           echo "MATCHING_TAGS=$MATCHING_TAGS" >> $GITHUB_ENV
-          
+
   tag:
     runs-on: ubuntu-latest
     needs: check-untagged
@@ -58,10 +58,9 @@ jobs:
       - name: Push version tag
         run: |
           tag=${{ steps.bump-semver.outputs.new_version }}
-          message='${{ github.event.head_commit.message }}'
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag -a "${tag}" -m "${message}"
+          git tag "${tag}"
           git push origin "${tag}"
 
   build-and-push:
