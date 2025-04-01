@@ -311,18 +311,3 @@ dependencyCheck {
     format = HTML.name
     suppressionFiles = listOf("owasp.suppressions.xml")
 }
-
-/**
- * The following is to patch vulnerabilities CVE-2025-25193 and CVE-2025-24970,
- * which are transitively depended on via:
- * - org.springframework.boot:spring-boot-starter-webflux -> 3.3.8
- * - io.awspring.cloud:spring-cloud-aws-starter-sqs -> 3.2.0
- *
- * In the future, we should reevaluate whether upgrading the above dependencies will resolve the vulnerability.
- */
-configurations.all {
-    resolutionStrategy.dependencySubstitution {
-        substitute(module("io.netty:netty-handler")).using(module("io.netty:netty-handler:4.1.118.Final"))
-        substitute(module("io.netty:netty-common")).using(module("io.netty:netty-common:4.1.118.Final"))
-    }
-}
