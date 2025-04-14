@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.service
 
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Nested
