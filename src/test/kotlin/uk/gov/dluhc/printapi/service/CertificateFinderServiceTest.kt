@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -67,10 +68,9 @@ internal class CertificateFinderServiceTest {
             given(certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(null)
 
             // When
-            val error = Assertions.catchThrowableOfType(
-                { certificateFinderService.getCertificate(eroId, sourceType, sourceReference) },
-                CertificateNotFoundException::class.java
-            )
+            val error = catchThrowableOfType(CertificateNotFoundException::class.java) {
+                certificateFinderService.getCertificate(eroId, sourceType, sourceReference)
+            }
 
             // Then
             verify(eroService).lookupGssCodesForEro(eroId)
@@ -106,10 +106,9 @@ internal class CertificateFinderServiceTest {
             given(certificateRepository.findBySourceTypeAndSourceReference(any(), any())).willReturn(null)
 
             // When
-            val error = Assertions.catchThrowableOfType(
-                { certificateFinderService.getCertificate(sourceType, sourceReference) },
-                CertificateNotFoundException::class.java
-            )
+            val error = catchThrowableOfType(CertificateNotFoundException::class.java) {
+                certificateFinderService.getCertificate(sourceType, sourceReference)
+            }
 
             // Then
             verify(certificateRepository).findBySourceTypeAndSourceReference(sourceType, sourceReference)

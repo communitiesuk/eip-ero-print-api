@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -56,10 +57,9 @@ internal class EroServiceTest {
             given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOfficeGssCodes(any())).willThrow(expected)
 
             // When
-            val ex = Assertions.catchThrowableOfType(
-                { eroService.lookupGssCodesForEro(eroId) },
-                ElectoralRegistrationOfficeNotFoundException::class.java
-            )
+            val ex = catchThrowableOfType(ElectoralRegistrationOfficeNotFoundException::class.java) {
+                eroService.lookupGssCodesForEro(eroId)
+            }
 
             // Then
             assertThat(ex).isEqualTo(expected)
@@ -74,10 +74,9 @@ internal class EroServiceTest {
             given(electoralRegistrationOfficeManagementApiClient.getElectoralRegistrationOfficeGssCodes(any())).willThrow(expected)
 
             // When
-            val ex = Assertions.catchThrowableOfType(
-                { eroService.lookupGssCodesForEro(eroId) },
-                ElectoralRegistrationOfficeGeneralException::class.java
-            )
+            val ex = catchThrowableOfType(ElectoralRegistrationOfficeGeneralException::class.java) {
+                eroService.lookupGssCodesForEro(eroId)
+            }
 
             // Then
             assertThat(ex).isEqualTo(expected)
@@ -128,10 +127,9 @@ internal class EroServiceTest {
             given(electoralRegistrationOfficeManagementApiClient.getEro(any())).willThrow(expected)
 
             // When
-            val ex = Assertions.catchThrowableOfType(
-                { eroService.isGssCodeValidForEro(gssCode, eroIdToMatch = eroId) },
-                ElectoralRegistrationOfficeNotFoundException::class.java
-            )
+            val ex = catchThrowableOfType(ElectoralRegistrationOfficeNotFoundException::class.java) {
+                eroService.isGssCodeValidForEro(gssCode, eroIdToMatch = eroId)
+            }
 
             // Then
             assertThat(ex).isEqualTo(expected)

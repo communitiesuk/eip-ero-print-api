@@ -103,10 +103,9 @@ internal class TemporaryCertificateServiceTest {
         given(eroClient.getEro(any())).willThrow(ElectoralRegistrationOfficeNotFoundException::class.java)
 
         // When
-        val exception = catchThrowableOfType(
-            { temporaryCertificateService.generateTemporaryCertificate(eroId, request) },
-            GenerateTemporaryCertificateValidationException::class.java
-        )
+        val exception = catchThrowableOfType(GenerateTemporaryCertificateValidationException::class.java) {
+            temporaryCertificateService.generateTemporaryCertificate(eroId, request)
+        }
 
         // Then
         verify(validator).validate(request)
@@ -131,10 +130,9 @@ internal class TemporaryCertificateServiceTest {
         given(eroClient.getEro(any())).willReturn(eroDetails)
 
         // When
-        val exception = catchThrowableOfType(
-            { temporaryCertificateService.generateTemporaryCertificate(eroIdInRequest, request) },
-            GenerateTemporaryCertificateValidationException::class.java
-        )
+        val exception = catchThrowableOfType(GenerateTemporaryCertificateValidationException::class.java) {
+            temporaryCertificateService.generateTemporaryCertificate(eroIdInRequest, request)
+        }
 
         // Then
         verify(validator).validate(request)

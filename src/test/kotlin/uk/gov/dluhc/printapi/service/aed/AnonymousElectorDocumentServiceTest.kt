@@ -135,10 +135,9 @@ internal class AnonymousElectorDocumentServiceTest {
             ).willThrow(ElectoralRegistrationOfficeNotFoundException::class.java)
 
             // When
-            val exception = Assertions.catchThrowableOfType(
-                { anonymousElectorDocumentService.generateAnonymousElectorDocument(eroId, request) },
-                GenerateAnonymousElectorDocumentValidationException::class.java
-            )
+            val exception = catchThrowableOfType(GenerateAnonymousElectorDocumentValidationException::class.java) {
+                anonymousElectorDocumentService.generateAnonymousElectorDocument(eroId, request)
+            }
 
             // Then
             verify(eroService).isGssCodeValidForEro(request.gssCode, eroId)
@@ -161,10 +160,9 @@ internal class AnonymousElectorDocumentServiceTest {
             given(eroService.isGssCodeValidForEro(any(), any())).willReturn(false)
 
             // When
-            val exception = Assertions.catchThrowableOfType(
-                { anonymousElectorDocumentService.generateAnonymousElectorDocument(eroIdInRequest, request) },
-                GenerateAnonymousElectorDocumentValidationException::class.java
-            )
+            val exception = catchThrowableOfType(GenerateAnonymousElectorDocumentValidationException::class.java) {
+                anonymousElectorDocumentService.generateAnonymousElectorDocument(eroIdInRequest, request)
+            }
 
             // Then
             verify(eroService).isGssCodeValidForEro(request.gssCode, eroIdInRequest)
@@ -444,10 +442,9 @@ internal class AnonymousElectorDocumentServiceTest {
             val dto = buildReIssueAnonymousElectorDocumentDto()
 
             // When
-            val exception = catchThrowableOfType(
-                { anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto) },
-                CertificateNotFoundException::class.java
-            )
+            val exception = catchThrowableOfType(CertificateNotFoundException::class.java) {
+                anonymousElectorDocumentService.reIssueAnonymousElectorDocument(eroId, dto)
+            }
 
             // Then
             assertThat(exception)
@@ -685,12 +682,12 @@ internal class AnonymousElectorDocumentServiceTest {
             TestLogAppender.reset()
 
             // When
-            val ex = catchThrowableOfType({
+            val ex = catchThrowableOfType(UpdateAnonymousElectorDocumentAllInitialDataRemovedException::class.java) {
                 anonymousElectorDocumentService.updateAnonymousElectorDocuments(
                     eroId,
                     updateAedDto
                 )
-            }, UpdateAnonymousElectorDocumentAllInitialDataRemovedException::class.java)
+            }
 
             // Then
             assertThat(ex.message).isEqualTo("All certificate for eroId = $eroId with sourceReference = ${updateAedDto.sourceReference} have pass the initial retention period and cannot be updated.")

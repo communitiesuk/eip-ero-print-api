@@ -42,10 +42,9 @@ class GenerateTemporaryCertificateValidatorTest {
         )
 
         // When
-        val exception = catchThrowableOfType(
-            { validator.validate(inValidDto) },
-            GenerateTemporaryCertificateValidationException::class.java
-        )
+        val exception = catchThrowableOfType(GenerateTemporaryCertificateValidationException::class.java) {
+            validator.validate(inValidDto)
+        }
 
         // Then
         assertThat(exception)
@@ -60,10 +59,9 @@ class GenerateTemporaryCertificateValidatorTest {
             validOnDate = invalidDate
         )
 
-        val exception = catchThrowableOfType(
-            { validator.validate(inValidDto) },
-            GenerateTemporaryCertificateValidationException::class.java
-        )
+        val exception = catchThrowableOfType(GenerateTemporaryCertificateValidationException::class.java) {
+            validator.validate(inValidDto)
+        }
 
         // Then
         assertThat(exception)

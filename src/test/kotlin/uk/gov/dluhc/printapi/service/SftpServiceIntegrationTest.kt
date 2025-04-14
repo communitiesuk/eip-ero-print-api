@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.service
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowableOfType
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
@@ -38,11 +39,9 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
             val filenameToProcess = "missing-file.json"
 
             // When
-            val ex =
-                Assertions.catchThrowableOfType(
-                    { sftpService.fetchFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess) },
-                    IOException::class.java
-                )
+            val ex = catchThrowableOfType(IOException::class.java) {
+                sftpService.fetchFileFromOutBoundDirectory(PRINT_RESPONSE_DOWNLOAD_PATH, filenameToProcess)
+            }
 
             // Then
             assertThat(ex).hasMessageContaining("Failed to read file [EROP/Dev/OutBound/missing-file.json]")
