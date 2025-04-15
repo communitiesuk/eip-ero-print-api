@@ -6,7 +6,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "3.3.7"
+    id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "1.9.25"
     kotlin("kapt") version "1.9.25"
@@ -16,7 +16,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
     id("org.openapi.generator") version "7.9.0"
-    id("org.owasp.dependencycheck") version "10.0.4" // version 11+ causes build failures, see https://github.com/spring-projects/spring-boot/issues/42952#issuecomment-2506304372
+    id("org.owasp.dependencycheck") version "12.1.0"
     id("org.jsonschema2dataclass") version "6.0.0"
 }
 
@@ -268,6 +268,7 @@ tasks.withType<KtLintCheckTask> {
 }
 
 tasks.withType<BootBuildImage> {
+    builder.set("paketobuildpacks/builder-jammy-base")
     environment.set(mapOf("BP_HEALTH_CHECKER_ENABLED" to "true"))
     buildpacks.set(
         listOf(
@@ -309,19 +310,4 @@ dependencyCheck {
     analyzers.centralEnabled = true
     format = HTML.name
     suppressionFiles = listOf("owasp.suppressions.xml")
-}
-
-/**
- * The following is to patch vulnerabilities CVE-2025-25193 and CVE-2025-24970,
- * which are transitively depended on via:
- * - org.springframework.boot:spring-boot-starter-webflux -> 3.3.8
- * - io.awspring.cloud:spring-cloud-aws-starter-sqs -> 3.2.0
- *
- * In the future, we should reevaluate whether upgrading the above dependencies will resolve the vulnerability.
- */
-configurations.all {
-    resolutionStrategy.dependencySubstitution {
-        substitute(module("io.netty:netty-handler")).using(module("io.netty:netty-handler:4.1.118.Final"))
-        substitute(module("io.netty:netty-common")).using(module("io.netty:netty-common:4.1.118.Final"))
-    }
 }

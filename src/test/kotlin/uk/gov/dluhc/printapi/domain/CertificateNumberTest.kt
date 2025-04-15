@@ -55,8 +55,9 @@ internal class CertificateNumberTest {
         val proposedCertificateNumber = "123XYZ"
 
         // When
-        val ex =
-            catchThrowableOfType({ CertificateNumber(proposedCertificateNumber) }, IllegalArgumentException::class.java)
+        val ex = catchThrowableOfType(IllegalArgumentException::class.java) {
+            CertificateNumber(proposedCertificateNumber)
+        }
 
         // Then
         assertThat(ex.message).isEqualTo("CertificateNumber value length must be 20")
@@ -68,8 +69,9 @@ internal class CertificateNumberTest {
         val proposedCertificateNumber = "gZZZZZZZZZZZxZZZZZZ7"
 
         // When
-        val ex =
-            catchThrowableOfType({ CertificateNumber(proposedCertificateNumber) }, IllegalArgumentException::class.java)
+        val ex = catchThrowableOfType(IllegalArgumentException::class.java) {
+            CertificateNumber(proposedCertificateNumber)
+        }
 
         // Then
         assertThat(ex.message).isEqualTo("CertificateNumber value must only contain characters from [0123456789ACDEFGHJKLMNPQRTUVWXYZ]")
@@ -81,8 +83,9 @@ internal class CertificateNumberTest {
         val proposedCertificateNumber = "1ZZZZZZZZZZZ3ZZZZZZ7"
 
         // When
-        val ex =
-            catchThrowableOfType({ CertificateNumber(proposedCertificateNumber) }, IllegalArgumentException::class.java)
+        val ex = catchThrowableOfType(IllegalArgumentException::class.java) {
+            CertificateNumber(proposedCertificateNumber)
+        }
 
         // Then
         assertThat(ex.message).isEqualTo("CertificateNumber value last character must be a 0 or 1")
