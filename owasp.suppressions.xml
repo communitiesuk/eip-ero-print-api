@@ -19,4 +19,22 @@
         <packageUrl regex="true">^pkg:maven/commons\-io/commons\-io@.*$</packageUrl>
         <vulnerabilityName>CVE-2024-47554</vulnerabilityName>
     </suppress>
+    <suppress until="2025-07-01Z">
+        <notes>
+            <![CDATA[file name: jsonschema2pojo-core-1.1.2.jar]]>
+
+            No available fix at the time of writing.
+
+            jsonschema2dataclass:6.0.0 imports jsonschema2pojo:1.1.2.
+
+            jsonschema2dataclass has not had a release since Jan 2023,
+            so the suppression date has been set until Q3 2025
+
+            The attack requires a maliciously crafted yaml spec,
+            which would require write access to the source code.
+            The inputs we provide do not result in this issue.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.jsonschema2pojo/jsonschema2pojo-core@.*$</packageUrl>
+        <vulnerabilityName>CVE-2025-3588</vulnerabilityName>
+    </suppress>
 </suppressions>
