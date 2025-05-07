@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
-import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidBatchId
 

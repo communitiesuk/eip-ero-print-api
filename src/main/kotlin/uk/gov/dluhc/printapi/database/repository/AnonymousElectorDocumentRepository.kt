@@ -12,7 +12,7 @@ interface AnonymousElectorDocumentRepository : JpaRepository<AnonymousElectorDoc
 
     fun findByGssCodeAndSourceTypeAndSourceReference(gssCode: String, sourceType: SourceType, sourceReference: String): List<AnonymousElectorDocument>
 
-    fun findByGssCodeInAndSourceTypeAndSourceReference(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): List<AnonymousElectorDocument>
+    fun findByGssCodeInAndSourceTypeAndSourceReferenceOrderByDateCreatedDesc(gssCodes: List<String>, sourceType: SourceType, sourceReference: String): List<AnonymousElectorDocument>
 
     fun findBySourceTypeAndInitialRetentionDataRemovedAndInitialRetentionRemovalDateBefore(
         sourceType: SourceType,
@@ -24,6 +24,11 @@ interface AnonymousElectorDocumentRepository : JpaRepository<AnonymousElectorDoc
         sourceType: SourceType,
         finalRetentionRemovalDate: LocalDate
     ): List<AnonymousElectorDocument>
+
+    fun existsByPhotoLocationArnEqualsAndFinalRetentionRemovalDateGreaterThanEqual(
+        photoLocationArn: String,
+        finalRetentionRemovalDate: LocalDate
+    ): Boolean
 }
 
 object AnonymousElectorDocumentRepositoryExtensions {
@@ -38,6 +43,13 @@ object AnonymousElectorDocumentRepositoryExtensions {
     fun AnonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType: SourceType): List<AnonymousElectorDocument> {
         return findBySourceTypeAndFinalRetentionRemovalDateBefore(
             sourceType = sourceType,
+            finalRetentionRemovalDate = LocalDate.now()
+        )
+    }
+
+    fun AnonymousElectorDocumentRepository.shouldRetainPhoto(photoLocationArn: String): Boolean {
+        return existsByPhotoLocationArnEqualsAndFinalRetentionRemovalDateGreaterThanEqual(
+            photoLocationArn = photoLocationArn,
             finalRetentionRemovalDate = LocalDate.now()
         )
     }

@@ -18,6 +18,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfInitialRetentionData
+import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.shouldRetainPhoto
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
@@ -41,7 +42,7 @@ internal class AedDataRetentionServiceTest {
     private lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
 
     @Mock
-    private lateinit var s3PhotoService: S3PhotoService
+    private lateinit var s3AccessService: S3AccessService
 
     @InjectMocks
     private lateinit var aedDataRetentionService: AedDataRetentionService
@@ -127,18 +128,43 @@ internal class AedDataRetentionServiceTest {
         @Test
         fun `should remove anonymous elector document final retention data`() {
             // Given
-            val aed1 = buildAnonymousElectorDocument(photoLocationArn = aPhotoArn())
-            val aed2 = buildAnonymousElectorDocument(photoLocationArn = anotherPhotoArn())
+            val aed1 = buildAnonymousElectorDocument(persisted = true, photoLocationArn = aPhotoArn())
+            val aed2 = buildAnonymousElectorDocument(persisted = true, photoLocationArn = anotherPhotoArn())
             val sourceType = ANONYMOUS_ELECTOR_DOCUMENT
             given(anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType)).willReturn(listOf(aed1, aed2))
+            given(anonymousElectorDocumentRepository.shouldRetainPhoto(aed1.photoLocationArn)).willReturn(false)
+            given(anonymousElectorDocumentRepository.shouldRetainPhoto(aed2.photoLocationArn)).willReturn(false)
 
             // When
             aedDataRetentionService.removeFinalRetentionPeriodData(sourceType)
 
             // Then
             verify(anonymousElectorDocumentRepository).findPendingRemovalOfFinalRetentionData(sourceType)
-            verify(s3PhotoService).removePhoto(aed1.photoLocationArn)
-            verify(s3PhotoService).removePhoto(aed2.photoLocationArn)
+            verify(s3AccessService).removeDocument(aed1.photoLocationArn)
+            verify(s3AccessService).removeDocument(aed2.photoLocationArn)
+            verify(anonymousElectorDocumentRepository).deleteById(aed1.id!!)
+            verify(anonymousElectorDocumentRepository).deleteById(aed2.id!!)
+        }
+
+        @Test
+        fun `should not remove photo if photo should be retained`() {
+            // Given
+            val aed1 = buildAnonymousElectorDocument(persisted = true, photoLocationArn = aPhotoArn())
+            val aed2 = buildAnonymousElectorDocument(persisted = true, photoLocationArn = anotherPhotoArn())
+            val sourceType = ANONYMOUS_ELECTOR_DOCUMENT
+            given(anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType)).willReturn(
+                listOf(aed1, aed2)
+            )
+            given(anonymousElectorDocumentRepository.shouldRetainPhoto(aed1.photoLocationArn)).willReturn(false)
+            given(anonymousElectorDocumentRepository.shouldRetainPhoto(aed2.photoLocationArn)).willReturn(true)
+
+            // When
+            aedDataRetentionService.removeFinalRetentionPeriodData(sourceType)
+
+            // Then
+            verify(anonymousElectorDocumentRepository).findPendingRemovalOfFinalRetentionData(sourceType)
+            verify(s3AccessService).removeDocument(aed1.photoLocationArn)
+            verify(s3AccessService, never()).removeDocument(aed2.photoLocationArn)
             verify(anonymousElectorDocumentRepository).deleteById(aed1.id!!)
             verify(anonymousElectorDocumentRepository).deleteById(aed2.id!!)
         }

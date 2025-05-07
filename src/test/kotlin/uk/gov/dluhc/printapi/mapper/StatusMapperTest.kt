@@ -40,15 +40,12 @@ class StatusMapperTest {
     fun `should throw exception given statusStep is NOT_MINUS_DELIVERED and status is SUCCESS`() {
         // Given
         // When
-        val ex = Assertions.catchThrowableOfType(
-            {
-                statusMapper.toStatusEntityEnum(
-                    ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
-                    ProcessPrintResponseMessage.Status.SUCCESS
-                )
-            },
-            IllegalArgumentException::class.java
-        )
+        val ex = Assertions.catchThrowableOfType(IllegalArgumentException::class.java) {
+            statusMapper.toStatusEntityEnum(
+                ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+                ProcessPrintResponseMessage.Status.SUCCESS
+            )
+        }
 
         // Then
         assertThat(ex).isNotNull.hasMessage("Print status cannot be in statusStep [NOT_MINUS_DELIVERED] when the status is [SUCCESS]")

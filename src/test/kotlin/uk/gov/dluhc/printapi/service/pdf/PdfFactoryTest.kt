@@ -45,7 +45,7 @@ internal class PdfFactoryTest {
                 "ero-contact-3" to address.town!!,
                 "ero-contact-4" to address.area!!,
                 "ero-contact-5" to address.postcode,
-                "ero-contact-6" to emailAddress,
+                "ero-contact-6" to emailAddress!!,
                 "ero-contact-7" to phoneNumber,
             )
         }
@@ -70,7 +70,7 @@ internal class PdfFactoryTest {
                 "ero-contact-3" to address.town!!,
                 "ero-contact-4" to address.area!!,
                 "ero-contact-5" to address.postcode,
-                "ero-contact-6" to emailAddress,
+                "ero-contact-6" to emailAddress!!,
                 "ero-contact-7" to phoneNumber,
             )
         }

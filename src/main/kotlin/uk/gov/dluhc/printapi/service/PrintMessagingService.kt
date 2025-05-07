@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
 import org.springframework.stereotype.Service
-import uk.gov.dluhc.printapi.messaging.MessageQueue
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 
 @Service

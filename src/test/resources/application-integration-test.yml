@@ -1,20 +1,18 @@
-cloud:
-  aws:
-    region:
-      static: eu-west-2
-    credentials:
-      access-key: test
-      secret-key: test
-    sqs:
-      endpoint: http://replaced-by-localStackContainerSettings-bean
-
 spring:
   datasource:
     username: root
     password: password
   liquibase:
     contexts: ddl
-
+  cloud:
+    aws:
+      region:
+        static: eu-west-2
+      credentials:
+        access-key: test
+        secret-key: test
+      sqs:
+        endpoint: http://replaced-by-localStackContainerSettings-bean
   jpa:
     properties:
       hibernate:
@@ -29,10 +27,16 @@ sqs:
   process-print-response-queue-name: process-print-response
   application-removed-queue-name: application-removed
   remove-certificate-queue-name: remove-certificate
+  trigger-voter-card-statistics-update-queue-name: trigger-voter-card-statistics-update.fifo
+  trigger-application-statistics-update-queue-name: trigger-application-statistics-update.fifo
 
 s3:
-  certificate-photos-target-bucket: localstack-vca-api-vca-target-bucket
-  certificate-photos-target-bucket-proxy-endpoint: localhost
+  temporary-certificate-access-duration: 5M
+  aed-access-duration: 5M
+  vca-target-bucket: localstack-vca-api-vca-target-bucket
+  vca-target-bucket-proxy-endpoint: localhost
+  bank-holidays-bucket: test-bank-hols-bucket
+  bank-holidays-bucket-object-key: test-bank-holidays.json
 
 api:
   print-api:
@@ -79,3 +83,5 @@ jobs:
   enabled: false
   batch-print-requests:
     batch-size: 100
+
+caching.time-to-live: PT2S  #Time period of 2 seconds

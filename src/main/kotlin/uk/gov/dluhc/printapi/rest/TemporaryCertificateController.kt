@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.rest
 
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
@@ -16,18 +17,20 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.dto.PdfFile
 import uk.gov.dluhc.printapi.mapper.GenerateTemporaryCertificateMapper
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateSummaryMapper
 import uk.gov.dluhc.printapi.models.GenerateTemporaryCertificateRequest
+import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.models.TemporaryCertificateSummariesResponse
+import uk.gov.dluhc.printapi.service.StatisticsUpdateService
 import uk.gov.dluhc.printapi.service.pdf.ExplainerPdfService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateService
 import uk.gov.dluhc.printapi.service.temporarycertificate.TemporaryCertificateSummaryService
 import java.io.ByteArrayInputStream
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin
@@ -36,6 +39,7 @@ class TemporaryCertificateController(
     private val temporaryCertificateSummaryMapper: TemporaryCertificateSummaryMapper,
     @Qualifier("temporaryCertificateExplainerExplainerPdfService") private val explainerPdfService: ExplainerPdfService,
     private val temporaryCertificateService: TemporaryCertificateService,
+    private val statisticsUpdateService: StatisticsUpdateService,
     private val generateTemporaryCertificateMapper: GenerateTemporaryCertificateMapper,
 ) {
 
@@ -71,21 +75,21 @@ class TemporaryCertificateController(
 
     @PostMapping("/eros/{eroId}/temporary-certificates")
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)
+    @ResponseStatus(CREATED)
     fun generateTemporaryCertificate(
         @PathVariable eroId: String,
         @RequestBody @Valid generateTemporaryCertificateRequest: GenerateTemporaryCertificateRequest,
         authentication: Authentication
-    ): ResponseEntity<InputStreamResource> {
+    ): PreSignedUrlResourceResponse {
         val userId = authentication.name
         val dto = generateTemporaryCertificateMapper.toGenerateTemporaryCertificateDto(
             generateTemporaryCertificateRequest,
             userId
         )
-        return temporaryCertificateService.generateTemporaryCertificate(eroId, dto).let { pdfFile ->
-            ResponseEntity.status(CREATED)
-                .headers(createPdfHttpHeaders(pdfFile))
-                .body(InputStreamResource(ByteArrayInputStream(pdfFile.contents)))
-        }
+        return temporaryCertificateService.generateTemporaryCertificate(eroId, dto)
+            .also {
+                statisticsUpdateService.triggerVoterCardStatisticsUpdate(dto.sourceReference)
+            }.let { presignedUrl -> PreSignedUrlResourceResponse(presignedUrl) }
     }
 
     @PreAuthorize(HAS_ERO_VC_ADMIN_AUTHORITY)

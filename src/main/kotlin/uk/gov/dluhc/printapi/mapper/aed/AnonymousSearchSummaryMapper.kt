@@ -17,6 +17,6 @@ abstract class AnonymousSearchSummaryMapper {
 
     abstract fun toAedSearchSummaryResponse(aedSummaryResultsDto: AnonymousSearchSummaryResults): AedSearchSummaryResponse
 
-    @Mapping(target = "status", constant = "PRINTED")
+    @Mapping(target = "status", expression = "java(dto.getInitialRetentionDataRemoved() ? AnonymousElectorDocumentStatus.EXPIRED : AnonymousElectorDocumentStatus.PRINTED)")
     protected abstract fun toAedSearchSummaryApi(dto: AnonymousSearchSummaryDto): AedSearchSummaryApi
 }

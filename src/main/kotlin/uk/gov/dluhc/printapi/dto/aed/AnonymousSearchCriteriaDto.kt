@@ -10,4 +10,5 @@ data class AnonymousSearchCriteriaDto(
 
 enum class AedSearchBy {
     SURNAME,
+    APPLICATION_REFERENCE,
 }

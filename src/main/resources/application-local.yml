@@ -1,0 +1,90 @@
+server:
+  port: 8085
+
+WIREMOCK_HOST: localhost
+WIRE_MOCK_PORT: 58080
+
+LOCALSTACK_HOST: localhost
+LOCALSTACK_PORT: 54566
+
+MYSQL_HOST: localhost
+MYSQL_PORT: 53306
+MYSQL_USER: root
+MYSQL_PASSWORD: password
+
+SFTP_HOST: localhost
+SFTP_PORT: 52222
+
+spring:
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: test
+        secret-key: test
+      sqs:
+        endpoint: http://${LOCALSTACK_HOST}:${LOCALSTACK_PORT}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.eu-west-2.amazonaws.com/${COGNITO_USER_POOL_ID}/.well-known/jwks.json
+
+s3:
+  localEndpointOverride: http://${LOCALSTACK_HOST}:${LOCALSTACK_PORT}
+
+LIQUIBASE_CONTEXTS: ddl
+
+API_PRINT_API_BASE_URL: http://localhost:${server.port}
+API_ERO_MANAGEMENT_URL: http://${WIREMOCK_HOST}:${WIRE_MOCK_PORT}/ero-management-api
+
+SQS_SEND_APPLICATION_TO_PRINT_QUEUE_NAME: send-application-to-print-queue
+SQS_PROCESS_PRINT_REQUEST_BATCH_QUEUE_NAME: process-print-request-batch-queue
+SQS_PROCESS_PRINT_RESPONSE_FILE_QUEUE_NAME: process-print-response-file-queue
+SQS_PROCESS_PRINT_RESPONSE_QUEUE_NAME: process-print-response-queue
+SQS_APPLICATION_REMOVED_QUEUE_NAME: application-removed-queue
+SQS_REMOVE_CERTIFICATE_QUEUE_NAME: remove-certificate-queue
+SQS_TRIGGER_VOTER_CARD_STATISTICS_UPDATE_QUEUE_NAME: trigger-voter-card-statistics-update-queue
+SQS_TRIGGER_APPLICATION_STATISTICS_UPDATE_QUEUE_NAME: trigger-application-statistics-update-queue
+
+S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_NAME: vca-target-bucket
+S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT: localhost
+S3_BANK_HOLIDAYS_BUCKET_NAME: bank-hols-bucket
+S3_BANK_HOLIDAYS_BUCKET_OBJECT_KEY: bank-holidays.json
+
+sftp:
+  host: ${SFTP_HOST}
+  port: ${SFTP_PORT}
+  user: user
+  private-key: |-
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCayuCxAaOEYfyE
+    ckcZPCm2mLhzeiTR5JWorcONcrdDsyyGFXAeoPU7VLU/H8EZmyWVWVTFtw0xqLX2
+    iQJzmidZPqO57YU+OoGxEObf6hADTEqW61QZFJ46b/8QZfLfcASVx861ZupolJYa
+    axeWu6x6+B3+KYxqud08Vwr99PjWyuXXpDnSQo/28SgNPi/wm3pKeCTdJ3QzbJRg
+    sF6DyU48rCsaELXnMRjy6pF42kzNwzTS6L/lkppD+7ZFq/JRvGhGTDtVs/jTM03i
+    LoKzV6tvFQJ/3Z/koQu3Jl6qjNv0eXSOEG2sNgzMbOGxEfruOF2Zxi0QFaj/d+X3
+    1LEu8dVrAgMBAAECggEAKTS0l6oeA1GqTP+22Yrgd9Ez2Nm9D3rQNDT9h5vwGT+L
+    LK5sSFsErSShkwo69zwLxzQekvtlscB9oAFc+7UfoGxCXW5TN/uPJrmfHCBM3vPi
+    L0a5/ms0q83AknbxLnW9Yrnr1vJsmCZlxuaXQvL2uU1vfodE7+xGbpelP3GFBHhY
+    tvlfYamJ0yDLhlQoN3TIX7RJL+TdgmbLIE6jdQGw2YloFL4qHH7xveK1rMQt6NHR
+    aqYDAdngPrdv2xF1+tyHdTgSA1EI7nrHRM9Rn6WuhMveV6cNlxHgeQ389+D1wIAH
+    IUE8S/fR8lm80DbxJL8+12u9JBKuK5py1Pzez1PeEQKBgQDHs0ewhSVUhTBrLJnw
+    vbNIo2fcDkkZpfPkzmj0+hBqSm3CgGnKzI1VLMaVV34J7XQT4hib7EeVsIB6XYAw
+    V9oMW0GNEHkBlBFnjV+R2xqt78E+PlfmY53x7UK4iVsa4+fpR1jhNKV6pS4syVbQ
+    wJfFjSzpp4MfJLdGzAibZfEAFQKBgQDGboWWqyj6k35fgYfFh2npzWHMmyC3toZA
+    W1fwP8dNX+IOlq8ukJKXxQTLcz4ceYmV+PNkZN5mjzOHeEc2N7ZcttbOJqn8CZO+
+    P5TTdBWw85jdHtedprPPWWSLML/reuYDHQmzEiqtTCO/lqWiCe9Pfe5VhM66IJdD
+    s9uGY69ffwKBgQC4HHR6rLZW7xhNpugiCHLzBBvryIvihpqOFzKysJ1TsVzyFjvy
+    yZV/snE/HFPKSU5cSnXPww3YVsqMhgl6CHSyMawEpuw45U8Kfk9fBHbbZ5Bsl0Oo
+    16y1b720roX9C6My8iFiN4xcv08L4XAVs4n5iweeP17m5o3GSrOguWJwZQKBgF18
+    XHurj9bd/j/IqsqpDYEVPepDe5qR55YScs/BfIg7kCkHXOk3O5k9PREM7kpECEob
+    y6+UxiLTfJdqV0J35PaxPWpKVPNlH7IWCmvE2SNQ4Mfsa/DeRQB/QRtCkGjEsfDt
+    kVBIUsrqgD0XIFnDDHgLAGpR84NFL366Ecay2EDJAoGACAu7LSDUC/g56G3Puj4F
+    D/vVlTegHg/9oBEiDE4G9sdVbY11xdKxtxDyoAB3yTl+Q2J3Bei4dafB+QOISmG4
+    u3QTpGj9UrZmhExoFzW2IzTaidiqZ/Vh6ffLJ80FGKdiPDOt9HK62e2Ft1IxWlLm
+    47oGutsp1o6qL7xtHcr62QA=
+    -----END PRIVATE KEY-----
+  print-request-upload-directory: EROP/Dev/InBound
+  print-response-download-directory: EROP/Dev/OutBound

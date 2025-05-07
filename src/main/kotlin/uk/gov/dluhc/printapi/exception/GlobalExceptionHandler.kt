@@ -1,10 +1,13 @@
 package uk.gov.dluhc.printapi.exception
 
+import jakarta.servlet.RequestDispatcher.ERROR_MESSAGE
+import jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_GATEWAY
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -16,8 +19,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiException
 import uk.gov.dluhc.printapi.config.ApiRequestErrorAttributes
 import uk.gov.dluhc.printapi.models.ErrorResponse
-import javax.servlet.RequestDispatcher.ERROR_MESSAGE
-import javax.servlet.RequestDispatcher.ERROR_STATUS_CODE
 
 /**
  * Global Exception Handler. Handles specific exceptions thrown by the application by returning a suitable [ErrorResponse]
@@ -53,7 +54,7 @@ class GlobalExceptionHandler(
     protected fun handleExceptionReturnBadGatewayErrorResponse(
         e: RuntimeException,
         request: WebRequest,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Any>? {
         /*
         The message property of ElectoralRegistrationOfficeManagementApiException
         contains too much detail of the nature of the error, and we would be exposing details of the internals of the
@@ -80,7 +81,7 @@ class GlobalExceptionHandler(
     protected fun handleExceptionReturnNotFoundErrorResponse(
         e: RuntimeException,
         request: WebRequest,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Any>? {
         return populateErrorResponseAndHandleExceptionInternal(e, NOT_FOUND, request)
     }
 
@@ -90,14 +91,31 @@ class GlobalExceptionHandler(
     @ExceptionHandler(
         value = [
             GenerateTemporaryCertificateValidationException::class,
-            GenerateAnonymousElectorDocumentValidationException::class
+            GenerateAnonymousElectorDocumentValidationException::class,
+            UpdateAnonymousElectorDocumentValidationException::class,
+            UpdateAnonymousElectorDocumentAllInitialDataRemovedException::class,
         ]
     )
     protected fun handleExceptionReturnBadRequestErrorResponse(
         e: RuntimeException,
         request: WebRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Any>? {
         return populateErrorResponseAndHandleExceptionInternal(e, BAD_REQUEST, request)
+    }
+
+    /**
+     * Exception handler to return a 413 Payload Too Large ErrorResponse
+     */
+    @ExceptionHandler(
+        value = [
+            ResponseFileTooLargeException::class,
+        ]
+    )
+    protected fun handleExceptionReturnContentTooLargeErrorResponse(
+        e: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<Any>? {
+        return populateErrorResponseAndHandleExceptionInternal(e, PAYLOAD_TOO_LARGE, request)
     }
 
     /**
@@ -106,9 +124,9 @@ class GlobalExceptionHandler(
     override fun handleHttpMessageNotReadable(
         e: HttpMessageNotReadableException,
         headers: HttpHeaders,
-        status: HttpStatus,
+        status: HttpStatusCode,
         request: WebRequest,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Any>? {
         return populateErrorResponseAndHandleExceptionInternal(e, BAD_REQUEST, request)
     }
 
@@ -118,17 +136,17 @@ class GlobalExceptionHandler(
     override fun handleMethodArgumentNotValid(
         e: MethodArgumentNotValidException,
         headers: HttpHeaders,
-        status: HttpStatus,
+        status: HttpStatusCode,
         request: WebRequest,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Any>? {
         return populateErrorResponseAndHandleExceptionInternal(e, BAD_REQUEST, request)
     }
 
     private fun populateErrorResponseAndHandleExceptionInternal(
         exception: Exception,
-        status: HttpStatus,
+        status: HttpStatusCode,
         request: WebRequest,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Any>? {
         request.setAttribute(ERROR_STATUS_CODE, status.value(), SCOPE_REQUEST)
         val body = errorAttributes.getErrorResponse(request)
         return handleExceptionInternal(exception, body, HttpHeaders(), status, request)

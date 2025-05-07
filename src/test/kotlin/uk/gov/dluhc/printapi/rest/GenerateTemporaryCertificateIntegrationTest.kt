@@ -3,18 +3,22 @@ package uk.gov.dluhc.printapi.rest
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.util.ResourceUtils
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.Tag
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.models.ErrorResponse
+import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
+import uk.gov.dluhc.printapi.testsupport.matchingPreSignedAwsS3GetUrl
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidLocalAuthorityName
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAdminBearerToken
@@ -26,6 +30,7 @@ import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
@@ -35,7 +40,9 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         private const val GSS_CODE = "W06000023"
         private const val CERTIFICATE_SAMPLE_PHOTO =
             "classpath:temporary-certificate-template/sample-certificate-photo.png"
-        private const val MAX_SIZE_2_MB = 2 * 1024 * 1024
+        private const val LARGE_CERTIFICATE_SAMPLE_PHOTO =
+            "classpath:temporary-certificate-template/sample-too-large-certificate-photo.png"
+        private const val MAX_SIZE_20_MB = 20 * 1024 * 1024
     }
 
     @Test
@@ -167,15 +174,15 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
     }
 
     @Test
-    fun `should return temporary certificate pdf given valid request for authorised user`() {
+    fun `should create a temporary certificate and return a presigned url to S3 given valid request for authorised user`() {
         // Given
-        val photoLocationArn = addPhotoToS3()
+        val photoLocationArn = addPhotoToS3(CERTIFICATE_SAMPLE_PHOTO)
         val request = buildGenerateTemporaryCertificateRequest(photoLocation = photoLocationArn)
         val localAuthorityName = aValidLocalAuthorityName()
         val localAuthorities: List<LocalAuthorityResponse> = listOf(
             buildLocalAuthorityResponse(
                 gssCode = request.gssCode,
-                contactDetailsEnglish = buildContactDetails(name = localAuthorityName)
+                contactDetailsEnglish = buildContactDetails(nameVac = localAuthorityName)
             )
         )
         val eroResponse = buildElectoralRegistrationOfficeResponse(id = ERO_ID, localAuthorities = localAuthorities)
@@ -184,7 +191,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
 
         // When
         val response = webTestClient.mutate()
-            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_2_MB) }
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_SIZE_20_MB) }
             .build().post()
             .uri(URI_TEMPLATE, ERO_ID)
             .bearerToken(getVCAdminBearerToken(eroId = ERO_ID))
@@ -192,9 +199,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
             .withBody(request)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
         val temporaryCertificates = temporaryCertificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(
@@ -204,21 +209,39 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         )
         assertThat(temporaryCertificates).hasSize(1)
         val temporaryCertificate = temporaryCertificates[0]
-        val contentDisposition = response.responseHeaders.contentDisposition
-        assertThat(contentDisposition.filename)
-            .isEqualTo("temporary-certificate-${temporaryCertificate.certificateNumber}.pdf")
 
-        val pdfContent = response.responseBody
+        val responseBody = response.responseBody.blockFirst()
+        val expectedS3Key =
+            "${request.gssCode}/${request.sourceReference}/temporary-certificate-${temporaryCertificate.certificateNumber}.pdf"
+        val expectedUrl = matchingPreSignedAwsS3GetUrl(expectedS3Key)
+        assertThat(responseBody!!.preSignedUrl).matches {
+            it.toString()
+                .matches(expectedUrl)
+        }
+
+        val temporaryCertificateFromS3 = getObjectFromS3(expectedS3Key)
+        val pdfContent = temporaryCertificateFromS3.bytes
         assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(localAuthorityName)
         }
+
+        assertThat(temporaryCertificateFromS3.contentType)
+            .isEqualTo(MediaType.APPLICATION_PDF_VALUE)
+
+        assertThat(temporaryCertificateFromS3.tags).isEqualTo(
+            listOf(Tag.builder().key("ToDelete").value("True").build())
+        )
+
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageSent(request.sourceReference)
+        }
     }
 
-    private fun addPhotoToS3(): String {
-        val s3Resource = ResourceUtils.getFile(CERTIFICATE_SAMPLE_PHOTO).readBytes()
-        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+    private fun addPhotoToS3(filepath: String): String {
+        val s3Resource = ResourceUtils.getFile(filepath).readBytes()
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
         val s3Path = "E09000007/0013a30ac9bae2ebb9b1239b/${UUID.randomUUID()}/8a53a30ac9bae2ebb9b1239b-test-photo.png"
 
         // add resource to S3

@@ -24,7 +24,8 @@ fun buildAnonymousSearchSummaryDto(
     dateTimeCreated: Instant = aValidRequestDateTime(),
     firstName: String = aValidFirstName(),
     surname: String = aValidSurname(),
-    postcode: String = faker.address().postcode(),
+    postcode: String? = faker.address().postcode(),
+    initialRetentionDataRemoved: Boolean = false,
 ): AnonymousSearchSummaryDto {
     return AnonymousSearchSummaryDto(
         gssCode = gssCode,
@@ -36,6 +37,7 @@ fun buildAnonymousSearchSummaryDto(
         dateTimeCreated = dateTimeCreated,
         firstName = firstName,
         surname = surname,
-        postcode = postcode
+        postcode = postcode,
+        initialRetentionDataRemoved = initialRetentionDataRemoved
     )
 }

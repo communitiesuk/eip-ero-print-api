@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
-import com.jcraft.jsch.ChannelSftp.LsEntry
+import org.apache.sshd.sftp.client.SftpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -64,7 +64,7 @@ internal class SftpServiceTest {
         fun `should return empty list on SFTP folder when no files are present`() {
             // Given
             val filesDirectoryPath = "/sftp/OutBound"
-            given(sftpOutboundTemplate.list(any())).willReturn(emptyList<LsEntry>().toTypedArray())
+            given(sftpOutboundTemplate.list(any())).willReturn(emptyList<SftpClient.DirEntry>().toTypedArray())
 
             // When
             val fileList = sftpService.identifyFilesToBeProcessed(filesDirectoryPath)
@@ -78,12 +78,12 @@ internal class SftpServiceTest {
         @Test
         fun `should return empty list on SFTP folder when only processing files are present`() {
             // Given
-            val lsEntry1 = mockLsEntryForFilename("status-20221101171156056.json.processing")
-            val lsEntry2 = mockLsEntryForFilename("status-20221125171156053.json.processing")
-            val lsEntry3 = mockLsEntryForFilename("status-20221031171156051.json.processing")
+            val dirEntry1 = mockDirEntryForFilename("status-20221101171156056.json.processing")
+            val dirEntry2 = mockDirEntryForFilename("status-20221125171156053.json.processing")
+            val dirEntry3 = mockDirEntryForFilename("status-20221031171156051.json.processing")
             val filesDirectoryPath = "/sftp/OutBound"
 
-            given(sftpOutboundTemplate.list(any())).willReturn(listOf(lsEntry1, lsEntry2, lsEntry3).toTypedArray())
+            given(sftpOutboundTemplate.list(any())).willReturn(listOf(dirEntry1, dirEntry2, dirEntry3).toTypedArray())
 
             // When
             val fileList = sftpService.identifyFilesToBeProcessed(filesDirectoryPath)
@@ -97,11 +97,11 @@ internal class SftpServiceTest {
         @Test
         fun `should list files on SFTP folder`() {
             // Given
-            val matchedFile1 = mockLsEntryForFilename(aValidPrintResponseFileName())
-            val matchedFile2 = mockLsEntryForFilename("status-20221101171156056.json")
-            val matchedFile3 = mockLsEntryForFilename("status-20221125171156053.json")
-            val matchedFile4 = mockLsEntryForFilename("status-20221031171156051.json")
-            val alreadyProcessedFile = mockLsEntryForFilename("status-20221201671156099.json.processing")
+            val matchedFile1 = mockDirEntryForFilename(aValidPrintResponseFileName())
+            val matchedFile2 = mockDirEntryForFilename("status-20221101171156056.json")
+            val matchedFile3 = mockDirEntryForFilename("status-20221125171156053.json")
+            val matchedFile4 = mockDirEntryForFilename("status-20221031171156051.json")
+            val alreadyProcessedFile = mockDirEntryForFilename("status-20221201671156099.json.processing")
             val expectedFileCount = 4
             val filesDirectoryPath = "/sftp/OutBound"
 
@@ -144,7 +144,7 @@ internal class SftpServiceTest {
         )
         fun `should not list files on SFTP folder for filename not matching pattern`(fileName: String) {
             // Given
-            val mismatchedPatternFile = mockLsEntryForFilename(fileName)
+            val mismatchedPatternFile = mockDirEntryForFilename(fileName)
             val filesDirectoryPath = "/sftp/OutBound"
 
             given(sftpOutboundTemplate.list(any())).willReturn(listOf(mismatchedPatternFile).toTypedArray())
@@ -178,9 +178,9 @@ internal class SftpServiceTest {
         }
     }
 
-    private fun mockLsEntryForFilename(filename: String): LsEntry {
-        val lsEntry: LsEntry = mock(LsEntry::class.java)
-        given(lsEntry.filename).willReturn(filename)
-        return lsEntry
+    private fun mockDirEntryForFilename(filename: String): SftpClient.DirEntry {
+        val dirEntry: SftpClient.DirEntry = mock(SftpClient.DirEntry::class.java)
+        given(dirEntry.filename).willReturn(filename)
+        return dirEntry
     }
 }

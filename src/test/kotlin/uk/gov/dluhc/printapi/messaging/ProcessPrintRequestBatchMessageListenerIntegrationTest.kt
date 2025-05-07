@@ -1,16 +1,20 @@
 package uk.gov.dluhc.printapi.messaging
 
-import com.jcraft.jsch.ChannelSftp
+import jakarta.transaction.Transactional
+import org.apache.sshd.sftp.client.SftpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import org.springframework.integration.file.remote.InputStreamCallback
 import org.springframework.test.context.transaction.TestTransaction
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.S3_BUCKET_CONTAINING_PHOTOS
+import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration.Companion.VCA_TARGET_BUCKET
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
@@ -24,19 +28,20 @@ import java.io.ByteArrayInputStream
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
-import javax.transaction.Transactional
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : IntegrationTest() {
 
-    @Test
     @Transactional
-    fun `should process print request batch message`() {
+    @ParameterizedTest
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should process print request batch message`(isFromApplicationsApi: Boolean?) {
         // Given
         val batchId = aValidBatchId()
         val requestId = aValidRequestId()
         val s3ResourceContents = "S3 Object Contents"
-        val s3Bucket = S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = VCA_TARGET_BUCKET
         val s3Path =
             "E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
 
@@ -65,7 +70,8 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
                         )
                     )
                 )
-            )
+            ),
+            isFromApplicationsApi = isFromApplicationsApi
         )
         certificate = certificateRepository.save(certificate)
         TestTransaction.flagForCommit()
@@ -78,7 +84,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
 
         // When
         TestTransaction.start()
-        sqsMessagingTemplate.convertAndSend(processPrintRequestBatchQueueName, payload)
+        sqsTemplate.send(processPrintRequestBatchQueueName, payload)
         TestTransaction.flagForCommit()
         TestTransaction.end()
 
@@ -90,6 +96,11 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
             verifySftpZipFile(sftpDirectoryList, batchId, listOf(requestId), s3ResourceContents)
             val processedCertificate = certificateRepository.findById(certificate.id!!).get()
             assertThat(processedCertificate.status).isEqualTo(SENT_TO_PRINT_PROVIDER)
+            if (isFromApplicationsApi == true) {
+                assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
+            } else {
+                assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+            }
         }
     }
 
@@ -101,7 +112,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
         val firstRequestId = aValidRequestId()
         val secondRequestId = aValidRequestId()
         val s3ResourceContents = "S3 Object Contents"
-        val s3Bucket = S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = VCA_TARGET_BUCKET
         val s3Path =
             "E09000007/0013a30ac9bae2ebb9b1239b/0d77b2ad-64e7-4aa9-b4de-d58380392962/8a53a30ac9bae2ebb9b1239b-initial-photo-1.png"
 
@@ -153,7 +164,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
 
         // When
         TestTransaction.start()
-        sqsMessagingTemplate.convertAndSend(processPrintRequestBatchQueueName, payload)
+        sqsTemplate.send(processPrintRequestBatchQueueName, payload)
         TestTransaction.flagForCommit()
         TestTransaction.end()
 
@@ -165,11 +176,12 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
             verifySftpZipFile(sftpDirectoryList, batchId, listOf(firstRequestId, secondRequestId), s3ResourceContents)
             val processedCertificate = certificateRepository.findById(certificate.id!!).get()
             assertThat(processedCertificate.status).isEqualTo(SENT_TO_PRINT_PROVIDER)
+            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
         }
     }
 
     private fun verifySftpZipFile(
-        sftpDirectoryList: List<ChannelSftp.LsEntry>,
+        sftpDirectoryList: List<SftpClient.DirEntry>,
         batchId: String,
         requestIdList: List<String>,
         s3ResourceContents: String

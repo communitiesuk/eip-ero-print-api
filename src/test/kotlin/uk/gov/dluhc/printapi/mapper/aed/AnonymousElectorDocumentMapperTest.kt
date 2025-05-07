@@ -11,6 +11,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -32,8 +33,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildAnonymousElectorD
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.aed.buildValidAddressDto
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedContactDetails
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildAnonymousElectorDocumentApi
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
@@ -103,15 +104,15 @@ class AnonymousElectorDocumentMapperTest {
                             middleNames = middleNames,
                             surname = surname,
                             addressee = addressee,
-                            registeredAddress = with(registeredAddress) {
+                            registeredAddress = registeredAddress?.let {
                                 buildValidAddress(
-                                    street = street,
-                                    postcode = postcode,
-                                    property = property,
-                                    locality = locality,
-                                    town = town,
-                                    area = area,
-                                    uprn = uprn,
+                                    street = it.street,
+                                    postcode = it.postcode,
+                                    property = it.property,
+                                    locality = it.locality,
+                                    town = it.town,
+                                    area = it.area,
+                                    uprn = it.uprn,
                                 )
                             },
                             email = email,
@@ -132,7 +133,7 @@ class AnonymousElectorDocumentMapperTest {
             // Then
             assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
             verify(certificateLanguageMapper).mapDtoToApi(dtoRequest.certificateLanguage)
-            verify(supportingInformationFormatMapper).mapDtoToApi(dtoRequest.supportingInformationFormat)
+            verify(supportingInformationFormatMapper).mapDtoToApi(dtoRequest.supportingInformationFormat!!)
             verify(deliveryAddressTypeMapper).mapDtoToApi(DtoDeliveryAddressType.ERO_COLLECTION)
             verify(instantMapper).toOffsetDateTime(dtoRequest.requestDateTime)
             verifyNoMoreInteractions(
@@ -155,7 +156,7 @@ class AnonymousElectorDocumentMapperTest {
                     middleNames = "J",
                     surname = "Bloggs"
                 ),
-                delivery = buildDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
+                delivery = buildAedDelivery(deliveryAddressType = ERO_COLLECTION, collectionReason = "Away from home")
             )
             given(certificateLanguageMapper.mapEntityToDto(any())).willReturn(DtoCertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapEntityToDto(any())).willReturn(AnonymousSupportingInformationFormatDtoEnum.BRAILLE)
@@ -209,6 +210,60 @@ class AnonymousElectorDocumentMapperTest {
             verify(certificateLanguageMapper).mapEntityToDto(entityRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapEntityToDto(entityRequest.supportingInformationFormat!!)
             verify(deliveryAddressTypeMapper).mapEntityToDto(ERO_COLLECTION)
+            verifyNoMoreInteractions(certificateLanguageMapper, supportingInformationFormatMapper, deliveryAddressTypeMapper)
+            verifyNoInteractions(instantMapper)
+        }
+
+        @Test
+        fun `should map expired AnonymousElectorDocument entity to an AnonymousElectorDocumentDto`() {
+            // Given
+            val entityRequest = buildAnonymousElectorDocument(
+                contactDetails = buildAedContactDetails(
+                    firstName = "John",
+                    middleNames = "J",
+                    surname = "Bloggs"
+                ),
+            ).also { it.removeInitialRetentionPeriodData() }
+            given(certificateLanguageMapper.mapEntityToDto(any())).willReturn(DtoCertificateLanguage.EN)
+
+            val expected = with(entityRequest) {
+                buildAnonymousElectorDocumentDto(
+                    certificateNumber = certificateNumber,
+                    electoralRollNumber = electoralRollNumber,
+                    gssCode = gssCode,
+                    sourceReference = sourceReference,
+                    applicationReference = applicationReference,
+                    certificateLanguage = DtoCertificateLanguage.EN,
+                    supportingInformationFormat = null,
+                    deliveryAddressType = null,
+                    collectionReason = delivery?.collectionReason,
+                    elector = with(contactDetails!!) {
+                        buildAnonymousElectorDto(
+                            firstName = firstName,
+                            middleNames = middleNames,
+                            surname = surname,
+                            addressee = "John J Bloggs",
+                            registeredAddress = null,
+                            email = null,
+                            phoneNumber = null,
+                        )
+                    },
+                    photoLocationArn = photoLocationArn,
+                    issueDate = issueDate,
+                    status = DtoAnonymousElectorDocumentStatus.EXPIRED,
+                    userId = userId,
+                    requestDateTime = requestDateTime,
+                )
+            }
+
+            // When
+            val actual = mapper.mapToAnonymousElectorDocumentDto(entityRequest)
+
+            // Then
+            assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+            verify(certificateLanguageMapper).mapEntityToDto(entityRequest.certificateLanguage)
+            verify(supportingInformationFormatMapper).mapEntityToDto(anyOrNull())
+            verify(deliveryAddressTypeMapper).mapEntityToDto(anyOrNull())
             verifyNoMoreInteractions(certificateLanguageMapper, supportingInformationFormatMapper, deliveryAddressTypeMapper)
             verifyNoInteractions(instantMapper)
         }

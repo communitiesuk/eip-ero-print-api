@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="0030a_add_index_for_source_reference_to_certificate" author="kirsty.land@softwire.com" context="ddl">
+        <createIndex tableName="certificate" indexName="certificate_source_reference_idx">
+            <column name="source_reference"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="certificate" indexName="certificate_source_reference_idx"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="0030b_add_index_for_source_reference_to_temporary_certificate" author="kirsty.land@softwire.com" context="ddl">
+        <createIndex tableName="temporary_certificate" indexName="temp_certificate_source_reference_idx">
+            <column name="source_reference"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="temporary_certificate" indexName="temp_certificate_source_reference_idx"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

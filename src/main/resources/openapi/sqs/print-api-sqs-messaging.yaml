@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print API SQS Message Types
-  version: '1.9.5'
+  version: '1.10.0'
   description: |-
     Print API SQS Message Types
     
@@ -146,6 +146,9 @@ components:
           maxLength: 1024
           description: The userId (email address) of the EROP user requesting the print
           example: fred.bloggs@some-domain.co.uk
+        isFromApplicationsApi:
+          type: boolean
+          description: It indicates that the message comes from the Applications Api or the legacy Voter Card Applications API
       required:
         - sourceReference
         - sourceType

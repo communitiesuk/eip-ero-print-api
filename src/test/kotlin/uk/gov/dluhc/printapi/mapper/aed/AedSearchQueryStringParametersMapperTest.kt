@@ -18,6 +18,7 @@ class AedSearchQueryStringParametersMapperTest {
         value = [
             ", ,,", // null [searchBy, searchValue]
             "SURNAME, Thomas, SURNAME",
+            "APPLICATION_REFERENCE, V123ABC456, APPLICATION_REFERENCE",
         ]
     )
     fun `should map AedSearchQueryStringParameters to AnonymousSearchCriteriaDto given searchBy and searchName values`(

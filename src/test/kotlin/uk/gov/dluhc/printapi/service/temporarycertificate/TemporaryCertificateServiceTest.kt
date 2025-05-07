@@ -16,6 +16,7 @@ import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeNotFoundException
 import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.exception.GenerateTemporaryCertificateValidationException
 import uk.gov.dluhc.printapi.mapper.TemporaryCertificateMapper
+import uk.gov.dluhc.printapi.service.S3AccessService
 import uk.gov.dluhc.printapi.service.pdf.PdfFactory
 import uk.gov.dluhc.printapi.service.pdf.TemporaryCertificatePdfTemplateDetailsFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRandomEroId
@@ -25,6 +26,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildTemporaryCertifica
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.aTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.temporarycertificates.buildTemplateDetails
 import uk.gov.dluhc.printapi.validator.service.GenerateTemporaryCertificateValidator
+import java.net.URI
 import kotlin.random.Random
 
 @ExtendWith(MockitoExtension::class)
@@ -48,6 +50,9 @@ internal class TemporaryCertificateServiceTest {
     @Mock
     private lateinit var pdfFactory: PdfFactory
 
+    @Mock
+    private lateinit var s3AccessService: S3AccessService
+
     @InjectMocks
     private lateinit var temporaryCertificateService: TemporaryCertificateService
 
@@ -67,6 +72,8 @@ internal class TemporaryCertificateServiceTest {
         given(temporaryCertificatePdfTemplateDetailsFactory.getTemplateDetails(any())).willReturn(templateDetails)
         val contents = Random.Default.nextBytes(10)
         given(pdfFactory.createPdfContents(any())).willReturn(contents)
+        val presignedUrl = URI.create("https://localhost/test-url")
+        given(s3AccessService.uploadTemporaryCertificate(any(), any(), any(), any())).willReturn(presignedUrl)
 
         // When
         val actual = temporaryCertificateService.generateTemporaryCertificate(eroId, request)
@@ -79,8 +86,13 @@ internal class TemporaryCertificateServiceTest {
         verify(temporaryCertificatePdfTemplateDetailsFactory).getTemplateDetails(temporaryCertificate)
         verify(pdfFactory).createPdfContents(templateDetails)
         verify(temporaryCertificateRepository).save(temporaryCertificate)
-        assertThat(actual.filename).isEqualTo("temporary-certificate-ZlxBCBxpjseZU5i3ccyL.pdf")
-        assertThat(actual.contents).isSameAs(contents)
+        verify(s3AccessService).uploadTemporaryCertificate(
+            request.gssCode,
+            request.sourceReference,
+            "temporary-certificate-ZlxBCBxpjseZU5i3ccyL.pdf",
+            contents
+        )
+        assertThat(actual).isEqualTo(presignedUrl)
     }
 
     @Test
@@ -91,10 +103,9 @@ internal class TemporaryCertificateServiceTest {
         given(eroClient.getEro(any())).willThrow(ElectoralRegistrationOfficeNotFoundException::class.java)
 
         // When
-        val exception = catchThrowableOfType(
-            { temporaryCertificateService.generateTemporaryCertificate(eroId, request) },
-            GenerateTemporaryCertificateValidationException::class.java
-        )
+        val exception = catchThrowableOfType(GenerateTemporaryCertificateValidationException::class.java) {
+            temporaryCertificateService.generateTemporaryCertificate(eroId, request)
+        }
 
         // Then
         verify(validator).validate(request)
@@ -119,10 +130,9 @@ internal class TemporaryCertificateServiceTest {
         given(eroClient.getEro(any())).willReturn(eroDetails)
 
         // When
-        val exception = catchThrowableOfType(
-            { temporaryCertificateService.generateTemporaryCertificate(eroIdInRequest, request) },
-            GenerateTemporaryCertificateValidationException::class.java
-        )
+        val exception = catchThrowableOfType(GenerateTemporaryCertificateValidationException::class.java) {
+            temporaryCertificateService.generateTemporaryCertificate(eroIdInRequest, request)
+        }
 
         // Then
         verify(validator).validate(request)

@@ -1,7 +1,9 @@
 package uk.gov.dluhc.printapi.messaging.service
 
+import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
@@ -9,13 +11,11 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findDistinctByPrintRequestStatusAndBatchId
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
-import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.service.IdFactory
-import javax.transaction.Transactional
 
 private val logger = KotlinLogging.logger {}
 
@@ -48,8 +48,8 @@ class PrintResponseProcessingService(
      * the print provider's batch response.
      */
     @Transactional
-    fun processBatchResponses(batchResponses: List<BatchResponse>) {
-        batchResponses.forEach { batchResponse ->
+    fun processBatchResponses(batchResponses: List<BatchResponse>): List<Certificate> {
+        return batchResponses.flatMap { batchResponse ->
             val certificates =
                 certificateRepository.findDistinctByPrintRequestStatusAndBatchId(
                     SENT_TO_PRINT_PROVIDER,
@@ -82,21 +82,21 @@ class PrintResponseProcessingService(
     }
 
     @Transactional
-    fun processPrintResponse(printResponse: ProcessPrintResponseMessage) {
+    fun processPrintResponse(printResponse: ProcessPrintResponseMessage): Certificate? {
         val newStatus: Status
 
         try {
             newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
         } catch (ex: IllegalArgumentException) {
             logger.error(ex.message)
-            return
+            return null
         }
 
         val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
 
         if (certificate == null) {
             logger.error("Certificate not found for the requestId ${printResponse.requestId}")
-            return
+            return null
         }
 
         with(printResponse) {
@@ -108,12 +108,15 @@ class PrintResponseProcessingService(
             )
         }
 
-        certificateRepository.save(certificate)
+        // Save and flush here to make sure that we avoid sending emails in the case of concurrency issues
+        certificateRepository.saveAndFlush(certificate)
 
         if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
             certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
         } else if (printResponse.status == ProcessPrintResponseMessage.Status.FAILED) {
             certificateFailedToPrintEmailSenderService.send(printResponse, certificate)
         }
+
+        return certificate
     }
 }

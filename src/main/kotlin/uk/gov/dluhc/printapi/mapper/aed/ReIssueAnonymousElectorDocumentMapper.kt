@@ -6,10 +6,12 @@ import org.mapstruct.Mapping
 import org.mapstruct.MappingTarget
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
+import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentDelivery
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.models.ReIssueAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
 import uk.gov.dluhc.printapi.service.IdFactory
 
 @Mapper(
@@ -30,6 +32,9 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
 
     @Autowired
     protected lateinit var deliveryAddressTypeMapper: DeliveryAddressTypeMapper
+
+    @Autowired
+    protected lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
 
     abstract fun toReIssueAnonymousElectorDocumentDto(
         apiRequest: ReIssueAnonymousElectorDocumentRequest,
@@ -65,6 +70,7 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
     @Mapping(target = "contactDetails.address.dateCreated", ignore = true)
     @Mapping(target = "contactDetails.address.createdBy", ignore = true)
     @Mapping(target = "contactDetails.address.version", ignore = true)
+    @Mapping(target = "initialRetentionDataRemoved", ignore = true)
     abstract fun toNewAnonymousElectorDocument(
         previousAed: AnonymousElectorDocument,
         dto: ReIssueAnonymousElectorDocumentDto,
@@ -76,6 +82,26 @@ abstract class ReIssueAnonymousElectorDocumentMapper {
         @MappingTarget aed: AnonymousElectorDocument,
         dto: ReIssueAnonymousElectorDocumentDto,
     ) {
-        aed.delivery?.deliveryAddressType = deliveryAddressTypeMapper.mapDtoToEntity(dto.deliveryAddressType)
+        val deliveryAddressTypeEntity = deliveryAddressTypeMapper.mapDtoToEntity(dto.deliveryAddressType)
+
+        if (aed.delivery != null) {
+            aed.delivery?.deliveryAddressType = deliveryAddressTypeEntity
+        } else {
+            aed.delivery = AnonymousElectorDocumentDelivery(deliveryAddressType = deliveryAddressTypeEntity)
+        }
+    }
+
+    @AfterMapping
+    protected fun setDataRetentionDates(
+        @MappingTarget aed: AnonymousElectorDocument,
+        previousAed: AnonymousElectorDocument
+    ) {
+        if (previousAed.initialRetentionRemovalDate != null) {
+            aed.initialRetentionRemovalDate = removalDateResolver.getAedInitialRetentionPeriodRemovalDate(aed.issueDate)
+        }
+
+        if (previousAed.finalRetentionRemovalDate != null) {
+            aed.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(aed.issueDate)
+        }
     }
 }

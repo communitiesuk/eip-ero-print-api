@@ -19,6 +19,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
@@ -28,7 +29,6 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_P
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
 import uk.gov.dluhc.printapi.mapper.ProcessPrintResponseMessageMapper
 import uk.gov.dluhc.printapi.mapper.StatusMapper
-import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
@@ -213,7 +213,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository).save(certificate)
+            verify(certificateRepository).saveAndFlush(certificate)
             verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
             verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
             assertThat(certificate.status).isEqualTo(expectedStatus)
@@ -262,7 +262,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository).save(certificate)
+            verify(certificateRepository).saveAndFlush(certificate)
             verify(certificateNotDeliveredEmailSenderService).send(response, certificate)
             verify(certificateFailedToPrintEmailSenderService, never()).send(any(), any())
 
@@ -312,7 +312,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository).save(certificate)
+            verify(certificateRepository).saveAndFlush(certificate)
             verify(certificateNotDeliveredEmailSenderService, never()).send(any(), any())
             verify(certificateFailedToPrintEmailSenderService).send(response, certificate)
 
@@ -344,7 +344,7 @@ class PrintResponseProcessingServiceTest {
             assertThat(TestLogAppender.hasLog("Certificate not found for the requestId $requestId", Level.ERROR)).isTrue
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
-            verify(certificateRepository, never()).save(any())
+            verify(certificateRepository, never()).saveAndFlush(any())
         }
     }
 

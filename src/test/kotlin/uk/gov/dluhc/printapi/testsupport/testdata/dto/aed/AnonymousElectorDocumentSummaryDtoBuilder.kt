@@ -32,8 +32,8 @@ fun buildAnonymousElectorDocumentDto(
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     certificateLanguage: CertificateLanguage = aValidCertificateLanguageDto(),
-    supportingInformationFormat: AnonymousSupportingInformationFormat = AnonymousSupportingInformationFormat.STANDARD,
-    deliveryAddressType: DeliveryAddressType = DeliveryAddressType.REGISTERED,
+    supportingInformationFormat: AnonymousSupportingInformationFormat? = AnonymousSupportingInformationFormat.STANDARD,
+    deliveryAddressType: DeliveryAddressType? = DeliveryAddressType.REGISTERED,
     collectionReason: String? = null,
     elector: AnonymousElectorDto = buildAnonymousElectorDto(),
     status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED,
@@ -64,7 +64,7 @@ fun buildAnonymousElectorDto(
     middleNames: String? = null,
     surname: String = aValidSurname(),
     addressee: String = aValidDeliveryName(),
-    registeredAddress: AddressDto = buildValidAddressDto(),
+    registeredAddress: AddressDto? = buildValidAddressDto(),
     email: String? = aValidEmailAddress(),
     phoneNumber: String? = aValidPhoneNumber()
 ): AnonymousElectorDto = AnonymousElectorDto(

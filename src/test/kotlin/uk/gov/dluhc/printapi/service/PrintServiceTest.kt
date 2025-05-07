@@ -56,6 +56,7 @@ class PrintServiceTest {
                 any()
             )
         ).willReturn(null)
+        given(certificateRepository.save(certificate)).willReturn(certificate)
         given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(sourceType)
         given(certificateMapper.toCertificate(any(), any())).willReturn(certificate)
 
@@ -88,6 +89,7 @@ class PrintServiceTest {
         given(certificateRepository.findByGssCodeInAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(
             certificate
         )
+        given(certificateRepository.save(certificate)).willReturn(certificate)
         given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(sourceType)
         given(printRequestMapper.toPrintRequest(any(), any())).willReturn(newPrintRequest)
 

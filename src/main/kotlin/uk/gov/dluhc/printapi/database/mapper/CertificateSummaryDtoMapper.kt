@@ -5,16 +5,29 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.dto.CertificateSummaryDto
 import uk.gov.dluhc.printapi.dto.PrintRequestSummaryDto
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapperImpl
 
 @Component
 class CertificateSummaryDtoMapper {
 
     val statusMapper: PrintRequestStatusDtoMapper = PrintRequestStatusDtoMapper()
+    val deliveryAddressTypeMapper: DeliveryAddressTypeMapper = DeliveryAddressTypeMapperImpl()
 
     fun certificateToCertificatePrintRequestSummaryDto(certificate: Certificate): CertificateSummaryDto {
+        val mostRecentPrintRequest = certificate
+            .printRequests
+            .sortedBy { it.requestDateTime }
+            .last()
         return CertificateSummaryDto(
             vacNumber = certificate.vacNumber!!,
-            printRequests = toPrintRequests(certificate.printRequests)
+            applicationReference = certificate.applicationReference!!,
+            sourceReference = certificate.sourceReference!!,
+            photoLocationArn = certificate.photoLocationArn!!,
+            firstName = mostRecentPrintRequest.firstName!!,
+            middleNames = mostRecentPrintRequest.middleNames,
+            surname = mostRecentPrintRequest.surname!!,
+            printRequests = toPrintRequests(certificate.printRequests),
         )
     }
 
@@ -29,7 +42,10 @@ class CertificateSummaryDtoMapper {
             userId = printRequest.userId!!,
             status = statusMapper.toPrintRequestStatusDto(currentStatus.status!!),
             dateTime = currentStatus.eventDateTime!!,
-            message = currentStatus.message
+            message = currentStatus.message,
+            deliveryAddressType = printRequest.delivery?.deliveryAddressType?.let {
+                deliveryAddressTypeMapper.mapEntityToDto(it)
+            }
         )
     }
 }

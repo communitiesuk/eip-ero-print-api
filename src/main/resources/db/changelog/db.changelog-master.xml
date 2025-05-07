@@ -36,4 +36,10 @@
     <include relativeToChangelogFile="true" file="ddl/0026_alter_delivery_add_collection_reason.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0027_update_aed_summary_view.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0028_alter_aed_contact_details_add_last_updated.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0029_alter_print_request_add_sanitized_surname.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0030_add_index_for_source_reference_to_certificate_and_temporary_certificate.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0031_EIP1-11169_add_is_from_applications_api_to_certificate.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0032_EROPSPT-397_update_aed_summary_view_include_aeds_after_15_months.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0033_EROPSPT-397_create_anonymous_elector_document_delivery_table.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0034_EROPSPT-397_update_anonymous_elector_document_to_use_new_delivery_table.xml"/>
 </databaseChangeLog>

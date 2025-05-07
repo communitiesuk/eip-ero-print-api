@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verifyNoMoreInteractions
-import uk.gov.dluhc.emailnotifications.EmailNotSentException
+import uk.gov.dluhc.email.EmailNotSentException
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.dto.SendCertificateFailedToPrintEmailRequest

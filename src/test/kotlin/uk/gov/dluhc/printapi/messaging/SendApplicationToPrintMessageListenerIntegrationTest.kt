@@ -1,9 +1,11 @@
 package uk.gov.dluhc.printapi.messaging
 
-import ch.qos.logback.classic.Level
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
@@ -24,7 +26,7 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
 import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.LARGE_MINUS_PRINT
-import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasLog
+import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasExceptionLogWithMessage
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidVacNumber
@@ -50,8 +52,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildAddress a
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
-    @Test
-    fun `should process message received on queue`() {
+    @ParameterizedTest
+    @NullSource
+    @CsvSource("true", "false")
+    fun `should process message received on queue`(isFromApplicationsApi: Boolean?) {
         // Given
         val ero = buildElectoralRegistrationOfficeResponse(
             localAuthorities = mutableListOf(
@@ -64,7 +68,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val payload = buildSendApplicationToPrintMessage(
             gssCode = gssCode,
             supportingInformationFormat = EASY_MINUS_READ,
-            certificateLanguage = SqsCertificateLanguage.CY
+            certificateLanguage = SqsCertificateLanguage.CY,
+            isFromApplicationsApi = isFromApplicationsApi
         )
 
         val payloadPhotoLocationArn = payload.photoLocation
@@ -79,8 +84,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 vacNumber = aValidVacNumber(),
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
-                issuingAuthority = localAuthority.contactDetailsEnglish.name,
-                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.name,
+                issuingAuthority = localAuthority.contactDetailsEnglish.nameVac,
+                issuingAuthorityCy = localAuthority.contactDetailsWelsh?.nameVac,
                 issueDate = LocalDate.now(),
                 photoLocationArn = payloadPhotoLocationArn,
             )
@@ -89,11 +94,16 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         }
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
+            if (isFromApplicationsApi == true) {
+                assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
+            } else {
+                assertUpdateStatisticsMessageSent(payload.sourceReference)
+            }
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
@@ -137,11 +147,12 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         }
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
+            assertUpdateStatisticsMessageSent(payload.sourceReference)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
@@ -198,11 +209,12 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         }
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
+            assertUpdateStatisticsMessageSent(payload.sourceReference)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
@@ -217,11 +229,11 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val payload = buildSendApplicationToPrintMessage(gssCode = "ABC") // gssCode must be 9 characters
 
         // When
-        sqsMessagingTemplate.convertAndSend(sendApplicationToPrintQueueName, payload)
+        sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
-            assertThat(hasLog("An exception occurred while invoking the handler method", Level.ERROR)).isTrue()
+            assertThat(hasExceptionLogWithMessage("handleMessage.arg0.gssCode: size must be between 9 and 9")).isTrue()
         }
     }
 
@@ -263,8 +275,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 ElectoralRegistrationOffice(
                     name = "Electoral Registration Officer",
                     phoneNumber = contactDetailsEnglish.phone,
-                    emailAddress = contactDetailsEnglish.email,
-                    website = contactDetailsEnglish.website,
+                    emailAddress = contactDetailsEnglish.emailVac,
+                    website = contactDetailsEnglish.websiteVac,
                     address = with(contactDetailsEnglish.address) {
                         Address(
                             street = street,
@@ -282,8 +294,8 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 ElectoralRegistrationOffice(
                     name = "Swyddog Cofrestru Etholiadol",
                     phoneNumber = contactDetailsWelsh!!.phone,
-                    emailAddress = contactDetailsWelsh!!.email,
-                    website = contactDetailsWelsh!!.website,
+                    emailAddress = contactDetailsWelsh!!.emailVac,
+                    website = contactDetailsWelsh!!.websiteVac,
                     address = with(contactDetailsWelsh!!.address) {
                         Address(
                             street = street,

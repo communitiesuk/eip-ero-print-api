@@ -8,16 +8,21 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.core.io.ClassPathResource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
+import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.ses.SesClient
+import uk.gov.dluhc.printapi.testsupport.buildS3Arn
 import java.net.InetAddress
 import java.net.URI
 
@@ -34,7 +39,7 @@ class LocalStackContainerConfiguration {
         const val DEFAULT_PORT = 4566
         const val DEFAULT_ACCESS_KEY_ID = "test"
         const val DEFAULT_SECRET_KEY = "test"
-        const val S3_BUCKET_CONTAINING_PHOTOS = "localstack-vca-api-vca-target-bucket"
+        const val VCA_TARGET_BUCKET = "localstack-vca-api-vca-target-bucket"
 
         val objectMapper = ObjectMapper()
         val localStackContainer: GenericContainer<*> = getInstance()
@@ -47,10 +52,10 @@ class LocalStackContainerConfiguration {
         fun getInstance(): GenericContainer<*> {
             if (container == null) {
                 container = GenericContainer(
-                    DockerImageName.parse("localstack/localstack:1.2.0")
+                    DockerImageName.parse("localstack/localstack:3.8.1")
                 ).withEnv(
                     mapOf(
-                        "SERVICES" to "sqs, ses",
+                        "SERVICES" to "sqs, ses, s3",
                         "AWS_DEFAULT_REGION" to DEFAULT_REGION,
                     )
                 )
@@ -80,27 +85,59 @@ class LocalStackContainerConfiguration {
     @Primary
     @Bean
     fun createS3BucketSettings(
-        awsCredentialsProvider: AwsCredentialsProvider?
+        awsBasicCredentialsProvider: AwsCredentialsProvider,
+        s3Properties: S3Properties
     ): S3Client {
         val s3Client = S3Client.builder()
             .endpointOverride(localStackContainer.getEndpointOverride())
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(DEFAULT_ACCESS_KEY_ID, DEFAULT_SECRET_KEY)
-                )
-            )
+            .credentialsProvider(awsBasicCredentialsProvider)
             .build()
 
-        createS3BucketsRequiredForTesting(s3Client)
+        createS3BucketsRequiredForTesting(s3Client = s3Client, s3Properties = s3Properties)
+        createS3FileInBankHolidaysBucket(s3Client = s3Client, s3Properties = s3Properties)
 
         return s3Client
     }
 
-    private fun createS3BucketsRequiredForTesting(s3Client: S3Client) {
+    @Primary
+    @Bean
+    fun configureS3Presigner(
+        awsBasicCredentialsProvider: AwsCredentialsProvider,
+        s3Properties: S3Properties
+    ): S3Presigner =
+        S3Presigner.builder()
+            .endpointOverride(localStackContainer.getEndpointOverride())
+            .credentialsProvider(awsBasicCredentialsProvider)
+            .build()
+
+    private fun createS3BucketsRequiredForTesting(
+        s3Client: S3Client,
+        s3Properties: S3Properties
+    ) {
         try {
-            s3Client.createBucket(CreateBucketRequest.builder().bucket(S3_BUCKET_CONTAINING_PHOTOS).build())
+            with(s3Properties) {
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(vcaTargetBucket).build())
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(bankHolidaysBucket).build())
+            }
         } catch (ex: S3Exception) {
             // ignore
+        }
+    }
+
+    private fun createS3FileInBankHolidaysBucket(
+        s3Client: S3Client,
+        s3Properties: S3Properties
+    ) {
+        with(s3Properties) {
+            val bankHolidaysArn = buildS3Arn(bankHolidaysBucket, bankHolidaysBucketObjectKey)
+            val testFileLocation = "bank-holidays/test-bank-holidays.json"
+            val putObjectRequest =
+                PutObjectRequest.builder()
+                    .bucket(bankHolidaysBucket)
+                    .key(bankHolidaysBucketObjectKey)
+                    .build()
+            s3Client.putObject(putObjectRequest, RequestBody.fromFile(ClassPathResource(testFileLocation).file))
+            logger.info { "Uploaded [$testFileLocation] to S3 bucket [$bankHolidaysBucket] with arn [$bankHolidaysArn]" }
         }
     }
 
@@ -145,7 +182,9 @@ class LocalStackContainerConfiguration {
         @Value("\${sqs.process-print-response-file-queue-name}") processPrintResponseFileQueueName: String,
         @Value("\${sqs.process-print-response-queue-name}") processPrintResponsesQueueName: String,
         @Value("\${sqs.application-removed-queue-name}") applicationRemovedQueueName: String,
-        @Value("\${sqs.remove-certificate-queue-name}") removeCertificateQueueName: String
+        @Value("\${sqs.remove-certificate-queue-name}") removeCertificateQueueName: String,
+        @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}") triggerVoterCardStatisticsUpdateQueueName: String,
+        @Value("\${sqs.trigger-application-statistics-update-queue-name}") triggerApplicationStatisticsUpdateQueueName: String,
     ): LocalStackContainerSettings {
         val queueUrlSendApplicationToPrint = localStackContainer.createSqsQueue(sendApplicationToPrintQueueName)
         val queueUrlProcessPrintBatchRequest = localStackContainer.createSqsQueue(processPrintRequestBatchQueueName)
@@ -153,12 +192,14 @@ class LocalStackContainerConfiguration {
         val queueUrlProcessPrintResponses = localStackContainer.createSqsQueue(processPrintResponsesQueueName)
         val queueUrlApplicationRemoved = localStackContainer.createSqsQueue(applicationRemovedQueueName)
         val queueUrlRemoveCertificate = localStackContainer.createSqsQueue(removeCertificateQueueName)
+        val queueUrlTriggerVoterCardStatisticsUpdate = localStackContainer.createSqsQueue(triggerVoterCardStatisticsUpdateQueueName)
+        val queueUrlTriggerApplicationStatisticsUpdate = localStackContainer.createSqsQueue(triggerApplicationStatisticsUpdateQueueName)
         localStackContainer.createSqsQueue("correlation-id-test-queue")
 
         val apiUrl = "http://${localStackContainer.host}:${localStackContainer.getMappedPort(DEFAULT_PORT)}"
 
         TestPropertyValues.of(
-            "cloud.aws.sqs.endpoint=$apiUrl",
+            "spring.cloud.aws.sqs.endpoint=$apiUrl",
         ).applyTo(applicationContext)
 
         return LocalStackContainerSettings(
@@ -168,13 +209,23 @@ class LocalStackContainerConfiguration {
             queueUrlProcessPrintResponseFile = queueUrlProcessPrintResponseFile,
             queueUrlProcessPrintResponses = queueUrlProcessPrintResponses,
             queueUrlApplicationRemoved = queueUrlApplicationRemoved,
-            queueUrlRemoveCertificate = queueUrlRemoveCertificate
+            queueUrlRemoveCertificate = queueUrlRemoveCertificate,
+            queueUrlTriggerVoterCardStatisticsUpdate = queueUrlTriggerVoterCardStatisticsUpdate,
+            queueUrlTriggerApplicationStatisticsUpdate = queueUrlTriggerApplicationStatisticsUpdate,
         )
     }
 
     private fun GenericContainer<*>.createSqsQueue(queueName: String): String {
+        val attributes = mutableListOf("VisibilityTimeout=1")
+        if (queueName.endsWith(".fifo")) {
+            attributes.add("FifoQueue=true")
+        }
         val execInContainer = execInContainer(
-            "awslocal", "sqs", "create-queue", "--queue-name", queueName
+            "awslocal",
+            "sqs",
+            "create-queue",
+            "--queue-name", queueName,
+            "--attributes", attributes.joinToString(","),
         )
         return execInContainer.stdout.let {
             objectMapper.readValue(it, Map::class.java)
@@ -191,6 +242,8 @@ class LocalStackContainerConfiguration {
         val queueUrlProcessPrintResponses: String,
         val queueUrlApplicationRemoved: String,
         val queueUrlRemoveCertificate: String,
+        val queueUrlTriggerVoterCardStatisticsUpdate: String,
+        val queueUrlTriggerApplicationStatisticsUpdate: String,
     ) {
         val mappedQueueUrlSendApplicationToPrint: String = toMappedUrl(queueUrlSendApplicationToPrint, apiUrl)
         val mappedQueueUrlProcessPrintBatchRequest: String = toMappedUrl(queueUrlProcessPrintBatchRequest, apiUrl)
@@ -198,7 +251,9 @@ class LocalStackContainerConfiguration {
         val mappedQueueUrlProcessPrintResponses: String = toMappedUrl(queueUrlProcessPrintResponses, apiUrl)
         val mappedQueueUrlApplicationRemoved: String = toMappedUrl(queueUrlApplicationRemoved, apiUrl)
         val mappedQueueUrlRemoveCertificate: String = toMappedUrl(queueUrlRemoveCertificate, apiUrl)
-        val sesMessagesUrl = "$apiUrl/_localstack/ses"
+        val mappedQueueUrlTriggerVoterCardStatisticsUpdate: String = toMappedUrl(queueUrlTriggerVoterCardStatisticsUpdate, apiUrl)
+        val mappedQueueUrlTriggerApplicationStatisticsUpdate: String = toMappedUrl(queueUrlTriggerApplicationStatisticsUpdate, apiUrl)
+        val sesMessagesUrl = "$apiUrl/_aws/ses"
 
         private fun toMappedUrl(rawUrlString: String, apiUrlString: String): String {
             val rawUrl = URI.create(rawUrlString)

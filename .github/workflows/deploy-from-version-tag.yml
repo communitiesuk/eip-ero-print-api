@@ -8,8 +8,6 @@ on:
         required: true
         type: choice
         options:
-          - sb
-          - dev
           - int
           - pvt
           - test
@@ -17,6 +15,7 @@ on:
           - dev2
           - int2
           - test2
+          - beta
 
 jobs:
   deploy:

@@ -7,6 +7,8 @@ import org.springframework.http.MediaType
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
+import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapperImpl
 import uk.gov.dluhc.printapi.models.CertificateSummaryResponse
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.PrintRequestStatus
@@ -19,6 +21,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.getBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
+import uk.gov.dluhc.printapi.testsupport.testdata.zip.aVacPhotoUrl
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit.SECONDS
@@ -35,6 +38,8 @@ internal class DeprecatedGetCertificateSummaryByApplicationIdIntegrationTest : I
         private const val ERO_ID = "some-city-council"
         private const val APPLICATION_ID = "7762ccac7c056046b75d4aa3"
     }
+
+    private val deliveryAddressTypeMapper: DeliveryAddressTypeMapper = DeliveryAddressTypeMapperImpl()
 
     @Test
     fun `should return forbidden given user with valid bearer token belonging to a different ero`() {
@@ -105,8 +110,14 @@ internal class DeprecatedGetCertificateSummaryByApplicationIdIntegrationTest : I
             eventDateTime = Instant.now().plusSeconds(3).truncatedTo(SECONDS),
             message = "Print provider production failed"
         )
-        val request1 = buildPrintRequest(printRequestStatuses = listOf(status1, status2, status3))
-        val request2 = buildPrintRequest(printRequestStatuses = listOf(status4))
+        val request1 = buildPrintRequest(
+            printRequestStatuses = listOf(status1, status2, status3),
+            requestDateTime = Instant.now().truncatedTo(SECONDS)
+        )
+        val request2 = buildPrintRequest(
+            printRequestStatuses = listOf(status4),
+            requestDateTime = Instant.now().plusSeconds(1).truncatedTo(SECONDS)
+        )
         val certificate = buildCertificate(
             gssCode = eroResponse.localAuthorities[0].gssCode,
             sourceType = SourceType.VOTER_CARD,
@@ -115,20 +126,29 @@ internal class DeprecatedGetCertificateSummaryByApplicationIdIntegrationTest : I
         )
 
         certificateRepository.save(certificate)
+        val expectedPhotoUrl = aVacPhotoUrl(ERO_ID, APPLICATION_ID)
         val expected = CertificateSummaryResponse(
             vacNumber = certificate.vacNumber!!,
+            sourceReference = certificate.sourceReference,
+            applicationReference = certificate.applicationReference!!,
+            firstName = request2.firstName,
+            middleNames = request2.middleNames,
+            surname = request2.surname,
+            photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
                     userId = request1.userId!!,
                     dateTime = status2.eventDateTime!!.atOffset(ZoneOffset.UTC),
-                    message = status2.message
+                    message = status2.message,
+                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToApi(request1.delivery!!.deliveryAddressType)
                 ),
                 PrintRequestSummary(
                     status = PrintRequestStatus.PRINT_MINUS_FAILED,
                     userId = request2.userId!!,
                     dateTime = status4.eventDateTime!!.atOffset(ZoneOffset.UTC),
-                    message = status4.message
+                    message = status4.message,
+                    deliveryAddressType = deliveryAddressTypeMapper.mapEntityToApi(request2.delivery!!.deliveryAddressType)
                 ),
             )
         )

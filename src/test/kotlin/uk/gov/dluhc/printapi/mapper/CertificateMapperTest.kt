@@ -126,6 +126,7 @@ class CertificateMapperTest {
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
+                isFromApplicationsApi = null,
             )
         }
 
@@ -213,6 +214,94 @@ class CertificateMapperTest {
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
+                isFromApplicationsApi = null,
+            )
+        }
+
+        // When
+        val actual = mapper.toCertificate(message, ero)
+
+        // Then
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
+        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_MINUS_CARD)
+        verify(idFactory).vacNumber()
+        verify(printRequestMapper).toPrintRequest(message, ero)
+        verify(instantMapper).toInstant(message.applicationReceivedDateTime)
+    }
+
+    @Test
+    fun `should map send application to print message for a Certificate from the Applications API`() {
+        // Given
+        val ero = buildEroDto(
+            welshContactDetails = null
+        )
+        val message = buildSendApplicationToPrintMessage(isFromApplicationsApi = true)
+        val requestId = aValidRequestId()
+        val vacNumber = aValidVacNumber()
+        given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
+        given(idFactory.vacNumber()).willReturn(vacNumber)
+        given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
+
+        val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.name)
+
+        val printRequest = with(message) {
+            PrintRequest(
+                requestDateTime = requestDateTime.toInstant(),
+                requestId = requestId,
+                firstName = firstName,
+                middleNames = middleNames,
+                surname = surname,
+                certificateLanguage = CertificateLanguageEntity.EN,
+                delivery = with(delivery) {
+                    Delivery(
+                        addressee = addressee,
+                        address = with(address) {
+                            Address(
+                                street = street,
+                                postcode = postcode,
+                                property = property,
+                                locality = locality,
+                                town = town,
+                                area = area,
+                                uprn = uprn
+                            )
+                        },
+                        deliveryClass = DeliveryClass.STANDARD,
+                        deliveryAddressType = DeliveryAddressType.REGISTERED,
+                        collectionReason = null,
+                        addressFormat = AddressFormat.UK,
+                    )
+                },
+                eroEnglish = englishEro,
+                eroWelsh = null,
+                statusHistory = mutableListOf(
+                    PrintRequestStatus(
+                        status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                        dateCreated = FIXED_TIME,
+                        eventDateTime = FIXED_TIME
+                    )
+                ),
+                userId = userId,
+            )
+        }
+        given(printRequestMapper.toPrintRequest(any(), any())).willReturn(printRequest)
+
+        val expected = with(message) {
+            Certificate(
+                id = null,
+                sourceReference = sourceReference,
+                applicationReference = applicationReference,
+                sourceType = SourceTypeEntity.VOTER_CARD,
+                vacNumber = vacNumber,
+                applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
+                gssCode = gssCode,
+                issuingAuthority = ero.englishContactDetails.name,
+                issuingAuthorityCy = null,
+                issueDate = LocalDate.now(),
+                printRequests = mutableListOf(printRequest),
+                status = Status.PENDING_ASSIGNMENT_TO_BATCH,
+                photoLocationArn = photoLocation,
+                isFromApplicationsApi = true,
             )
         }
 

@@ -29,7 +29,7 @@ fun buildAedSearchSummaryApi(
     dateTimeCreated: OffsetDateTime = aValidGeneratedDateTime(),
     firstName: String = aValidFirstName(),
     surname: String = aValidSurname(),
-    postcode: String = faker.address().postcode(),
+    postcode: String? = faker.address().postcode(),
 ): AedSearchSummary {
     return AedSearchSummary(
         gssCode = gssCode,
@@ -49,7 +49,8 @@ fun buildAedSearchSummaryApi(
 fun buildAedSearchSummaryApiFromAedEntity(
     aedEntity: AnonymousElectorDocument,
     electoralRollNumber: String = aedEntity.electoralRollNumber,
-    surname: String = aedEntity.contactDetails!!.surname
+    surname: String = aedEntity.contactDetails!!.surname,
+    status: AnonymousElectorDocumentStatus = AnonymousElectorDocumentStatus.PRINTED
 ): AedSearchSummary {
     return with(aedEntity) {
         AedSearchSummary(
@@ -58,12 +59,12 @@ fun buildAedSearchSummaryApiFromAedEntity(
             applicationReference = applicationReference,
             certificateNumber = certificateNumber,
             electoralRollNumber = electoralRollNumber,
-            status = AnonymousElectorDocumentStatus.PRINTED,
+            status = status,
             issueDate = issueDate,
             dateTimeCreated = requestDateTime.atOffset(ZoneOffset.UTC),
             firstName = contactDetails!!.firstName,
             surname = surname,
-            postcode = contactDetails!!.address!!.postcode!!
+            postcode = contactDetails?.address?.postcode
         )
     }
 }

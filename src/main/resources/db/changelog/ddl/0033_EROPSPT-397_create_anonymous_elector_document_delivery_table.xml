@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="0033_EROPSPT-397_create_anonymous_elector_document_delivery_table" author="alex.yip@softwire.com"
+               context="ddl">
+        <comment>
+            Creates the anonymous_elector_document_delivery table,
+            to split off AED delivery information into a separate table from the delivery table
+        </comment>
+
+        <createTable tableName="anonymous_elector_document_delivery">
+            <column name="id" type="uuid">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             unique="true"
+                             primaryKeyName="anonymous_elector_document_delivery_pkey"/>
+            </column>
+
+            <column name="addressee" type="varchar(255)"/>
+
+            <column name="address_id" type="uuid">
+                <constraints foreignKeyName="fk_anonymous_elector_document_delivery_address"
+                             references="address(id)"/>
+            </column>
+
+            <column name="address_format" type="varchar(50)"/>
+
+            <column name="delivery_class" type="varchar(20)"/>
+
+            <column name="delivery_address_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="collection_reason"
+                    type="text"
+                    remarks="The reason the elector gave for having to collect their AED (if applicable)"/>
+
+            <column name="date_created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="anonymous_elector_document_delivery"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

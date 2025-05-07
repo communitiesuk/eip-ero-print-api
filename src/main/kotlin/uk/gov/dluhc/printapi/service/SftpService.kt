@@ -72,21 +72,26 @@ class SftpService(
      * @return the contents of the remote file
      */
     fun fetchFileFromOutBoundDirectory(directory: String, fileName: String): String {
+        val filePath = createFileNamePath(directory, fileName)
         var responseString: String? = null
-        sftpOutboundTemplate.get(createFileNamePath(directory, fileName)) {
-            responseString = IOUtils.toString(it, StandardCharsets.UTF_8)
+        try {
+            sftpOutboundTemplate.get(filePath) {
+                responseString = IOUtils.toString(it, StandardCharsets.UTF_8)
+            }
+        } catch (ex: Exception) {
+            throw IOException("Failed to read file [$filePath]", ex)
         }
         return responseString!!
     }
 
-    @Throws(IOException::class)
+    /**
+     * @return
+     * - `true` if successful
+     * - `false` if file not found
+     */
     fun removeFileFromOutBoundDirectory(directory: String, fileName: String): Boolean {
         logger.info { "Removing processed file [$fileName] from directory [$directory]" }
-        try {
-            return sftpOutboundTemplate.remove(createFileNamePath(directory, fileName))
-        } catch (ex: MessagingException) {
-            throw IOException(ex)
-        }
+        return sftpOutboundTemplate.remove(createFileNamePath(directory, fileName))
     }
 
     private fun createFileNamePath(fileDirectory: String, fileName: String) = "$fileDirectory/$fileName"

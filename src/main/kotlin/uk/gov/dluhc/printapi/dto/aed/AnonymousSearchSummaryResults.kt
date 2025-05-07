@@ -19,7 +19,8 @@ data class AnonymousSearchSummaryDto(
     val electoralRollNumber: String,
     val firstName: String,
     val surname: String,
-    val postcode: String,
+    val postcode: String?,
     val issueDate: LocalDate,
     val dateTimeCreated: Instant,
+    val initialRetentionDataRemoved: Boolean
 )

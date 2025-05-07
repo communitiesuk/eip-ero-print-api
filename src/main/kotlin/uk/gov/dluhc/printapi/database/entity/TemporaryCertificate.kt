@@ -1,31 +1,30 @@
 package uk.gov.dluhc.printapi.database.entity
 
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
+import jakarta.persistence.Version
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.JdbcTypeCode
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import uk.gov.dluhc.printapi.database.repository.UUIDCharType
-import uk.gov.dluhc.printapi.database.repository.UseExistingOrGenerateUUID
+import java.sql.Types
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
-import javax.persistence.CascadeType
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.OneToMany
-import javax.persistence.Table
-import javax.persistence.Version
-import javax.validation.constraints.NotNull
-import javax.validation.constraints.Size
 
 @Table
 @Entity
@@ -33,9 +32,8 @@ import javax.validation.constraints.Size
 class TemporaryCertificate(
 
     @Id
-    @Type(type = UUIDCharType)
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = UseExistingOrGenerateUUID.NAME)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(Types.CHAR)
     var id: UUID? = null,
 
     @field:NotNull
@@ -108,6 +106,7 @@ class TemporaryCertificate(
     var userId: String? = null,
 
     @CreationTimestamp
+    @Column(updatable = false)
     var dateCreated: Instant? = null,
 
     @field:Size(max = 255)
@@ -115,7 +114,7 @@ class TemporaryCertificate(
     var createdBy: String? = null,
 
     @Version
-    var version: Long? = null
+    var version: Long = 0L
 ) {
 
     fun getNameOnCertificate(): String {

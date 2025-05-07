@@ -21,10 +21,10 @@ class EroDtoMapperTest {
             eroId = eroId,
             englishContactDetails = with(localAuthority.contactDetailsEnglish) {
                 EroContactDetailsDto(
-                    name = name,
-                    emailAddress = email,
+                    name = nameVac,
+                    emailAddress = emailVac!!,
                     phoneNumber = phone,
-                    website = website,
+                    website = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,
@@ -59,10 +59,10 @@ class EroDtoMapperTest {
             eroId = eroId,
             englishContactDetails = with(localAuthority.contactDetailsEnglish) {
                 EroContactDetailsDto(
-                    name = name,
-                    emailAddress = email,
+                    name = nameVac,
+                    emailAddress = emailVac!!,
                     phoneNumber = phone,
-                    website = website,
+                    website = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,
@@ -78,10 +78,67 @@ class EroDtoMapperTest {
             },
             welshContactDetails = with(localAuthority.contactDetailsWelsh!!) {
                 EroContactDetailsDto(
-                    name = name,
+                    name = nameVac,
+                    emailAddress = emailVac!!,
+                    phoneNumber = phone,
+                    website = websiteVac,
+                    address = with(address) {
+                        AddressDto(
+                            street = street,
+                            postcode = postcode,
+                            property = property,
+                            locality = locality,
+                            town = town,
+                            area = area,
+                            uprn = uprn
+                        )
+                    }
+                )
+            }
+        )
+
+        // When
+        val actual = mapper.toEroDto(eroId, localAuthority)
+
+        // Then
+        Assertions.assertThat(actual).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(expected)
+    }
+
+    @Test
+    fun `should fall back to default email addresses if no VAC addresses provided`() {
+        // Given
+        val eroId = aValidRandomEroId()
+        val localAuthority = buildLocalAuthorityResponse(
+            contactDetailsEnglish = buildContactDetails(emailAddressVac = null),
+            contactDetailsWelsh = buildContactDetails(emailAddressVac = null),
+        )
+        val expected = EroDto(
+            eroId = eroId,
+            englishContactDetails = with(localAuthority.contactDetailsEnglish) {
+                EroContactDetailsDto(
+                    name = nameVac,
                     emailAddress = email,
                     phoneNumber = phone,
-                    website = website,
+                    website = websiteVac,
+                    address = with(address) {
+                        AddressDto(
+                            street = street,
+                            postcode = postcode,
+                            property = property,
+                            locality = locality,
+                            town = town,
+                            area = area,
+                            uprn = uprn
+                        )
+                    }
+                )
+            },
+            welshContactDetails = with(localAuthority.contactDetailsWelsh!!) {
+                EroContactDetailsDto(
+                    name = nameVac,
+                    emailAddress = email,
+                    phoneNumber = phone,
+                    website = websiteVac,
                     address = with(address) {
                         AddressDto(
                             street = street,

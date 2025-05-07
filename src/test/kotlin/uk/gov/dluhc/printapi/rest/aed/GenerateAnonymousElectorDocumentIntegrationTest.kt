@@ -3,12 +3,14 @@ package uk.gov.dluhc.printapi.rest.aed
 import com.lowagie.text.pdf.PdfReader
 import com.lowagie.text.pdf.parser.PdfTextExtractor
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.util.ResourceUtils
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.Tag
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
@@ -21,12 +23,14 @@ import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat
 import uk.gov.dluhc.printapi.models.ErrorResponse
 import uk.gov.dluhc.printapi.models.GenerateAnonymousElectorDocumentRequest
+import uk.gov.dluhc.printapi.models.PreSignedUrlResourceResponse
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.models.ErrorResponseAssert.Companion.assertThat
 import uk.gov.dluhc.printapi.testsupport.bearerToken
+import uk.gov.dluhc.printapi.testsupport.matchingPreSignedAwsS3GetUrl
 import uk.gov.dluhc.printapi.testsupport.testdata.anotherValidEroId
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAddress
-import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildDelivery
+import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAedDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.getVCAnonymousAdminBearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildApiCertificateDelivery
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrationOfficeResponse
@@ -36,6 +40,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildValidAddress
 import uk.gov.dluhc.printapi.testsupport.withBody
 import java.io.ByteArrayInputStream
 import java.util.UUID.randomUUID
+import java.util.concurrent.TimeUnit
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddressTypeEntity
 import uk.gov.dluhc.printapi.models.DeliveryAddressType as DeliveryAddressTypeApi
 import uk.gov.dluhc.printapi.models.DeliveryClass as DeliveryClassApi
@@ -209,7 +214,7 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         wireMockService.stubEroManagementGetEroByGssCode(eroResponse, request.gssCode)
 
         val expectedDelivery = with(request.delivery) {
-            buildDelivery(
+            buildAedDelivery(
                 addressee = addressee,
                 address = with(deliveryAddress) {
                     buildAddress(
@@ -239,14 +244,9 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
             .withBody(request)
             .exchange()
             .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_PDF)
-            .expectBody(ByteArray::class.java)
-            .returnResult()
+            .returnResult(PreSignedUrlResourceResponse::class.java)
 
         // Then
-        val pdfContent = response.responseBody
-        val contentDisposition = response.responseHeaders.contentDisposition
-
         val electorDocuments = anonymousElectorDocumentRepository.findByGssCodeAndSourceTypeAndSourceReference(
             request.gssCode,
             ANONYMOUS_ELECTOR_DOCUMENT,
@@ -265,18 +265,39 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
                 it.hasStatus(AnonymousElectorDocumentStatus.Status.PRINTED)
             }
 
-        assertThat(contentDisposition.filename).isEqualTo("anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf")
+        val responseBody = response.responseBody.blockFirst()
+        val expectedS3Key =
+            "${request.gssCode}/${request.sourceReference}/anonymous-elector-document-${newlyCreatedAed.certificateNumber}.pdf"
+        val expectedUrl = matchingPreSignedAwsS3GetUrl(expectedS3Key)
+        assertThat(responseBody!!.preSignedUrl).matches {
+            it.toString()
+                .matches(expectedUrl)
+        }
 
+        val aedFromS3 = getObjectFromS3(expectedS3Key)
+        val pdfContent = aedFromS3.bytes
+        assertThat(pdfContent).isNotNull
         PdfReader(pdfContent).use { reader ->
             val text = PdfTextExtractor(reader).getTextFromPage(1)
             assertThat(text).contains(newlyCreatedAed.certificateNumber)
             assertThat(text).doesNotContainIgnoringCase(request.surname)
         }
+
+        assertThat(aedFromS3.contentType)
+            .isEqualTo(MediaType.APPLICATION_PDF_VALUE)
+
+        assertThat(aedFromS3.tags).isEqualTo(
+            listOf(Tag.builder().key("ToDelete").value("True").build())
+        )
+
+        await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
+            assertUpdateStatisticsMessageNotSent()
+        }
     }
 
     private fun addPhotoToS3(): String {
         val s3Resource = ResourceUtils.getFile(AED_SAMPLE_PHOTO).readBytes()
-        val s3Bucket = LocalStackContainerConfiguration.S3_BUCKET_CONTAINING_PHOTOS
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
         val s3Path = "E09000007/0013a30ac9bae2ebb9b1239b/${randomUUID()}/8a53a30ac9bae2ebb9b1239b-test-photo.png"
 
         // add resource to S3

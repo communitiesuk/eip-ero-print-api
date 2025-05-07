@@ -1,11 +1,10 @@
 package uk.gov.dluhc.printapi.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jcraft.jsch.ChannelSftp
-import com.jcraft.jsch.ChannelSftp.LsEntry
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate
+import io.awspring.cloud.sqs.operations.SqsTemplate
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
+import org.apache.sshd.sftp.client.SftpClient
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
@@ -29,7 +29,11 @@ import org.springframework.integration.support.MessageBuilder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.s3.S3Client
-import uk.gov.dluhc.printapi.client.BankHolidayDataClient
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest
+import software.amazon.awssdk.services.s3.model.Tag
+import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDataClient
+import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
@@ -40,11 +44,16 @@ import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
 import uk.gov.dluhc.printapi.jobs.FinalRetentionPeriodDataRemovalJob
 import uk.gov.dluhc.printapi.jobs.InitialRetentionPeriodDataRemovalJob
 import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
-import uk.gov.dluhc.printapi.messaging.MessageQueue
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
+import uk.gov.dluhc.printapi.messaging.stubs.UpdateApplicationStatisticsMessageListenerStub
+import uk.gov.dluhc.printapi.messaging.stubs.UpdateStatisticsMessageListenerStub
+import uk.gov.dluhc.printapi.service.AedDataRetentionService
+import uk.gov.dluhc.printapi.service.BankHolidaysDataService
+import uk.gov.dluhc.printapi.service.CertificateSummarySearchService
 import uk.gov.dluhc.printapi.service.SftpService
+import uk.gov.dluhc.printapi.service.aed.AnonymousElectorDocumentSearchService
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.WiremockService
 import uk.gov.dluhc.printapi.testsupport.emails.LocalstackEmailMessage
@@ -52,6 +61,7 @@ import uk.gov.dluhc.printapi.testsupport.emails.LocalstackEmailMessagesSentClien
 import java.io.File
 import java.nio.charset.Charset
 import java.time.Clock
+import java.time.Duration
 
 private val logger = KotlinLogging.logger {}
 
@@ -76,7 +86,7 @@ internal abstract class IntegrationTest {
     protected lateinit var localstackEmailMessagesSentClient: LocalstackEmailMessagesSentClient
 
     @Autowired
-    protected lateinit var sqsMessagingTemplate: QueueMessagingTemplate
+    protected lateinit var sqsTemplate: SqsTemplate
 
     @Autowired
     protected lateinit var sftpService: SftpService
@@ -137,6 +147,12 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.remove-certificate-queue-name}")
     protected lateinit var removeCertificateQueueName: String
 
+    @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
+    protected lateinit var triggerStatisticsUpdateQueueName: String
+
+    @Value("\${sqs.trigger-application-statistics-update-queue-name}")
+    protected lateinit var triggerApplicationStatisticsUpdateQueueName: String
+
     @Autowired
     protected lateinit var certificateRepository: CertificateRepository
 
@@ -153,14 +169,47 @@ internal abstract class IntegrationTest {
     protected lateinit var testDeliveryRepository: TestDeliveryRepository
 
     @Autowired
+    protected lateinit var testAnonymousElectorDocumentDeliveryRepository: TestAnonymousElectorDocumentDeliveryRepository
+
+    @Autowired
     protected lateinit var testAddressRepository: TestAddressRepository
 
     @Autowired
     protected lateinit var testPrintRequestRepository: TestPrintRequestRepository
 
+    @Autowired
+    protected lateinit var anonymousElectorDocumentSearchService: AnonymousElectorDocumentSearchService
+
+    @Autowired
+    protected lateinit var certificateSummarySearchService: CertificateSummarySearchService
+
+    @Autowired
+    protected lateinit var bankHolidaysDataService: BankHolidaysDataService
+
+    @Autowired
+    protected lateinit var aedDataRetentionService: AedDataRetentionService
+
+    @Autowired
+    protected lateinit var cacheManager: CacheManager
+
+    @Autowired
+    protected lateinit var updateStatisticsMessageListenerStub: UpdateStatisticsMessageListenerStub
+
+    @Autowired
+    protected lateinit var updateApplicationStatisticsMessageListenerStub: UpdateApplicationStatisticsMessageListenerStub
+
+    @Value("\${caching.time-to-live}")
+    protected lateinit var timeToLive: Duration
+
     @BeforeEach
     fun clearLogAppender() {
         TestLogAppender.reset()
+    }
+
+    @BeforeEach
+    fun clearMessagesFromStubs() {
+        updateStatisticsMessageListenerStub.clear()
+        updateApplicationStatisticsMessageListenerStub.clear()
     }
 
     @BeforeEach
@@ -186,6 +235,7 @@ internal abstract class IntegrationTest {
         clearRepository(certificateRepository, "certificateRepository")
         clearRepository(temporaryCertificateRepository, "temporaryCertificateRepository")
         clearRepository(anonymousElectorDocumentRepository, "anonymousElectorDocumentRepository")
+        cacheManager.getCache(UK_BANK_HOLIDAYS_CACHE)?.clear()
     }
 
     private fun clearRepository(repository: CrudRepository<*, *>, repoName: String) {
@@ -209,7 +259,7 @@ internal abstract class IntegrationTest {
     class IntegrationTestConfiguration {
         @Bean
         @Primary
-        fun testSftpSessionFactory(properties: SftpProperties): SessionFactory<ChannelSftp.LsEntry> {
+        fun testSftpSessionFactory(properties: SftpProperties): SessionFactory<SftpClient.DirEntry> {
             val factory = DefaultSftpSessionFactory(true)
             factory.setHost(properties.host)
             factory.setPort(sftpContainer.getMappedPort(SftpContainerConfiguration.DEFAULT_SFTP_PORT))
@@ -263,6 +313,48 @@ internal abstract class IntegrationTest {
         }
     }
 
+    protected fun assertUpdateStatisticsMessageSent(applicationId: String) {
+        val messages = updateStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).isNotEmpty
+        Assertions.assertThat(messages).anyMatch {
+            it.voterCardApplicationId == applicationId
+        }
+    }
+
+    protected fun assertUpdateApplicationStatisticsMessageSent(applicationId: String) {
+        val messages = updateApplicationStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).isNotEmpty
+        Assertions.assertThat(messages).anyMatch {
+            it.applicationId == applicationId
+        }
+    }
+
+    protected fun assertNumberOfUpdateStatisticsMessagesSent(count: Int) {
+        val messages = updateStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).hasSize(count)
+    }
+
+    protected fun assertUpdateStatisticsMessageNotSent() {
+        val messages = updateStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).isEmpty()
+    }
+
+    protected fun getObjectFromS3(s3Path: String): S3ObjectData {
+        val s3Bucket = LocalStackContainerConfiguration.VCA_TARGET_BUCKET
+        val getObjectRequest = GetObjectRequest.builder().bucket(s3Bucket).key(s3Path).build()
+        val objectBytes = s3Client.getObjectAsBytes(getObjectRequest).asByteArray()
+        val objectResponse = s3Client.getObject(getObjectRequest).response()
+        val objectTags =
+            s3Client.getObjectTagging(GetObjectTaggingRequest.builder().bucket(s3Bucket).key(s3Path).build())
+        return S3ObjectData(objectBytes, objectResponse.contentType(), objectTags.tagSet())
+    }
+
+    protected class S3ObjectData(
+        val bytes: ByteArray,
+        val contentType: String,
+        val tags: List<Tag>,
+    )
+
     private fun getSftpInboundDirectoryFileNames() =
         getSftpDirectoryFileNames(sftpInboundTemplate, PRINT_REQUEST_UPLOAD_PATH)
 
@@ -271,7 +363,7 @@ internal abstract class IntegrationTest {
         directory: String
     ): List<String> {
         return sftpTemplate.list(directory)
-            .map(LsEntry::getFilename)
+            .map { it.filename }
             .filterNot { path -> path.equals(".") }
             .filterNot { path -> path.equals("..") }
             .toList()

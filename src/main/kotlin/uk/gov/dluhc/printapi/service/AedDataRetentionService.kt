@@ -7,6 +7,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepository
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfFinalRetentionData
 import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.findPendingRemovalOfInitialRetentionData
+import uk.gov.dluhc.printapi.database.repository.AnonymousElectorDocumentRepositoryExtensions.shouldRetainPhoto
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 
@@ -17,7 +18,7 @@ class AedDataRetentionService(
     private val sourceTypeMapper: SourceTypeMapper,
     private val anonymousElectorDocumentRepository: AnonymousElectorDocumentRepository,
     private val removalDateResolver: ElectorDocumentRemovalDateResolver,
-    private val s3PhotoService: S3PhotoService,
+    private val s3AccessService: S3AccessService,
 ) {
 
     /**
@@ -65,7 +66,14 @@ class AedDataRetentionService(
         with(anonymousElectorDocumentRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType)) {
             logger.info { "Found $size Anonymous Elector Documents with sourceType $sourceType to remove" }
             forEach {
-                s3PhotoService.removePhoto(it.photoLocationArn)
+                val shouldRetainPhoto = anonymousElectorDocumentRepository.shouldRetainPhoto(
+                    photoLocationArn = it.photoLocationArn
+                )
+
+                if (!shouldRetainPhoto) {
+                    s3AccessService.removeDocument(it.photoLocationArn)
+                }
+
                 anonymousElectorDocumentRepository.deleteById(it.id!!)
             }
         }
