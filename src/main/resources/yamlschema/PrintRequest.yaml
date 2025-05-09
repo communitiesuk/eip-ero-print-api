@@ -22,13 +22,13 @@ properties:
   issueDate:
     type: string
     format: date
-    description: The issue date of the Voter Authority Card
+    description: Only supplied in the case of a re-print.
     example: '2022-06-01'
   suggestedExpiryDate:
     type: string
     format: date
-    example: '2022-06-01'
-    description: issueDate + 10 years
+    example: '2032-06-01'
+    description: Only supplied in the case of a re-print. This is usually issueDate + 10 years.
   requestDateTime:
     type: string
     format: date-time
@@ -176,8 +176,6 @@ properties:
 required:
   - requestId
   - issuingAuthorityEn
-  - issueDate
-  - suggestedExpiryDate
   - requestDateTime
   - cardFirstname
   - cardSurname
