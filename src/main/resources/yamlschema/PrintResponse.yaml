@@ -16,18 +16,39 @@ properties:
     example: '2022-06-01T14:23:03.000Z'
   statusStep:
     type: string
-    description: The current print step this update relates to
+    description: The current print step this update relates to.
     enum:
       - PROCESSED
       - IN-PRODUCTION
+      - PRINTED
       - DISPATCHED
       - NOT-DELIVERED
   status:
     type: string
+    description: |-
+      Indicates if the step change was successful or not.
+      * If the statusStep is PROCESSED, the status can be SUCCESS or FAILED
+      * If the statusStep is NOT-DELIVERED, the status can only be FAILED
+      * For all other status steps, the status can only be SUCCESS
     enum:
       - SUCCESS
       - FAILED
-    description: Indicates if the step change was successful or not.
+  issueDate:
+    type: string
+    format: date
+    description: |-
+      Only returned if statusStep is PRINTED and if the print request was the initial printing of a document.
+      If the request was for a re-print, this will not be returned.
+      This is the legal issuedDate.
+    example: '2022-06-01'
+  suggestedExpiryDate:
+    type: string
+    format: date
+    description: |-
+      Only returned if statusStep is PRINTED and if the print request was the initial printing of a document.
+      If the request was for a re-print, this will not be returned.
+      This is the legal issuedDate + 10 years.
+    example: '2032-06-01'
   message:
     type: string
     maxLength: 255
