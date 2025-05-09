@@ -104,7 +104,9 @@ class PrintResponseProcessingService(
                 requestId = requestId,
                 status = newStatus,
                 eventDateTime = timestamp.toInstant(),
-                message = message
+                issueDate = issueDate,
+                suggestedExpiryDate = suggestedExpiryDate,
+                message = message,
             )
         }
 

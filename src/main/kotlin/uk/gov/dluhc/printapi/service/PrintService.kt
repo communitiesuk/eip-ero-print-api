@@ -30,6 +30,8 @@ class PrintService(
             it.addPrintRequest(printRequestMapper.toPrintRequest(message, ero))
         } ?: run { certificateMapper.toCertificate(message, ero) }
 
+        // TODO EROPSPT-418 does this generate a new certificate row?
+
         return certificateRepository.save(certificate)
     }
 }

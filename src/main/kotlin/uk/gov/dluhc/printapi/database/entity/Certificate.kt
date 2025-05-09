@@ -61,14 +61,12 @@ class Certificate(
     @field:Size(max = 255)
     var issuingAuthorityCy: String? = null,
 
-    @field:NotNull
-    var issueDate: LocalDate = LocalDate.now(),
+    var issueDate: LocalDate? = null,
 
     /**
      * The certificate's expiry date. Not to be confused with removal dates related to data retention policies.
      */
-    @field:NotNull
-    var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
+    var suggestedExpiryDate: LocalDate? = null,
 
     /**
      * The legislation stipulates there are three retention periods for certificate related data. The first (initial)
@@ -209,6 +207,8 @@ class Certificate(
         requestId: String,
         status: PrintRequestStatus.Status,
         eventDateTime: Instant,
+        issueDate: LocalDate?,
+        suggestedExpiryDate: LocalDate?,
         message: String?
     ) {
         processPrintRequestUpdate {
@@ -217,7 +217,9 @@ class Certificate(
                     PrintRequestStatus(
                         status = status,
                         eventDateTime = eventDateTime,
-                        message = message
+                        message = message,
+                        issueDate = issueDate,
+                        suggestedExpiryDate = suggestedExpiryDate,
                     )
                 )
             }
@@ -239,6 +241,8 @@ class Certificate(
         val currentPrintRequest = getCurrentPrintRequest()
         val currentStatus = currentPrintRequest.getCurrentStatus()
         status = currentStatus.status
+        issueDate = currentStatus.issueDate
+        suggestedExpiryDate = currentStatus.suggestedExpiryDate
     }
 
     override fun equals(other: Any?): Boolean {

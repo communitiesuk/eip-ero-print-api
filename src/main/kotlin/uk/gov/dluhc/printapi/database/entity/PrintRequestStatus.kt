@@ -19,6 +19,7 @@ import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.sql.Types
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 
 @Table
@@ -39,6 +40,10 @@ class PrintRequestStatus(
 
     @field:Size(max = 1024)
     var message: String? = null,
+
+    var issueDate: LocalDate? = null,
+
+    var suggestedExpiryDate: LocalDate? = null,
 
     @CreationTimestamp
     @Column(updatable = false)
