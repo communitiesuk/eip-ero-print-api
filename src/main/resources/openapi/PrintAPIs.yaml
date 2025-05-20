@@ -1208,7 +1208,18 @@ paths:
         - Anonymous Elector Documents (AED) Explainer Document
       responses:
         '201':
-          $ref: '#/components/responses/PreSignedUrlResource'
+          description: created
+          headers:
+            Content-Disposition:
+              description: Content-Disposition header
+              schema:
+                type: string
+                example: attachment; filename="AED-explainer-document-E09000007.pdf"
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         '404':
           $ref: '#/components/responses/404ErrorResponse'
       security:
