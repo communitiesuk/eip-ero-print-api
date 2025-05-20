@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Print APIs
-  version: '1.24.0'
+  version: '1.25.0'
   description: Print APIs
 #
 # --------------------------------------------------------------------------------
@@ -705,6 +705,11 @@ paths:
               schema:
                 type: string
                 example: attachment; filename="temporary-certificate-explainer-document-E09000007.pdf"
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         '404':
           $ref: '#/components/responses/404ErrorResponse'
       operationId: generate-temporary-certificate-explainer-document
