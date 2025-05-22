@@ -10,6 +10,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
+import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -80,10 +81,11 @@ internal class CertificateDataRetentionServiceTest {
             // Then
             assertThat(certificate).hasInitialRetentionRemovalDate(expectedInitialRetentionRemovalDate)
             assertThat(certificate).hasFinalRetentionRemovalDate(expectedFinalRetentionRemovalDate)
+            assertThat(certificate.hasSourceApplicationBeenRemoved).isTrue
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
-            verify(removalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate, message.gssCode)
-            verify(removalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(certificate.issueDate)
+            verify(removalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate!!, message.gssCode)
+            verify(removalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(certificate.issueDate!!)
             verify(certificateRepository).save(certificate)
         }
 
@@ -110,6 +112,40 @@ internal class CertificateDataRetentionServiceTest {
                 TestLogAppender.hasLog(
                     "Certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9 not found",
                     Level.ERROR
+                )
+            ).isTrue
+        }
+
+        @Test
+        fun `should handle source application removed before certificate is printed`() {
+            // Given
+            val message = buildApplicationRemovedMessage(
+                sourceReference = "63774ff4bb4e7049b67182d9",
+                sourceType = VOTER_MINUS_CARD,
+            )
+            val certificate = buildCertificate(
+                issueDate = null,
+                suggestedExpiryDate = null,
+            )
+            given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
+            given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(certificate)
+
+            // When
+            certificateDataRetentionService.handleSourceApplicationRemoved(message)
+
+            // Then
+            assertThat(certificate.initialRetentionRemovalDate).isNull()
+            assertThat(certificate.finalRetentionRemovalDate).isNull()
+            assertThat(certificate.hasSourceApplicationBeenRemoved).isTrue
+            verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
+            verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
+            verify(removalDateResolver, never()).getCertificateInitialRetentionPeriodRemovalDate(any(), any())
+            verify(removalDateResolver, never()).getElectorDocumentFinalRetentionPeriodRemovalDate(any())
+            verify(certificateRepository).save(certificate)
+            assertThat(
+                TestLogAppender.hasLog(
+                    "No issue date found for certificate with sourceType = VOTER_CARD and sourceReference = 63774ff4bb4e7049b67182d9",
+                    Level.WARN
                 )
             ).isTrue
         }

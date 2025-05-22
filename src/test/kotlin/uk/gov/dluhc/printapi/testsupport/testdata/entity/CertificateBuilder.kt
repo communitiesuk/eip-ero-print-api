@@ -66,11 +66,13 @@ fun buildCertificate(
     sourceReference: String = aValidSourceReference(),
     applicationReceivedDateTime: Instant = aValidApplicationReceivedDateTime(),
     applicationReference: String = aValidApplicationReference(),
-    issueDate: LocalDate = aValidIssueDate(),
+    issueDate: LocalDate? = aValidIssueDate(),
+    suggestedExpiryDate: LocalDate? = aValidSuggestedExpiryDate(),
     initialRetentionRemovalDate: LocalDate? = null,
     initialRetentionDataRemoved: Boolean = false,
     finalRetentionRemovalDate: LocalDate? = null,
     isFromApplicationsApi: Boolean? = null,
+    hasSourceApplicationBeenRemoved: Boolean = false,
 ): Certificate {
     val certificate = Certificate(
         id = if (persisted) randomUUID() else null,
@@ -81,7 +83,7 @@ fun buildCertificate(
         applicationReceivedDateTime = applicationReceivedDateTime,
         issuingAuthority = aValidIssuingAuthority(),
         issueDate = issueDate,
-        suggestedExpiryDate = aValidSuggestedExpiryDate(),
+        suggestedExpiryDate = suggestedExpiryDate,
         gssCode = gssCode,
         photoLocationArn = photoLocationArn,
         status = status,
@@ -91,6 +93,7 @@ fun buildCertificate(
         dateCreated = if (persisted) Instant.now() else null,
         createdBy = if (persisted) "system" else null,
         isFromApplicationsApi = isFromApplicationsApi,
+        hasSourceApplicationBeenRemoved = hasSourceApplicationBeenRemoved,
     )
     printRequests.forEach { printRequest -> certificate.addPrintRequest(printRequest) }
     return certificate
