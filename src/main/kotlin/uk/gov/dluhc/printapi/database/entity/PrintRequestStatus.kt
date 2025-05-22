@@ -77,7 +77,5 @@ class PrintRequestStatus(
         DISPATCHED,
         NOT_DELIVERED,
         PRINT_PROVIDER_VALIDATION_FAILED,
-        PRINT_PROVIDER_PRODUCTION_FAILED, // TODO EROPSPT-418 this is never used
-        PRINT_PROVIDER_DISPATCH_FAILED, // TODO EROPSPT-418 this is never used
     }
 }

@@ -171,9 +171,9 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
         val message = buildProcessPrintResponseMessage(
             requestId = requestId,
             status = ProcessPrintResponseMessage.Status.FAILED,
-            statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
+            statusStep = ProcessPrintResponseMessage.StatusStep.PROCESSED,
         )
-        val expectedStatus = Status.PRINT_PROVIDER_PRODUCTION_FAILED
+        val expectedStatus = Status.PRINT_PROVIDER_VALIDATION_FAILED
 
         val expectedGssCode = certificate.gssCode!!
         val ero = buildElectoralRegistrationOfficeResponse(

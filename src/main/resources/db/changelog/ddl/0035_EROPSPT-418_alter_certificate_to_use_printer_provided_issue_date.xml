@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="0035_EROPSPT-418_alter_certificate_to_use_printer_provided_issue_date"
+               author="alex.yip@softwire.com"
+               context="ddl">
+        <comment>
+            Drop not null constraint on issue_date and suggested_expiry_date, to use the printer provided dates.
+            Create new column to mark if the source application of a certificate has been deleted.
+        </comment>
+
+        <dropNotNullConstraint
+            tableName="certificate"
+            columnName="issue_date"
+            columnDataType="date"/>
+
+        <dropNotNullConstraint
+            tableName="certificate"
+            columnName="suggested_expiry_date"
+            columnDataType="date"/>
+
+        <addColumn tableName="certificate">
+            <column
+                name="has_source_application_been_removed"
+                type="boolean"
+                defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <addNotNullConstraint
+                tableName="certificate"
+                columnName="issue_date"
+                columnDataType="date"/>
+
+            <addNotNullConstraint
+                tableName="certificate"
+                columnName="suggested_expiry_date"
+                columnDataType="date"/>
+
+            <dropColumn
+                tableName="certificate"
+                columnName="has_source_application_been_removed"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
