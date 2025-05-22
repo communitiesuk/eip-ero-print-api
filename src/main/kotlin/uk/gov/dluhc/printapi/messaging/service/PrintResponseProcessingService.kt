@@ -32,7 +32,6 @@ class PrintResponseProcessingService(
     private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
     private val removalDateResolver: ElectorDocumentRemovalDateResolver,
 ) {
-
     fun processPrintResponses(printResponses: List<PrintResponse>) {
         printResponses.forEach {
             processPrintResponseQueue.submit(processPrintResponseMessageMapper.toProcessPrintResponseMessage(it))
@@ -51,33 +50,35 @@ class PrintResponseProcessingService(
      * the print provider's batch response.
      */
     @Transactional
-    fun processBatchResponses(batchResponses: List<BatchResponse>): List<Certificate> {
-        return batchResponses.flatMap { batchResponse ->
+    fun processBatchResponses(batchResponses: List<BatchResponse>): List<Certificate> =
+        batchResponses.flatMap { batchResponse ->
             val certificates =
                 certificateRepository.findDistinctByPrintRequestStatusAndBatchId(
                     SENT_TO_PRINT_PROVIDER,
-                    batchResponse.batchId
+                    batchResponse.batchId,
                 )
             processBatchCertificates(batchResponse, certificates)
             certificateRepository.saveAll(certificates)
         }
-    }
 
-    private fun processBatchCertificates(batchResponse: BatchResponse, certificates: List<Certificate>) {
+    private fun processBatchCertificates(
+        batchResponse: BatchResponse,
+        certificates: List<Certificate>,
+    ) {
         with(batchResponse) {
             certificates.forEach {
                 if (status == SUCCESS) {
                     it.addReceivedByPrintProviderEventForBatch(
                         batchId = batchId,
                         eventDateTime = timestamp.toInstant(),
-                        message = message
+                        message = message,
                     )
                 } else {
                     it.requeuePrintRequestForBatch(
                         batchId = batchId,
                         eventDateTime = timestamp.toInstant(),
                         message = message,
-                        newRequestId = idFactory.requestId()
+                        newRequestId = idFactory.requestId(),
                     )
                 }
             }
@@ -96,10 +97,11 @@ class PrintResponseProcessingService(
             return null
         }
 
-        val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId) ?: run {
-            logger.error("Certificate not found for the requestId ${printResponse.requestId}")
-            return null
-        }
+        val certificate =
+            certificateRepository.getByPrintRequestsRequestId(printResponse.requestId) ?: run {
+                logger.error("Certificate not found for the requestId ${printResponse.requestId}")
+                return null
+            }
 
         with(printResponse) {
             if (newStatus == Status.PRINTED) {
@@ -114,7 +116,7 @@ class PrintResponseProcessingService(
                 requestId = requestId,
                 status = newStatus,
                 eventDateTime = timestamp.toInstant(),
-                message = message
+                message = message,
             )
         }
 
@@ -142,7 +144,7 @@ class PrintResponseProcessingService(
         if (newIssueDate == null || newSuggestedExpiryDate == null) {
             // TODO EROPSPT-418: Trigger alarm?
             logger.error {
-                "Initial print request with requestId [${requestId}] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${newIssueDate}, ${newSuggestedExpiryDate}]"
+                "Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [$newIssueDate, $newSuggestedExpiryDate]"
             }
             return
         }

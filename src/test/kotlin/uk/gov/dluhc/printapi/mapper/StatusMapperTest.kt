@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.mapper
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
