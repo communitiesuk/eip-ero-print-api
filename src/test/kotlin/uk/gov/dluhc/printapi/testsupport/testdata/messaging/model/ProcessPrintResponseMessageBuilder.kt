@@ -4,6 +4,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidEventMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import java.time.Instant
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
 
@@ -12,11 +13,15 @@ fun buildProcessPrintResponseMessage(
     timestamp: OffsetDateTime = Instant.now().atOffset(UTC),
     statusStep: ProcessPrintResponseMessage.StatusStep = ProcessPrintResponseMessage.StatusStep.PROCESSED,
     status: ProcessPrintResponseMessage.Status = ProcessPrintResponseMessage.Status.SUCCESS,
+    issueDate: LocalDate? = null,
+    suggestedExpiryDate: LocalDate? = null,
     message: String? = if (status == ProcessPrintResponseMessage.Status.SUCCESS) null else aValidEventMessage(),
 ) = ProcessPrintResponseMessage(
     requestId = requestId,
     timestamp = timestamp,
     statusStep = statusStep,
     status = status,
+    issueDate = issueDate,
+    suggestedExpiryDate = suggestedExpiryDate,
     message = message
 )
