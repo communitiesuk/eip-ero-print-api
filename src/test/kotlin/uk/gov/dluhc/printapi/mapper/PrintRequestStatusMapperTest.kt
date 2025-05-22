@@ -21,8 +21,6 @@ class PrintRequestStatusMapperTest {
             "DISPATCHED, DISPATCHED",
             "NOT_DELIVERED, NOT_MINUS_DELIVERED",
             "PRINT_PROVIDER_VALIDATION_FAILED, PRINT_MINUS_FAILED",
-            "PRINT_PROVIDER_PRODUCTION_FAILED, PRINT_MINUS_PROCESSING",
-            "PRINT_PROVIDER_DISPATCH_FAILED, PRINT_MINUS_PROCESSING"
         ]
     )
     fun `should map status dto enum to print request status`(status: PrintRequestStatusDto, expected: PrintRequestStatus) {

@@ -22,8 +22,6 @@ internal class PrintRequestStatusDtoMapperTest {
             "DISPATCHED, DISPATCHED",
             "NOT_DELIVERED, NOT_DELIVERED",
             "PRINT_PROVIDER_VALIDATION_FAILED, PRINT_PROVIDER_VALIDATION_FAILED",
-            "PRINT_PROVIDER_PRODUCTION_FAILED, PRINT_PROVIDER_PRODUCTION_FAILED",
-            "PRINT_PROVIDER_DISPATCH_FAILED, PRINT_PROVIDER_DISPATCH_FAILED",
         ]
     )
     fun `should map entity Status to DTO status`(status: Status, expected: PrintRequestStatusDto) {

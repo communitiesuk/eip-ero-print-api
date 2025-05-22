@@ -37,8 +37,8 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             sourceReference = certificate.sourceReference!!,
             gssCode = certificate.gssCode!!
         )
-        // currently 29 working days following issue date - refer to application.yml
-        val expectedInitialRemovalDate = LocalDate.of(2023, MAY, 17)
+        // currently 28 working days following issue date - refer to application.yml
+        val expectedInitialRemovalDate = LocalDate.of(2023, MAY, 16)
         val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
 
         // When

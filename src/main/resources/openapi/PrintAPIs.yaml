@@ -1396,8 +1396,6 @@ components:
         - DISPATCHED
         - NOT_DELIVERED
         - PRINT_PROVIDER_VALIDATION_FAILED
-        - PRINT_PROVIDER_PRODUCTION_FAILED
-        - PRINT_PROVIDER_DISPATCH_FAILED
 
     AedSearchBy:
       title: AedSearchBy
