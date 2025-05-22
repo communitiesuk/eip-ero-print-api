@@ -439,7 +439,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             assertThat(
                 TestLogAppender.hasLog(
-                    "Initial print request with requestId [${requestId}] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [null, ${response.suggestedExpiryDate}]",
+                    "Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [null, ${response.suggestedExpiryDate}]",
                     Level.ERROR
                 )
             ).isTrue
@@ -469,7 +469,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             assertThat(
                 TestLogAppender.hasLog(
-                    "Initial print request with requestId [${requestId}] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${response.issueDate}, null]",
+                    "Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${response.issueDate}, null]",
                     Level.ERROR
                 )
             ).isTrue
