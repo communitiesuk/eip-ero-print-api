@@ -61,14 +61,12 @@ class Certificate(
     @field:Size(max = 255)
     var issuingAuthorityCy: String? = null,
 
-    @field:NotNull
-    var issueDate: LocalDate = LocalDate.now(),
+    var issueDate: LocalDate? = null,
 
     /**
      * The certificate's expiry date. Not to be confused with removal dates related to data retention policies.
      */
-    @field:NotNull
-    var suggestedExpiryDate: LocalDate = issueDate.plusYears(10),
+    var suggestedExpiryDate: LocalDate? = null,
 
     /**
      * The legislation stipulates there are three retention periods for certificate related data. The first (initial)
@@ -96,6 +94,11 @@ class Certificate(
      * legacy Voter Card Applications API
      */
     var isFromApplicationsApi: Boolean? = false,
+
+    /**
+     * Set to true after the source application is removed.
+     */
+    var hasSourceApplicationBeenRemoved: Boolean = false,
 
     /**
      * Certificate status corresponds to the current status of the most recent

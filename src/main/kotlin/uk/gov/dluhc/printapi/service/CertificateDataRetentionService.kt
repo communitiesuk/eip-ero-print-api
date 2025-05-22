@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -13,6 +14,7 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
+import java.time.LocalDate
 
 private val logger = KotlinLogging.logger {}
 
@@ -34,19 +36,34 @@ class CertificateDataRetentionService(
      */
     @Transactional
     fun handleSourceApplicationRemoved(message: ApplicationRemovedMessage) {
-        with(message) {
-            val sourceType = sourceTypeMapper.mapSqsToEntity(sourceType)
-            certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
-                gssCode = gssCode,
-                sourceType = sourceType,
-                sourceReference = sourceReference
-            )?.also {
-                it.initialRetentionRemovalDate = removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
-                it.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
-                certificateRepository.save(it)
-            }
-                ?: logger.error { "Certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }
+        val sourceType = sourceTypeMapper.mapSqsToEntity(message.sourceType)
+        val certificate = certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
+            gssCode = message.gssCode,
+            sourceType = sourceType,
+            sourceReference = message.sourceReference,
+        ) ?: run {
+            logger.error { "Certificate with sourceType = $sourceType and sourceReference = ${message.sourceReference} not found" }
+            return
         }
+
+        certificate.issueDate?.let {
+            certificate.setRetentionRemovalDates(it, message.gssCode)
+        } ?: logger.warn {
+            // EROPSPT-418: We expect that it's very unlikely for this to happen.
+            // The retention dates will be set when the issue date is set.
+            // Logging a warning here to record instances of it.
+            "No issue date found for certificate with sourceType = $sourceType and sourceReference = ${message.sourceReference}"
+        }
+
+        certificate.hasSourceApplicationBeenRemoved = true
+        certificateRepository.save(certificate)
+    }
+
+    fun Certificate.setRetentionRemovalDates(issueDate: LocalDate, gssCode: String) {
+        initialRetentionRemovalDate =
+            removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
+        finalRetentionRemovalDate =
+            removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
     }
 
     @Transactional

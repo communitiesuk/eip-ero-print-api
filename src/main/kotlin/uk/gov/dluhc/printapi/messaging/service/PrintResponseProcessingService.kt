@@ -15,7 +15,9 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
+import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
 import uk.gov.dluhc.printapi.service.IdFactory
+import java.time.LocalDate
 
 private val logger = KotlinLogging.logger {}
 
@@ -28,6 +30,7 @@ class PrintResponseProcessingService(
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>,
     private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
     private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
+    private val removalDateResolver: ElectorDocumentRemovalDateResolver,
 ) {
 
     fun processPrintResponses(printResponses: List<PrintResponse>) {
@@ -88,18 +91,25 @@ class PrintResponseProcessingService(
         try {
             newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
         } catch (ex: IllegalArgumentException) {
+            // TODO EROPSPT-418: Trigger alarm?
             logger.error(ex.message)
             return null
         }
 
-        val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
-
-        if (certificate == null) {
+        val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId) ?: run {
             logger.error("Certificate not found for the requestId ${printResponse.requestId}")
             return null
         }
 
         with(printResponse) {
+            if (newStatus == Status.PRINTED) {
+                certificate.setAsPrinted(
+                    requestId,
+                    issueDate,
+                    suggestedExpiryDate,
+                )
+            }
+
             certificate.addPrintRequestEvent(
                 requestId = requestId,
                 status = newStatus,
@@ -118,5 +128,36 @@ class PrintResponseProcessingService(
         }
 
         return certificate
+    }
+
+    fun Certificate.setAsPrinted(
+        requestId: String,
+        newIssueDate: LocalDate?,
+        newSuggestedExpiryDate: LocalDate?,
+    ) {
+        if (issueDate != null && suggestedExpiryDate != null) {
+            return
+        }
+
+        if (newIssueDate == null || newSuggestedExpiryDate == null) {
+            // TODO EROPSPT-418: Trigger alarm?
+            logger.error {
+                "Initial print request with requestId [${requestId}] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${newIssueDate}, ${newSuggestedExpiryDate}]"
+            }
+            return
+        }
+
+        issueDate = newIssueDate
+        suggestedExpiryDate = newSuggestedExpiryDate
+
+        if (hasSourceApplicationBeenRemoved) {
+            initialRetentionRemovalDate =
+                removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(
+                    newIssueDate,
+                    gssCode!!,
+                )
+            finalRetentionRemovalDate =
+                removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(newIssueDate)
+        }
     }
 }

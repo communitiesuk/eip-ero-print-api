@@ -32,15 +32,19 @@ import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
+import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssueDate
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
+import uk.gov.dluhc.printapi.testsupport.testdata.aValidSuggestedExpiryDate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
+import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class PrintResponseProcessingServiceTest {
@@ -70,6 +74,9 @@ class PrintResponseProcessingServiceTest {
     @Mock
     private lateinit var certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService
 
+    @Mock
+    private lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
+
     @BeforeEach
     fun setup() {
         service = PrintResponseProcessingService(
@@ -80,6 +87,7 @@ class PrintResponseProcessingServiceTest {
             processPrintResponseQueue,
             certificateNotDeliveredEmailSenderService,
             certificateFailedToPrintEmailSenderService,
+            removalDateResolver
         )
     }
 
@@ -225,7 +233,12 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
+            verifyNoMoreInteractions(
+                statusMapper,
+                certificateRepository,
+                certificateNotDeliveredEmailSenderService,
+                certificateFailedToPrintEmailSenderService
+            )
         }
 
         @Test
@@ -275,7 +288,12 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
+            verifyNoMoreInteractions(
+                statusMapper,
+                certificateRepository,
+                certificateNotDeliveredEmailSenderService,
+                certificateFailedToPrintEmailSenderService
+            )
         }
 
         @Test
@@ -325,7 +343,12 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
+            verifyNoMoreInteractions(
+                statusMapper,
+                certificateRepository,
+                certificateNotDeliveredEmailSenderService,
+                certificateFailedToPrintEmailSenderService
+            )
         }
 
         @Test
@@ -346,23 +369,173 @@ class PrintResponseProcessingServiceTest {
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository, never()).saveAndFlush(any())
         }
-    }
 
-    @Test
-    fun `should log and not throw exception given statusMapper throws exception`() {
-        // Given
-        val response = buildProcessPrintResponseMessage()
-        val message = "Undefined statusStep and status combination"
-        val exception = IllegalArgumentException(message)
-        given(statusMapper.toStatusEntityEnum(any(), any())).willThrow(exception)
-        TestLogAppender.reset()
+        @Test
+        fun `should log and not throw exception given statusMapper throws exception`() {
+            // Given
+            val response = buildProcessPrintResponseMessage()
+            val message = "Undefined statusStep and status combination"
+            val exception = IllegalArgumentException(message)
+            given(statusMapper.toStatusEntityEnum(any(), any())).willThrow(exception)
+            TestLogAppender.reset()
 
-        // When
-        service.processPrintResponse(response)
+            // When
+            service.processPrintResponse(response)
 
-        // Then
-        assertThat(TestLogAppender.hasLog(message, Level.ERROR)).isTrue
-        verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
-        verifyNoInteractions(certificateRepository)
+            // Then
+            assertThat(TestLogAppender.hasLog(message, Level.ERROR)).isTrue
+            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
+            verifyNoInteractions(certificateRepository)
+        }
+
+        @Test
+        fun `should not change issueDate and suggestedExpiryDate if certificate has already been printed`() {
+            // Given
+            val requestId = aValidRequestId()
+            val originalIssueDate = LocalDate.now().minusDays(5)
+            val originalSuggestedExpiryDate = originalIssueDate.plusYears(10)
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
+                issueDate = aValidIssueDate(),
+                suggestedExpiryDate = aValidSuggestedExpiryDate(),
+            )
+            val certificate = buildCertificate(
+                issueDate = originalIssueDate,
+                suggestedExpiryDate = originalSuggestedExpiryDate,
+            )
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            assertThat(certificate.issueDate).isEqualTo(originalIssueDate)
+            assertThat(certificate.suggestedExpiryDate).isEqualTo(originalSuggestedExpiryDate)
+        }
+
+        @Test
+        fun `should log error if certificate hasn't been printed and new issueDate is null`() {
+            // Given
+            val requestId = aValidRequestId()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
+                issueDate = null,
+                suggestedExpiryDate = aValidSuggestedExpiryDate(),
+            )
+            val certificate = buildCertificate(
+                issueDate = null,
+                suggestedExpiryDate = null,
+            )
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+            TestLogAppender.reset()
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            assertThat(
+                TestLogAppender.hasLog(
+                    "Initial print request with requestId [${requestId}] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [null, ${response.suggestedExpiryDate}]",
+                    Level.ERROR
+                )
+            ).isTrue
+        }
+
+        @Test
+        fun `should log error if certificate hasn't been printed and new suggestedExpiryDate is null`() {
+            // Given
+            val requestId = aValidRequestId()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
+                issueDate = aValidIssueDate(),
+                suggestedExpiryDate = null,
+            )
+            val certificate = buildCertificate(
+                issueDate = null,
+                suggestedExpiryDate = null,
+            )
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+            TestLogAppender.reset()
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            assertThat(
+                TestLogAppender.hasLog(
+                    "Initial print request with requestId [${requestId}] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${response.issueDate}, null]",
+                    Level.ERROR
+                )
+            ).isTrue
+        }
+
+        @Test
+        fun `should set issueDate and suggestedExpiryDate if certificate hasn't been printed and values are not null`() {
+            // Given
+            val requestId = aValidRequestId()
+            val issueDate = aValidIssueDate()
+            val suggestedExpiryDate = aValidSuggestedExpiryDate()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
+                issueDate = issueDate,
+                suggestedExpiryDate = suggestedExpiryDate
+            )
+            val certificate = buildCertificate(
+                issueDate = null,
+                suggestedExpiryDate = null,
+            )
+
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            assertThat(certificate.issueDate).isEqualTo(issueDate)
+            assertThat(certificate.suggestedExpiryDate).isEqualTo(suggestedExpiryDate)
+        }
+
+        @Test
+        fun `should set initial and final retention removal date if certificate hasn't been printed, dates are not null, and source application has been removed`() {
+            // Given
+            val requestId = aValidRequestId()
+            val issueDate = aValidIssueDate()
+            val suggestedExpiryDate = aValidSuggestedExpiryDate()
+            val response = buildProcessPrintResponseMessage(
+                requestId = requestId,
+                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
+                issueDate = issueDate,
+                suggestedExpiryDate = suggestedExpiryDate
+            )
+            val certificate = buildCertificate(
+                hasSourceApplicationBeenRemoved = true,
+                issueDate = null,
+                suggestedExpiryDate = null,
+            )
+            val initialRemovalDate = LocalDate.of(2099, 1, 1)
+            val finalRemovalDate = LocalDate.of(2100, 1, 1)
+
+            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
+            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
+            given(removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any()))
+                .willReturn(initialRemovalDate)
+            given(removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any()))
+                .willReturn(finalRemovalDate)
+
+            // When
+            service.processPrintResponse(response)
+
+            // Then
+            assertThat(certificate.initialRetentionRemovalDate).isEqualTo(initialRemovalDate)
+            assertThat(certificate.finalRetentionRemovalDate).isEqualTo(finalRemovalDate)
+        }
     }
 }
