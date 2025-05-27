@@ -41,6 +41,8 @@ s3:
 api:
   print-api:
     base.url: http://localhost:8080
+    data-retention:
+      certificate-initial-retention-period: "P28D"
   ero-management:
     url: http://will-be-replaced-by-wireMockServer-bean
 

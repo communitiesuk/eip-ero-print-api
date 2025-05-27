@@ -106,4 +106,36 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             assertThat(saved).hasFinalRetentionRemovalDate(expectedFinalRemovalDate)
         }
     }
+
+    @Test
+    fun `should process application removed message for a certificate without issue date`() {
+        // Given
+        val certificate = buildCertificate(
+            issueDate = null,
+            suggestedExpiryDate = null,
+            initialRetentionRemovalDate = null,
+            finalRetentionRemovalDate = null,
+            printRequests = listOf(
+                buildPrintRequest(delivery = buildDelivery()),
+                buildPrintRequest(delivery = buildDelivery())
+            )
+        )
+        certificateRepository.save(certificate)
+        val payload = buildApplicationRemovedMessage(
+            sourceReference = certificate.sourceReference!!,
+            gssCode = certificate.gssCode!!
+        )
+
+        // When
+        sqsTemplate.send(applicationRemovedQueueName, payload)
+
+        // Then
+        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
+            val response = certificateRepository.findAll()
+            assertThat(response).hasSize(1)
+            val saved = response[0]
+            assertThat(saved).hasInitialRetentionRemovalDate(null)
+            assertThat(saved).hasFinalRetentionRemovalDate(null)
+        }
+    }
 }
