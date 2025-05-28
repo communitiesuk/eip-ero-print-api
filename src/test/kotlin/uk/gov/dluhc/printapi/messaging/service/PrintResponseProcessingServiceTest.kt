@@ -12,6 +12,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.given
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
@@ -19,7 +20,9 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 import uk.gov.dluhc.messagingsupport.MessageQueue
+import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
@@ -32,7 +35,7 @@ import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
-import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
+import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssueDate
@@ -75,7 +78,7 @@ class PrintResponseProcessingServiceTest {
     private lateinit var certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService
 
     @Mock
-    private lateinit var removalDateResolver: ElectorDocumentRemovalDateResolver
+    private lateinit var certificateDataRetentionService: CertificateDataRetentionService
 
     @BeforeEach
     fun setup() {
@@ -87,7 +90,7 @@ class PrintResponseProcessingServiceTest {
             processPrintResponseQueue,
             certificateNotDeliveredEmailSenderService,
             certificateFailedToPrintEmailSenderService,
-            removalDateResolver
+            certificateDataRetentionService,
         )
     }
 
@@ -525,10 +528,14 @@ class PrintResponseProcessingServiceTest {
 
             given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
             given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
-            given(removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any()))
-                .willReturn(initialRemovalDate)
-            given(removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any()))
-                .willReturn(finalRemovalDate)
+            doAnswer {
+                (it.arguments[0] as Certificate).apply {
+                    initialRetentionRemovalDate = initialRemovalDate
+                    finalRetentionRemovalDate = finalRemovalDate
+                }
+            }
+                .whenever(certificateDataRetentionService)
+                .setCertificateRetentionRemovalDates(any(), any(), any())
 
             // When
             service.processPrintResponse(response)
