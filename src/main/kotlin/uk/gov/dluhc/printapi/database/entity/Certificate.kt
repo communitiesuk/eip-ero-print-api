@@ -98,7 +98,7 @@ class Certificate(
     /**
      * Set to true after the source application is removed.
      */
-    var hasSourceApplicationBeenRemoved: Boolean = false,
+    var hasSourceApplicationBeenRemoved: Boolean? = false,
 
     /**
      * Certificate status corresponds to the current status of the most recent

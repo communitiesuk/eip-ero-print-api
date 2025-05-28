@@ -152,7 +152,7 @@ class PrintResponseProcessingService(
         issueDate = newIssueDate
         suggestedExpiryDate = newSuggestedExpiryDate
 
-        if (hasSourceApplicationBeenRemoved) {
+        if (hasSourceApplicationBeenRemoved == true) {
             certificateDataRetentionService.setCertificateRetentionRemovalDates(
                 this,
                 newIssueDate,
