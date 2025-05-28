@@ -27,9 +27,7 @@
             <column
                 name="has_source_application_been_removed"
                 type="boolean"
-                defaultValue="false">
-                <constraints nullable="false"/>
-            </column>
+                defaultValue="false"/>
         </addColumn>
 
         <rollback>
