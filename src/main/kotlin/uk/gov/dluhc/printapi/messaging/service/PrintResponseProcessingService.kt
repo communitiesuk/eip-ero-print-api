@@ -15,7 +15,7 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
-import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
+import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.IdFactory
 import java.time.LocalDate
 
@@ -30,7 +30,7 @@ class PrintResponseProcessingService(
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>,
     private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
     private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
-    private val removalDateResolver: ElectorDocumentRemovalDateResolver,
+    private val certificateDataRetentionService: CertificateDataRetentionService,
 ) {
     fun processPrintResponses(printResponses: List<PrintResponse>) {
         printResponses.forEach {
@@ -153,13 +153,11 @@ class PrintResponseProcessingService(
         suggestedExpiryDate = newSuggestedExpiryDate
 
         if (hasSourceApplicationBeenRemoved) {
-            initialRetentionRemovalDate =
-                removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(
-                    newIssueDate,
-                    gssCode!!,
-                )
-            finalRetentionRemovalDate =
-                removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(newIssueDate)
+            certificateDataRetentionService.setCertificateRetentionRemovalDates(
+                this,
+                newIssueDate,
+                gssCode!!,
+            )
         }
     }
 }

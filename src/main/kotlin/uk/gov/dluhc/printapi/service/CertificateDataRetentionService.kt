@@ -47,7 +47,7 @@ class CertificateDataRetentionService(
         }
 
         certificate.issueDate?.let {
-            certificate.setRetentionRemovalDates(it, message.gssCode)
+            setCertificateRetentionRemovalDates(certificate, it, message.gssCode)
         } ?: logger.warn {
             // EROPSPT-418: We expect that it's very unlikely for this to happen.
             // The retention dates will be set when the issue date is set.
@@ -59,10 +59,14 @@ class CertificateDataRetentionService(
         certificateRepository.save(certificate)
     }
 
-    fun Certificate.setRetentionRemovalDates(issueDate: LocalDate, gssCode: String) {
-        initialRetentionRemovalDate =
+    fun setCertificateRetentionRemovalDates(
+        certificate: Certificate,
+        issueDate: LocalDate,
+        gssCode: String
+    ) = certificate.also {
+        it.initialRetentionRemovalDate =
             removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
-        finalRetentionRemovalDate =
+        it.finalRetentionRemovalDate =
             removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
     }
 
@@ -88,7 +92,8 @@ class CertificateDataRetentionService(
     @Transactional(readOnly = true)
     fun queueCertificatesForRemoval(sourceType: SourceType) {
         // initial query to get the number of records
-        val totalElements = certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(sourceType = sourceType)
+        val totalElements =
+            certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(sourceType = sourceType)
         if (totalElements == 0) {
             logger.info { "No certificates with sourceType $sourceType to remove final retention period data from" }
             return
@@ -102,7 +107,13 @@ class CertificateDataRetentionService(
         var batchNumber = totalBatches
         while (batchNumber > 0) {
             logger.info { "Retrieving batch [$batchNumber] of [$totalBatches] of CertificateRemovalSummary" }
-            with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, batchNumber = batchNumber, batchSize = batchSize)) {
+            with(
+                certificateRepository.findPendingRemovalOfFinalRetentionData(
+                    sourceType = sourceType,
+                    batchNumber = batchNumber,
+                    batchSize = batchSize
+                )
+            ) {
                 forEach { removeCertificateQueue.submit(RemoveCertificateMessage(it.id!!, it.photoLocationArn!!)) }
                 batchNumber--
             }
