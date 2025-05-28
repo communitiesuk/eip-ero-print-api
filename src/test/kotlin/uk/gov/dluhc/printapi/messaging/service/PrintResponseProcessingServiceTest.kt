@@ -91,6 +91,7 @@ class PrintResponseProcessingServiceTest {
             certificateNotDeliveredEmailSenderService,
             certificateFailedToPrintEmailSenderService,
             certificateDataRetentionService,
+            "TEST_ALARM_MAGIC_STRING",
         )
     }
 
@@ -367,7 +368,7 @@ class PrintResponseProcessingServiceTest {
             service.processPrintResponse(response)
 
             // Then
-            assertThat(TestLogAppender.hasLog("Certificate not found for the requestId $requestId", Level.ERROR)).isTrue
+            assertThat(TestLogAppender.hasLog("TEST_ALARM_MAGIC_STRING: Certificate not found for the requestId [$requestId]", Level.ERROR)).isTrue
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository, never()).saveAndFlush(any())
@@ -377,8 +378,7 @@ class PrintResponseProcessingServiceTest {
         fun `should log and not throw exception given statusMapper throws exception`() {
             // Given
             val response = buildProcessPrintResponseMessage()
-            val message = "Undefined statusStep and status combination"
-            val exception = IllegalArgumentException(message)
+            val exception = IllegalArgumentException("Undefined statusStep and status combination")
             given(statusMapper.toStatusEntityEnum(any(), any())).willThrow(exception)
             TestLogAppender.reset()
 
@@ -386,7 +386,7 @@ class PrintResponseProcessingServiceTest {
             service.processPrintResponse(response)
 
             // Then
-            assertThat(TestLogAppender.hasLog(message, Level.ERROR)).isTrue
+            assertThat(TestLogAppender.hasLog("TEST_ALARM_MAGIC_STRING: Undefined statusStep and status combination", Level.ERROR)).isTrue
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verifyNoInteractions(certificateRepository)
         }
@@ -442,7 +442,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             assertThat(
                 TestLogAppender.hasLog(
-                    "Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [null, ${response.suggestedExpiryDate}]",
+                    "TEST_ALARM_MAGIC_STRING: Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [null, ${response.suggestedExpiryDate}]",
                     Level.ERROR
                 )
             ).isTrue
@@ -472,7 +472,7 @@ class PrintResponseProcessingServiceTest {
             // Then
             assertThat(
                 TestLogAppender.hasLog(
-                    "Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${response.issueDate}, null]",
+                    "TEST_ALARM_MAGIC_STRING: Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${response.issueDate}, null]",
                     Level.ERROR
                 )
             ).isTrue

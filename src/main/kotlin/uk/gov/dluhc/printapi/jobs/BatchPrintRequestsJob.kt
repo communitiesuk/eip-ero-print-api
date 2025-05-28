@@ -12,6 +12,7 @@ class BatchPrintRequestsJob(
 ) {
 
     @Scheduled(cron = CRON_DISABLED)
+    // @Scheduled(cron = "\${jobs.batch-print-requests.cron}")
     @SchedulerLock(name = "\${jobs.batch-print-requests.name}")
     fun run() {
         printRequestsService.processPrintRequests()
