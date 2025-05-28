@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.messaging.service
 
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -31,6 +32,7 @@ class PrintResponseProcessingService(
     private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
     private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
     private val certificateDataRetentionService: CertificateDataRetentionService,
+    @Value("\${alarm-magic-strings.process-print-response-print-response}") private val processPrintResponseMagicString: String,
 ) {
     fun processPrintResponses(printResponses: List<PrintResponse>) {
         printResponses.forEach {
@@ -92,14 +94,13 @@ class PrintResponseProcessingService(
         try {
             newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
         } catch (ex: IllegalArgumentException) {
-            // TODO EROPSPT-418: Trigger alarm?
-            logger.error(ex.message)
+            logger.error { "$processPrintResponseMagicString: ${ex.message}" }
             return null
         }
 
         val certificate =
             certificateRepository.getByPrintRequestsRequestId(printResponse.requestId) ?: run {
-                logger.error("Certificate not found for the requestId ${printResponse.requestId}")
+                logger.error { "$processPrintResponseMagicString: Certificate not found for the requestId [${printResponse.requestId}]" }
                 return null
             }
 
@@ -142,9 +143,8 @@ class PrintResponseProcessingService(
         }
 
         if (newIssueDate == null || newSuggestedExpiryDate == null) {
-            // TODO EROPSPT-418: Trigger alarm?
             logger.error {
-                "Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [$newIssueDate, $newSuggestedExpiryDate]"
+                "$processPrintResponseMagicString: Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [$newIssueDate, $newSuggestedExpiryDate]"
             }
             return
         }

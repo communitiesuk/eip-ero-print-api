@@ -248,3 +248,6 @@ email:
       send-to-requesting-user: false
 
 caching.time-to-live: PT24H  #Time period of 24 hours
+
+alarm-magic-strings:
+  process-print-response: ${PROCESS_PRINT_RESPONSE_ALARM_STRING}
