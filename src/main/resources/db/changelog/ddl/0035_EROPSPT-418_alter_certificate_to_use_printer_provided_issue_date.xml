@@ -10,7 +10,8 @@
                context="ddl">
         <comment>
             Drop not null constraint on issue_date and suggested_expiry_date, to use the printer provided dates.
-            Create new column to mark if the source application of a certificate has been deleted.
+            Create a column to mark if the source application of a certificate has been deleted.
+            Create a temporary column to mark if the certificate was created with the printer-provided issue date.
         </comment>
 
         <dropNotNullConstraint
@@ -26,6 +27,11 @@
         <addColumn tableName="certificate">
             <column
                 name="has_source_application_been_removed"
+                type="boolean"
+                defaultValue="false"/>
+
+            <column
+                name="is_certificate_created_with_printer_provided_issue_date"
                 type="boolean"
                 defaultValue="false"/>
         </addColumn>
@@ -44,6 +50,10 @@
             <dropColumn
                 tableName="certificate"
                 columnName="has_source_application_been_removed"/>
+
+            <dropColumn
+                tableName="certificate"
+                columnName="is_certificate_created_with_printer_provided_issue_date"/>
         </rollback>
 
     </changeSet>
