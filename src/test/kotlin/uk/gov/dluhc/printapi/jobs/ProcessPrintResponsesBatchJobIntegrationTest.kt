@@ -78,7 +78,6 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
             printRequests = listOf(
                 buildPrintRequest(
                     batchId = batchId2,
-                    // requestId = "other-id",
                     printRequestStatuses = listOf(
                         buildPrintRequestStatus(
                             status = Status.SENT_TO_PRINT_PROVIDER,

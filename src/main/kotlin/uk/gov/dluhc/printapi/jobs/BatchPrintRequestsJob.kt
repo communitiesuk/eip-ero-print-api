@@ -12,6 +12,7 @@ class BatchPrintRequestsJob(
 ) {
 
     @Scheduled(cron = CRON_DISABLED)
+    // TODO we'll need to enable this job once A1SP completes their rollout
     // @Scheduled(cron = "\${jobs.batch-print-requests.cron}")
     @SchedulerLock(name = "\${jobs.batch-print-requests.name}")
     fun run() {

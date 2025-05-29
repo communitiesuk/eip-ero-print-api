@@ -535,7 +535,7 @@ class PrintResponseProcessingServiceTest {
                 }
             }
                 .whenever(certificateDataRetentionService)
-                .setCertificateRetentionRemovalDates(any(), any(), any())
+                .setCertificateRetentionRemovalDates(any(), any())
 
             // When
             service.processPrintResponse(response)
