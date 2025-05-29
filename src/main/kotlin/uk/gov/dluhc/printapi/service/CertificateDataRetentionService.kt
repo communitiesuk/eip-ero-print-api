@@ -14,7 +14,6 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.ApplicationRemovedMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
-import java.time.LocalDate
 
 private val logger = KotlinLogging.logger {}
 
@@ -46,28 +45,36 @@ class CertificateDataRetentionService(
             return
         }
 
-        certificate.issueDate?.let {
-            setCertificateRetentionRemovalDates(certificate, it, message.gssCode)
-        } ?: logger.warn {
+        try {
+            setCertificateRetentionRemovalDates(certificate, message.gssCode)
+        } catch (_: IllegalArgumentException) {
             // EROPSPT-418: We expect that it's very unlikely for this to happen.
             // The retention dates will be set when the issue date is set.
             // Logging a warning here to record instances of it.
-            "No issue date found for certificate with sourceType = $sourceType and sourceReference = ${message.sourceReference}"
+            logger.warn { "No issue date found for certificate with sourceType = $sourceType and sourceReference = ${message.sourceReference}" }
         }
 
         certificate.hasSourceApplicationBeenRemoved = true
         certificateRepository.save(certificate)
     }
 
-    fun setCertificateRetentionRemovalDates(
-        certificate: Certificate,
-        issueDate: LocalDate,
-        gssCode: String
-    ) = certificate.also {
-        it.initialRetentionRemovalDate =
-            removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
-        it.finalRetentionRemovalDate =
-            removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
+    fun setCertificateRetentionRemovalDates(certificate: Certificate, gssCode: String): Certificate {
+        val issueDate = certificate.issueDate
+
+        if (issueDate == null) {
+            throw IllegalArgumentException("Issue date not found for certificate")
+        }
+
+        return certificate.also {
+            it.initialRetentionRemovalDate =
+                removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(
+                    issueDate,
+                    gssCode,
+                    it.isCertificateCreatedWithPrinterProvidedIssueDate ?: false
+                )
+            it.finalRetentionRemovalDate =
+                removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
+        }
     }
 
     @Transactional
