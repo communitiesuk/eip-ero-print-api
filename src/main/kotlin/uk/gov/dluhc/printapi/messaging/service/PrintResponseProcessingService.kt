@@ -32,7 +32,7 @@ class PrintResponseProcessingService(
     private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
     private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
     private val certificateDataRetentionService: CertificateDataRetentionService,
-    @Value("\${alarm-magic-strings.process-print-response-print-response}") private val processPrintResponseMagicString: String,
+    @Value("\${alarm-magic-strings.process-print-response}") private val processPrintResponseMagicString: String,
 ) {
     fun processPrintResponses(printResponses: List<PrintResponse>) {
         printResponses.forEach {
@@ -138,7 +138,7 @@ class PrintResponseProcessingService(
         newIssueDate: LocalDate?,
         newSuggestedExpiryDate: LocalDate?,
     ) {
-        if (issueDate != null && suggestedExpiryDate != null) {
+        if (hasBeenPrinted()) {
             return
         }
 
@@ -153,11 +153,13 @@ class PrintResponseProcessingService(
         suggestedExpiryDate = newSuggestedExpiryDate
 
         if (hasSourceApplicationBeenRemoved == true) {
+            // No need to catch the exception here, as we've just set the issue date
             certificateDataRetentionService.setCertificateRetentionRemovalDates(
                 this,
-                newIssueDate,
                 gssCode!!,
             )
         }
     }
+
+    private fun Certificate.hasBeenPrinted() = issueDate != null && suggestedExpiryDate != null
 }

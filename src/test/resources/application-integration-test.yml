@@ -87,3 +87,6 @@ jobs:
     batch-size: 100
 
 caching.time-to-live: PT2S  #Time period of 2 seconds
+
+alarm-magic-strings:
+  process-print-response: "TEST_ALARM_MAGIC_STRING"
