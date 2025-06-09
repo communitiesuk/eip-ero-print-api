@@ -77,7 +77,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-ui:1.8.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
-    implementation("com.opencsv:opencsv:5.9")
+    implementation("com.opencsv:opencsv:5.11.1")
 
     constraints {
         implementation("org.webjars:swagger-ui:5.20.0") {
