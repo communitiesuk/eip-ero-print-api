@@ -174,7 +174,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = PrintRequestStatus.Status.PRINT_PROVIDER_DISPATCH_FAILED,
+                        status = PrintRequestStatus.Status.PRINT_PROVIDER_VALIDATION_FAILED,
                         eventDateTime = Instant.now().minus(20, ChronoUnit.DAYS)
                     ),
                 )
@@ -256,7 +256,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = PrintRequestStatus.Status.PRINT_PROVIDER_DISPATCH_FAILED,
+                        status = PrintRequestStatus.Status.PRINT_PROVIDER_VALIDATION_FAILED,
                         eventDateTime = Instant.now().minus(20, ChronoUnit.DAYS)
                     ),
                 )
@@ -342,7 +342,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = PrintRequestStatus.Status.PRINT_PROVIDER_DISPATCH_FAILED,
+                        status = PrintRequestStatus.Status.PRINT_PROVIDER_VALIDATION_FAILED,
                         eventDateTime = Instant.now().minus(20, ChronoUnit.DAYS)
                     ),
                 )
@@ -452,7 +452,7 @@ internal class CertificateTest {
                         eventDateTime = Instant.now().minus(28, ChronoUnit.DAYS)
                     ),
                     buildPrintRequestStatus(
-                        status = PrintRequestStatus.Status.PRINT_PROVIDER_DISPATCH_FAILED,
+                        status = PrintRequestStatus.Status.PRINT_PROVIDER_VALIDATION_FAILED,
                         eventDateTime = Instant.now().minus(20, ChronoUnit.DAYS)
                     ),
                 )
