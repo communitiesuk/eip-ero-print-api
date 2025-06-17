@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.mapper
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
@@ -15,18 +14,17 @@ class StatusMapperTest {
     @CsvSource(
         value = [
             "PROCESSED, SUCCESS, VALIDATED_BY_PRINT_PROVIDER",
+            "PROCESSED, FAILED, PRINT_PROVIDER_VALIDATION_FAILED",
             "IN_MINUS_PRODUCTION, SUCCESS, IN_PRODUCTION",
+            "PRINTED, SUCCESS, PRINTED",
             "DISPATCHED, SUCCESS, DISPATCHED",
             "NOT_MINUS_DELIVERED, FAILED, NOT_DELIVERED",
-            "PROCESSED, FAILED, PRINT_PROVIDER_VALIDATION_FAILED",
-            "IN_MINUS_PRODUCTION, FAILED, PRINT_PROVIDER_PRODUCTION_FAILED",
-            "DISPATCHED, FAILED, PRINT_PROVIDER_DISPATCH_FAILED"
         ]
     )
     fun `should map statusStep and status to entity status`(
         statusStep: ProcessPrintResponseMessage.StatusStep,
         status: ProcessPrintResponseMessage.Status,
-        expected: Status
+        expected: Status,
     ) {
         // Given
         // When
@@ -36,18 +34,27 @@ class StatusMapperTest {
         assertThat(actual).isEqualTo(expected)
     }
 
-    @Test
-    fun `should throw exception given statusStep is NOT_MINUS_DELIVERED and status is SUCCESS`() {
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "IN_MINUS_PRODUCTION, FAILED, Print status cannot be in statusStep [IN_MINUS_PRODUCTION] when the status is [FAILED]",
+            "PRINTED, FAILED, Print status cannot be in statusStep [PRINTED] when the status is [FAILED]",
+            "DISPATCHED, FAILED, Print status cannot be in statusStep [DISPATCHED] when the status is [FAILED]",
+            "NOT_MINUS_DELIVERED, SUCCESS, Print status cannot be in statusStep [NOT_MINUS_DELIVERED] when the status is [SUCCESS]",
+        ]
+    )
+    fun `should throw exception given invalid combination of statusStep and status`(
+        statusStep: ProcessPrintResponseMessage.StatusStep,
+        status: ProcessPrintResponseMessage.Status,
+        message: String
+    ) {
         // Given
         // When
         val ex = Assertions.catchThrowableOfType(IllegalArgumentException::class.java) {
-            statusMapper.toStatusEntityEnum(
-                ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
-                ProcessPrintResponseMessage.Status.SUCCESS
-            )
+            statusMapper.toStatusEntityEnum(statusStep, status)
         }
 
         // Then
-        assertThat(ex).isNotNull.hasMessage("Print status cannot be in statusStep [NOT_MINUS_DELIVERED] when the status is [SUCCESS]")
+        assertThat(ex).isNotNull.hasMessage(message)
     }
 }
