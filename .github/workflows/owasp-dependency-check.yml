@@ -8,5 +8,5 @@ jobs:
   owasp-dependency-check:
     uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/owasp-dependency-check.yml@main
     secrets:
-      slack_vulnerability_alerts_webhook: ${{ secrets.SLACK_VUNLERABILITY_ALERTS_WEBHOOK }}
+      slack_vulnerability_alerts_webhook: ${{ secrets.SLACK_DLUHC_VT_BETA_ALERTS_WEBHOOK }}
       vulnerability_alerts_nvd_api_key: ${{ secrets.VULNERABILITY_ALERTS_NVD_API_KEY }}
