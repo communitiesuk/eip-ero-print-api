@@ -33,10 +33,28 @@ class ElectorDocumentRemovalDateResolver(
      * the UK nation concerned.
      * @return A [LocalDate] representing when the data should be removed
      */
-    fun getCertificateInitialRetentionPeriodRemovalDate(issueDate: LocalDate, gssCode: String): LocalDate =
-        with(getTotalDaysForWorkingDays(issueDate, dataRetentionConfig.certificateInitialRetentionPeriod.days, gssCode)) {
-            issueDate.plusDays(this.toLong())
+    fun getCertificateInitialRetentionPeriodRemovalDate(
+        issueDate: LocalDate,
+        gssCode: String,
+        isCertificateCreatedWithPrinterProvidedIssueDate: Boolean,
+    ): LocalDate {
+        // This is a temporary workaround to ensure that applications created before EROPSPT-418 is deployed
+        // are retained for 29 (1 extra) working days.
+        // TODO EROPSPT-XXX: Remove this workaround once all applications created before EROPSPT-418 are removed
+        val requiredWorkingDays = if (isCertificateCreatedWithPrinterProvidedIssueDate) {
+            dataRetentionConfig.certificateInitialRetentionPeriod.days
+        } else {
+            dataRetentionConfig.legacyCertificateInitialRetentionPeriod.days
         }
+
+        val daysToAdd = getTotalDaysForWorkingDays(
+            issueDate,
+            requiredWorkingDays,
+            gssCode,
+        )
+
+        return issueDate.plusDays(daysToAdd.toLong())
+    }
 
     /**
      * Calculates the date that certain [uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument] related data
@@ -79,7 +97,8 @@ class ElectorDocumentRemovalDateResolver(
      *
      * @param issueDate The date the [uk.gov.dluhc.printapi.database.entity.TemporaryCertificate] was issued.
      * @return A [LocalDate] representing when the data should be removed
-     */ fun getTempCertFinalRetentionPeriodRemovalDate(issueDate: LocalDate): LocalDate? {
+     */
+    fun getTempCertFinalRetentionPeriodRemovalDate(issueDate: LocalDate): LocalDate? {
         val firstJuly = LocalDate.of(issueDate.year, Month.JULY, 1)
         val numberOfYears =
             when (issueDate.isBefore(firstJuly)) {

@@ -114,7 +114,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
                     message = null
                 ),
                 buildPrintRequestStatus(
-                    status = Status.PRINT_PROVIDER_DISPATCH_FAILED,
+                    status = Status.NOT_DELIVERED,
                     eventDateTime = printResponses.printResponses[2].timestamp.toInstant(),
                     message = printResponses.printResponses[2].message
                 ),
@@ -129,13 +129,13 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
             )
         )
         val expectedCertificate1 = certificate1.deepCopy()
-        expectedCertificate1.status = Status.PRINT_PROVIDER_DISPATCH_FAILED
+        expectedCertificate1.status = Status.NOT_DELIVERED
         expectedCertificate1.printRequests.first().statusHistory = expectedStatuses1
 
         val expectedCertificate2 = certificate2.deepCopy()
+        expectedCertificate2.status = Status.PENDING_ASSIGNMENT_TO_BATCH
         expectedCertificate2.printRequests.first().batchId = null
         expectedCertificate2.printRequests.first().statusHistory = expectedStatuses2
-        expectedCertificate2.status = Status.PENDING_ASSIGNMENT_TO_BATCH
 
         // When
         processPrintResponsesBatchJob.pollAndProcessPrintResponses()
@@ -200,7 +200,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
                 ),
                 buildPrintResponse(
                     requestId = requestId1,
-                    statusStep = PrintResponse.StatusStep.DISPATCHED,
+                    statusStep = PrintResponse.StatusStep.NOT_DELIVERED,
                     status = PrintResponse.Status.FAILED,
                     message = "$requestId1 dispatch failed",
                     timestamp = timestamp4
