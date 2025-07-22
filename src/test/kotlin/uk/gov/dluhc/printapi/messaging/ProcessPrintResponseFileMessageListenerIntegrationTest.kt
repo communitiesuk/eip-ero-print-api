@@ -116,8 +116,9 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
                 assertThat(updated.status).isEqualTo(PrintRequestStatus.Status.PRINTED)
                 assertThat(
                     updated.printRequests[0].statusHistory
-                    .sortedByDescending { it.eventDateTime }
-                    .first().status)
+                        .sortedByDescending { it.eventDateTime }
+                        .first().status
+                )
                     .isEqualTo(PrintRequestStatus.Status.PRINTED)
             }
         }
@@ -180,13 +181,15 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
                 assertThat(updated.status).isEqualTo(PrintRequestStatus.Status.NOT_DELIVERED)
                 assertThat(
                     updated.printRequests.first().statusHistory
-                    .sortedByDescending { it.eventDateTime }
-                    .first().status)
+                        .sortedByDescending { it.eventDateTime }
+                        .first().status
+                )
                     .isEqualTo(PrintRequestStatus.Status.NOT_DELIVERED)
                 assertThat(
                     updated.printRequests.first().statusHistory
-                    .sortedByDescending { it.eventDateTime }
-                    .first().message)
+                        .sortedByDescending { it.eventDateTime }
+                        .first().message
+                )
                     .isNotNull()
             }
         }
