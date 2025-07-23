@@ -1,0 +1,22 @@
+{
+  "PrintResponses": [
+    {
+      "requestId": "request-id-1",
+      "timestamp": "2025-07-15T10:27:18.229Z",
+      "statusStep": "PRINTED",
+      "status": "SUCCESS",
+      "issueDate": "2025-01-19",
+      "suggestedExpiryDate": "2035-01-19",
+      "message": ""
+    },
+    {
+      "requestId": "request-id-2",
+      "timestamp": "2025-07-15T10:27:18.229Z",
+      "statusStep": "PRINTED",
+      "status": "SUCCESS",
+      "issueDate": "2025-01-19",
+      "suggestedExpiryDate": "2035-01-19",
+      "message": ""
+    }
+  ]
+}
