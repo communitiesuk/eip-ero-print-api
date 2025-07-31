@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.jobs
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.scheduling.annotation.Scheduled.CRON_DISABLED
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.service.PrintRequestsService
 
@@ -10,7 +11,9 @@ class BatchPrintRequestsJob(
     private val printRequestsService: PrintRequestsService,
 ) {
 
-    @Scheduled(cron = "\${jobs.batch-print-requests.cron}")
+    @Scheduled(cron = CRON_DISABLED)
+    // TODO we'll need to enable this job once A1SP completes their rollout
+    // @Scheduled(cron = "\${jobs.batch-print-requests.cron}")
     @SchedulerLock(name = "\${jobs.batch-print-requests.name}")
     fun run() {
         printRequestsService.processPrintRequests()
