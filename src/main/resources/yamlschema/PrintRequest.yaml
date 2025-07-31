@@ -1,4 +1,4 @@
-#version: 1.1.0
+#version: 1.0.0
 title: PrintRequest
 type: object
 description: Represents a single print request
@@ -22,13 +22,13 @@ properties:
   issueDate:
     type: string
     format: date
-    description: Only supplied in the case of a re-print.
+    description: The issue date of the Voter Authority Card
     example: '2022-06-01'
   suggestedExpiryDate:
     type: string
     format: date
-    example: '2032-06-01'
-    description: Only supplied in the case of a re-print. This is usually issueDate + 10 years.
+    example: '2022-06-01'
+    description: issueDate + 10 years
   requestDateTime:
     type: string
     format: date-time
@@ -176,6 +176,8 @@ properties:
 required:
   - requestId
   - issuingAuthorityEn
+  - issueDate
+  - suggestedExpiryDate
   - requestDateTime
   - cardFirstname
   - cardSurname

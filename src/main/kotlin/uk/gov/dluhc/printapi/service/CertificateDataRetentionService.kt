@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.config.DataRetentionConfiguration
-import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -35,45 +34,18 @@ class CertificateDataRetentionService(
      */
     @Transactional
     fun handleSourceApplicationRemoved(message: ApplicationRemovedMessage) {
-        val sourceType = sourceTypeMapper.mapSqsToEntity(message.sourceType)
-        val certificate = certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
-            gssCode = message.gssCode,
-            sourceType = sourceType,
-            sourceReference = message.sourceReference,
-        ) ?: run {
-            logger.error { "Certificate with sourceType = $sourceType and sourceReference = ${message.sourceReference} not found" }
-            return
-        }
-
-        try {
-            setCertificateRetentionRemovalDates(certificate, message.gssCode)
-        } catch (_: IllegalArgumentException) {
-            // EROPSPT-418: We expect that it's very unlikely for this to happen.
-            // The retention dates will be set when the issue date is set.
-            // Logging a warning here to record instances of it.
-            logger.warn { "No issue date found for certificate with sourceType = $sourceType and sourceReference = ${message.sourceReference}" }
-        }
-
-        certificate.hasSourceApplicationBeenRemoved = true
-        certificateRepository.save(certificate)
-    }
-
-    fun setCertificateRetentionRemovalDates(certificate: Certificate, gssCode: String): Certificate {
-        val issueDate = certificate.issueDate
-
-        if (issueDate == null) {
-            throw IllegalArgumentException("Issue date not found for certificate")
-        }
-
-        return certificate.also {
-            it.initialRetentionRemovalDate =
-                removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(
-                    issueDate,
-                    gssCode,
-                    it.isCertificateCreatedWithPrinterProvidedIssueDate ?: false
-                )
-            it.finalRetentionRemovalDate =
-                removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
+        with(message) {
+            val sourceType = sourceTypeMapper.mapSqsToEntity(sourceType)
+            certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(
+                gssCode = gssCode,
+                sourceType = sourceType,
+                sourceReference = sourceReference
+            )?.also {
+                it.initialRetentionRemovalDate = removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(it.issueDate, gssCode)
+                it.finalRetentionRemovalDate = removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(it.issueDate)
+                certificateRepository.save(it)
+            }
+                ?: logger.error { "Certificate with sourceType = $sourceType and sourceReference = $sourceReference not found" }
         }
     }
 
@@ -99,8 +71,7 @@ class CertificateDataRetentionService(
     @Transactional(readOnly = true)
     fun queueCertificatesForRemoval(sourceType: SourceType) {
         // initial query to get the number of records
-        val totalElements =
-            certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(sourceType = sourceType)
+        val totalElements = certificateRepository.countBySourceTypeAndFinalRetentionRemovalDateBefore(sourceType = sourceType)
         if (totalElements == 0) {
             logger.info { "No certificates with sourceType $sourceType to remove final retention period data from" }
             return
@@ -114,13 +85,7 @@ class CertificateDataRetentionService(
         var batchNumber = totalBatches
         while (batchNumber > 0) {
             logger.info { "Retrieving batch [$batchNumber] of [$totalBatches] of CertificateRemovalSummary" }
-            with(
-                certificateRepository.findPendingRemovalOfFinalRetentionData(
-                    sourceType = sourceType,
-                    batchNumber = batchNumber,
-                    batchSize = batchSize
-                )
-            ) {
+            with(certificateRepository.findPendingRemovalOfFinalRetentionData(sourceType = sourceType, batchNumber = batchNumber, batchSize = batchSize)) {
                 forEach { removeCertificateQueue.submit(RemoveCertificateMessage(it.id!!, it.photoLocationArn!!)) }
                 batchNumber--
             }

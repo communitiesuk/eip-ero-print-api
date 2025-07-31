@@ -14,7 +14,6 @@ class StatusStepMapperTest {
         value = [
             "PROCESSED, PROCESSED",
             "IN_PRODUCTION, IN_MINUS_PRODUCTION",
-            "PRINTED, PRINTED",
             "DISPATCHED, DISPATCHED",
             "NOT_DELIVERED, NOT_MINUS_DELIVERED"
         ]

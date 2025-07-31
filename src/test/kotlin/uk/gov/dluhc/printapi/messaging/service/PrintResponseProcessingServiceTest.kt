@@ -12,7 +12,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.given
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
@@ -20,9 +19,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.whenever
 import uk.gov.dluhc.messagingsupport.MessageQueue
-import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.NOT_DELIVERED
@@ -35,19 +32,15 @@ import uk.gov.dluhc.printapi.mapper.StatusMapper
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.FAILED
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
-import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidIssueDate
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
-import uk.gov.dluhc.printapi.testsupport.testdata.aValidSuggestedExpiryDate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequest
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildPrintRequestStatus
 import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildBatchResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildPrintResponse
-import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class PrintResponseProcessingServiceTest {
@@ -77,9 +70,6 @@ class PrintResponseProcessingServiceTest {
     @Mock
     private lateinit var certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService
 
-    @Mock
-    private lateinit var certificateDataRetentionService: CertificateDataRetentionService
-
     @BeforeEach
     fun setup() {
         service = PrintResponseProcessingService(
@@ -90,8 +80,6 @@ class PrintResponseProcessingServiceTest {
             processPrintResponseQueue,
             certificateNotDeliveredEmailSenderService,
             certificateFailedToPrintEmailSenderService,
-            certificateDataRetentionService,
-            "TEST_ALARM_MAGIC_STRING",
         )
     }
 
@@ -237,12 +225,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(
-                statusMapper,
-                certificateRepository,
-                certificateNotDeliveredEmailSenderService,
-                certificateFailedToPrintEmailSenderService
-            )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
@@ -292,12 +275,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(
-                statusMapper,
-                certificateRepository,
-                certificateNotDeliveredEmailSenderService,
-                certificateFailedToPrintEmailSenderService
-            )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
@@ -347,12 +325,7 @@ class PrintResponseProcessingServiceTest {
                         message = response.message
                     )
                 )
-            verifyNoMoreInteractions(
-                statusMapper,
-                certificateRepository,
-                certificateNotDeliveredEmailSenderService,
-                certificateFailedToPrintEmailSenderService
-            )
+            verifyNoMoreInteractions(statusMapper, certificateRepository, certificateNotDeliveredEmailSenderService, certificateFailedToPrintEmailSenderService)
         }
 
         @Test
@@ -368,181 +341,28 @@ class PrintResponseProcessingServiceTest {
             service.processPrintResponse(response)
 
             // Then
-            assertThat(TestLogAppender.hasLog("TEST_ALARM_MAGIC_STRING: Certificate not found for the requestId [$requestId]", Level.ERROR)).isTrue
+            assertThat(TestLogAppender.hasLog("Certificate not found for the requestId $requestId", Level.ERROR)).isTrue
             verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
             verify(certificateRepository).getByPrintRequestsRequestId(requestId)
             verify(certificateRepository, never()).saveAndFlush(any())
         }
+    }
 
-        @Test
-        fun `should log and not throw exception given statusMapper throws exception`() {
-            // Given
-            val response = buildProcessPrintResponseMessage()
-            val exception = IllegalArgumentException("Undefined statusStep and status combination")
-            given(statusMapper.toStatusEntityEnum(any(), any())).willThrow(exception)
-            TestLogAppender.reset()
+    @Test
+    fun `should log and not throw exception given statusMapper throws exception`() {
+        // Given
+        val response = buildProcessPrintResponseMessage()
+        val message = "Undefined statusStep and status combination"
+        val exception = IllegalArgumentException(message)
+        given(statusMapper.toStatusEntityEnum(any(), any())).willThrow(exception)
+        TestLogAppender.reset()
 
-            // When
-            service.processPrintResponse(response)
+        // When
+        service.processPrintResponse(response)
 
-            // Then
-            assertThat(TestLogAppender.hasLog("TEST_ALARM_MAGIC_STRING: Undefined statusStep and status combination", Level.ERROR)).isTrue
-            verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
-            verifyNoInteractions(certificateRepository)
-        }
-
-        @Test
-        fun `should not change issueDate and suggestedExpiryDate if certificate has already been printed`() {
-            // Given
-            val requestId = aValidRequestId()
-            val originalIssueDate = LocalDate.now().minusDays(5)
-            val originalSuggestedExpiryDate = originalIssueDate.plusYears(10)
-            val response = buildProcessPrintResponseMessage(
-                requestId = requestId,
-                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
-                issueDate = aValidIssueDate(),
-                suggestedExpiryDate = aValidSuggestedExpiryDate(),
-            )
-            val certificate = buildCertificate(
-                issueDate = originalIssueDate,
-                suggestedExpiryDate = originalSuggestedExpiryDate,
-            )
-            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
-            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
-
-            // When
-            service.processPrintResponse(response)
-
-            // Then
-            assertThat(certificate.issueDate).isEqualTo(originalIssueDate)
-            assertThat(certificate.suggestedExpiryDate).isEqualTo(originalSuggestedExpiryDate)
-        }
-
-        @Test
-        fun `should log error if certificate hasn't been printed and new issueDate is null`() {
-            // Given
-            val requestId = aValidRequestId()
-            val response = buildProcessPrintResponseMessage(
-                requestId = requestId,
-                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
-                issueDate = null,
-                suggestedExpiryDate = aValidSuggestedExpiryDate(),
-            )
-            val certificate = buildCertificate(
-                issueDate = null,
-                suggestedExpiryDate = null,
-            )
-            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
-            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
-            TestLogAppender.reset()
-
-            // When
-            service.processPrintResponse(response)
-
-            // Then
-            assertThat(
-                TestLogAppender.hasLog(
-                    "TEST_ALARM_MAGIC_STRING: Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [null, ${response.suggestedExpiryDate}]",
-                    Level.ERROR
-                )
-            ).isTrue
-        }
-
-        @Test
-        fun `should log error if certificate hasn't been printed and new suggestedExpiryDate is null`() {
-            // Given
-            val requestId = aValidRequestId()
-            val response = buildProcessPrintResponseMessage(
-                requestId = requestId,
-                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
-                issueDate = aValidIssueDate(),
-                suggestedExpiryDate = null,
-            )
-            val certificate = buildCertificate(
-                issueDate = null,
-                suggestedExpiryDate = null,
-            )
-            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
-            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
-            TestLogAppender.reset()
-
-            // When
-            service.processPrintResponse(response)
-
-            // Then
-            assertThat(
-                TestLogAppender.hasLog(
-                    "TEST_ALARM_MAGIC_STRING: Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [${response.issueDate}, null]",
-                    Level.ERROR
-                )
-            ).isTrue
-        }
-
-        @Test
-        fun `should set issueDate and suggestedExpiryDate if certificate hasn't been printed and values are not null`() {
-            // Given
-            val requestId = aValidRequestId()
-            val issueDate = aValidIssueDate()
-            val suggestedExpiryDate = aValidSuggestedExpiryDate()
-            val response = buildProcessPrintResponseMessage(
-                requestId = requestId,
-                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
-                issueDate = issueDate,
-                suggestedExpiryDate = suggestedExpiryDate
-            )
-            val certificate = buildCertificate(
-                issueDate = null,
-                suggestedExpiryDate = null,
-            )
-
-            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
-            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
-
-            // When
-            service.processPrintResponse(response)
-
-            // Then
-            assertThat(certificate.issueDate).isEqualTo(issueDate)
-            assertThat(certificate.suggestedExpiryDate).isEqualTo(suggestedExpiryDate)
-        }
-
-        @Test
-        fun `should set initial and final retention removal date if certificate hasn't been printed, dates are not null, and source application has been removed`() {
-            // Given
-            val requestId = aValidRequestId()
-            val issueDate = aValidIssueDate()
-            val suggestedExpiryDate = aValidSuggestedExpiryDate()
-            val response = buildProcessPrintResponseMessage(
-                requestId = requestId,
-                statusStep = ProcessPrintResponseMessage.StatusStep.PRINTED,
-                issueDate = issueDate,
-                suggestedExpiryDate = suggestedExpiryDate
-            )
-            val certificate = buildCertificate(
-                hasSourceApplicationBeenRemoved = true,
-                issueDate = null,
-                suggestedExpiryDate = null,
-            )
-            val initialRemovalDate = LocalDate.of(2099, 1, 1)
-            val finalRemovalDate = LocalDate.of(2100, 1, 1)
-
-            given(statusMapper.toStatusEntityEnum(any(), any())).willReturn(PrintRequestStatus.Status.PRINTED)
-            given(certificateRepository.getByPrintRequestsRequestId(any())).willReturn(certificate)
-            doAnswer {
-                (it.arguments[0] as Certificate).apply {
-                    initialRetentionRemovalDate = initialRemovalDate
-                    finalRetentionRemovalDate = finalRemovalDate
-                }
-            }
-                .whenever(certificateDataRetentionService)
-                .setCertificateRetentionRemovalDates(any(), any())
-
-            // When
-            service.processPrintResponse(response)
-
-            // Then
-            assertThat(certificate.initialRetentionRemovalDate).isEqualTo(initialRemovalDate)
-            assertThat(certificate.finalRetentionRemovalDate).isEqualTo(finalRemovalDate)
-        }
+        // Then
+        assertThat(TestLogAppender.hasLog(message, Level.ERROR)).isTrue
+        verify(statusMapper).toStatusEntityEnum(response.statusStep, response.status)
+        verifyNoInteractions(certificateRepository)
     }
 }

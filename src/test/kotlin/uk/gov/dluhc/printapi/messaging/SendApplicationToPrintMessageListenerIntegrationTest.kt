@@ -41,6 +41,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.model.buildElectoralRegistrati
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildLocalAuthorityResponse
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
@@ -85,9 +86,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 gssCode = gssCode,
                 issuingAuthority = localAuthority.contactDetailsEnglish.nameVac,
                 issuingAuthorityCy = localAuthority.contactDetailsWelsh?.nameVac,
-                issueDate = null,
-                suggestedExpiryDate = null,
-                hasSourceApplicationBeenRemoved = false,
+                issueDate = LocalDate.now(),
                 photoLocationArn = payloadPhotoLocationArn,
             )
             val printRequest = toPrintRequest(localAuthority, SupportingInformationFormat.EASY_READ, CertificateLanguage.CY)

@@ -288,14 +288,12 @@ internal abstract class IntegrationTest {
     }
 
     protected fun writeFileToRemoteOutBoundDirectory(fileName: String) {
-        val remoteFilenamePath = sftpOutboundTemplate.send(
+        sftpOutboundTemplate.send(
             MessageBuilder
                 .withPayload(File("$LOCAL_SFTP_OUTBOUND_TEST_DIRECTORY/$fileName"))
                 .setHeader(FILENAME, fileName)
                 .build()
         )
-
-        logger.info { "remote file written to: $remoteFilenamePath" }
     }
 
     protected fun assertEmailSent(expected: LocalstackEmailMessage) {

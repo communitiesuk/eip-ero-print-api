@@ -37,8 +37,8 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             sourceReference = certificate.sourceReference!!,
             gssCode = certificate.gssCode!!
         )
-        // currently 28 working days following issue date - refer to application.yml
-        val expectedInitialRemovalDate = LocalDate.of(2023, MAY, 16)
+        // currently 29 working days following issue date - refer to application.yml
+        val expectedInitialRemovalDate = LocalDate.of(2023, MAY, 17)
         val expectedFinalRemovalDate = LocalDate.of(2032, JULY, 1)
 
         // When
@@ -104,38 +104,6 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
             val saved = response[0]
             assertThat(saved).hasInitialRetentionRemovalDate(expectedInitialRemovalDate)
             assertThat(saved).hasFinalRetentionRemovalDate(expectedFinalRemovalDate)
-        }
-    }
-
-    @Test
-    fun `should process application removed message for a certificate without issue date`() {
-        // Given
-        val certificate = buildCertificate(
-            issueDate = null,
-            suggestedExpiryDate = null,
-            initialRetentionRemovalDate = null,
-            finalRetentionRemovalDate = null,
-            printRequests = listOf(
-                buildPrintRequest(delivery = buildDelivery()),
-                buildPrintRequest(delivery = buildDelivery())
-            )
-        )
-        certificateRepository.save(certificate)
-        val payload = buildApplicationRemovedMessage(
-            sourceReference = certificate.sourceReference!!,
-            gssCode = certificate.gssCode!!
-        )
-
-        // When
-        sqsTemplate.send(applicationRemovedQueueName, payload)
-
-        // Then
-        await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-            val response = certificateRepository.findAll()
-            assertThat(response).hasSize(1)
-            val saved = response[0]
-            assertThat(saved).hasInitialRetentionRemovalDate(null)
-            assertThat(saved).hasFinalRetentionRemovalDate(null)
         }
     }
 }
