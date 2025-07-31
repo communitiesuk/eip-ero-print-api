@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.messaging.service
 
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -15,7 +16,9 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse
 import uk.gov.dluhc.printapi.printprovider.models.BatchResponse.Status.SUCCESS
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
+import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.IdFactory
+import java.time.LocalDate
 
 private val logger = KotlinLogging.logger {}
 
@@ -28,8 +31,9 @@ class PrintResponseProcessingService(
     private val processPrintResponseQueue: MessageQueue<ProcessPrintResponseMessage>,
     private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
     private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
+    private val certificateDataRetentionService: CertificateDataRetentionService,
+    @Value("\${alarm-magic-strings.process-print-response}") private val processPrintResponseMagicString: String,
 ) {
-
     fun processPrintResponses(printResponses: List<PrintResponse>) {
         printResponses.forEach {
             processPrintResponseQueue.submit(processPrintResponseMessageMapper.toProcessPrintResponseMessage(it))
@@ -48,33 +52,35 @@ class PrintResponseProcessingService(
      * the print provider's batch response.
      */
     @Transactional
-    fun processBatchResponses(batchResponses: List<BatchResponse>): List<Certificate> {
-        return batchResponses.flatMap { batchResponse ->
+    fun processBatchResponses(batchResponses: List<BatchResponse>): List<Certificate> =
+        batchResponses.flatMap { batchResponse ->
             val certificates =
                 certificateRepository.findDistinctByPrintRequestStatusAndBatchId(
                     SENT_TO_PRINT_PROVIDER,
-                    batchResponse.batchId
+                    batchResponse.batchId,
                 )
             processBatchCertificates(batchResponse, certificates)
             certificateRepository.saveAll(certificates)
         }
-    }
 
-    private fun processBatchCertificates(batchResponse: BatchResponse, certificates: List<Certificate>) {
+    private fun processBatchCertificates(
+        batchResponse: BatchResponse,
+        certificates: List<Certificate>,
+    ) {
         with(batchResponse) {
             certificates.forEach {
                 if (status == SUCCESS) {
                     it.addReceivedByPrintProviderEventForBatch(
                         batchId = batchId,
                         eventDateTime = timestamp.toInstant(),
-                        message = message
+                        message = message,
                     )
                 } else {
                     it.requeuePrintRequestForBatch(
                         batchId = batchId,
                         eventDateTime = timestamp.toInstant(),
                         message = message,
-                        newRequestId = idFactory.requestId()
+                        newRequestId = idFactory.requestId(),
                     )
                 }
             }
@@ -88,23 +94,30 @@ class PrintResponseProcessingService(
         try {
             newStatus = statusMapper.toStatusEntityEnum(printResponse.statusStep, printResponse.status)
         } catch (ex: IllegalArgumentException) {
-            logger.error(ex.message)
+            logger.error { "$processPrintResponseMagicString: ${ex.message}" }
             return null
         }
 
-        val certificate = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
-
-        if (certificate == null) {
-            logger.error("Certificate not found for the requestId ${printResponse.requestId}")
-            return null
-        }
+        val certificate =
+            certificateRepository.getByPrintRequestsRequestId(printResponse.requestId) ?: run {
+                logger.error { "$processPrintResponseMagicString: Certificate not found for the requestId [${printResponse.requestId}]" }
+                return null
+            }
 
         with(printResponse) {
+            if (newStatus == Status.PRINTED) {
+                certificate.setAsPrinted(
+                    requestId,
+                    issueDate,
+                    suggestedExpiryDate,
+                )
+            }
+
             certificate.addPrintRequestEvent(
                 requestId = requestId,
                 status = newStatus,
                 eventDateTime = timestamp.toInstant(),
-                message = message
+                message = message,
             )
         }
 
@@ -119,4 +132,34 @@ class PrintResponseProcessingService(
 
         return certificate
     }
+
+    fun Certificate.setAsPrinted(
+        requestId: String,
+        newIssueDate: LocalDate?,
+        newSuggestedExpiryDate: LocalDate?,
+    ) {
+        if (hasBeenPrinted()) {
+            return
+        }
+
+        if (newIssueDate == null || newSuggestedExpiryDate == null) {
+            logger.error {
+                "$processPrintResponseMagicString: Initial print request with requestId [$requestId] was successfully printed, but the non-null fields issueDate and suggestedExpiryDate have values [$newIssueDate, $newSuggestedExpiryDate]"
+            }
+            return
+        }
+
+        issueDate = newIssueDate
+        suggestedExpiryDate = newSuggestedExpiryDate
+
+        if (hasSourceApplicationBeenRemoved == true) {
+            // No need to catch the exception here, as we've just set the issue date
+            certificateDataRetentionService.setCertificateRetentionRemovalDates(
+                this,
+                gssCode!!,
+            )
+        }
+    }
+
+    private fun Certificate.hasBeenPrinted() = issueDate != null && suggestedExpiryDate != null
 }

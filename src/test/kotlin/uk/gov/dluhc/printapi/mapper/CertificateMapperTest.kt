@@ -26,7 +26,6 @@ import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.toElectoralRegistrationOffice
 import uk.gov.dluhc.printapi.testsupport.testdata.model.buildSendApplicationToPrintMessage
 import java.time.Instant
-import java.time.LocalDate
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
 import uk.gov.dluhc.printapi.database.entity.SourceType as SourceTypeEntity
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage as CertificateLanguageModel
@@ -122,7 +121,9 @@ class CertificateMapperTest {
                 gssCode = gssCode,
                 issuingAuthority = ero.englishContactDetails.name,
                 issuingAuthorityCy = null,
-                issueDate = LocalDate.now(),
+                issueDate = null,
+                suggestedExpiryDate = null,
+                hasSourceApplicationBeenRemoved = false,
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
@@ -210,7 +211,9 @@ class CertificateMapperTest {
                 gssCode = gssCode,
                 issuingAuthority = ero.englishContactDetails.name,
                 issuingAuthorityCy = ero.welshContactDetails!!.name,
-                issueDate = LocalDate.now(),
+                issueDate = null,
+                suggestedExpiryDate = null,
+                hasSourceApplicationBeenRemoved = false,
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
@@ -297,7 +300,9 @@ class CertificateMapperTest {
                 gssCode = gssCode,
                 issuingAuthority = ero.englishContactDetails.name,
                 issuingAuthorityCy = null,
-                issueDate = LocalDate.now(),
+                issueDate = null,
+                suggestedExpiryDate = null,
+                hasSourceApplicationBeenRemoved = false,
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
