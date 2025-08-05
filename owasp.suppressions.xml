@@ -10,7 +10,7 @@
             jsonschema2dataclass:6.0.0 imports jsonschema2pojo:1.1.2.
 
             jsonschema2dataclass has not had a release since Jan 2023,
-            so the suppression date has been set until Q3 2025
+            so the suppression date has been set until Q1 2026
 
             The org.apache.commons.io.input.XmlStreamReader class may excessively consume CPU resources when
             processing maliciously crafted input.
@@ -28,7 +28,7 @@
             jsonschema2dataclass:6.0.0 imports jsonschema2pojo:1.1.2.
 
             jsonschema2dataclass has not had a release since Jan 2023,
-            so the suppression date has been set until Q3 2025
+            so the suppression date has been set until Q1 2026
 
             The attack requires a maliciously crafted yaml spec,
             which would require write access to the source code.
@@ -36,5 +36,41 @@
         </notes>
         <packageUrl regex="true">^pkg:maven/org\.jsonschema2pojo/jsonschema2pojo-core@.*$</packageUrl>
         <vulnerabilityName>CVE-2025-3588</vulnerabilityName>
+    </suppress>
+    <suppress until="2026-01-01Z">
+        <notes>
+            <![CDATA[file name: commons-lang-2.6.jar]]>
+
+            Fixed in commons-lang3:3.18.0.
+
+            Package imported by `jsonschema2pojo-core@1.1.2`
+
+            jsonschema2dataclass has not had a release since Jan 2023,
+            so the suppression date has been set until Q1 2026
+
+            The attack requires a maliciously crafted yaml spec,
+            which would require write access to the source code.
+            The inputs we provide do not result in this issue.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/commons-lang/commons-lang@.*$</packageUrl>
+        <vulnerabilityName>CVE-2025-48924</vulnerabilityName>
+    </suppress>
+    <suppress until="2026-01-01Z">
+        <notes>
+            <![CDATA[file name: commons-lang-3.17.0.jar]]>
+
+            Fixed in commons-lang3:3.18.0.
+
+            Package imported by `jsonschema2pojo-core@1.1.2`
+
+            jsonschema2dataclass has not had a release since Jan 2023,
+            so the suppression date has been set until Q1 2026
+
+            The attack requires a maliciously crafted yaml spec,
+            which would require write access to the source code.
+            The inputs we provide do not result in this issue.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons-lang3@.*$</packageUrl>
+        <vulnerabilityName>CVE-2025-48924</vulnerabilityName>
     </suppress>
 </suppressions>
