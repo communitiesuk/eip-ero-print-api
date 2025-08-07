@@ -13,10 +13,9 @@ interface PrintRequestStatusMapper {
     @ValueMapping(source = "RECEIVED_BY_PRINT_PROVIDER", target = "PRINT_MINUS_PROCESSING")
     @ValueMapping(source = "VALIDATED_BY_PRINT_PROVIDER", target = "PRINT_MINUS_PROCESSING")
     @ValueMapping(source = "IN_PRODUCTION", target = "PRINT_MINUS_PROCESSING")
+    @ValueMapping(source = "PRINTED", target = "PRINT_MINUS_PROCESSING")
     @ValueMapping(source = "DISPATCHED", target = "DISPATCHED")
     @ValueMapping(source = "NOT_DELIVERED", target = "NOT_MINUS_DELIVERED")
     @ValueMapping(source = "PRINT_PROVIDER_VALIDATION_FAILED", target = "PRINT_MINUS_FAILED")
-    @ValueMapping(source = "PRINT_PROVIDER_PRODUCTION_FAILED", target = "PRINT_MINUS_PROCESSING")
-    @ValueMapping(source = "PRINT_PROVIDER_DISPATCH_FAILED", target = "PRINT_MINUS_PROCESSING")
     fun toPrintRequestStatus(status: PrintRequestStatusDto): PrintRequestStatus
 }
