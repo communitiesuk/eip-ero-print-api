@@ -315,6 +315,7 @@ internal abstract class IntegrationTest {
         }
     }
 
+    // TODO: remove this?
     protected fun assertUpdateStatisticsMessageSent(applicationId: String) {
         val messages = updateStatisticsMessageListenerStub.getMessages()
         Assertions.assertThat(messages).isNotEmpty
@@ -331,8 +332,14 @@ internal abstract class IntegrationTest {
         }
     }
 
+    // TODO: remove this?
     protected fun assertNumberOfUpdateStatisticsMessagesSent(count: Int) {
         val messages = updateStatisticsMessageListenerStub.getMessages()
+        Assertions.assertThat(messages).hasSize(count)
+    }
+
+    protected fun assertNumberOfUpdateApplicationStatisticsMessagesSent(count: Int) {
+        val messages = updateApplicationStatisticsMessageListenerStub.getMessages()
         Assertions.assertThat(messages).hasSize(count)
     }
 

@@ -3,9 +3,6 @@ package uk.gov.dluhc.printapi.messaging
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.eromanagementapi.models.LocalAuthorityResponse
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.Address
@@ -51,10 +48,8 @@ import uk.gov.dluhc.printapi.testsupport.testdata.messaging.model.buildAddress a
 
 internal class SendApplicationToPrintMessageListenerIntegrationTest : IntegrationTest() {
 
-    @ParameterizedTest
-    @NullSource
-    @CsvSource("true", "false")
-    fun `should process message received on queue`(isFromApplicationsApi: Boolean?) {
+    @Test
+    fun `should process message received on queue`() {
         // Given
         val ero = buildElectoralRegistrationOfficeResponse(
             localAuthorities = mutableListOf(
@@ -68,7 +63,6 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
             gssCode = gssCode,
             supportingInformationFormat = EASY_MINUS_READ,
             certificateLanguage = SqsCertificateLanguage.CY,
-            isFromApplicationsApi = isFromApplicationsApi
         )
 
         val payloadPhotoLocationArn = payload.photoLocation
@@ -100,11 +94,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
-            if (isFromApplicationsApi == true) {
-                assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
-            } else {
-                assertUpdateStatisticsMessageSent(payload.sourceReference)
-            }
+            assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
@@ -151,9 +141,9 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         sqsTemplate.send(sendApplicationToPrintQueueName, payload)
 
         // Then
-        await.atMost(5, SECONDS).untilAsserted {
+        await.pollDelay(3, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
-            assertUpdateStatisticsMessageSent(payload.sourceReference)
+            assertUpdateApplicationStatisticsMessageSent(payload.sourceReference) // failure here
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]
@@ -215,7 +205,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Then
         await.atMost(5, SECONDS).untilAsserted {
             wireMockService.verifyEroManagementGetEro(gssCode)
-            assertUpdateStatisticsMessageSent(payload.sourceReference)
+            assertUpdateApplicationStatisticsMessageSent(payload.sourceReference)
             val response = certificateRepository.findAll()
             assertThat(response).hasSize(1)
             val saved = response[0]

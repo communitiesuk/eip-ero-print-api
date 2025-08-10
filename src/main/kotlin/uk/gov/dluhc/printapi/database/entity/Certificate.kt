@@ -90,12 +90,6 @@ class Certificate(
     var finalRetentionRemovalDate: LocalDate? = null,
 
     /**
-     * Set to true when the certificate is associated with an application from the Applications API, rather than the
-     * legacy Voter Card Applications API
-     */
-    var isFromApplicationsApi: Boolean? = false,
-
-    /**
      * Set to true after the source application is removed.
      */
     var hasSourceApplicationBeenRemoved: Boolean? = false,

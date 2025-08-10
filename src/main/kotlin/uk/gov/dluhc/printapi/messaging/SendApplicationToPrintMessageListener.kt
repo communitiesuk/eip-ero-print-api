@@ -25,7 +25,7 @@ class SendApplicationToPrintMessageListener(
         with(payload) {
             logger.info { "Print message with source reference [$sourceReference] received" }
             printService.savePrintMessage(payload).also {
-                statisticsUpdateService.updateStatistics(it.sourceReference!!, payload.isFromApplicationsApi)
+                statisticsUpdateService.updateStatistics(it.sourceReference!!)
             }
             logger.info { "Print message with source reference [$sourceReference] saved" }
         }

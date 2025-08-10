@@ -3,9 +3,6 @@ package uk.gov.dluhc.printapi.messaging
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_RESPONSE_DOWNLOAD_PATH
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
@@ -18,10 +15,8 @@ import java.util.concurrent.TimeUnit
 
 internal class ProcessPrintResponseFileMessageListenerIntegrationTest : IntegrationTest() {
 
-    @ParameterizedTest
-    @NullSource
-    @CsvSource("true", "false")
-    fun `should fetch remote print response file and send message to source api`(isFromApplicationsApi: Boolean?) {
+    @Test
+    fun `should fetch remote print response file and send message to source api`() {
         // Given
         val filenameToProcess = "status-20220928235441999.json"
         val printResponses = buildPrintResponses()
@@ -31,7 +26,6 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
             buildCertificate(
                 status = PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER,
                 batchId = it.batchId,
-                isFromApplicationsApi = isFromApplicationsApi
             )
         }
         certificateRepository.saveAll(certificates)
@@ -50,11 +44,7 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
             assertThat(hasFilesPresentInOutboundDirectory(listOf(filenameToProcess))).isFalse
             certificates.forEach {
-                if (isFromApplicationsApi == true) {
-                    assertUpdateApplicationStatisticsMessageSent(it.sourceReference!!)
-                } else {
-                    assertUpdateStatisticsMessageSent(it.sourceReference!!)
-                }
+                assertUpdateApplicationStatisticsMessageSent(it.sourceReference!!)
             }
         }
     }

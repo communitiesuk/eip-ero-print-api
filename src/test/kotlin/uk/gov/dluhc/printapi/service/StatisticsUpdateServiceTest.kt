@@ -25,29 +25,10 @@ class StatisticsUpdateServiceTest {
     )
 
     @Test
-    fun `should trigger voter card statistics update when isFromApplicationsApi is false or null`() {
-        val applicationId = aValidSourceReference()
-
-        statisticsUpdateService.updateStatistics(applicationId)
-
-        verify(triggerVoterCardStatisticsUpdateQueue).submit(
-            argThat { voterCardApplicationId == applicationId },
-            any()
-        )
-
-        statisticsUpdateService.updateStatistics(applicationId, false)
-
-        verify(triggerVoterCardStatisticsUpdateQueue, times(2)).submit(
-            argThat { voterCardApplicationId == applicationId },
-            any()
-        )
-    }
-
-    @Test
-    fun `should trigger application statistics update when isFromApplicationsApi is true`() {
+    fun `should trigger application statistics update`() {
         val id = aValidSourceReference()
 
-        statisticsUpdateService.updateStatistics(id, true)
+        statisticsUpdateService.updateStatistics(id)
 
         verify(triggerApplicationStatisticsUpdateQueue).submit(
             argThat { applicationId == id },
@@ -62,7 +43,7 @@ class StatisticsUpdateServiceTest {
         statisticsUpdateService.updateStatistics(applicationId)
 
         val argumentCaptor = argumentCaptor<Map<String, String>>()
-        verify(triggerVoterCardStatisticsUpdateQueue).submit(any(), argumentCaptor.capture())
+        verify(triggerApplicationStatisticsUpdateQueue).submit(any(), argumentCaptor.capture())
 
         val headers = argumentCaptor.firstValue
         val deduplicationId = headers["message-deduplication-id"]

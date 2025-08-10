@@ -3,9 +3,6 @@ package uk.gov.dluhc.printapi.messaging
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.NullSource
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
@@ -35,10 +32,8 @@ import java.util.concurrent.TimeUnit
 
 internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationTest() {
 
-    @ParameterizedTest
-    @NullSource
-    @CsvSource("true", "false")
-    fun `should process print response message`(isFromApplicationsApi: Boolean?) {
+    @Test
+    fun `should process print response message`() {
         // Given
         val requestId = aValidRequestId()
         val batchId = aValidBatchId()
@@ -56,7 +51,6 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
                     )
                 )
             ),
-            isFromApplicationsApi = isFromApplicationsApi
         )
         certificateRepository.save(certificate)
 
@@ -82,11 +76,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             val saved = certificateRepository.getByPrintRequestsRequestId(printResponse.requestId)
             assertThat(saved).isNotNull
             assertThat(saved!!.status).isEqualTo(Status.IN_PRODUCTION)
-            if (isFromApplicationsApi == true) {
-                assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
-            } else {
-                assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
-            }
+            assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
         }
     }
 
@@ -139,7 +129,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             assertThat(saved.suggestedExpiryDate).isNotNull
             assertThat(saved.issueDate).isEqualTo(issueDate)
             assertThat(saved.suggestedExpiryDate).isEqualTo(suggestedExpiryDate)
-            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+            assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
         }
     }
 
@@ -202,7 +192,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             assertThat(saved.initialRetentionRemovalDate).isEqualTo(initialRetentionRemovalDate)
             assertThat(saved.finalRetentionRemovalDate).isEqualTo(finalRetentionRemovalDate)
 
-            assertUpdateStatisticsMessageSent(certificate.sourceReference!!)
+            assertUpdateApplicationStatisticsMessageSent(certificate.sourceReference!!)
         }
     }
 
