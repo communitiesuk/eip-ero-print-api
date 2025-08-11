@@ -146,9 +146,6 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.remove-certificate-queue-name}")
     protected lateinit var removeCertificateQueueName: String
 
-    @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
-    protected lateinit var triggerStatisticsUpdateQueueName: String
-
     @Value("\${sqs.trigger-application-statistics-update-queue-name}")
     protected lateinit var triggerApplicationStatisticsUpdateQueueName: String
 

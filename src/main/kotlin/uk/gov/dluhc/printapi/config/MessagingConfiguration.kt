@@ -35,9 +35,6 @@ class MessagingConfiguration {
     @Value("\${sqs.remove-certificate-queue-name}")
     private lateinit var removeCertificateQueueName: String
 
-    @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
-    private lateinit var triggerVoterCardStatisticsUpdateQueueName: String
-
     @Value("\${sqs.trigger-application-statistics-update-queue-name}")
     private lateinit var triggerApplicationStatisticsUpdateQueueName: String
 
