@@ -229,7 +229,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         }
 
         await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageNotSent()
+            assertUpdateApplicationStatisticsMessageNotSent()
         }
     }
 
@@ -322,7 +322,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         }
 
         await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageNotSent()
+            assertUpdateApplicationStatisticsMessageNotSent()
         }
     }
 
@@ -415,7 +415,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         }
 
         await.pollDelay(3, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageNotSent()
+            assertUpdateApplicationStatisticsMessageNotSent()
         }
     }
 

@@ -16,7 +16,6 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateApplicationStatisticsMessage
-import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMessage
 
 @Configuration
 class MessagingConfiguration {
@@ -69,10 +68,6 @@ class MessagingConfiguration {
     @Bean
     fun removeCertificateQueue(sqsTemplate: SqsTemplate) =
         MessageQueue<RemoveCertificateMessage>(removeCertificateQueueName, sqsTemplate)
-
-    @Bean
-    fun triggerVoterCardStatisticsUpdateQueue(sqsTemplate: SqsTemplate) =
-        MessageQueue<UpdateStatisticsMessage>(triggerVoterCardStatisticsUpdateQueueName, sqsTemplate)
 
     @Bean
     fun triggerApplicationStatisticsUpdateQueue(sqsTemplate: SqsTemplate) =

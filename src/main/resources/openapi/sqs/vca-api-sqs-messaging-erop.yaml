@@ -60,15 +60,6 @@ paths:
       responses:
         '204':
           description: No response content.
-  '/trigger-voter-card-statistics-update':
-    post:
-      tags:
-        - SQS Queues
-      requestBody:
-        $ref: '#/components/requestBodies/UpdateStatisticsMessage'
-      responses:
-        '204':
-          description: No response content.
   '/trigger-application-statistics-update':
     post:
       tags:
@@ -265,17 +256,6 @@ components:
           example: 1f0f76a9a66f438b9bb33070
       required:
         - voterCardApplicationId
-    UpdateStatisticsMessage:
-      title: UpdateStatisticsMessage
-      type: object
-      description: SQS Message for initiating a statistics update for a voter card application.
-      properties:
-        voterCardApplicationId:
-          type: string
-          description: The identifier of the Voter Card Application
-          example: 1f0f76a9a66f438b9bb33070
-      required:
-        - voterCardApplicationId
     UpdateApplicationStatisticsMessage:
       title: TriggerApplicationStatisticsUpdateMessage
       type: object
@@ -307,11 +287,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/RemoveApplicationMessage'
-    UpdateStatisticsMessage:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateStatisticsMessage'
     UpdateApplicationStatisticsMessage:
       content:
         application/json:

@@ -88,7 +88,7 @@ class TemporaryCertificateController(
         )
         return temporaryCertificateService.generateTemporaryCertificate(eroId, dto)
             .also {
-                statisticsUpdateService.triggerVoterCardStatisticsUpdate(dto.sourceReference)
+                statisticsUpdateService.triggerApplicationStatisticsUpdate(dto.sourceReference)
             }.let { presignedUrl -> PreSignedUrlResourceResponse(presignedUrl) }
     }
 

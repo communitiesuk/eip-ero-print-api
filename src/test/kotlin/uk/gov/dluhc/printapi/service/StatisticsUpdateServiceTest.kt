@@ -7,20 +7,15 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateApplicationStatisticsMessage
-import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateStatisticsMessage
 
 class StatisticsUpdateServiceTest {
-
-    private val triggerVoterCardStatisticsUpdateQueue: MessageQueue<UpdateStatisticsMessage> = mock()
     private val triggerApplicationStatisticsUpdateQueue: MessageQueue<UpdateApplicationStatisticsMessage> = mock()
 
     private val statisticsUpdateService = StatisticsUpdateService(
-        triggerVoterCardStatisticsUpdateQueue,
         triggerApplicationStatisticsUpdateQueue
     )
 
@@ -50,20 +45,6 @@ class StatisticsUpdateServiceTest {
 
         assertNotNull(deduplicationId)
         assertEquals(36, deduplicationId?.length) // UUID length
-    }
-
-    @Test
-    fun `should trigger voter card statistics update with correct parameters`() {
-        val applicationId = aValidSourceReference()
-
-        statisticsUpdateService.triggerVoterCardStatisticsUpdate(applicationId)
-
-        verify(triggerVoterCardStatisticsUpdateQueue).submit(
-            argThat { voterCardApplicationId == applicationId },
-            argThat { headers ->
-                headers["message-group-id"] == applicationId && headers.containsKey("message-deduplication-id") // Checking headers
-            }
-        )
     }
 
     @Test
