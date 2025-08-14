@@ -9,11 +9,6 @@ import java.util.UUID
 class StatisticsUpdateService(
     private val triggerApplicationStatisticsUpdateQueue: MessageQueue<UpdateApplicationStatisticsMessage>,
 ) {
-
-    fun updateStatistics(applicationId: String) {
-        triggerApplicationStatisticsUpdate(applicationId)
-    }
-
     fun triggerApplicationStatisticsUpdate(applicationId: String) {
         triggerApplicationStatisticsUpdateQueue.submit(
             UpdateApplicationStatisticsMessage(applicationId = applicationId),

@@ -24,7 +24,7 @@ class PrintResponseFileService(
         removeFile(directory, fileName)
 
         certificates.forEach {
-            statisticsUpdateService.updateStatistics(it.sourceReference!!)
+            statisticsUpdateService.triggerApplicationStatisticsUpdate(it.sourceReference!!)
         }
     }
 

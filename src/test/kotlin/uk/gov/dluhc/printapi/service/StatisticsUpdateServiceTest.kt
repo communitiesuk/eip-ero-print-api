@@ -20,22 +20,10 @@ class StatisticsUpdateServiceTest {
     )
 
     @Test
-    fun `should trigger application statistics update`() {
-        val id = aValidSourceReference()
-
-        statisticsUpdateService.updateStatistics(id)
-
-        verify(triggerApplicationStatisticsUpdateQueue).submit(
-            argThat { applicationId == id },
-            any()
-        )
-    }
-
-    @Test
     fun `should generate unique message-deduplication-id`() {
         val applicationId = aValidSourceReference()
 
-        statisticsUpdateService.updateStatistics(applicationId)
+        statisticsUpdateService.triggerApplicationStatisticsUpdate(applicationId)
 
         val argumentCaptor = argumentCaptor<Map<String, String>>()
         verify(triggerApplicationStatisticsUpdateQueue).submit(any(), argumentCaptor.capture())
