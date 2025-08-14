@@ -11,7 +11,7 @@ class StatisticsUpdateService(
 ) {
     fun triggerApplicationStatisticsUpdate(applicationId: String) {
         triggerApplicationStatisticsUpdateQueue.submit(
-            UpdateApplicationStatisticsMessage(applicationId = applicationId),
+            UpdateApplicationStatisticsMessage(externalId = applicationId),
             mapOf(
                 "message-group-id" to applicationId,
                 "message-deduplication-id" to UUID.randomUUID().toString(),

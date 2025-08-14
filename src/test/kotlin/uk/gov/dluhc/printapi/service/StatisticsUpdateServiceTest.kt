@@ -42,7 +42,7 @@ class StatisticsUpdateServiceTest {
         statisticsUpdateService.triggerApplicationStatisticsUpdate(id)
 
         verify(triggerApplicationStatisticsUpdateQueue).submit(
-            argThat { applicationId == id },
+            argThat { externalId == id },
             argThat { headers ->
                 headers["message-group-id"] == id && headers.containsKey("message-deduplication-id") // Checking headers
             }
