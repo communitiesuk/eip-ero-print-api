@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Applications API SQS Message Types for stats update
+  version: '0.0.0'
+  description: |-
+    Applications API SQS Message Types for stats update
+    
+    Messages defined in this spec are produced by the Applications API and the Print API.
+    Messages defined in this spec are consumed by the Applications API.
+    
+    Any changes to this spec should be based on joint collaboration and agreement between the Applications APIs and the Print API.
+    
+    Whilst this is an openAPI spec, it does not imply being used to define REST APIs, nor is it intended to.
+    
+    The `paths` elements are being used to document (at a high level) the SQS queues and the request bodies that are expected
+    to be published to them. **There is no intent to generate or implement SQS queues or listener classes from this document.**
+    
+    The `paths` element is only being used in order to maintain the structure of the openApi spec, as `paths` are required 
+    elements.
+#
+# --------------------------------------------------------------------------------
+#
+
+paths:
+  #
+  # --------------------------------------------------------------------------------
+  # SQS Queues start here
+  # --------------------------------------------------------------------------------
+  #
+  '/trigger-application-statistics-update':
+    post:
+      tags:
+        - SQS Queues
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateApplicationStatisticsMessage'
+      responses:
+        '204':
+          description: No response content.
+components:
+  #
+  # Schema and Enum Definitions
+  # --------------------------------------------------------------------------------
+  schemas:
+    UpdateApplicationStatisticsMessage:
+      title: TriggerApplicationStatisticsUpdateMessage
+      type: object
+      description: SQS message for initiating a statistics update for an application
+      properties:
+        externalId:
+          type: string
+          description: The identifier of the Application
+          example: 1f0f76a9a66f438b9bb33070
+      required:
+        - externalId
+
+  #
+  # Response Body Definitions
+  # --------------------------------------------------------------------------------
+  responses: { }
+
+  #
+  # Request Body Definitions
+  # --------------------------------------------------------------------------------
+  requestBodies:
+    UpdateApplicationStatisticsMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateApplicationStatisticsMessage'

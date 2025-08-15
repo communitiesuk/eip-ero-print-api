@@ -32,7 +32,6 @@ fun buildSendApplicationToPrintMessage(
     photoLocation: String = "arn:aws:s3:::source-document-storage/$gssCode/$sourceReference/${UUID.randomUUID()}/" +
         faker.file().fileName("", null, "jpg", ""),
     userId: String = faker.internet().emailAddress(),
-    isFromApplicationsApi: Boolean? = null,
 ) = SendApplicationToPrintMessage(
     sourceReference = sourceReference,
     applicationReference = applicationReference,
@@ -48,5 +47,4 @@ fun buildSendApplicationToPrintMessage(
     delivery = delivery,
     gssCode = gssCode,
     userId = userId,
-    isFromApplicationsApi = isFromApplicationsApi,
 )

@@ -81,9 +81,9 @@ internal class BatchPrintRequestsJobIntegrationTest : IntegrationTest() {
         // One message will be sent for each certificate when the batch is taken off the queue and processed
         // Messages should not be sent during the job itself
         await.pollDelay(5, TimeUnit.SECONDS).atMost(8, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageSent(certificate1.sourceReference!!)
-            assertUpdateStatisticsMessageSent(certificate2.sourceReference!!)
-            assertNumberOfUpdateStatisticsMessagesSent(2)
+            assertUpdateApplicationStatisticsMessageSent(certificate1.sourceReference!!)
+            assertUpdateApplicationStatisticsMessageSent(certificate2.sourceReference!!)
+            assertNumberOfUpdateApplicationStatisticsMessagesSent(2)
         }
     }
 }

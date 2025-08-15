@@ -127,7 +127,6 @@ class CertificateMapperTest {
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
-                isFromApplicationsApi = null,
             )
         }
 
@@ -217,7 +216,6 @@ class CertificateMapperTest {
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
-                isFromApplicationsApi = null,
             )
         }
 
@@ -238,7 +236,7 @@ class CertificateMapperTest {
         val ero = buildEroDto(
             welshContactDetails = null
         )
-        val message = buildSendApplicationToPrintMessage(isFromApplicationsApi = true)
+        val message = buildSendApplicationToPrintMessage()
         val requestId = aValidRequestId()
         val vacNumber = aValidVacNumber()
         given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(SourceTypeEntity.VOTER_CARD)
@@ -306,7 +304,6 @@ class CertificateMapperTest {
                 printRequests = mutableListOf(printRequest),
                 status = Status.PENDING_ASSIGNMENT_TO_BATCH,
                 photoLocationArn = photoLocation,
-                isFromApplicationsApi = true,
             )
         }
 

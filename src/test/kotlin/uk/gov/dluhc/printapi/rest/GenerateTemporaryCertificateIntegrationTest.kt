@@ -235,7 +235,7 @@ internal class GenerateTemporaryCertificateIntegrationTest : IntegrationTest() {
         )
 
         await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-            assertUpdateStatisticsMessageSent(request.sourceReference)
+            assertUpdateApplicationStatisticsMessageSent(request.sourceReference)
         }
     }
 

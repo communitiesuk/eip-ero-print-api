@@ -101,8 +101,8 @@ internal class PrintResponseFileServiceTest {
         inOrder.verify(printResponseProcessingService).processBatchResponses(printResponses.batchResponses)
         inOrder.verify(printResponseProcessingService).processPrintResponses(printResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
-        inOrder.verify(statisticsUpdateService).updateStatistics(firstCertificate.sourceReference!!)
-        inOrder.verify(statisticsUpdateService).updateStatistics(secondCertificate.sourceReference!!)
+        inOrder.verify(statisticsUpdateService).triggerApplicationStatisticsUpdate(firstCertificate.sourceReference!!)
+        inOrder.verify(statisticsUpdateService).triggerApplicationStatisticsUpdate(secondCertificate.sourceReference!!)
     }
 
     @Test

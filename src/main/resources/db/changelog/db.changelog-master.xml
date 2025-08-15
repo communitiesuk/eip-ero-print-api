@@ -43,4 +43,5 @@
     <include relativeToChangelogFile="true" file="ddl/0033_EROPSPT-397_create_anonymous_elector_document_delivery_table.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0034_EROPSPT-397_update_anonymous_elector_document_to_use_new_delivery_table.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0035_EROPSPT-418_alter_certificate_to_use_printer_provided_issue_date.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0036_EIP1-11368_make_certificate_isFromApplicationsApi_default_true.xml"/>
 </databaseChangeLog>

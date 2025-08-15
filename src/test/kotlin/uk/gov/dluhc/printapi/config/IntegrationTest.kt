@@ -48,7 +48,6 @@ import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
 import uk.gov.dluhc.printapi.messaging.stubs.UpdateApplicationStatisticsMessageListenerStub
-import uk.gov.dluhc.printapi.messaging.stubs.UpdateStatisticsMessageListenerStub
 import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.BankHolidaysDataService
 import uk.gov.dluhc.printapi.service.CertificateSummarySearchService
@@ -147,9 +146,6 @@ internal abstract class IntegrationTest {
     @Value("\${sqs.remove-certificate-queue-name}")
     protected lateinit var removeCertificateQueueName: String
 
-    @Value("\${sqs.trigger-voter-card-statistics-update-queue-name}")
-    protected lateinit var triggerStatisticsUpdateQueueName: String
-
     @Value("\${sqs.trigger-application-statistics-update-queue-name}")
     protected lateinit var triggerApplicationStatisticsUpdateQueueName: String
 
@@ -193,9 +189,6 @@ internal abstract class IntegrationTest {
     protected lateinit var cacheManager: CacheManager
 
     @Autowired
-    protected lateinit var updateStatisticsMessageListenerStub: UpdateStatisticsMessageListenerStub
-
-    @Autowired
     protected lateinit var updateApplicationStatisticsMessageListenerStub: UpdateApplicationStatisticsMessageListenerStub
 
     @Value("\${caching.time-to-live}")
@@ -208,7 +201,6 @@ internal abstract class IntegrationTest {
 
     @BeforeEach
     fun clearMessagesFromStubs() {
-        updateStatisticsMessageListenerStub.clear()
         updateApplicationStatisticsMessageListenerStub.clear()
     }
 
@@ -315,29 +307,21 @@ internal abstract class IntegrationTest {
         }
     }
 
-    protected fun assertUpdateStatisticsMessageSent(applicationId: String) {
-        val messages = updateStatisticsMessageListenerStub.getMessages()
-        Assertions.assertThat(messages).isNotEmpty
-        Assertions.assertThat(messages).anyMatch {
-            it.voterCardApplicationId == applicationId
-        }
-    }
-
     protected fun assertUpdateApplicationStatisticsMessageSent(applicationId: String) {
         val messages = updateApplicationStatisticsMessageListenerStub.getMessages()
         Assertions.assertThat(messages).isNotEmpty
         Assertions.assertThat(messages).anyMatch {
-            it.applicationId == applicationId
+            it.externalId == applicationId
         }
     }
 
-    protected fun assertNumberOfUpdateStatisticsMessagesSent(count: Int) {
-        val messages = updateStatisticsMessageListenerStub.getMessages()
+    protected fun assertNumberOfUpdateApplicationStatisticsMessagesSent(count: Int) {
+        val messages = updateApplicationStatisticsMessageListenerStub.getMessages()
         Assertions.assertThat(messages).hasSize(count)
     }
 
-    protected fun assertUpdateStatisticsMessageNotSent() {
-        val messages = updateStatisticsMessageListenerStub.getMessages()
+    protected fun assertUpdateApplicationStatisticsMessageNotSent() {
+        val messages = updateApplicationStatisticsMessageListenerStub.getMessages()
         Assertions.assertThat(messages).isEmpty()
     }
 
