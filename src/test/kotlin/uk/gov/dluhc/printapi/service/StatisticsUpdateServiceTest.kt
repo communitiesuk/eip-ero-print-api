@@ -8,9 +8,9 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import uk.gov.dluhc.applicationsapi.messaging.models.UpdateApplicationStatisticsMessage
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
-import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateApplicationStatisticsMessage
 
 class StatisticsUpdateServiceTest {
     private val triggerApplicationStatisticsUpdateQueue: MessageQueue<UpdateApplicationStatisticsMessage> = mock()

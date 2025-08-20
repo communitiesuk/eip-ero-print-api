@@ -206,7 +206,7 @@ tasks.create("generate-models-from-openapi-document-print-api-sqs-messaging.yaml
 tasks.create("generate-models-from-openapi-document-shared-stats-update-sqs-messaging.yaml", GenerateTask::class) {
     enabled = true
     inputSpec.set("$projectDir/src/main/resources/openapi/sqs/shared-stats-update-sqs-messaging.yaml")
-    packageName.set("uk.gov.dluhc.votercardapplicationsapi.messaging")
+    packageName.set("uk.gov.dluhc.applicationsapi.messaging")
 }
 
 tasks.create("generate-models-from-openapi-document-EROManagementAPIs.yaml", GenerateTask::class) {
