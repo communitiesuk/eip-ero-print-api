@@ -5,10 +5,10 @@ info:
   description: |-
     Applications API SQS Message Types for stats update
     
-    Messages defined in this spec are produced by the Applications API and the Print API.
+    Messages defined in this spec are produced by the Applications API, Notifications API and the Print API.
     Messages defined in this spec are consumed by the Applications API.
     
-    Any changes to this spec should be based on joint collaboration and agreement between the Applications APIs and the Print API.
+    Any changes to this spec should be based on joint collaboration and agreement between the Applications, Notifications and Print APIs.
     
     Whilst this is an openAPI spec, it does not imply being used to define REST APIs, nor is it intended to.
     

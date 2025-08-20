@@ -9,13 +9,13 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import uk.gov.dluhc.applicationsapi.messaging.models.UpdateApplicationStatisticsMessage
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.messagingsupport.MessagingConfigurationHelper
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
-import uk.gov.dluhc.votercardapplicationsapi.messaging.models.UpdateApplicationStatisticsMessage
 
 @Configuration
 class MessagingConfiguration {
