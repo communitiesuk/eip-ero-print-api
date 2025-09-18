@@ -1,0 +1,46 @@
+version: 2
+
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "aleyipsoftwire"
+    # Only create PRs for direct dependencies
+    allow:
+      - dependency-type: "direct"
+    # Ignore libs-api dependencies
+    ignore:
+      - dependency-name: "uk.gov.dluhc*"
+    groups:
+      # Group all gradle security updates
+      gradle-security-updates:
+        applies-to: security-updates
+        patterns: [ "*" ]
+      # Group all kotlin plugin updates
+      kotlin-plugins:
+        patterns:
+          - "jvm"
+          - "kapt"
+          - "plugin.allopen"
+          - "plugin.jpa"
+          - "plugin.spring"
+      # Group all version updates, except for Spring Boot
+      gradle-version-updates:
+        applies-to: version-updates
+        patterns: [ "*" ]
+        exclude-patterns: [ "org.springframework.boot" ]
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "aleyipsoftwire"
+    groups:
+      # Group all github-action updates
+      github-actions:
+        applies-to: version-updates
+        patterns: [ "*" ]
