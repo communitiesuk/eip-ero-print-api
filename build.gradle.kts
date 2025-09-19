@@ -7,15 +7,15 @@ import java.lang.ProcessBuilder.Redirect
 
 plugins {
     id("org.springframework.boot") version "3.5.5"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "1.9.25"
     kotlin("kapt") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.jpa") version "1.9.25"
     kotlin("plugin.allopen") version "1.9.25"
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
-    id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
-    id("org.openapi.generator") version "7.9.0"
+    id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
+    id("org.jlleitschuh.gradle.ktlint-idea") version "11.6.1"
+    id("org.openapi.generator") version "7.15.0"
     id("org.owasp.dependencycheck") version "12.1.3"
     id("org.jsonschema2dataclass") version "6.0.0"
 }
@@ -60,10 +60,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     implementation("org.apache.commons:commons-lang3:3.18.0")
-    implementation("org.mapstruct:mapstruct:1.6.2")
-    kapt("org.mapstruct:mapstruct-processor:1.6.2")
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    kapt("org.mapstruct:mapstruct-processor:1.6.3")
 
     // internal libs
     implementation("uk.gov.dluhc:logging-library:3.0.4")
@@ -77,28 +77,28 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-ui:1.8.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
-    implementation("com.opencsv:opencsv:5.11.1")
+    implementation("com.opencsv:opencsv:5.12.0")
 
     constraints {
-        implementation("org.webjars:swagger-ui:5.20.0") {
+        implementation("org.webjars:swagger-ui:5.28.1") {
             because("Lower versions (imported by org.springdoc:springdoc-openapi-ui:1.8.0) triggers CVE-2024-45801, CVE-2024-47875, CVE-2025-26791")
         }
     }
 
     // Logging
-    runtimeOnly("net.logstash.logback:logstash-logback-encoder:8.0")
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:8.1")
 
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("com.nimbusds:nimbus-jose-jwt:10.0.2")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.5")
 
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.10")
+    runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.15")
     runtimeOnly("software.amazon.awssdk:rds")
 
     // AWS dependencies
@@ -117,14 +117,14 @@ dependencies {
     implementation("software.amazon.awssdk:ses")
 
     // mongo core datatypes, so that we can generate a Mongo ObjectId (a 12 byte/24 char hex string ID)
-    implementation("org.mongodb:bson:4.7.1")
+    implementation("org.mongodb:bson:5.6.0")
 
     // Scheduling
-    implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
-    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.10.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.10.0")
 
     // OpenPDF
-    implementation("com.github.librepdf:openpdf:2.0.3")
+    implementation("com.github.librepdf:openpdf:3.0.0")
 
     // caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -134,19 +134,19 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.20.3")
-    testImplementation("org.testcontainers:testcontainers:1.20.3")
-    testImplementation("org.testcontainers:mysql:1.20.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.3")
+    testImplementation("org.testcontainers:testcontainers:1.21.3")
+    testImplementation("org.testcontainers:mysql:1.21.3")
 
-    testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.0.0")
 
-    testImplementation("org.wiremock:wiremock-standalone:3.9.2")
-    testImplementation("net.datafaker:datafaker:2.4.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+    testImplementation("net.datafaker:datafaker:2.5.0")
 
     // Libraries to support creating JWTs in tests
-    testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
-    testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+    testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
+    testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
 }
 
 tasks.withType<KotlinCompile> {
