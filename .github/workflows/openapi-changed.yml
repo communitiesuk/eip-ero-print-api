@@ -15,7 +15,7 @@ jobs:
     if: github.event.pull_request.merged == true
     steps:
       - name: Trigger the eip-ero-infra openapi-changed dispatch workflow
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.CABINETOFFICE_EIP_ERO_PAT }}
           script: |
@@ -30,7 +30,7 @@ jobs:
               }
             });
       - name: Trigger the eip-ero-portal-ui openapi-changed dispatch workflow
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.CABINETOFFICE_EIP_ERO_PAT }}
           script: |
