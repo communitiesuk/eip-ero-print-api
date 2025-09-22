@@ -26,6 +26,6 @@ class FilenameFactory(private val clock: Clock) {
     }
 
     companion object {
-        private var TIMESTAMP_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
+        private val TIMESTAMP_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
     }
 }
