@@ -1,4 +1,6 @@
 [*.{kt,kts}]
+# We have disabled these rules when we upgraded the ktlint plugin to v13
+# to avoid a massive number of warnings
 ktlint_standard_argument-list-wrapping = disabled
 ktlint_standard_chain-method-continuation = disabled
 ktlint_standard_class-signature = disabled
