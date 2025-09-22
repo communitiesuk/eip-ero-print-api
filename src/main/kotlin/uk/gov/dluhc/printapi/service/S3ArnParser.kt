@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:filename")
+
 package uk.gov.dluhc.printapi.service
 
 import software.amazon.awssdk.arns.Arn
