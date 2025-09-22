@@ -1,8 +1,8 @@
 [*.{kt,kts}]
 # ktlint_standard_annotation = disabled
 ktlint_standard_argument-list-wrapping = disabled
-ktlint_standard_binary-expression-wrapping = disabled
-ktlint_standard_blank-line-before-declaration = disabled
+# ktlint_standard_binary-expression-wrapping = disabled
+# ktlint_standard_blank-line-before-declaration = disabled
 ktlint_standard_chain-method-continuation = disabled
 ktlint_standard_class-signature = disabled
 ktlint_standard_condition-wrapping = disabled

@@ -184,6 +184,7 @@ internal class ExplainerPdfTemplateDetailsFactoryTest {
         assertThat(actual.path).isEqualTo(WELSH_TEMPLATE_PATH)
         assertThat(actual.placeholders).isEqualTo(expectedPlaceholders)
     }
+
     @Test
     fun `should get template details when optional properties are blank`() {
         // Given
