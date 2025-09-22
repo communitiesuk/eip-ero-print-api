@@ -40,11 +40,11 @@ class WiremockService(private val wireMockServer: WireMockServer) {
             get(urlPathMatching("/cognito/.well-known/jwks.json")).willReturn(
                 ok().withBody(
                     """
-                            {
-                               "keys":[
-                                    ${RsaKeyPair.jwk.toJSONString()}
-                               ]
-                            }
+                    {
+                       "keys":[
+                            ${RsaKeyPair.jwk.toJSONString()}
+                       ]
+                    }
                     """.trimIndent()
                 )
             )
