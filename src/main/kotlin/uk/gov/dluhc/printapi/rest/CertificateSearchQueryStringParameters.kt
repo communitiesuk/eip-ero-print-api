@@ -12,11 +12,11 @@ import kotlin.reflect.KClass
 data class CertificateSearchQueryStringParameters
     @ConstructorProperties(value = ["page", "pageSize", "searchBy", "searchValue"])
     constructor(
-    val page: Int = 1,
-    val pageSize: Int = 100,
-    val searchBy: CertificateSearchBy? = null,
-    val searchValue: String? = null,
-)
+        val page: Int = 1,
+        val pageSize: Int = 100,
+        val searchBy: CertificateSearchBy? = null,
+        val searchValue: String? = null,
+    )
 
 @Constraint(validatedBy = [CertificateSearchByParametersAreValidConstraintValidator::class])
 @Target(AnnotationTarget.CLASS)
