@@ -10,9 +10,11 @@ fun parseS3Arn(s3Arn: String): S3Location {
 }
 
 private fun createPath(s3Photo: Arn): String =
-    if (s3Photo.resource().qualifier().isPresent)
+    if (s3Photo.resource().qualifier().isPresent) {
         "${s3Photo.resource().resource()}/${s3Photo.resource().qualifier().get()}"
-    else s3Photo.resource().resource()
+    } else {
+        s3Photo.resource().resource()
+    }
 
 data class S3Location(
     val bucket: String,
