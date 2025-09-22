@@ -10,18 +10,18 @@ class TemporaryCertificatePdfTemplateProperties(
     english: English<EnglishTemporaryCertificatePlaceholder>,
     welsh: Welsh<WelshTemporaryCertificatePlaceholder>
 ) : ElectorDocumentPdfTemplateProperties<EnglishTemporaryCertificatePlaceholder, WelshTemporaryCertificatePlaceholder>(
-    english,
-    welsh
-)
+        english,
+        welsh
+    )
 
 @ConfigurationProperties(prefix = "anonymous-elector-document.certificate-pdf")
 class AnonymousElectorDocumentPdfTemplateProperties(
     english: English<AnonymousElectorDocumentPlaceholder>,
     welsh: Welsh<AnonymousElectorDocumentPlaceholder>
 ) : ElectorDocumentPdfTemplateProperties<AnonymousElectorDocumentPlaceholder, AnonymousElectorDocumentPlaceholder>(
-    english,
-    welsh
-)
+        english,
+        welsh
+    )
 
 abstract class ElectorDocumentPdfTemplateProperties<EP, WP>(
     val english: English<EP>,

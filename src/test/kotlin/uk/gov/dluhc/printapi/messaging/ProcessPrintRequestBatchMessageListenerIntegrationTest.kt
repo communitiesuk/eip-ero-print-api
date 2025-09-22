@@ -204,7 +204,7 @@ internal class ProcessPrintRequestBatchMessageListenerIntegrationTest : Integrat
                         assertThat(photoFileContents).isEqualTo(s3ResourceContents)
                     }
                 }
-                )
+            )
         )
     }
 

@@ -14,10 +14,11 @@ class UserPrincipalAuditorAware : AuditorAware<String> {
 
     override fun getCurrentAuditor(): Optional<String> {
         return with(SecurityContextHolder.getContext().authentication) {
-            if (this != null && this.isAuthenticated)
+            if (this != null && this.isAuthenticated) {
                 Optional.of(this.name)
-            else
+            } else {
                 Optional.of(SYSTEM)
+            }
         }
     }
 }

@@ -11,8 +11,7 @@ class CertificateSummaryService(
     private val mapper: CertificateSummaryDtoMapper,
 ) {
 
-    fun getCertificateSummary(eroId: String, sourceType: SourceType, sourceReference: String):
-        CertificateSummaryDto {
+    fun getCertificateSummary(eroId: String, sourceType: SourceType, sourceReference: String): CertificateSummaryDto {
         val certificate = certificateFinderService.getCertificate(eroId, sourceType, sourceReference)
         return mapper.certificateToCertificatePrintRequestSummaryDto(certificate)
     }

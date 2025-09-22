@@ -9,12 +9,14 @@ import java.beans.ConstructorProperties
 import kotlin.reflect.KClass
 
 @AedSearchByParametersAreValid
-data class AedSearchQueryStringParameters @ConstructorProperties(value = ["page", "pageSize", "searchBy", "searchValue"]) constructor(
-    val page: Int = 1,
-    val pageSize: Int = 100,
-    val searchBy: AedSearchBy? = null,
-    val searchValue: String? = null,
-)
+data class AedSearchQueryStringParameters
+    @ConstructorProperties(value = ["page", "pageSize", "searchBy", "searchValue"])
+    constructor(
+        val page: Int = 1,
+        val pageSize: Int = 100,
+        val searchBy: AedSearchBy? = null,
+        val searchValue: String? = null,
+    )
 
 @Constraint(validatedBy = [AedSearchByParametersAreValidConstraintValidator::class])
 @Target(AnnotationTarget.CLASS)

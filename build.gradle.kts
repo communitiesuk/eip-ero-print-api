@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
@@ -8,13 +9,12 @@ import java.lang.ProcessBuilder.Redirect
 plugins {
     id("org.springframework.boot") version "3.5.6"
     id("io.spring.dependency-management") version "1.1.6"
-    kotlin("jvm") version "1.9.25"
-    kotlin("kapt") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    kotlin("plugin.jpa") version "1.9.25"
-    kotlin("plugin.allopen") version "1.9.25"
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
-    id("org.jlleitschuh.gradle.ktlint-idea") version "11.0.0"
+    kotlin("jvm") version "2.2.20"
+    kotlin("kapt") version "2.2.20"
+    kotlin("plugin.spring") version "2.2.20"
+    kotlin("plugin.jpa") version "2.2.20"
+    kotlin("plugin.allopen") version "2.2.20"
+    id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
     id("org.openapi.generator") version "7.9.0"
     id("org.owasp.dependencycheck") version "12.1.3"
     id("org.jsonschema2dataclass") version "6.0.0"
@@ -149,16 +149,18 @@ dependencies {
     testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
+
 tasks.withType<KotlinCompile> {
     dependsOn(tasks.withType<GenerateTask>())
 
     // Cannot use "withType" notation like above as Task class is internal
     dependsOn("generateJsonSchema2DataClassConfigMain")
-
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
-    }
 }
 
 tasks.withType<Test> {
@@ -302,7 +304,7 @@ fun String.runCommand(): String {
     return process.inputStream.bufferedReader().readText().trim()
 }
 
-/* Configuration for the OWASP dependency check */
+// Configuration for the OWASP dependency check
 dependencyCheck {
     autoUpdate = true
     failOnError = true

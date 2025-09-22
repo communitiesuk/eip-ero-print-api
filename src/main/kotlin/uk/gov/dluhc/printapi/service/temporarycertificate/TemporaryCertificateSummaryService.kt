@@ -11,8 +11,7 @@ class TemporaryCertificateSummaryService(
     private val mapper: TemporaryCertificateSummaryMapper
 ) {
 
-    fun getTemporaryCertificateSummaries(eroId: String, sourceType: SourceType, sourceReference: String):
-        List<TemporaryCertificateSummaryDto> {
+    fun getTemporaryCertificateSummaries(eroId: String, sourceType: SourceType, sourceReference: String): List<TemporaryCertificateSummaryDto> {
         val temporaryCertificates = temporaryCertificateFinderService.getTemporaryCertificates(
             eroId,
             sourceType,

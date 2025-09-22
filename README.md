@@ -5,12 +5,11 @@ Spring Boot microservice that :
 ## Developer Setup
 ### Kotlin API Developers
 
-Configure your IDE with the code formatter (ktlint):
-```
-$ ./gradlew ktlintApplyToIdea
-```
-This only needs doing once to set up your IDE with the code styles.
-If you prefer, you can run `./gradlew addKtlintFormatPreCommitHook` to add a pre-commit hook to format your code on commit.
+Install the [ktlint](https://plugins.jetbrains.com/plugin/15057-ktlint)
+plugin so the IDE adheres to the ktlint code style.
+
+If you prefer, you can run `./gradlew addKtlintFormatGitPreCommitHook`
+to add a pre-commit hook to format your code on commit.
 
 #### AWS CodeArtifact Access Set Up
 

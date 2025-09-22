@@ -33,6 +33,7 @@ class CertificateFailedToPrintEmailSenderServiceTest {
 
     @Mock
     private lateinit var electoralRegistrationOfficeManagementApiClient: ElectoralRegistrationOfficeManagementApiClient
+
     @Mock
     private lateinit var emailService: EmailService
 

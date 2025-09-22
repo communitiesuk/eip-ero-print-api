@@ -16,8 +16,10 @@ import uk.gov.dluhc.printapi.testsupport.testdata.zip.aFileDetails
 internal class SftpInputStreamProviderTest {
     @Mock
     private lateinit var printRequestsFileProducer: PrintRequestsFileProducer
+
     @Mock
     private lateinit var s3Client: S3Client
+
     @Mock
     private lateinit var taskExecutor: ThreadPoolTaskExecutor
 

@@ -12,6 +12,7 @@ import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
 fun aValidEroId() = "${faker.address().city().lowercase()}-city-council"
+
 fun anotherValidEroId(refEroId: String): String {
     while (true) {
         val eroId = aValidEroId()
@@ -23,6 +24,7 @@ fun anotherValidEroId(refEroId: String): String {
 }
 
 fun aValidEroName(): String = faker.address().city()
+
 fun aValidLocalAuthorityName(): String = faker.address().city()
 
 fun getRandomGssCode() = "E${randomNumeric(8)}"

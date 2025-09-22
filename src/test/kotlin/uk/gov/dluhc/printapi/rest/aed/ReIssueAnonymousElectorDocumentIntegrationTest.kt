@@ -206,7 +206,8 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
                 aedMatchesPresignedUrl(aed, presignedUrl)
             }
 
-        val newlyCreatedAed = electorDocuments.first { aed -> // Get the new AED that this test would have created
+        val newlyCreatedAed = electorDocuments.first { aed ->
+            // Get the new AED that this test would have created
             aedMatchesPresignedUrl(aed, presignedUrl)
         }
         assertThat(newlyCreatedAed)
@@ -299,7 +300,8 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
                 aedMatchesPresignedUrl(aed, presignedUrl)
             }
 
-        val newlyCreatedAed = electorDocuments.first { aed -> // Get the new AED that this test would have created
+        val newlyCreatedAed = electorDocuments.first { aed ->
+            // Get the new AED that this test would have created
             aedMatchesPresignedUrl(aed, presignedUrl)
         }
         assertThat(newlyCreatedAed)
@@ -392,7 +394,8 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
                 aedMatchesPresignedUrl(aed, presignedUrl)
             }
 
-        val newlyCreatedAed = electorDocuments.first { aed -> // Get the new AED that this test would have created
+        val newlyCreatedAed = electorDocuments.first { aed ->
+            // Get the new AED that this test would have created
             aedMatchesPresignedUrl(aed, presignedUrl)
         }
         assertThat(newlyCreatedAed)
