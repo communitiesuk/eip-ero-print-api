@@ -67,7 +67,7 @@ fun buildValidAddressDto(
     town: String? = fakeAddress.city(),
     area: String? = fakeAddress.state(),
     postcode: String = fakeAddress.postcode(),
-    uprn: String? = RandomStringUtils.randomNumeric(12),
+    uprn: String? = RandomStringUtils.secure().nextNumeric(12),
 ): AddressDto =
     AddressDto(
         property = property,

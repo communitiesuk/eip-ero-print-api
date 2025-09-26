@@ -29,7 +29,6 @@ import uk.gov.dluhc.printapi.testsupport.buildS3Arn
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
 import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 import java.net.URI
-import java.net.URL
 import java.time.Duration
 
 @ExtendWith(MockitoExtension::class)
@@ -91,7 +90,7 @@ internal class S3AccessServiceTest {
                 .getObjectRequest(GetObjectRequest.builder().bucket(bucketName).key(key).build())
                 .build()
             val presignedGetObjectRequest = mock<PresignedGetObjectRequest>()
-            given(presignedGetObjectRequest.url()).willReturn(URL(presignedUrl))
+            given(presignedGetObjectRequest.url()).willReturn(URI.create(presignedUrl).toURL())
             given(s3Presigner.presignGetObject(any<GetObjectPresignRequest>())).willReturn(presignedGetObjectRequest)
             val expectedUri = URI.create(transformedUrl)
 
@@ -122,7 +121,7 @@ internal class S3AccessServiceTest {
             val bucketName = s3Properties.vcaTargetBucket
             val presignedUrl = "https://$bucketName/$expectedKey?$S3_QUERY_PARAMS"
             val presignedGetObjectRequest = mock<PresignedGetObjectRequest>()
-            given(presignedGetObjectRequest.url()).willReturn(URL(presignedUrl))
+            given(presignedGetObjectRequest.url()).willReturn(URI.create(presignedUrl).toURL())
             given(s3Presigner.presignGetObject(any<GetObjectPresignRequest>())).willReturn(presignedGetObjectRequest)
         }
 

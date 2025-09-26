@@ -1,11 +1,11 @@
 package uk.gov.dluhc.printapi.testsupport.assertj.assertions
 
 import jakarta.annotation.Generated
+import org.assertj.core.annotation.CheckReturnValue
 import org.assertj.core.api.AbstractObjectAssert
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.assertj.core.internal.Iterables
-import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
 import uk.gov.dluhc.printapi.database.entity.Delivery
 import uk.gov.dluhc.printapi.database.entity.ElectoralRegistrationOffice

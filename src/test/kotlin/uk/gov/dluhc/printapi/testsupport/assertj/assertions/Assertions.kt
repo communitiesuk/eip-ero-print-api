@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.testsupport.assertj.assertions
 
+import org.assertj.core.annotation.CheckReturnValue
 import org.assertj.core.api.Assertions
-import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.Address
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentDelivery
