@@ -36,16 +36,8 @@ class ElectorDocumentRemovalDateResolver(
     fun getCertificateInitialRetentionPeriodRemovalDate(
         issueDate: LocalDate,
         gssCode: String,
-        isCertificateCreatedWithPrinterProvidedIssueDate: Boolean,
     ): LocalDate {
-        // This is a temporary workaround to ensure that applications created before EROPSPT-418 is deployed
-        // are retained for 29 (1 extra) working days.
-        // TODO EROPSPT-XXX: Remove this workaround once all applications created before EROPSPT-418 are removed
-        val requiredWorkingDays = if (isCertificateCreatedWithPrinterProvidedIssueDate) {
-            dataRetentionConfig.certificateInitialRetentionPeriod.days
-        } else {
-            dataRetentionConfig.legacyCertificateInitialRetentionPeriod.days
-        }
+        val requiredWorkingDays = dataRetentionConfig.certificateInitialRetentionPeriod.days
 
         val daysToAdd = getTotalDaysForWorkingDays(
             issueDate,

@@ -42,7 +42,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             given(bankHolidaysDataService.getUpcomingBankHolidays(any(), any(), any())).willReturn(listOf(upcomingBankHoliday))
 
             // When
-            val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode, true)
+            val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
 
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
@@ -60,7 +60,7 @@ internal class ElectorDocumentRemovalDateResolverTest {
             given(bankHolidaysDataService.getUpcomingBankHolidays(any(), any(), any())).willReturn(emptyList())
 
             // When
-            val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode, true)
+            val actual = electorDocumentRemovalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(issueDate, gssCode)
 
             // Then
             assertThat(actual).isEqualTo(expectedRemovalDate)
