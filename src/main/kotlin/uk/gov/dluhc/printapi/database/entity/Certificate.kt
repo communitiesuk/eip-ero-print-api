@@ -95,13 +95,6 @@ class Certificate(
     var hasSourceApplicationBeenRemoved: Boolean? = false,
 
     /**
-     * Temporary flag used to indicate whether the certificate was created after the rollout
-     *
-     * TODO EROPSPT-XXX: Remove this field once all certificates created before the rollout have been deleted
-     */
-    var isCertificateCreatedWithPrinterProvidedIssueDate: Boolean? = true,
-
-    /**
      * Certificate status corresponds to the current status of the most recent
      * [PrintRequest], based on the requestDateTime that is included in the
      * [uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage].

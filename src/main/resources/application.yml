@@ -55,8 +55,6 @@ api:
       valid-on-date:
         max-calendar-days-in-future: 30
     data-retention:
-      # TODO EROPSPT-XXX: Remove legacy period once all certificates created before rollout are removed
-      legacy-certificate-initial-retention-period: "P29D"
       certificate-initial-retention-period: "P28D"
       certificate-removal-batch-size: 10000
 

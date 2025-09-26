@@ -72,7 +72,7 @@ internal class CertificateDataRetentionServiceTest {
             val expectedFinalRetentionRemovalDate = LocalDate.of(2032, JULY, 1)
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
             given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(certificate)
-            given(removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any(), any())).willReturn(expectedInitialRetentionRemovalDate)
+            given(removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(any(), any())).willReturn(expectedInitialRetentionRemovalDate)
             given(removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(any())).willReturn(expectedFinalRetentionRemovalDate)
 
             // When
@@ -84,7 +84,7 @@ internal class CertificateDataRetentionServiceTest {
             assertThat(certificate.hasSourceApplicationBeenRemoved).isTrue
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
-            verify(removalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate!!, message.gssCode, true)
+            verify(removalDateResolver).getCertificateInitialRetentionPeriodRemovalDate(certificate.issueDate!!, message.gssCode)
             verify(removalDateResolver).getElectorDocumentFinalRetentionPeriodRemovalDate(certificate.issueDate!!)
             verify(certificateRepository).save(certificate)
         }
@@ -139,7 +139,7 @@ internal class CertificateDataRetentionServiceTest {
             assertThat(certificate.hasSourceApplicationBeenRemoved).isTrue
             verify(sourceTypeMapper).mapSqsToEntity(message.sourceType)
             verify(certificateRepository).findByGssCodeAndSourceTypeAndSourceReference(message.gssCode, VOTER_CARD, message.sourceReference)
-            verify(removalDateResolver, never()).getCertificateInitialRetentionPeriodRemovalDate(any(), any(), any())
+            verify(removalDateResolver, never()).getCertificateInitialRetentionPeriodRemovalDate(any(), any())
             verify(removalDateResolver, never()).getElectorDocumentFinalRetentionPeriodRemovalDate(any())
             verify(certificateRepository).save(certificate)
             assertThat(
