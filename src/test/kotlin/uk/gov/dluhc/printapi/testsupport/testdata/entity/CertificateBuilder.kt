@@ -174,7 +174,7 @@ fun buildAddress(
     locality: String? = fakeAddress.streetName(),
     town: String? = fakeAddress.city(),
     area: String? = fakeAddress.state(),
-    uprn: String? = RandomStringUtils.randomNumeric(12)
+    uprn: String? = RandomStringUtils.secure().nextNumeric(12)
 ) = Address(
     id = if (persisted) randomUUID() else null,
     street = street,

@@ -9,8 +9,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.given
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.util.ResourceUtils
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
@@ -68,7 +68,7 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         }
     }
 
-    @SpyBean
+    @MockitoSpyBean
     private lateinit var aedMappingHelper: AedMappingHelper
 
     @Test
@@ -695,7 +695,10 @@ internal class ReIssueAnonymousElectorDocumentIntegrationTest : IntegrationTest(
         return "arn:aws:s3:::$s3Bucket/$s3Path"
     }
 
-    private fun aedMatchesPresignedUrl(aed: uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument, presignedUrl: URI): Boolean {
+    private fun aedMatchesPresignedUrl(
+        aed: uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument,
+        presignedUrl: URI
+    ): Boolean {
         val s3Key = "${aed.gssCode}/${aed.sourceReference}/anonymous-elector-document-${aed.certificateNumber}.pdf"
         val expectedUrl = matchingPreSignedAwsS3GetUrl(s3Key)
         return presignedUrl.toString().matches(expectedUrl)

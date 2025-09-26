@@ -1,8 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
-import org.apache.commons.lang3.RandomStringUtils.randomAlphabetic
-import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
-import org.apache.commons.lang3.RandomStringUtils.randomNumeric
+import org.apache.commons.lang3.RandomStringUtils
 import org.bson.types.ObjectId
 import uk.gov.dluhc.printapi.testsupport.replaceSpacesWith
 import uk.gov.dluhc.printapi.testsupport.testdata.DataFaker.Companion.faker
@@ -27,7 +25,7 @@ fun aValidEroName(): String = faker.address().city()
 
 fun aValidLocalAuthorityName(): String = faker.address().city()
 
-fun getRandomGssCode() = "E${randomNumeric(8)}"
+fun getRandomGssCode() = "E${RandomStringUtils.secure().nextNumeric(8)}"
 
 fun getRandomGssCodeList() = listOf(getRandomGssCode())
 
@@ -41,15 +39,17 @@ fun aValidRequestId(): String = getAMongoDbId()
 
 fun aValidRequestDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
-fun aValidVacNumber(): String = randomAlphanumeric(20)
+fun aValidVacNumber(): String = RandomStringUtils.secure().nextAlphanumeric(20)
 
-fun aValidVacVersion(): String = randomAlphanumeric(20)
+fun aValidVacVersion(): String = RandomStringUtils.secure().nextAlphanumeric(20)
 
 fun aValidSourceReference(): String = getAMongoDbId()
 
-fun aValidApplicationReference(): String = "V${randomAlphabetic(9).uppercase()}"
+fun aValidApplicationReference(): String = "V${RandomStringUtils.secure().nextAlphabetic(9).uppercase()}"
 
-fun aValidElectoralRollNumber(): String = "${randomAlphabetic(4)}-${randomNumeric(8)}" // no specific format. "Special" characters allowed
+fun aValidElectoralRollNumber(): String = "${RandomStringUtils.secure().nextAlphabetic(4)}-${
+    RandomStringUtils.secure().nextNumeric(8)
+}" // no specific format. "Special" characters allowed
 
 fun aValidApplicationReceivedDateTime(): Instant = Instant.now().truncatedTo(SECONDS)
 
@@ -67,7 +67,7 @@ fun aValidFirstName(): String = faker.name().firstName()
 
 fun aValidSurname(): String = faker.name().lastName()
 
-fun aValidUserId(): String = faker.name().username()
+fun aValidUserId(): String = faker.internet().username()
 
 fun aValidDeliveryName(): String = faker.name().fullName()
 
