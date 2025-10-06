@@ -7,5 +7,4 @@ import java.time.Period
 data class DataRetentionConfiguration(
     val certificateInitialRetentionPeriod: Period,
     val certificateRemovalBatchSize: Int,
-    val legacyCertificateInitialRetentionPeriod: Period,
 )

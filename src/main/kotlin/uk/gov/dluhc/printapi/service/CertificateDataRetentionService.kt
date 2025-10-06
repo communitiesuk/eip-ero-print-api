@@ -59,18 +59,13 @@ class CertificateDataRetentionService(
     }
 
     fun setCertificateRetentionRemovalDates(certificate: Certificate, gssCode: String): Certificate {
-        val issueDate = certificate.issueDate
-
-        if (issueDate == null) {
-            throw IllegalArgumentException("Issue date not found for certificate")
-        }
+        val issueDate = certificate.issueDate ?: throw IllegalArgumentException("Issue date not found for certificate")
 
         return certificate.also {
             it.initialRetentionRemovalDate =
                 removalDateResolver.getCertificateInitialRetentionPeriodRemovalDate(
                     issueDate,
                     gssCode,
-                    it.isCertificateCreatedWithPrinterProvidedIssueDate ?: false
                 )
             it.finalRetentionRemovalDate =
                 removalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(issueDate)
