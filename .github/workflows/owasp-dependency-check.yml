@@ -10,3 +10,5 @@ jobs:
     secrets:
       slack_vulnerability_alerts_webhook: ${{ secrets.SLACK_DLUHC_VT_BETA_ALERTS_WEBHOOK }}
       vulnerability_alerts_nvd_api_key: ${{ secrets.VULNERABILITY_ALERTS_NVD_API_KEY }}
+      vulnerability_alerts_oss_index_username: ${{ secrets.VULNERABILITY_ALERTS_OSS_INDEX_USERNAME }}
+      vulnerability_alerts_oss_index_password: ${{ secrets.VULNERABILITY_ALERTS_OSS_INDEX_PASSWORD }}
