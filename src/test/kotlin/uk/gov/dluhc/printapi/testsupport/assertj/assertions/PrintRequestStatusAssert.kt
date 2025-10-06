@@ -1,10 +1,10 @@
 package uk.gov.dluhc.printapi.testsupport.assertj.assertions
 
 import jakarta.annotation.Generated
+import org.assertj.core.annotation.CheckReturnValue
 import org.assertj.core.api.AbstractObjectAssert
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.within
-import org.assertj.core.util.CheckReturnValue
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import java.time.Instant

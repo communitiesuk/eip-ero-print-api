@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.testdata
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import uk.gov.dluhc.eromanagementapi.models.EroGroup
 import uk.gov.dluhc.printapi.config.IntegrationTest.Companion.ERO_ID
 import uk.gov.dluhc.printapi.testsupport.RsaKeyPair
@@ -43,14 +42,14 @@ fun buildAccessToken(
     groups: List<String> = listOf("ero-$eroId", "ero-vc-admin-$eroId")
 ): String =
     Jwts.builder()
-        .setSubject(UUID.randomUUID().toString())
-        .setClaims(
+        .subject(UUID.randomUUID().toString())
+        .claims(
             mapOf(
                 "cognito:groups" to groups,
                 "email" to email
             )
         )
-        .setIssuedAt(Date.from(Instant.now()))
-        .setExpiration(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
-        .signWith(RsaKeyPair.privateKey, SignatureAlgorithm.RS256)
+        .issuedAt(Date.from(Instant.now()))
+        .expiration(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
+        .signWith(RsaKeyPair.privateKey, Jwts.SIG.RS256)
         .compact()
