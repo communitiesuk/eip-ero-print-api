@@ -5,6 +5,8 @@
 https://dluhcdigital.atlassian.net/browse/EIP1-
 
 ## Checklist before requesting a review
+Tick all those which are done
+Replace check box with ❌ if the step is not relevant for this PR
 
 - [ ] I double checked that ACs on the ticket are met by this code update
 - [ ] I have checked any risky steps with my TL ([cheat sheet for safe release here](https://softwiretech.atlassian.net/wiki/spaces/EIP/pages/20960542739/Safe+Release+Cheat+Sheet))
