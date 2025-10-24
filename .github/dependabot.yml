@@ -26,11 +26,13 @@ updates:
           - "plugin.allopen"
           - "plugin.jpa"
           - "plugin.spring"
-      # Group all version updates, except for Spring Boot
+      # Group all version updates, except for Spring Boot and the dependency checker
       gradle-version-updates:
         applies-to: version-updates
         patterns: [ "*" ]
-        exclude-patterns: [ "org.springframework.boot" ]
+        exclude-patterns:
+          - "org.springframework.boot"
+          - "org.owasp.dependencycheck"
     open-pull-requests-limit: 20
 
   - package-ecosystem: "github-actions"

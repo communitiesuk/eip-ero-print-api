@@ -7,7 +7,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "3.5.6"
+    id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "2.2.20"
     kotlin("kapt") version "2.2.20"
@@ -16,7 +16,7 @@ plugins {
     kotlin("plugin.allopen") version "2.2.20"
     id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
     id("org.openapi.generator") version "7.9.0"
-    id("org.owasp.dependencycheck") version "12.1.6"
+    id("org.owasp.dependencycheck") version "12.1.8"
     id("org.jsonschema2dataclass") version "6.0.0"
 }
 
