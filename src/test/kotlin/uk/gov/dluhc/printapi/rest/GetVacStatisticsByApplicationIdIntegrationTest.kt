@@ -1,8 +1,10 @@
 package uk.gov.dluhc.printapi.rest
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus.NOT_FOUND
+import uk.gov.dluhc.internalauth.Constants
 import uk.gov.dluhc.printapi.config.IntegrationTest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.SourceType
@@ -23,6 +25,11 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
         private const val APPLICATION_ID = "7762ccac7c056046b75d4aa3"
     }
 
+    @BeforeEach
+    fun resetWiremock() {
+        wireMockService.resetAllStubsAndMappings()
+    }
+
     @Test
     fun `should return bad request given request without applicationId query string parameter`() {
         webTestClient.get()
@@ -33,10 +40,52 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
     }
 
     @Test
+    fun `should return unauthorised given no auth header present`() {
+        // When / Then
+        webTestClient.get()
+            .uri(URI_TEMPLATE, APPLICATION_ID)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized()
+    }
+
+    @Test
+    fun `should return unauthorised given failed sts auth request`() {
+        // Given
+        wireMockService.stubUnsuccessfulStsPresignedAuthResponse()
+
+        // When / Then
+        webTestClient.get()
+            .uri(URI_TEMPLATE, APPLICATION_ID)
+            .header(Constants.AUTH_HEADER_NAME, "query=something")
+            .exchange()
+            .expectStatus()
+            .isUnauthorized()
+    }
+
+    @Test
+    fun `should return forbidden given role is not allowed to access statistics`() {
+        // Given
+        wireMockService.stubSuccessfulStsPresignedAuthResponse("wrong-role")
+
+        // When / Then
+        webTestClient.get()
+            .uri(URI_TEMPLATE, APPLICATION_ID)
+            .header(Constants.AUTH_HEADER_NAME, "query=something")
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+    }
+
+    @Test
     fun `should return not found given application does not exist`() {
+        // Given
+        wireMockService.stubSuccessfulStsPresignedAuthResponse("stats-role")
+
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
+            .header(Constants.AUTH_HEADER_NAME, "query=something")
             .exchange()
             .expectStatus()
             .isEqualTo(NOT_FOUND)
@@ -84,9 +133,12 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
             temporaryCertificateIssued = false,
         )
 
+        wireMockService.stubSuccessfulStsPresignedAuthResponse("other-stats-role")
+
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
+            .header(Constants.AUTH_HEADER_NAME, "query=something")
             .exchange()
             .expectStatus().isOk
             .returnResult(StatisticsResponse::class.java)
@@ -125,9 +177,12 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
             temporaryCertificateIssued = false,
         )
 
+        wireMockService.stubSuccessfulStsPresignedAuthResponse("stats-role")
+
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
+            .header(Constants.AUTH_HEADER_NAME, "query=something")
             .exchange()
             .expectStatus().isOk
             .returnResult(StatisticsResponse::class.java)
@@ -169,9 +224,12 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
             temporaryCertificateIssued = true,
         )
 
+        wireMockService.stubSuccessfulStsPresignedAuthResponse("other-stats-role")
+
         // When
         val response = webTestClient.get()
             .uri(URI_TEMPLATE, APPLICATION_ID)
+            .header(Constants.AUTH_HEADER_NAME, "query=something")
             .exchange()
             .expectStatus().isOk
             .returnResult(StatisticsResponse::class.java)

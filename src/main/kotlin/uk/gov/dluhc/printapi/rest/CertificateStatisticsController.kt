@@ -1,7 +1,9 @@
 package uk.gov.dluhc.printapi.rest
 
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -18,8 +20,10 @@ private val logger = KotlinLogging.logger {}
 
 @RestController
 @CrossOrigin
+@PreAuthorize("hasAnyAuthority(#root.this.allowedRoleArns)")
 @RequestMapping("/certificates/statistics")
 class CertificateStatisticsController(
+    @Value("#{'\${statistics.allowed-role-arns}'.split(',')}") val allowedRoleArns: List<String>,
     private val certificateFinderService: CertificateFinderService,
     private val temporaryCertificateFinderService: TemporaryCertificateFinderService,
     private val statusMapper: CertificateStatisticsStatusMapper,
