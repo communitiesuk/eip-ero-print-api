@@ -31,15 +31,6 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
     }
 
     @Test
-    fun `should return bad request given request without applicationId query string parameter`() {
-        webTestClient.get()
-            .uri("/certificates/statistics")
-            .exchange()
-            .expectStatus()
-            .isBadRequest
-    }
-
-    @Test
     fun `should return unauthorised given no auth header present`() {
         // When / Then
         webTestClient.get()
@@ -61,6 +52,20 @@ internal class GetVacStatisticsByApplicationIdIntegrationTest : IntegrationTest(
             .exchange()
             .expectStatus()
             .isUnauthorized()
+    }
+
+    @Test
+    fun `should return bad request given request without applicationId query string parameter`() {
+        // Given
+        wireMockService.stubSuccessfulStsPresignedAuthResponse("stats-role")
+
+        // When/Then
+        webTestClient.get()
+            .uri("/certificates/statistics")
+            .header(Constants.AUTH_HEADER_NAME, "query=something")
+            .exchange()
+            .expectStatus()
+            .isBadRequest
     }
 
     @Test
