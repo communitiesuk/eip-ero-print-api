@@ -37,6 +37,12 @@ s3:
   bank-holidays-bucket: test-bank-hols-bucket
   bank-holidays-bucket-object-key: test-bank-holidays.json
 
+sts:
+  base-url: http://replaced-by-wireMockServer-bean
+
+statistics:
+  allowed-role-arns: stats-role,other-stats-role
+
 api:
   print-api:
     base.url: http://localhost:8080

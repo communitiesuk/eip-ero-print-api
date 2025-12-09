@@ -23,7 +23,8 @@ class WiremockConfiguration {
             baseUrl = "http://localhost:${this.port()}"
             TestPropertyValues.of(
                 "spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:${this.port()}/cognito/.well-known/jwks.json",
-                "api.ero-management.url=http://localhost:${this.port()}/ero-management-api"
+                "api.ero-management.url=http://localhost:${this.port()}/ero-management-api",
+                "sts.base-url=http://localhost:${this.port()}/sts",
             ).applyTo(applicationContext)
         }
 }
