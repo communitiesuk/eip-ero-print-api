@@ -1,5 +1,7 @@
 package uk.gov.dluhc.printapi.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -11,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import uk.gov.dluhc.internalauth.presignedStsQueryParametersAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +24,11 @@ class SecurityConfiguration(
 ) {
 
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain =
+    fun filterChain(
+        http: HttpSecurity,
+        objectMapper: ObjectMapper,
+        @Value("\${sts.base-url}") stsBaseUrl: String,
+    ): SecurityFilterChain =
         http.also { httpSecurity ->
             httpSecurity
                 .sessionManagement {
@@ -41,11 +48,6 @@ class SecurityConfiguration(
                 .authorizeHttpRequests {
                     it.requestMatchers(OPTIONS).permitAll()
                     it.requestMatchers("/actuator/**").permitAll()
-
-                    // These requests are authenticated through the API gateway using IAM
-                    it.requestMatchers("/certificates/statistics", "/anonymous-elector-documents/statistics")
-                        .permitAll()
-
                     it.anyRequest().authenticated()
                 }
                 .oauth2ResourceServer { oAuth2ResourceServerConfigurer ->
@@ -54,5 +56,6 @@ class SecurityConfiguration(
                         it.jwkSetUri(environment.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri"))
                     }
                 }
+                .addFilter(presignedStsQueryParametersAuthenticationFilter(stsBaseUrl, objectMapper))
         }.build()
 }

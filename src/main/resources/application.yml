@@ -48,6 +48,12 @@ s3:
   bank-holidays-bucket: ${S3_BANK_HOLIDAYS_BUCKET_NAME}
   bank-holidays-bucket-object-key: ${S3_BANK_HOLIDAYS_BUCKET_OBJECT_KEY}
 
+sts:
+  base-url: ${STS_REGIONAL_BASE_URL}
+
+statistics:
+  allowed-role-arns: ${STATISTICS_ALLOWED_ROLE_ARNS}
+
 api:
   print-api:
     base.url: ${API_PRINT_API_BASE_URL}
