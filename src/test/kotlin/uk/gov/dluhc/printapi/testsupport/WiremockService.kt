@@ -24,17 +24,8 @@ class WiremockService(private val wireMockServer: WireMockServer) {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private var baseUrl: String? = null
-
     fun resetAllStubsAndMappings() {
         wireMockServer.resetAll()
-    }
-
-    fun wiremockBaseUrl(): String {
-        if (baseUrl == null) {
-            baseUrl = "http://localhost:${wireMockServer.port()}"
-        }
-        return baseUrl!!
     }
 
     fun stubCognitoJwtIssuerResponse() {
