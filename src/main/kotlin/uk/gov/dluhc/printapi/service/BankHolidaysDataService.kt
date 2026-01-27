@@ -20,7 +20,7 @@ class BankHolidaysDataService(
     private val bankHolidayDataClient: BankHolidayDataClient,
 ) {
 
-    @Cacheable(UK_BANK_HOLIDAYS_CACHE)
+    @Cacheable(UK_BANK_HOLIDAYS_CACHE, sync = true)
     fun getUpcomingBankHolidays(
         gssCode: String,
         fromDate: LocalDate,
