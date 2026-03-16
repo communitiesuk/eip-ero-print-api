@@ -32,4 +32,4 @@ email:
 
 metrics:
   environment: dev2
-  metrics-enabled: true
+  metrics-enabled: false
