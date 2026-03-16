@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
+import uk.gov.dluhc.printapi.client.MetricsClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -43,6 +44,9 @@ internal class ProcessPrintBatchServiceTest {
     @Mock
     private lateinit var sftpService: SftpService
 
+    @Mock
+    private lateinit var metricsClient: MetricsClient
+
     @InjectMocks
     private lateinit var processPrintBatchService: ProcessPrintBatchService
 
@@ -63,6 +67,7 @@ internal class ProcessPrintBatchServiceTest {
         val zipFilename = aValidZipFilename()
         val sftpPath = aValidSftpPath()
         given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
+        given(certificateRepository.saveAll(any<List<Certificate>>())).willReturn(certificates)
         given(printFileDetailsFactory.createFileDetailsFromCertificates(any(), any())).willReturn(fileDetails)
         given(sftpZipInputStreamProvider.createSftpInputStream(any())).willReturn(sftpInputStream)
         given(filenameFactory.createZipFilename(any(), any())).willReturn(zipFilename)
@@ -77,6 +82,7 @@ internal class ProcessPrintBatchServiceTest {
         verify(sftpZipInputStreamProvider).createSftpInputStream(fileDetails)
         verify(filenameFactory).createZipFilename(batchId, certificates)
         verify(sftpService).sendFile(sftpInputStream, zipFilename)
+        verify(metricsClient).recordPrintRequestsSent(1)
     }
 
     @Test

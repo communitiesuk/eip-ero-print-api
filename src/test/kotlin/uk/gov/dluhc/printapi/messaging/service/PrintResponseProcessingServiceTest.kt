@@ -22,6 +22,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import uk.gov.dluhc.messagingsupport.MessageQueue
+import uk.gov.dluhc.printapi.client.MetricsClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.IN_PRODUCTION
@@ -80,6 +81,9 @@ class PrintResponseProcessingServiceTest {
     @Mock
     private lateinit var certificateDataRetentionService: CertificateDataRetentionService
 
+    @Mock
+    private lateinit var metricsClient: MetricsClient
+
     @BeforeEach
     fun setup() {
         service = PrintResponseProcessingService(
@@ -91,6 +95,7 @@ class PrintResponseProcessingServiceTest {
             certificateNotDeliveredEmailSenderService,
             certificateFailedToPrintEmailSenderService,
             certificateDataRetentionService,
+            metricsClient,
             "TEST_ALARM_MAGIC_STRING",
         )
     }

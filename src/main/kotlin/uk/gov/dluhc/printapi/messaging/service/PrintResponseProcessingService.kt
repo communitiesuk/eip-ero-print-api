@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.messagingsupport.MessageQueue
+import uk.gov.dluhc.printapi.client.MetricsClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_PRINT_PROVIDER
@@ -32,6 +33,7 @@ class PrintResponseProcessingService(
     private val certificateNotDeliveredEmailSenderService: CertificateNotDeliveredEmailSenderService,
     private val certificateFailedToPrintEmailSenderService: CertificateFailedToPrintEmailSenderService,
     private val certificateDataRetentionService: CertificateDataRetentionService,
+    private val metricsClient: MetricsClient,
     @Value("\${alarm-magic-strings.process-print-response}") private val processPrintResponseMagicString: String,
 ) {
     fun processPrintResponses(printResponses: List<PrintResponse>) {
@@ -123,6 +125,7 @@ class PrintResponseProcessingService(
 
         // Save and flush here to make sure that we avoid sending emails in the case of concurrency issues
         certificateRepository.saveAndFlush(certificate)
+        metricsClient.recordPrintResponseReceived()
 
         if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
             certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
