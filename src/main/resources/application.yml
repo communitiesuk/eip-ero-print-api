@@ -247,5 +247,9 @@ email:
 
 caching.time-to-live: PT24H  #Time period of 24 hours
 
+metrics:
+  environment: live
+  metrics-enabled: true
+
 alarm-magic-strings:
   process-print-response: ${PROCESS_PRINT_RESPONSE_ALARM_STRING}

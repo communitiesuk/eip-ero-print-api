@@ -111,6 +111,7 @@ dependencies {
 
     // AWS library
     implementation("software.amazon.awssdk:s3")
+    implementation("software.amazon.awssdk:cloudwatch")
     testImplementation("software.amazon.awssdk:auth")
     testImplementation("software.amazon.awssdk:sts")
 

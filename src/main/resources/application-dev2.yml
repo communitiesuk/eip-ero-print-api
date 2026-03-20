@@ -29,3 +29,7 @@ email:
     certificate-failed-to-print:
       email-body-template: email-templates/non-prod/certificate-failed-to-print.html
       send-to-requesting-user: true
+
+metrics:
+  environment: dev2
+  metrics-enabled: false
