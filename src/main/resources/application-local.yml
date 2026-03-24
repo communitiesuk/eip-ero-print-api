@@ -55,6 +55,10 @@ S3_BANK_HOLIDAYS_BUCKET_OBJECT_KEY: bank-holidays.json
 PROCESS_PRINT_RESPONSE_ALARM_STRING: "process-print-response-alarm"
 SCHEDULED_JOB_ALARM_STRING: "scheduled-job-alarm"
 
+metrics:
+  environment: local
+  metrics-enabled: false
+
 sftp:
   host: ${SFTP_HOST}
   port: ${SFTP_PORT}

@@ -2,6 +2,7 @@ package uk.gov.dluhc.printapi.messaging.service
 
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import uk.gov.dluhc.printapi.client.MetricsClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.ASSIGNED_TO_BATCH
 import uk.gov.dluhc.printapi.database.repository.CertificateRepository
@@ -23,7 +24,8 @@ class ProcessPrintBatchService(
     private val certificateRepository: CertificateRepository,
     private val sftpZipInputStreamProvider: SftpInputStreamProvider,
     private val filenameFactory: FilenameFactory,
-    private val sftpService: SftpService
+    private val sftpService: SftpService,
+    private val metricsClient: MetricsClient,
 ) {
 
     /**
@@ -51,7 +53,9 @@ class ProcessPrintBatchService(
         val sftpFilename = filenameFactory.createZipFilename(batchId, certificates)
         sftpService.sendFile(sftpInputStream, sftpFilename)
         updateCertificates(batchId, certificates)
-        return certificateRepository.saveAll(certificates)
+        val savedCertificates = certificateRepository.saveAll(certificates)
+        metricsClient.recordPrintRequestsSent(savedCertificates.size)
+        return savedCertificates
     }
 
     private fun verifyPrintRequestCount(certificates: List<Certificate>, batchId: String, expectedCount: Int?) {
