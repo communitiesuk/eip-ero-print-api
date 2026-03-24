@@ -99,3 +99,4 @@ metrics:
 
 alarm-magic-strings:
   process-print-response: "TEST_ALARM_MAGIC_STRING"
+  scheduled-job: "TEST_SCHEDULED_JOB_ALARM_STRING"
