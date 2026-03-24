@@ -52,6 +52,13 @@ S3_CERTIFICATE_PHOTOS_TARGET_BUCKET_PROXY_ENDPOINT: localhost
 S3_BANK_HOLIDAYS_BUCKET_NAME: bank-hols-bucket
 S3_BANK_HOLIDAYS_BUCKET_OBJECT_KEY: bank-holidays.json
 
+PROCESS_PRINT_RESPONSE_ALARM_STRING: "process-print-response-alarm"
+SCHEDULED_JOB_ALARM_STRING: "scheduled-job-alarm"
+
+metrics:
+  environment: local
+  metrics-enabled: false
+
 sftp:
   host: ${SFTP_HOST}
   port: ${SFTP_PORT}

@@ -9,11 +9,11 @@ import java.lang.ProcessBuilder.Redirect
 plugins {
     id("org.springframework.boot") version "3.5.11"
     id("io.spring.dependency-management") version "1.1.6"
-    kotlin("jvm") version "2.3.0"
-    kotlin("kapt") version "2.3.0"
-    kotlin("plugin.spring") version "2.3.0"
-    kotlin("plugin.jpa") version "2.3.0"
-    kotlin("plugin.allopen") version "2.3.0"
+    kotlin("jvm") version "2.3.10"
+    kotlin("kapt") version "2.3.10"
+    kotlin("plugin.spring") version "2.3.10"
+    kotlin("plugin.jpa") version "2.3.10"
+    kotlin("plugin.allopen") version "2.3.10"
     id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
     id("org.openapi.generator") version "7.9.0"
     id("org.owasp.dependencycheck") version "12.2.0"
@@ -111,6 +111,7 @@ dependencies {
 
     // AWS library
     implementation("software.amazon.awssdk:s3")
+    implementation("software.amazon.awssdk:cloudwatch")
     testImplementation("software.amazon.awssdk:auth")
     testImplementation("software.amazon.awssdk:sts")
 
