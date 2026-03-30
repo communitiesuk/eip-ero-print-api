@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.expression.common.LiteralExpression
+import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate
@@ -40,13 +41,17 @@ class SftpConfiguration {
     @Bean
     fun sftpSessionFactory(properties: SftpProperties): SessionFactory<SftpClient.DirEntry> =
         with(properties) {
-            DefaultSftpSessionFactory(true).apply {
+            val factory = DefaultSftpSessionFactory(true).apply {
                 setHost(host)
                 setPort(port)
                 setUser(user)
                 setPassword(password)
                 setPrivateKey(ByteArrayResource(privateKey.encodeToByteArray()))
                 setAllowUnknownKeys(true)
+            }
+
+            CachingSessionFactory(factory).apply {
+                setTestSession(true)
             }
         }
 }
