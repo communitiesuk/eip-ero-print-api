@@ -1,0 +1,5 @@
+# Restrict this file being modified exception for admins
+/.github/CODEOWNERS @communitiesuk/ier-ds-admin-softwire
+
+# All other files owned by the standard elections development team
+* @communitiesuk/elections-digital-development-team
