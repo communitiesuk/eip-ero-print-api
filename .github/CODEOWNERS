@@ -1,5 +1,9 @@
-# Restrict this file being modified exception for admins
-/.github/CODEOWNERS @communitiesuk/ier-ds-admin-softwire
+# Order matters in this file with last matching row taking effect
 
-# All other files owned by the standard elections development team
-* @communitiesuk/elections-digital-development-team
+# Note: All rules are currently commented out to avoid unnecessary noise
+
+# All files owned by the standard elections development team
+#* @communitiesuk/elections-digital-development-team
+
+# However, this CODEOWNERS file should be restricted to only admins
+#/.github/CODEOWNERS @communitiesuk/ier-ds-admin-softwire
