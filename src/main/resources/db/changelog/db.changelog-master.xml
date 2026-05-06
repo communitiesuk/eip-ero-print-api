@@ -46,4 +46,6 @@
     <include relativeToChangelogFile="true" file="ddl/0036_EIP1-11368_make_certificate_isFromApplicationsApi_default_true.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0037_EIP1-11368_remove_is_from_applications_api_from_certificate.xml"/>
     <include relativeToChangelogFile="true" file="ddl/0038_EROPSPT-514_remove-temporary-certificate-printer-provided-flag.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0039_EIP1-13842_add_index_for_print_request_batch_id.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/0040_EIP1-13842_add_index_for_certificate_status.xml"/>
 </databaseChangeLog>
