@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="0039_add_index_for_print_request_batch_id" author="stephen.penney@softwire.com" context="ddl">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="print_request" indexName="print_request_batch_id_idx" />
+            </not>
+        </preConditions>
+
+        <createIndex tableName="print_request" indexName="print_request_batch_id_idx">
+            <column name="batch_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="print_request" indexName="print_request_batch_id_idx"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
