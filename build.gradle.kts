@@ -27,6 +27,12 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 extra["awsSdkVersion"] = "2.29.6"
 extra["springCloudAwsVersion"] = "3.2.1"
 
+// Forcing 4.1.133 version of netty to patch vulnerabilities, under EROPSPT-710.
+// When we upgrade to spring v4 we should check if spring pulls in newer versions of netty.
+// If so, this override should be removed.
+// TODO EROPSPT-603
+extra["netty.version"] = "4.1.133.Final"
+
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
 }
@@ -75,16 +81,10 @@ dependencies {
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springdoc:springdoc-openapi-ui:1.8.0")
+    implementation("io.swagger.core.v3:swagger-annotations:2.2.7")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
     implementation("com.opencsv:opencsv:5.11.1")
-
-    constraints {
-        implementation("org.webjars:swagger-ui:5.20.0") {
-            because("Lower versions (imported by org.springdoc:springdoc-openapi-ui:1.8.0) triggers CVE-2024-45801, CVE-2024-47875, CVE-2025-26791")
-        }
-    }
 
     // Logging
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:8.0")
