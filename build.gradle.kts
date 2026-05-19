@@ -27,11 +27,12 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 extra["awsSdkVersion"] = "2.29.6"
 extra["springCloudAwsVersion"] = "3.2.1"
 
-// Forcing 4.1.133 version of netty to patch vulnerabilities, under EROPSPT-710.
-// When we upgrade to spring v4 we should check if spring pulls in newer versions of netty.
+// Forcing 4.1.133 version of netty and tomcat to patch vulnerabilities, under EROPSPT-710.
+// When we upgrade to spring v4 we should check if spring pulls in newer versions of netty and tomcat.
 // If so, this override should be removed.
 // TODO EROPSPT-603
 extra["netty.version"] = "4.1.133.Final"
+extra["tomcat.version"] = "10.1.55"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
