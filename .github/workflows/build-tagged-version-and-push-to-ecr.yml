@@ -6,7 +6,7 @@ on:
 jobs:
   deploy:
     if: startsWith(github.ref, 'refs/tags/v')
-    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/build-and-push.yml@main
+    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/build-and-push.yml@eip1-13829-use-read-only-rule-and-avoid-dev2-environment-on-main
     with:
       version: ${{ github.ref_name }}
       image_name: eip-ero-${{ vars.app_name }}
