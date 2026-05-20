@@ -7,7 +7,7 @@ on:
 
 jobs:
   hotfix:
-    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/hotfix.yml@eip1-13829-use-read-only-rule-and-avoid-dev2-environment-on-main
+    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/hotfix.yml@main
     with:
       image_name: eip-ero-${{ vars.app_name }}
       ecr_repo: ${{ vars.app_name }}-repo

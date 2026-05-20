@@ -11,10 +11,9 @@ concurrency:
 
 jobs:
   build-image-and-deploy-to-dev2:
-    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/build-image-and-deploy-to-dev2.yml@eip1-13829-use-read-only-rule-and-avoid-dev2-environment-on-main
+    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/build-image-and-deploy-to-dev2.yml@main
     with:
       image_name: eip-ero-${{ vars.app_name }}
       ecr_repo: ${{ vars.app_name }}-repo
       app_name_dev2_prefix: dev2-${{ vars.app_name }}
-      use_preprod_main_iam_github_role: true
     secrets: inherit

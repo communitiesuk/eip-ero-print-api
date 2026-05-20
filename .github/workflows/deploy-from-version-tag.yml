@@ -19,7 +19,7 @@ on:
 jobs:
   deploy:
     if: startsWith(github.ref, 'refs/tags/v')
-    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/deploy.yml@eip1-13829-use-read-only-rule-and-avoid-dev2-environment-on-main
+    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/deploy.yml@main
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
       version: ${{ github.ref_name }}
