@@ -1,5 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.service
 
+import jakarta.persistence.OptimisticLockException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -9,6 +10,8 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
+import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import uk.gov.dluhc.printapi.client.MetricsClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -67,7 +70,7 @@ internal class ProcessPrintBatchServiceTest {
         val zipFilename = aValidZipFilename()
         val sftpPath = aValidSftpPath()
         given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
-        given(certificateRepository.saveAll(any<List<Certificate>>())).willReturn(certificates)
+        given(certificateRepository.saveAllAndFlush(any<List<Certificate>>())).willReturn(certificates)
         given(printFileDetailsFactory.createFileDetailsFromCertificates(any(), any())).willReturn(fileDetails)
         given(sftpZipInputStreamProvider.createSftpInputStream(any())).willReturn(sftpInputStream)
         given(filenameFactory.createZipFilename(any(), any())).willReturn(zipFilename)
@@ -82,7 +85,44 @@ internal class ProcessPrintBatchServiceTest {
         verify(sftpZipInputStreamProvider).createSftpInputStream(fileDetails)
         verify(filenameFactory).createZipFilename(batchId, certificates)
         verify(sftpService).sendFile(sftpInputStream, zipFilename)
+        verify(certificateRepository).saveAllAndFlush(certificates)
         verify(metricsClient).recordPrintRequestsSent(1)
+
+        val inOrder = inOrder(certificateRepository, sftpService)
+        inOrder.verify(certificateRepository).saveAllAndFlush(certificates)
+        inOrder.verify(sftpService).sendFile(sftpInputStream, zipFilename)
+    }
+
+    @Test
+    fun `should not send file to SFTP when saveAllAndFlush throws`() {
+        // Given
+        val batchId = aValidBatchId()
+        val printRequests = listOf(
+            buildPrintRequest(
+                batchId = batchId,
+                printRequestStatuses = listOf(buildPrintRequestStatus(status = Status.ASSIGNED_TO_BATCH))
+            )
+        )
+        val certificates = listOf(buildCertificate(printRequests = printRequests))
+        val printRequestCount = 1
+        val fileDetails = aFileDetails()
+        val sftpInputStream = aValidInputStream()
+        val zipFilename = aValidZipFilename()
+        given(certificateRepository.findByPrintRequestsBatchId(any())).willReturn(certificates)
+        given(printFileDetailsFactory.createFileDetailsFromCertificates(any(), any())).willReturn(fileDetails)
+        given(sftpZipInputStreamProvider.createSftpInputStream(any())).willReturn(sftpInputStream)
+        given(filenameFactory.createZipFilename(any(), any())).willReturn(zipFilename)
+        given(certificateRepository.saveAllAndFlush(any<List<Certificate>>()))
+            .willThrow(OptimisticLockException("locked"))
+
+        // When
+        val error = catchThrowable { processPrintBatchService.processBatch(batchId, printRequestCount) }
+
+        // Then
+        assertThat(error).isInstanceOf(OptimisticLockException::class.java)
+        verify(certificateRepository).saveAllAndFlush(certificates)
+        verify(sftpService, never()).sendFile(any(), any())
+        verify(metricsClient, never()).recordPrintRequestsSent(any())
     }
 
     @Test
