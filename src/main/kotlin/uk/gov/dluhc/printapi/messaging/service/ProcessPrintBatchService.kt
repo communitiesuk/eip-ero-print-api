@@ -59,6 +59,7 @@ class ProcessPrintBatchService(
         updateCertificates(batchId, certificates)
         val savedCertificates = certificateRepository.saveAllAndFlush(certificates)
 
+        // File is uploaded after `saveAllAndFlush` to reduce the chance of uploading a file when the transaction doesn't complete.
         sftpService.sendFile(sftpInputStream, sftpFilename)
 
         metricsClient.recordPrintRequestsSent(savedCertificates.size)
