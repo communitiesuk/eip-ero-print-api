@@ -5,5 +5,5 @@ on:
 
 jobs:
   build-and-test-api:
-    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/build-and-test.yml@eip1-13829-use-read-only-rule-and-avoid-dev2-environment-on-main
+    uses: communitiesuk/eip-ero-shared-workflows/.github/workflows/build-and-test.yml@main
     secrets: inherit
