@@ -7,7 +7,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "3.5.14"
+    id("org.springframework.boot") version "3.5.15"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "2.3.21"
     kotlin("kapt") version "2.3.21"
@@ -27,11 +27,11 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 extra["awsSdkVersion"] = "2.29.6"
 extra["springCloudAwsVersion"] = "3.2.1"
 
-// Forcing 4.1.133 version of netty and tomcat to patch vulnerabilities, under EROPSPT-710.
+// Forcing 4.1.135 version of netty and tomcat to patch vulnerabilities, under EROPSPT-710.
 // When we upgrade to spring v4 we should check if spring pulls in newer versions of netty and tomcat.
 // If so, this override should be removed.
 // TODO EROPSPT-603
-extra["netty.version"] = "4.1.133.Final"
+extra["netty.version"] = "4.1.135.Final"
 extra["tomcat.version"] = "10.1.55"
 
 allOpen {
