@@ -14,7 +14,7 @@ plugins {
     kotlin("plugin.spring") version "2.3.21"
     kotlin("plugin.jpa") version "2.3.21"
     kotlin("plugin.allopen") version "2.3.21"
-    id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.openapi.generator") version "7.9.0"
     id("org.owasp.dependencycheck") version "12.2.2"
     id("org.jsonschema2dataclass") version "6.0.0"
@@ -26,13 +26,6 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 extra["awsSdkVersion"] = "2.29.6"
 extra["springCloudAwsVersion"] = "4.0.2"
-
-// Forcing 4.1.135 version of netty and tomcat to patch vulnerabilities, under EROPSPT-710.
-// When we upgrade to spring v4 we should check if spring pulls in newer versions of netty and tomcat.
-// If so, this override should be removed.
-// TODO EROPSPT-603
-extra["netty.version"] = "4.1.135.Final"
-extra["tomcat.version"] = "10.1.55"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
@@ -138,8 +131,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-webtestclient")
     testImplementation("org.springframework.security:spring-security-test")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.20.3")
-    testImplementation("org.testcontainers:testcontainers:1.20.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.testcontainers:testcontainers:1.21.4")
     testImplementation("org.testcontainers:mysql:1.20.3")
 
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
