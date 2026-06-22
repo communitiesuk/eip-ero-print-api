@@ -1,8 +1,8 @@
 package uk.gov.dluhc.printapi.messaging.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.service.SftpService
 import uk.gov.dluhc.printapi.service.StatisticsUpdateService
@@ -12,7 +12,7 @@ private val logger = KotlinLogging.logger {}
 @Service
 class PrintResponseFileService(
     val sftpService: SftpService,
-    val objectMapper: ObjectMapper,
+    val jsonMapper: JsonMapper,
     val printResponseProcessingService: PrintResponseProcessingService,
     val statisticsUpdateService: StatisticsUpdateService,
 ) {
@@ -30,7 +30,7 @@ class PrintResponseFileService(
 
     private fun parsePrintResponseContent(printResponsesString: String): PrintResponses {
         logger.debug { "Parsing print responses $printResponsesString" }
-        return objectMapper.readValue(printResponsesString, PrintResponses::class.java)
+        return jsonMapper.readValue(printResponsesString, PrintResponses::class.java)
     }
 
     private fun removeFile(directory: String, fileName: String) {

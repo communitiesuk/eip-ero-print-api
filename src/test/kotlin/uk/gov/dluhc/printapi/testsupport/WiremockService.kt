@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.testsupport
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder.responseDefinition
@@ -13,6 +12,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficeResponse
 import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
 
@@ -22,7 +22,7 @@ import uk.gov.dluhc.eromanagementapi.models.ElectoralRegistrationOfficesResponse
 @Service
 class WiremockService(private val wireMockServer: WireMockServer) {
     @Autowired
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var jsonMapper: JsonMapper
 
     fun resetAllStubsAndMappings() {
         wireMockServer.resetAll()
@@ -53,7 +53,7 @@ class WiremockService(private val wireMockServer: WireMockServer) {
     }
 
     private fun stubEroManagementGetEroByGssCode(gssCode: String, eros: List<ElectoralRegistrationOfficeResponse>) {
-        val responseBody = objectMapper.writeValueAsString(ElectoralRegistrationOfficesResponse(eros))
+        val responseBody = jsonMapper.writeValueAsString(ElectoralRegistrationOfficesResponse(eros))
         wireMockServer.stubFor(
             get(urlEqualTo("/ero-management-api/eros?gssCode=$gssCode"))
                 .willReturn(
@@ -66,7 +66,7 @@ class WiremockService(private val wireMockServer: WireMockServer) {
     }
 
     fun stubEroManagementGetEroByEroId(ero: ElectoralRegistrationOfficeResponse, eroId: String) {
-        val responseBody = objectMapper.writeValueAsString(ero)
+        val responseBody = jsonMapper.writeValueAsString(ero)
         wireMockServer.stubFor(
             get(urlEqualTo("/ero-management-api/eros/$eroId"))
                 .willReturn(

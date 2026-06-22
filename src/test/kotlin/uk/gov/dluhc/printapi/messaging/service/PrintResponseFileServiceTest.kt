@@ -1,7 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.service
 
 import ch.qos.logback.classic.Level
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -12,6 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.inOrder
 import org.springframework.messaging.MessagingException
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponse
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
 import uk.gov.dluhc.printapi.service.SftpService
@@ -26,7 +26,7 @@ internal class PrintResponseFileServiceTest {
     private lateinit var sftpService: SftpService
 
     @Mock
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var jsonMapper: JsonMapper
 
     @Mock
     private lateinit var printResponseProcessingService: PrintResponseProcessingService
@@ -50,7 +50,7 @@ internal class PrintResponseFileServiceTest {
                 .withBatchResponses(emptyList())
                 .withPrintResponses(emptyList<PrintResponse>())
                 .build()
-        given(objectMapper.readValue(fileContent, PrintResponses::class.java))
+        given(jsonMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
         given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
 
@@ -58,9 +58,9 @@ internal class PrintResponseFileServiceTest {
         printResponseFileService.processPrintResponseFile(directory, fileName)
 
         // Then
-        val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService)
+        val inOrder = inOrder(sftpService, jsonMapper, printResponseProcessingService)
         inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
-        inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
+        inOrder.verify(jsonMapper).readValue(fileContent, PrintResponses::class.java)
         inOrder.verify(printResponseProcessingService).processBatchResponses(expectedPrintResponses.batchResponses)
         inOrder.verify(printResponseProcessingService).processPrintResponses(expectedPrintResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
@@ -86,7 +86,7 @@ internal class PrintResponseFileServiceTest {
 
         given(sftpService.fetchFileFromOutBoundDirectory(any(), any())).willReturn(fileContent)
 
-        given(objectMapper.readValue(fileContent, PrintResponses::class.java))
+        given(jsonMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(printResponses)
         given(printResponseProcessingService.processBatchResponses(any()))
             .willReturn(listOf(firstCertificate, secondCertificate))
@@ -95,9 +95,9 @@ internal class PrintResponseFileServiceTest {
         printResponseFileService.processPrintResponseFile(directory, fileName)
 
         // Then
-        val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService, statisticsUpdateService)
+        val inOrder = inOrder(sftpService, jsonMapper, printResponseProcessingService, statisticsUpdateService)
         inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
-        inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
+        inOrder.verify(jsonMapper).readValue(fileContent, PrintResponses::class.java)
         inOrder.verify(printResponseProcessingService).processBatchResponses(printResponses.batchResponses)
         inOrder.verify(printResponseProcessingService).processPrintResponses(printResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
@@ -118,7 +118,7 @@ internal class PrintResponseFileServiceTest {
                 .withBatchResponses(emptyList())
                 .withPrintResponses(emptyList<PrintResponse>())
                 .build()
-        given(objectMapper.readValue(fileContent, PrintResponses::class.java))
+        given(jsonMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
         given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
 
@@ -130,9 +130,9 @@ internal class PrintResponseFileServiceTest {
         printResponseFileService.processPrintResponseFile(directory, fileName)
 
         // Then
-        val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService)
+        val inOrder = inOrder(sftpService, jsonMapper, printResponseProcessingService)
         inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
-        inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
+        inOrder.verify(jsonMapper).readValue(fileContent, PrintResponses::class.java)
         inOrder.verify(printResponseProcessingService).processBatchResponses(expectedPrintResponses.batchResponses)
         inOrder.verify(printResponseProcessingService).processPrintResponses(expectedPrintResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)
@@ -157,7 +157,7 @@ internal class PrintResponseFileServiceTest {
                 .withBatchResponses(emptyList())
                 .withPrintResponses(emptyList<PrintResponse>())
                 .build()
-        given(objectMapper.readValue(fileContent, PrintResponses::class.java))
+        given(jsonMapper.readValue(fileContent, PrintResponses::class.java))
             .willReturn(expectedPrintResponses)
         given(printResponseProcessingService.processBatchResponses(any())).willReturn(emptyList())
         val exception = MessagingException("Some error occurred")
@@ -169,9 +169,9 @@ internal class PrintResponseFileServiceTest {
         printResponseFileService.processPrintResponseFile(directory, fileName)
 
         // Then
-        val inOrder = inOrder(sftpService, objectMapper, printResponseProcessingService)
+        val inOrder = inOrder(sftpService, jsonMapper, printResponseProcessingService)
         inOrder.verify(sftpService).fetchFileFromOutBoundDirectory(directory, fileName)
-        inOrder.verify(objectMapper).readValue(fileContent, PrintResponses::class.java)
+        inOrder.verify(jsonMapper).readValue(fileContent, PrintResponses::class.java)
         inOrder.verify(printResponseProcessingService).processBatchResponses(expectedPrintResponses.batchResponses)
         inOrder.verify(printResponseProcessingService).processPrintResponses(expectedPrintResponses.printResponses)
         inOrder.verify(sftpService).removeFileFromOutBoundDirectory(directory, fileName)

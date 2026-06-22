@@ -7,8 +7,8 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "3.5.15"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "4.1.0"
+    id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.3.21"
     kotlin("kapt") version "2.3.21"
     kotlin("plugin.spring") version "2.3.21"
@@ -25,7 +25,7 @@ version = "latest"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 extra["awsSdkVersion"] = "2.29.6"
-extra["springCloudAwsVersion"] = "3.2.1"
+extra["springCloudAwsVersion"] = "4.0.2"
 
 // Forcing 4.1.135 version of netty and tomcat to patch vulnerabilities, under EROPSPT-710.
 // When we upgrade to spring v4 we should check if spring pulls in newer versions of netty and tomcat.
@@ -65,8 +65,8 @@ dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.core:jackson-databind")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
     implementation("org.apache.commons:commons-lang3:3.18.0")
     implementation("org.mapstruct:mapstruct:1.6.2")
@@ -75,7 +75,7 @@ dependencies {
     // internal libs
     implementation("uk.gov.dluhc:logging-library:3.0.5")
     implementation("uk.gov.dluhc:bank-holidays-data-client-library:1.0.3")
-    implementation("uk.gov.dluhc:messaging-support-library:2.3.3")
+    implementation("uk.gov.dluhc:messaging-support-library:3.0.0")
     implementation("uk.gov.dluhc:email-client:1.0.2")
     implementation("uk.gov.dluhc:internal-auth-library:1.1.1")
 
@@ -135,6 +135,7 @@ dependencies {
 
     // Test implementations
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-webtestclient")
     testImplementation("org.springframework.security:spring-security-test")
 
     testImplementation("org.testcontainers:junit-jupiter:1.20.3")
