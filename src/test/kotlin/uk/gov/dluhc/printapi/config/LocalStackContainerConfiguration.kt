@@ -41,7 +41,7 @@ class LocalStackContainerConfiguration {
         const val DEFAULT_SECRET_KEY = "test"
         const val VCA_TARGET_BUCKET = "localstack-vca-api-vca-target-bucket"
 
-        val jsonMapper =  JsonMapper()
+        val jsonMapper = JsonMapper()
         val localStackContainer: GenericContainer<*> = getInstance()
         private var container: GenericContainer<*>? = null
 
