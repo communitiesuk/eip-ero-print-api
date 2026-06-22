@@ -19,7 +19,7 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
             // Given
             val filenameToProcess = "status-20220928235441999.json"
             val printResponses = buildPrintResponses()
-            val expectedResponseString = objectMapper.writeValueAsString(printResponses)
+            val expectedResponseString = jsonMapper.writeValueAsString(printResponses)
 
             writeContentToRemoteOutBoundDirectory(filenameToProcess, expectedResponseString)
 
@@ -54,7 +54,7 @@ internal class SftpServiceIntegrationTest : IntegrationTest() {
             // Given
             val filenameToProcess = "status-20220928235441999.json"
             val printResponses = buildPrintResponses()
-            val expectedResponseString = objectMapper.writeValueAsString(printResponses)
+            val expectedResponseString = jsonMapper.writeValueAsString(printResponses)
 
             writeContentToRemoteOutBoundDirectory(filenameToProcess, expectedResponseString)
 

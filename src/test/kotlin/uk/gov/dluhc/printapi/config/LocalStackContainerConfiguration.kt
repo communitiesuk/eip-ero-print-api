@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.util.TestPropertyValues
@@ -22,6 +21,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.ses.SesClient
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.dluhc.printapi.testsupport.buildS3Arn
 import java.net.InetAddress
 import java.net.URI
@@ -41,7 +41,7 @@ class LocalStackContainerConfiguration {
         const val DEFAULT_SECRET_KEY = "test"
         const val VCA_TARGET_BUCKET = "localstack-vca-api-vca-target-bucket"
 
-        val objectMapper = ObjectMapper()
+        val jsonMapper =  JsonMapper()
         val localStackContainer: GenericContainer<*> = getInstance()
         private var container: GenericContainer<*>? = null
 
@@ -225,7 +225,7 @@ class LocalStackContainerConfiguration {
             "--attributes", attributes.joinToString(","),
         )
         return execInContainer.stdout.let {
-            objectMapper.readValue(it, Map::class.java)
+            jsonMapper.readValue(it, Map::class.java)
         }.let {
             it["QueueUrl"] as String
         }

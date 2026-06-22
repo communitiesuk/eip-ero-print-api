@@ -20,7 +20,7 @@ internal class ProcessPrintResponseFileMessageListenerIntegrationTest : Integrat
         // Given
         val filenameToProcess = "status-20220928235441999.json"
         val printResponses = buildPrintResponses()
-        val printResponsesAsString = objectMapper.writeValueAsString(printResponses)
+        val printResponsesAsString = jsonMapper.writeValueAsString(printResponses)
 
         val certificates = printResponses.batchResponses.map {
             buildCertificate(
