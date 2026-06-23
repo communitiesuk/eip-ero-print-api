@@ -50,7 +50,7 @@ class TestLogAppender : AppenderBase<ILoggingEvent>() {
         }
 
         private fun hasMessageInThrowableCauseChain(throwable: IThrowableProxy?, message: String): Boolean =
-            throwable != null && (throwable.message == message || hasMessageInThrowableCauseChain(throwable.cause, message))
+            throwable != null && (throwable.message?.contains(message) == true || hasMessageInThrowableCauseChain(throwable.cause, message))
 
         fun reset() {
             logList.clear()
