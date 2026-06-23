@@ -66,10 +66,10 @@ dependencies {
     kapt("org.mapstruct:mapstruct-processor:1.6.2")
 
     // internal libs
-    implementation("uk.gov.dluhc:logging-library:3.0.5")
-    implementation("uk.gov.dluhc:bank-holidays-data-client-library:1.0.3")
+    implementation("uk.gov.dluhc:logging-library:4.0.0")
+    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.0.0")
     implementation("uk.gov.dluhc:messaging-support-library:3.0.0")
-    implementation("uk.gov.dluhc:email-client:1.0.2")
+    implementation("uk.gov.dluhc:email-client:1.2.0")
     implementation("uk.gov.dluhc:internal-auth-library:2.0.0")
 
     // api
