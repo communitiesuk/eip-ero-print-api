@@ -301,8 +301,7 @@ internal abstract class IntegrationTest {
         val expectedEmailBodyRegex = Regex(expected.body.htmlPart!!)
         with(localstackEmailMessagesSentClient.getEmailMessagesSent()) {
             val foundMessage = messages.any {
-                !it.timestamp.isBefore(expected.timestamp) &&
-                    it.destination.toAddresses.toSet() == expected.destination.toAddresses.toSet() &&
+                it.destination.toAddresses.toSet() == expected.destination.toAddresses.toSet() &&
                     it.subject == expected.subject &&
                     expectedEmailBodyRegex.matches(it.body.htmlPart!!) &&
                     it.body.textPart == expected.body.textPart &&

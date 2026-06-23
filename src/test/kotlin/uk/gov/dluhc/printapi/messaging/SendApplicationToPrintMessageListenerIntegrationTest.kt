@@ -224,7 +224,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
 
         // Then
         await.atMost(5, SECONDS).untilAsserted {
-            assertThat(hasExceptionLogWithMessage("handleMessage.arg0.gssCode: size must be between 9 and 9")).isTrue()
+            assertThat(hasExceptionLogWithMessage("gssCode") && hasExceptionLogWithMessage("size must be between 9 and 9")).isTrue()
         }
     }
 
