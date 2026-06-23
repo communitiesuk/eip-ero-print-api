@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.dao.TransientDataAccessException
 import org.springframework.data.repository.CrudRepository
+import org.springframework.http.client.reactive.ClientHttpConnector
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
@@ -259,6 +261,11 @@ internal abstract class IntegrationTest {
             factory.setPrivateKey(ByteArrayResource(properties.privateKey.encodeToByteArray()))
             factory.setAllowUnknownKeys(true)
             return CachingSessionFactory(factory)
+        }
+
+        @Bean
+        fun clientHttpConnector(): ClientHttpConnector {
+            return ReactorClientHttpConnector()
         }
     }
 
