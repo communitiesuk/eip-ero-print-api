@@ -22,7 +22,12 @@ plugins {
 
 group = "uk.gov.dluhc"
 version = "latest"
-java.sourceCompatibility = JavaVersion.VERSION_17
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 extra["awsSdkVersion"] = "2.29.6"
 extra["springCloudAwsVersion"] = "4.0.2"
