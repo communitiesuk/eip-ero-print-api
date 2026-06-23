@@ -155,7 +155,7 @@ class CertificateMapperTest {
         given(instantMapper.toInstant(any())).willReturn(message.applicationReceivedDateTime.toInstant())
 
         val englishEro = ero.englishContactDetails.toElectoralRegistrationOffice(ero.englishContactDetails.name)
-        val welshEro = ero.welshContactDetails!!.toElectoralRegistrationOffice(ero.welshContactDetails!!.name)
+        val welshEro = ero.welshContactDetails!!.toElectoralRegistrationOffice(ero.welshContactDetails.name)
 
         val printRequest = with(message) {
             PrintRequest(
@@ -209,7 +209,7 @@ class CertificateMapperTest {
                 applicationReceivedDateTime = applicationReceivedDateTime.toInstant(),
                 gssCode = gssCode,
                 issuingAuthority = ero.englishContactDetails.name,
-                issuingAuthorityCy = ero.welshContactDetails!!.name,
+                issuingAuthorityCy = ero.welshContactDetails.name,
                 issueDate = null,
                 suggestedExpiryDate = null,
                 hasSourceApplicationBeenRemoved = false,

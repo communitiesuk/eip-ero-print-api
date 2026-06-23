@@ -285,9 +285,9 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
                 ElectoralRegistrationOffice(
                     name = "Swyddog Cofrestru Etholiadol",
                     phoneNumber = contactDetailsWelsh!!.phone,
-                    emailAddress = contactDetailsWelsh!!.emailVac,
-                    website = contactDetailsWelsh!!.websiteVac,
-                    address = with(contactDetailsWelsh!!.address) {
+                    emailAddress = contactDetailsWelsh.emailVac,
+                    website = contactDetailsWelsh.websiteVac,
+                    address = with(contactDetailsWelsh.address) {
                         Address(
                             street = street,
                             postcode = postcode,

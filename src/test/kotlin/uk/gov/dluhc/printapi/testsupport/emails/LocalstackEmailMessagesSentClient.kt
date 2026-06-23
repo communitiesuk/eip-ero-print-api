@@ -54,7 +54,7 @@ class LocalstackEmailMessagesSentClient(
         return response!!
     }
 
-    private fun handleException(ex: Throwable, message: String): Mono<out LocalstackEmailMessages>? {
+    private fun handleException(ex: Throwable, message: String): Mono<out LocalstackEmailMessages> {
         logger.error(ex) { "Unhandled exception thrown by WebClient" }
         return Mono.error(RuntimeException(message))
     }
