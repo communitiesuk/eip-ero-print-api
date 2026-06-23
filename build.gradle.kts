@@ -91,7 +91,7 @@ dependencies {
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.liquibase:liquibase-core")
+    implementation("org.springframework.boot:spring-boot-starter-liquibase")
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.10")
     runtimeOnly("software.amazon.awssdk:rds")
