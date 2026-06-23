@@ -24,8 +24,9 @@ class AnonymousElectorDocumentSummarySpecificationBuilder {
         gssCodes: List<String>,
         criteria: AnonymousSearchCriteriaDto
     ): Specification<AnonymousElectorDocumentSummary> {
-        return buildSpecificationForGssCodes(gssCodes)
-            .and(buildSpecificationForSearchBy(criteria.searchBy, criteria.searchValue))
+        val gssCodeSpec = buildSpecificationForGssCodes(gssCodes)
+        val searchBySpec = buildSpecificationForSearchBy(criteria.searchBy, criteria.searchValue)
+        return searchBySpec?.let { gssCodeSpec.and(it) } ?: gssCodeSpec
     }
 
     private fun buildSpecificationForGssCodes(gssCodes: List<String>) =
@@ -55,13 +56,13 @@ class AnonymousElectorDocumentSummarySpecificationBuilder {
     }
 
     private fun hasApplicationReference(applicationReference: String): Specification<AnonymousElectorDocumentSummary> {
-        return Specification<AnonymousElectorDocumentSummary> { root: Root<AnonymousElectorDocumentSummary?>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
+        return Specification<AnonymousElectorDocumentSummary> { root: Root<AnonymousElectorDocumentSummary>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
             criteriaBuilder.equal(root.get<Any>(APPLICATION_REFERENCE), applicationReference)
         }
     }
 
     private fun hasSanitizedSurname(sanitizedSurname: String): Specification<AnonymousElectorDocumentSummary> {
-        return Specification<AnonymousElectorDocumentSummary> { root: Root<AnonymousElectorDocumentSummary?>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
+        return Specification<AnonymousElectorDocumentSummary> { root: Root<AnonymousElectorDocumentSummary>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
             criteriaBuilder.equal(root.get<Any>(SANITIZED_SURNAME), sanitizedSurname)
         }
     }

@@ -12,9 +12,9 @@ private val logger = KotlinLogging.logger {}
  * to [SearchBy] variables
  */
 @Component
-class StringToAedSearchByConverter : Converter<String, AedSearchBy> {
+class StringToAedSearchByConverter : Converter<String, AedSearchBy?> {
     override fun convert(source: String): AedSearchBy? =
-        AedSearchBy.values()
+        AedSearchBy.entries
             .firstOrNull { it.value == source }
             .also {
                 if (it == null) {

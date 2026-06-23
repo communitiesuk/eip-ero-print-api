@@ -2,7 +2,7 @@ package uk.gov.dluhc.printapi.config
 
 import org.springframework.boot.web.error.ErrorAttributeOptions
 import org.springframework.boot.web.error.ErrorAttributeOptions.Include
-import org.springframework.boot.web.servlet.error.DefaultErrorAttributes
+import org.springframework.boot.webmvc.error.DefaultErrorAttributes
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.validation.FieldError
@@ -57,19 +57,19 @@ class ApiRequestErrorAttributes : DefaultErrorAttributes() {
         return message
     }
 
-    private fun Map<String, Any>.getTimeStamp(): OffsetDateTime =
+    private fun Map<String, Any?>.getTimeStamp(): OffsetDateTime =
         (this[TIMESTAMP] as Date).toInstant().atOffset(ZoneOffset.UTC)
 
-    private fun Map<String, Any>.getStatus(): Int =
+    private fun Map<String, Any?>.getStatus(): Int =
         this[STATUS] as Int
 
-    private fun Map<String, Any>.getError(): String =
+    private fun Map<String, Any?>.getError(): String =
         this[ERROR].toString()
 
-    private fun Map<String, Any>.getMessage(): String =
+    private fun Map<String, Any?>.getMessage(): String =
         this[MESSAGE].toString()
 
-    private fun Map<String, Any>.getErrors(): List<String>? =
+    private fun Map<String, Any?>.getErrors(): List<String>? =
         (this[ERRORS] as List<*>?)
             ?.map { it as FieldError }
             ?.map {

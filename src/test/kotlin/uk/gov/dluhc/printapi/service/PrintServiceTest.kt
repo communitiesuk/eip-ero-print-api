@@ -66,7 +66,7 @@ class PrintServiceTest {
         // Then
         verify(eroClient).getEro(message.gssCode!!)
         verify(certificateRepository).findByGssCodeInAndSourceTypeAndSourceReference(
-            listOf(message.gssCode!!),
+            listOf(message.gssCode),
             sourceType,
             message.sourceReference
         )
@@ -99,7 +99,7 @@ class PrintServiceTest {
         // Then
         verify(eroClient).getEro(message.gssCode!!)
         verify(certificateRepository).findByGssCodeInAndSourceTypeAndSourceReference(
-            listOf(message.gssCode!!),
+            listOf(message.gssCode),
             sourceType,
             message.sourceReference
         )
