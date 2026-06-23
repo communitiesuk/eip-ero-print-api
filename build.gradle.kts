@@ -70,7 +70,7 @@ dependencies {
     implementation("uk.gov.dluhc:bank-holidays-data-client-library:1.0.3")
     implementation("uk.gov.dluhc:messaging-support-library:3.0.0")
     implementation("uk.gov.dluhc:email-client:1.0.2")
-    implementation("uk.gov.dluhc:internal-auth-library:1.1.1")
+    implementation("uk.gov.dluhc:internal-auth-library:2.0.0")
 
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
