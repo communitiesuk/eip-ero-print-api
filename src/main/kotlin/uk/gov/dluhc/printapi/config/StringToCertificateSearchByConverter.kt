@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class StringToCertificateSearchByConverter : Converter<String, CertificateSearchBy?> {
     override fun convert(source: String): CertificateSearchBy? =
-        CertificateSearchBy.entries
+        CertificateSearchBy.values()
             .firstOrNull { it.value == source }
             .also {
                 if (it == null) {

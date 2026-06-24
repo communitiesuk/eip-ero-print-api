@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class StringToAedSearchByConverter : Converter<String, AedSearchBy?> {
     override fun convert(source: String): AedSearchBy? =
-        AedSearchBy.entries
+        AedSearchBy.values()
             .firstOrNull { it.value == source }
             .also {
                 if (it == null) {
