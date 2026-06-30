@@ -1,7 +1,5 @@
 # Order matters in this file with last matching row taking effect
 
-# Note: All rules are currently commented out to avoid unnecessary noise
-
 # All files owned by the standard elections development team
 * @communitiesuk/EROP-PR-Approvers
 
