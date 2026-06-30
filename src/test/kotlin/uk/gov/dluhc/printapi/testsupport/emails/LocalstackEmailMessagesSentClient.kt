@@ -28,18 +28,8 @@ class LocalstackEmailMessagesSentClient(
         val webClient = WebClient.builder()
             .clientConnector(httpClient)
             .codecs { configurer ->
-                configurer.defaultCodecs().jacksonJsonEncoder(
-                    JacksonJsonEncoder(
-                        jsonMapper,
-                        MediaType.APPLICATION_JSON
-                    )
-                )
-                configurer.defaultCodecs().jacksonJsonDecoder(
-                    JacksonJsonDecoder(
-                        jsonMapper,
-                        MediaType.APPLICATION_JSON
-                    )
-                )
+                configurer.defaultCodecs().jacksonJsonEncoder(JacksonJsonEncoder(jsonMapper, MediaType.APPLICATION_JSON))
+                configurer.defaultCodecs().jacksonJsonDecoder(JacksonJsonDecoder(jsonMapper, MediaType.APPLICATION_JSON))
             }
             .build()
 
