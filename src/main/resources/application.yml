@@ -226,7 +226,6 @@ logging:
     com:
       jcraft:
         jsch: WARN
-    org.apache.sshd: DEBUG
 
 email:
   client:
