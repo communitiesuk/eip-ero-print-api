@@ -31,7 +31,7 @@ extra["springCloudAwsVersion"] = "3.2.1"
 // When we upgrade to spring v4 we should check if spring pulls in newer versions of netty and tomcat.
 // If so, this override should be removed.
 // TODO EROPSPT-603
-extra["netty.version"] = "4.1.134.Final"
+extra["netty.version"] = "4.1.135.Final"
 extra["tomcat.version"] = "10.1.55"
 
 allOpen {
