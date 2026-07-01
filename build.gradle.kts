@@ -278,7 +278,16 @@ tasks.withType<KtLintCheckTask> {
 
 tasks.withType<BootBuildImage> {
     builder.set("paketobuildpacks/builder-jammy-base")
-    environment.set(mapOf("BP_HEALTH_CHECKER_ENABLED" to "true"))
+    environment.set(
+        mapOf(
+            "BP_HEALTH_CHECKER_ENABLED" to "true",
+            // Netty's native epoll transport interferes with unrelated Apache MINA SSHD NIO2 SFTP sessions,
+            // causing intermittent "Broken pipe"/session reset failures when polling the print provider's SFTP server.
+            // Forcing pure-Java NIO for netty (reactor-netty + AWS SDK netty-nio-client) resolves this;
+            // the performance cost is negligible given this service's low connection volume.
+            "JAVA_TOOL_OPTIONS" to "-Dio.netty.transport.noNative=true",
+        )
+    )
     buildpacks.set(
         listOf(
             "urn:cnb:builder:paketo-buildpacks/java",
