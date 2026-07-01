@@ -18,10 +18,5 @@ import org.springframework.integration.config.EnableIntegration
 class PrintApiApplication
 
 fun main(args: Array<String>) {
-    // TODO diagnostic flag to rule out netty's native epoll transport as the cause of
-    // intermittent SFTP (Apache MINA SSHD NIO2) session failures seen after the Netty
-    // 4.1.135.Final upgrade - remove once root cause is confirmed/fixed.
-    System.setProperty("io.netty.transport.noNative", "true")
-
     runApplication<PrintApiApplication>(*args)
 }
