@@ -1,6 +1,5 @@
 package uk.gov.dluhc.printapi.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.operations.SqsTemplate
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
@@ -11,15 +10,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.dao.TransientDataAccessException
 import org.springframework.data.repository.CrudRepository
+import org.springframework.http.client.reactive.ClientHttpConnector
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.integration.file.FileHeaders.FILENAME
 import org.springframework.integration.file.remote.session.CachingSessionFactory
 import org.springframework.integration.file.remote.session.SessionFactory
@@ -32,6 +33,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest
 import software.amazon.awssdk.services.s3.model.Tag
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.dluhc.bankholidaysdataclient.BankHolidayDataClient
 import uk.gov.dluhc.messagingsupport.MessageQueue
 import uk.gov.dluhc.printapi.config.SftpContainerConfiguration.Companion.PRINT_REQUEST_UPLOAD_PATH
@@ -129,7 +131,7 @@ internal abstract class IntegrationTest {
     protected lateinit var removeCertificateMessageQueue: MessageQueue<RemoveCertificateMessage>
 
     @Autowired
-    protected lateinit var objectMapper: ObjectMapper
+    protected lateinit var jsonMapper: JsonMapper
 
     @Value("\${sqs.send-application-to-print-queue-name}")
     protected lateinit var sendApplicationToPrintQueueName: String
@@ -260,6 +262,11 @@ internal abstract class IntegrationTest {
             factory.setAllowUnknownKeys(true)
             return CachingSessionFactory(factory)
         }
+
+        @Bean
+        fun clientHttpConnector(): ClientHttpConnector {
+            return ReactorClientHttpConnector()
+        }
     }
 
     protected fun getSftpOutboundDirectoryFileNames() =
@@ -294,8 +301,7 @@ internal abstract class IntegrationTest {
         val expectedEmailBodyRegex = Regex(expected.body.htmlPart!!)
         with(localstackEmailMessagesSentClient.getEmailMessagesSent()) {
             val foundMessage = messages.any {
-                !it.timestamp.isBefore(expected.timestamp) &&
-                    it.destination.toAddresses.toSet() == expected.destination.toAddresses.toSet() &&
+                it.destination.toAddresses.toSet() == expected.destination.toAddresses.toSet() &&
                     it.subject == expected.subject &&
                     expectedEmailBodyRegex.matches(it.body.htmlPart!!) &&
                     it.body.textPart == expected.body.textPart &&

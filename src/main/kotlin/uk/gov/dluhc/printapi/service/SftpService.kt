@@ -24,7 +24,7 @@ class SftpService(
         private val STATUS_RESPONSE_FILE_REGEX = Regex("status-\\d{17}\\.json")
     }
 
-    fun sendFile(inputStream: InputStream, filename: String): String =
+    fun sendFile(inputStream: InputStream, filename: String): String? =
         sftpInboundTemplate.send(
             MessageBuilder
                 .withPayload(inputStream)

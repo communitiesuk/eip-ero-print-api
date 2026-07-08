@@ -1,7 +1,9 @@
 package uk.gov.dluhc.printapi.testsupport
 
-import uk.gov.dluhc.printapi.testsupport.DeepCopyObjectMapper.Companion.objectMapper
+import tools.jackson.databind.json.JsonMapper
+
+private val jsonMapper = JsonMapper()
 
 fun <T> T.deepCopy(): T {
-    return objectMapper.readValue(objectMapper.writeValueAsString(this), this!!::class.java)
+    return jsonMapper.readValue(jsonMapper.writeValueAsString(this), this!!::class.java)
 }

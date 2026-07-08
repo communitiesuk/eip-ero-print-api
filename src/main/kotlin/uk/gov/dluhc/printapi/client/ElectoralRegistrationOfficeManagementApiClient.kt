@@ -77,7 +77,7 @@ class ElectoralRegistrationOfficeManagementApiClient(
         )
     }
 
-    private fun <T> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =
+    private fun <T : Any> handleException(ex: Throwable, searchCriteria: Map<String, String>): Mono<T> =
         if (ex is WebClientResponseException) {
             handleWebClientResponseException(ex, searchCriteria)
         } else {
@@ -85,7 +85,7 @@ class ElectoralRegistrationOfficeManagementApiClient(
             Mono.error(ElectoralRegistrationOfficeGeneralException(ex.message, searchCriteria))
         }
 
-    private fun <T> handleWebClientResponseException(
+    private fun <T : Any> handleWebClientResponseException(
         ex: WebClientResponseException,
         searchCriteria: Map<String, String>
     ): Mono<T> =

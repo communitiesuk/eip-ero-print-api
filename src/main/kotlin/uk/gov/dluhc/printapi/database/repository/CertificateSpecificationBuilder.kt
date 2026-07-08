@@ -26,8 +26,9 @@ class CertificateSpecificationBuilder {
         gssCodes: List<String>,
         criteria: CertificateSearchCriteriaDto
     ): Specification<Certificate> {
-        return buildSpecificationForGssCodes(gssCodes)
-            .and(buildSpecificationForSearchBy(criteria.searchBy, criteria.searchValue))
+        val gssCodeSpec = buildSpecificationForGssCodes(gssCodes)
+        val searchBySpec = buildSpecificationForSearchBy(criteria.searchBy, criteria.searchValue)
+        return searchBySpec?.let { gssCodeSpec.and(it) } ?: gssCodeSpec
     }
 
     private fun buildSpecificationForGssCodes(gssCodes: List<String>) =
@@ -55,13 +56,13 @@ class CertificateSpecificationBuilder {
     }
 
     private fun hasApplicationReference(applicationReference: String): Specification<Certificate> {
-        return Specification<Certificate> { root: Root<Certificate?>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
+        return Specification<Certificate> { root: Root<Certificate>, _: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
             criteriaBuilder.equal(root.get<Any>(APPLICATION_REFERENCE), applicationReference)
         }
     }
 
     private fun hasSanitizedSurname(surname: String): Specification<Certificate> {
-        return Specification<Certificate> { root: Root<Certificate?>, query: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
+        return Specification<Certificate> { root: Root<Certificate>, query: CriteriaQuery<*>?, criteriaBuilder: CriteriaBuilder ->
             val printRequest: Join<PrintRequest, Certificate> = root.join("printRequests")
             query?.distinct(true)
             criteriaBuilder.equal(printRequest.get<Any>(SANITIZED_SURNAME), surname)

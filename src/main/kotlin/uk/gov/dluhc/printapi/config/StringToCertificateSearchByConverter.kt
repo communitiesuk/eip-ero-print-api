@@ -12,7 +12,7 @@ private val logger = KotlinLogging.logger {}
  * to [CertificateSearchBy] variables
  */
 @Component
-class StringToCertificateSearchByConverter : Converter<String, CertificateSearchBy> {
+class StringToCertificateSearchByConverter : Converter<String, CertificateSearchBy?> {
     override fun convert(source: String): CertificateSearchBy? =
         CertificateSearchBy.values()
             .firstOrNull { it.value == source }

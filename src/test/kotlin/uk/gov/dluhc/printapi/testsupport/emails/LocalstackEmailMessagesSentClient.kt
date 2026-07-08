@@ -1,14 +1,14 @@
 package uk.gov.dluhc.printapi.testsupport.emails
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ClientHttpConnector
-import org.springframework.http.codec.json.Jackson2JsonDecoder
-import org.springframework.http.codec.json.Jackson2JsonEncoder
+import org.springframework.http.codec.json.JacksonJsonDecoder
+import org.springframework.http.codec.json.JacksonJsonEncoder
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.dluhc.printapi.config.LocalStackContainerConfiguration
 import java.net.URI
 
@@ -20,7 +20,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class LocalstackEmailMessagesSentClient(
     private val httpClient: ClientHttpConnector,
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
     private val localStackContainerSettings: LocalStackContainerConfiguration.LocalStackContainerSettings,
 ) {
 
@@ -28,8 +28,8 @@ class LocalstackEmailMessagesSentClient(
         val webClient = WebClient.builder()
             .clientConnector(httpClient)
             .codecs { configurer ->
-                configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON))
-                configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON))
+                configurer.defaultCodecs().jacksonJsonEncoder(JacksonJsonEncoder(jsonMapper, MediaType.APPLICATION_JSON))
+                configurer.defaultCodecs().jacksonJsonDecoder(JacksonJsonDecoder(jsonMapper, MediaType.APPLICATION_JSON))
             }
             .build()
 
@@ -44,7 +44,7 @@ class LocalstackEmailMessagesSentClient(
         return response!!
     }
 
-    private fun handleException(ex: Throwable, message: String): Mono<out LocalstackEmailMessages>? {
+    private fun handleException(ex: Throwable, message: String): Mono<out LocalstackEmailMessages> {
         logger.error(ex) { "Unhandled exception thrown by WebClient" }
         return Mono.error(RuntimeException(message))
     }

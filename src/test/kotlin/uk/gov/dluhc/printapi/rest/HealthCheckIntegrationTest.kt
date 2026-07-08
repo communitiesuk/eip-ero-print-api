@@ -1,8 +1,6 @@
 package uk.gov.dluhc.printapi.rest
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.dluhc.printapi.config.IntegrationTest
 
 internal class HealthCheckIntegrationTest : IntegrationTest() {
@@ -17,7 +15,7 @@ internal class HealthCheckIntegrationTest : IntegrationTest() {
 
         // Then
         response.expectStatus().isOk
-        val actual = response.returnResult<String>().responseBody.blockFirst()
-        assertThat(actual).isEqualTo("""{"status":"UP"}""")
+            .expectBody()
+            .jsonPath("$.status").isEqualTo("UP")
     }
 }

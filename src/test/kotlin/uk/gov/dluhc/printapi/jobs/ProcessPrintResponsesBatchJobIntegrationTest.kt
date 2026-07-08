@@ -32,7 +32,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
 
         writeFileToRemoteOutBoundDirectory(validFile1)
         writeFileToRemoteOutBoundDirectory(validFile2)
-        writeContentToRemoteOutBoundDirectory(validFile3, objectMapper.writeValueAsString(buildPrintResponses()))
+        writeContentToRemoteOutBoundDirectory(validFile3, jsonMapper.writeValueAsString(buildPrintResponses()))
         writeContentToRemoteOutBoundDirectory(unknownFileTypeFileName, "This is an unknown file type")
 
         val originalFileList = listOf(validFile1, validFile2, validFile3, unknownFileTypeFileName)
@@ -93,7 +93,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
 
         val fileName = "status-20220928235441000.json"
         val printResponses = getPrintResponses(batchId1, batchId2, requestId1)
-        writeContentToRemoteOutBoundDirectory(fileName, objectMapper.writeValueAsString(printResponses))
+        writeContentToRemoteOutBoundDirectory(fileName, jsonMapper.writeValueAsString(printResponses))
 
         val expectedStatuses1 = certificate1.printRequests.first().statusHistory.toMutableList()
         expectedStatuses1.addAll(

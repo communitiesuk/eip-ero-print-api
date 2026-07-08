@@ -7,14 +7,14 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "3.5.15"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "4.1.0"
+    id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.3.21"
     kotlin("kapt") version "2.3.21"
     kotlin("plugin.spring") version "2.3.21"
     kotlin("plugin.jpa") version "2.3.21"
     kotlin("plugin.allopen") version "2.3.21"
-    id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.openapi.generator") version "7.9.0"
     id("org.owasp.dependencycheck") version "12.2.2"
     id("org.jsonschema2dataclass") version "6.0.0"
@@ -22,17 +22,15 @@ plugins {
 
 group = "uk.gov.dluhc"
 version = "latest"
-java.sourceCompatibility = JavaVersion.VERSION_17
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 extra["awsSdkVersion"] = "2.29.6"
-extra["springCloudAwsVersion"] = "3.2.1"
-
-// Forcing 4.1.135 version of netty and tomcat to patch vulnerabilities, under EROPSPT-710.
-// When we upgrade to spring v4 we should check if spring pulls in newer versions of netty and tomcat.
-// If so, this override should be removed.
-// TODO EROPSPT-603
-extra["netty.version"] = "4.1.135.Final"
-extra["tomcat.version"] = "10.1.55"
+extra["springCloudAwsVersion"] = "4.0.2"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
@@ -65,19 +63,19 @@ dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.core:jackson-databind")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
     implementation("org.apache.commons:commons-lang3:3.18.0")
     implementation("org.mapstruct:mapstruct:1.6.2")
     kapt("org.mapstruct:mapstruct-processor:1.6.2")
 
     // internal libs
-    implementation("uk.gov.dluhc:logging-library:3.0.5")
-    implementation("uk.gov.dluhc:bank-holidays-data-client-library:1.0.3")
-    implementation("uk.gov.dluhc:messaging-support-library:2.3.3")
-    implementation("uk.gov.dluhc:email-client:1.0.2")
-    implementation("uk.gov.dluhc:internal-auth-library:1.1.1")
+    implementation("uk.gov.dluhc:logging-library:4.0.0")
+    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.0.0")
+    implementation("uk.gov.dluhc:messaging-support-library:3.0.0")
+    implementation("uk.gov.dluhc:email-client:1.2.0")
+    implementation("uk.gov.dluhc:internal-auth-library:2.0.0")
 
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -98,7 +96,7 @@ dependencies {
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.liquibase:liquibase-core")
+    implementation("org.springframework.boot:spring-boot-starter-liquibase")
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.10")
     runtimeOnly("software.amazon.awssdk:rds")
@@ -135,10 +133,11 @@ dependencies {
 
     // Test implementations
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-webtestclient")
     testImplementation("org.springframework.security:spring-security-test")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.20.3")
-    testImplementation("org.testcontainers:testcontainers:1.20.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.testcontainers:testcontainers:1.21.4")
     testImplementation("org.testcontainers:mysql:1.20.3")
 
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
@@ -199,25 +198,25 @@ tasks.withType<GenerateTask> {
     )
 }
 
-tasks.create("generate-models-from-openapi-document-PrintAPIs.yaml", GenerateTask::class) {
+tasks.register("generate-models-from-openapi-document-PrintAPIs.yaml", GenerateTask::class) {
     enabled = true
     inputSpec.set("$projectDir/src/main/resources/openapi/PrintAPIs.yaml")
     packageName.set("uk.gov.dluhc.printapi")
 }
 
-tasks.create("generate-models-from-openapi-document-print-api-sqs-messaging.yaml", GenerateTask::class) {
+tasks.register("generate-models-from-openapi-document-print-api-sqs-messaging.yaml", GenerateTask::class) {
     enabled = true
     inputSpec.set("$projectDir/src/main/resources/openapi/sqs/print-api-sqs-messaging.yaml")
     packageName.set("uk.gov.dluhc.printapi.messaging")
 }
 
-tasks.create("generate-models-from-openapi-document-shared-stats-update-sqs-messaging.yaml", GenerateTask::class) {
+tasks.register("generate-models-from-openapi-document-shared-stats-update-sqs-messaging.yaml", GenerateTask::class) {
     enabled = true
     inputSpec.set("$projectDir/src/main/resources/openapi/sqs/shared-stats-update-sqs-messaging.yaml")
     packageName.set("uk.gov.dluhc.applicationsapi.messaging")
 }
 
-tasks.create("generate-models-from-openapi-document-EROManagementAPIs.yaml", GenerateTask::class) {
+tasks.register("generate-models-from-openapi-document-EROManagementAPIs.yaml", GenerateTask::class) {
     enabled = true
     inputSpec.set("$projectDir/src/main/resources/openapi/external/EROManagementAPIs.yaml")
     packageName.set("uk.gov.dluhc.eromanagementapi")
