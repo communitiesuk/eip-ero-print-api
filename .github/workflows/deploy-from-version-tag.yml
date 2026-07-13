@@ -15,6 +15,7 @@ on:
           - test
           - tst2
           - live
+          - drt
 
 jobs:
   deploy:
