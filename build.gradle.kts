@@ -9,11 +9,11 @@ import java.lang.ProcessBuilder.Redirect
 plugins {
     id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.3.21"
-    kotlin("kapt") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
-    kotlin("plugin.jpa") version "2.3.21"
-    kotlin("plugin.allopen") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
+    kotlin("kapt") version "2.4.10"
+    kotlin("plugin.spring") version "2.4.10"
+    kotlin("plugin.jpa") version "2.4.10"
+    kotlin("plugin.allopen") version "2.4.10"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.openapi.generator") version "7.9.0"
     id("org.owasp.dependencycheck") version "12.2.2"
@@ -153,7 +153,7 @@ dependencies {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+        freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = JvmTarget.JVM_17
     }
 }
