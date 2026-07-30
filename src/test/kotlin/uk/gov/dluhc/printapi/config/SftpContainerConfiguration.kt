@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.config
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.time.StopWatch
 import org.springframework.context.annotation.Configuration
 import org.testcontainers.containers.BindMode

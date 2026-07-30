@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.service
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import tools.jackson.databind.json.JsonMapper
 import uk.gov.dluhc.printapi.printprovider.models.PrintResponses
@@ -36,10 +36,10 @@ class PrintResponseFileService(
     private fun removeFile(directory: String, fileName: String) {
         try {
             if (!sftpService.removeFileFromOutBoundDirectory(directory, fileName)) {
-                logger.warn("File $fileName was not found when trying to remove from the directory $directory")
+                logger.warn { "File $fileName was not found when trying to remove from the directory $directory" }
             }
         } catch (ex: Exception) {
-            logger.error("An error occurred when trying to remove file $fileName from the directory $directory. ${ex.message}")
+            logger.error { "An error occurred when trying to remove file $fileName from the directory $directory. ${ex.message}" }
         }
     }
 }

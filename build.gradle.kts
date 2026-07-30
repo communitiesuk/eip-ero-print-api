@@ -81,7 +81,6 @@ dependencies {
     implementation("org.springframework.integration:spring-integration-sftp")
     implementation("com.opencsv:opencsv:5.12.0")
 
-
     // Logging
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:9.0")
 

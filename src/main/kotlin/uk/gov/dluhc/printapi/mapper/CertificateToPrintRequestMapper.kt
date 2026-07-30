@@ -1,11 +1,15 @@
 package uk.gov.dluhc.printapi.mapper
 
+import org.mapstruct.Builder
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 
 @Mapper(
+    // The generated PrintRequest POJO exposes a static builder() whose setters are named withXxx, which MapStruct
+    // cannot resolve to properties. Disable builder usage so the no-arg constructor and setters are used instead.
+    builder = Builder(disableBuilder = true),
     uses = [
         InstantMapper::class,
         SupportingInformationFormatMapper::class,
