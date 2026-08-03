@@ -7,8 +7,9 @@ import uk.gov.dluhc.printapi.database.entity.Certificate
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 
 @Mapper(
-    // The generated PrintRequest POJO exposes a static builder() whose setters are named withXxx, which MapStruct
-    // cannot resolve to properties. Disable builder usage so the no-arg constructor and setters are used instead.
+    // The generated PrintRequest POJO is created with a builder whose setter methods are named with[methodName]() eg. withCardNumber()
+    // instead of the standard set[methodName]() eg. withCardNumber(). MapStruct cannot match these "with" methods to bean properties,
+    // so we disable builder usage and force it to use the no-arg constructor and standard setters instead.
     builder = Builder(disableBuilder = true),
     uses = [
         InstantMapper::class,
