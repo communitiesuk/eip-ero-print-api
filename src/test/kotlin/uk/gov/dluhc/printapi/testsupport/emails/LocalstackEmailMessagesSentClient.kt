@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.testsupport.emails
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ClientHttpConnector
 import org.springframework.http.codec.json.JacksonJsonDecoder

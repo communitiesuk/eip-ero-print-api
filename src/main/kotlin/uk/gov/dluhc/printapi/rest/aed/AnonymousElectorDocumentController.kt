@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.rest.aed
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.Valid
-import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders

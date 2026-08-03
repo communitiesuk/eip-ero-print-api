@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.config
 
 import io.awspring.cloud.sqs.operations.SqsTemplate
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.io.IOUtils
 import org.apache.sshd.sftp.client.SftpClient
 import org.assertj.core.api.Assertions
@@ -236,7 +236,7 @@ internal abstract class IntegrationTest {
         try {
             repository.deleteAll()
         } catch (tdae: TransientDataAccessException) {
-            logger.warn("exception while cleaning up db with `$repoName.deleteAll()`", tdae)
+            logger.warn(tdae) { "exception while cleaning up db with `$repoName.deleteAll()`" }
             repository.deleteAll()
         }
     }

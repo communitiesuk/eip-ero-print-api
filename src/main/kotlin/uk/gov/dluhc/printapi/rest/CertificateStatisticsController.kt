@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.rest
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize

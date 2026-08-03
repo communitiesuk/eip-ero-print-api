@@ -17,7 +17,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.openapi.generator") version "7.9.0"
     id("org.owasp.dependencycheck") version "12.2.2"
-    id("org.jsonschema2dataclass") version "6.0.0"
+    id("org.jsonschema2dataclass") version "6.1.0"
 }
 
 group = "uk.gov.dluhc"
@@ -29,8 +29,13 @@ java {
     }
 }
 
-extra["awsSdkVersion"] = "2.29.6"
-extra["springCloudAwsVersion"] = "4.0.2"
+extra["awsSdkVersion"] = "2.49.4"
+extra["springCloudAwsVersion"] = "4.1.0"
+// EROPSPT-733 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
+extra["logback.version"] = "1.5.37"
+extra["netty.version"] = "4.2.16.Final"
+extra["log4j2.version"] = "2.25.5"
+extra["tomcat.version"] = "11.0.24"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
@@ -50,32 +55,23 @@ repositories {
     }
 }
 
-apply(plugin = "org.jlleitschuh.gradle.ktlint")
-apply(plugin = "org.openapi.generator")
-apply(plugin = "org.springframework.boot")
-apply(plugin = "io.spring.dependency-management")
-apply(plugin = "org.jetbrains.kotlin.jvm")
-apply(plugin = "org.jetbrains.kotlin.plugin.spring")
-apply(plugin = "org.jetbrains.kotlin.plugin.jpa")
-apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
-
 dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("tools.jackson.module:jackson-module-kotlin")
-    implementation("tools.jackson.core:jackson-databind")
-    implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
-    implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.1.5")
+    implementation("tools.jackson.core:jackson-databind:3.1.5")
+    implementation("tools.jackson.core:jackson-core:3.1.5")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
+    implementation("org.apache.commons:commons-lang3:3.20.0")
     implementation("org.mapstruct:mapstruct:1.6.2")
     kapt("org.mapstruct:mapstruct-processor:1.6.2")
 
     // internal libs
-    implementation("uk.gov.dluhc:logging-library:4.0.0")
-    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.0.0")
-    implementation("uk.gov.dluhc:messaging-support-library:3.0.0")
-    implementation("uk.gov.dluhc:email-client:1.2.0")
-    implementation("uk.gov.dluhc:internal-auth-library:2.0.0")
+    implementation("uk.gov.dluhc:logging-library:4.2.0")
+    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.2.0")
+    implementation("uk.gov.dluhc:messaging-support-library:3.2.1")
+    implementation("uk.gov.dluhc:email-client:1.4.0")
+    implementation("uk.gov.dluhc:internal-auth-library:2.2.0")
 
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -83,15 +79,14 @@ dependencies {
     implementation("io.swagger.core.v3:swagger-annotations:2.2.7")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
-    implementation("com.opencsv:opencsv:5.11.1")
+    implementation("com.opencsv:opencsv:5.12.0")
 
     // Logging
-    runtimeOnly("net.logstash.logback:logstash-logback-encoder:8.0")
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:9.0")
 
     // spring security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("com.nimbusds:nimbus-jose-jwt:10.0.2")
 
     // mysql
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -147,8 +142,11 @@ dependencies {
     testImplementation("net.datafaker:datafaker:2.4.1")
 
     // Libraries to support creating JWTs in tests
-    testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
-    testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+    testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
+    testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
+    // EROPSPT-733: Jackson v2 packages used by jjwt, should be reviewed if upgrading jjwt-jackson
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.5")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.5")
 }
 
 kotlin {
