@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.messaging.service
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
-import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.messagingsupport.MessageQueue

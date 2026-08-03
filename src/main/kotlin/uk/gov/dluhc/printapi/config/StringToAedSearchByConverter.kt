@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.config
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.printapi.models.AedSearchBy
