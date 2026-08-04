@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.client.ElectoralRegistrationOfficeManagementApiClient
 import uk.gov.dluhc.printapi.database.entity.Certificate
@@ -27,10 +27,10 @@ class CertificateFailedToPrintEmailSenderService(
             }
             emailService.sendCertificateFailedToPrintEmail(request)
         } catch (e: Exception) {
-            logger.error {
+            logger.error(
                 "failed to send [Certificate Failed To Print] email when processing ProcessPrintResponseMessage for " +
                     "certificate [${certificate.id}] with requestId [${printResponse.requestId}]: ${e.message}"
-            }
+            )
         }
     }
 }

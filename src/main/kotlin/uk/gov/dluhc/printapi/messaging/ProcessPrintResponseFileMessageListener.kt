@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.messaging
 
 import io.awspring.cloud.sqs.annotation.SqsListener
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.messagingsupport.MessageListener

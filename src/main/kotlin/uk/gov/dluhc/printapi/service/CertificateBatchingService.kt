@@ -1,7 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service

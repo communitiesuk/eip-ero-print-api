@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.integration.file.FileHeaders

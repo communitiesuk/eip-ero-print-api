@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.text.StringSubstitutor.replace
 import org.springframework.stereotype.Service
@@ -19,13 +19,13 @@ class EmailService(
     private val emailContentConfiguration: EmailContentConfiguration,
 ) {
     fun sendCertificateNotDeliveredEmail(request: SendCertificateNotDeliveredEmailRequest) {
-        logger.info { "sending [Certificate Not Delivered] email to [${request.localAuthorityEmailAddresses}]" }
+        logger.info("sending [Certificate Not Delivered] email to [${request.localAuthorityEmailAddresses}]")
         val emailConfig = emailContentConfiguration.certificateReturned
         sendEmail(request, emailConfig)
     }
 
     fun sendCertificateFailedToPrintEmail(request: SendCertificateFailedToPrintEmailRequest) {
-        logger.info { "sending [Certificate Failed To Print] email to [${request.localAuthorityEmailAddresses}]" }
+        logger.info("sending [Certificate Failed To Print] email to [${request.localAuthorityEmailAddresses}]")
         val emailConfig = emailContentConfiguration.certificateFailedToPrint
         sendEmail(request, emailConfig)
     }
