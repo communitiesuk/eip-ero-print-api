@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder

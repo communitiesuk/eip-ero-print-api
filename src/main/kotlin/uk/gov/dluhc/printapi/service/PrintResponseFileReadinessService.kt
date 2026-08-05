@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.config.SftpProperties
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage

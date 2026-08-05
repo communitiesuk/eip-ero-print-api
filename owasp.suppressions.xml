@@ -1,105 +1,157 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd">
-    <suppress until="2027-01-01Z">
-        <notes><![CDATA[
-        file name: jsonschema2pojo-core-1.2.2.jar
+    <suppress until="2026-07-01Z">
+        <notes>
+            <![CDATA[file name: commons-io-2.11.0.jar]]>
 
-        org.jsonschema2pojo:jsonschema2pojo-core is pulled in transitively by the
-        `org.jsonschema2dataclass` Gradle plugin; it is not a directly declared dependency. The CVE
-        is fixed in jsonschema2pojo 1.3.0, but that fix is NOT yet consumable here: plugin 6.1.0
-        (the latest release, published Jan 2026) still pins jsonschema2pojo 1.2.2, and the upstream
-        bump to 1.3.3 is still an open PR (jsonschema2dataclass/js2d-gradle#1159). The plugin
-        releases roughly annually in January, so this suppression is dated Jan 2027 to coincide
-        with the next expected release.
-        Rated MEDIUM (VulDB CVSS 4.0 4.8 / CVSS 3.1 5.3, vector AV:L requiring local access).
-        Not exploitable here:
-        (1) This is a BUILD-TIME ONLY dependency. It resolves solely in the `jsonschema2dataclass`
-            and `jsonschema2dataclassPlugins` configurations, consumed by the code generation task
-            generateJsonSchema2DataClassConfigMain. It is absent from both runtimeClasspath and
-            compileClasspath, so it is never packaged into the container image and never executed
-            by the running service.
-        (2) The attack requires a maliciously crafted yaml schema, which would require write access
-            to the source code. Our only inputs are the schemas checked in under
-            src/main/resources/yamlschema, and they do not result in this issue.
-        (3) The underlying defect is a StackOverflowError when a schema root is self-referencing
-            (fixed upstream by joelittlejohn/jsonschema2pojo#1679). On the JVM this fails the build
-            rather than corrupting memory, despite the "stack-based buffer overflow" wording used
-            by the reporting CNA.
-        REMOVE this suppression once an org.jsonschema2dataclass release adopting jsonschema2pojo
-        >= 1.3.0 is published and upgraded to.
-        ]]></notes>
+            Fixed in 2.14.0
+
+            Package imported by the `jsonschema2pojo` plugin before 1.2.2.
+            jsonschema2dataclass:6.0.0 imports jsonschema2pojo:1.1.2.
+
+            jsonschema2dataclass has not had a release since Jan 2023,
+            so the suppression date has been set until Q3 2026
+
+            The org.apache.commons.io.input.XmlStreamReader class may excessively consume CPU resources when
+            processing maliciously crafted input.
+            The inputs we provide do not result in this issue.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/commons\-io/commons\-io@.*$</packageUrl>
+        <vulnerabilityName>CVE-2024-47554</vulnerabilityName>
+    </suppress>
+    <suppress until="2026-07-01Z">
+        <notes>
+            <![CDATA[file name: jsonschema2pojo-core-1.1.2.jar]]>
+
+            No available fix at the time of writing.
+
+            jsonschema2dataclass:6.0.0 imports jsonschema2pojo:1.1.2.
+
+            jsonschema2dataclass has not had a release since Jan 2023,
+            so the suppression date has been set until Q3 2026
+
+            The attack requires a maliciously crafted yaml spec,
+            which would require write access to the source code.
+            The inputs we provide do not result in this issue.
+        </notes>
         <packageUrl regex="true">^pkg:maven/org\.jsonschema2pojo/jsonschema2pojo-core@.*$</packageUrl>
         <vulnerabilityName>CVE-2025-3588</vulnerabilityName>
     </suppress>
-    <suppress until="2026-10-28Z">
-        <notes><![CDATA[
-        org.hdrhistogram:HdrHistogram is pulled in transitively via Micrometer (used by Spring Boot
-        Actuator metrics); it is not a directly declared dependency. Both CVEs affect HdrHistogram
-        up to 2.2.2, are rated LOW (VulDB CVSS 4.0 1.9 / CVSS 3.1 3.3, vector AV:L requiring local
-        access), and are officially DISPUTED for lack of a crossed security boundary. Neither is
-        exploitable here:
-        (1) CVE-2026-14683 (CWE-400/CWE-789) is uncontrolled memory allocation in
-            AbstractHistogram.decodeFromCompressedByteBuffer, reachable only when decoding an
-            attacker-controlled compressed histogram byte buffer with a manipulated
-            lengthOfCompressedContents. This service never deserialises/decodes external histogram
-            data; Micrometer only encodes its own internally-produced metrics.
-        (2) CVE-2026-14686 is an incorrect comparison / improper input validation in
-            DoubleHistogram.recordValue ("Range Check"), reachable only when recording
-            attacker-controlled values through that API, which this service does not expose.
-        There is currently NO fixed release (all versions up to 2.2.2 are affected and the project
-        has not responded), so pinning is not an option. REMOVE this suppression once a fixed
-        HdrHistogram release is published and adopted transitively by Micrometer.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.hdrhistogram/HdrHistogram@.*$</packageUrl>
-        <cve>CVE-2026-14683</cve>
-        <cve>CVE-2026-14686</cve>
-    </suppress>
-    <suppress until="2026-09-01Z">
-        <notes><![CDATA[
-        TEMPORARY suppression. CVE-2026-53914 is an unsafe-deserialization flaw (CWE-502) in the
-        JetBrains Kotlin build-cache metadata, affecting the Kotlin toolchain before 2.4.20. This
-        project currently uses Kotlin 2.4.10 and cannot yet upgrade because the fixed release
-        (2.4.20) is not available in our repositories.
-        Not exploitable here:
-        (1) The Kotlin artifacts (kotlin-stdlib*, kotlin-reflect) are declared compileOnly and are
-            NOT shipped in the published library jar, so consumers of this library are unaffected.
-        (2) The flaw is build-time only and requires an attacker to plant malicious metadata in the
-            local Kotlin/Gradle build cache. The vendor (JetBrains) scores it 6.7 with
-            AV:L/AC:H/PR:H (local access, high privilege, high attack complexity); NVD's over-broad
-            9.8 AV:N enrichment does not reflect the actual attack path. Our build cache is local to
-            the CI/dev environment and is not attacker-controlled.
-        REMOVE this suppression and upgrade to Kotlin >= 2.4.20 once that release is published.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin\-.*@.*$</packageUrl>
-        <cve>CVE-2026-53914</cve>
-    </suppress>
-    <suppress until="2026-10-28Z">
-        <notes><![CDATA[
-        com.mysql:mysql-connector-j is pinned to 9.7.0 by the Spring Boot 4.1.0 dependency BOM
-        (mysql.version). All four CVEs come from Oracle's July 2026 Critical Patch Update and affect
-        Connector/J 9.7.0-9.7.1. There is currently NO fixed release on Maven Central (latest published
-        is 9.7.0), so upgrading is not yet possible; this must be revisited once Oracle ships a fixed
-        Connector/J release (> 9.7.1).
+    <suppress until="2026-07-01Z">
+        <notes>
+            <![CDATA[file name: commons-lang-2.6.jar]]>
 
-        All four are client-side JDBC driver flaws that are triggered by data returned from the MySQL
-        server. Exploitation therefore requires the driver to connect to a malicious or compromised
-        MySQL server, or an attacker performing a man-in-the-middle on the client<->server connection.
-        This service connects only to its own managed (AWS RDS) MySQL database, which raises the bar
-        well above the generic "network access" wording in the advisories.
-        (1) CVE-2026-60586 (CVSS 7.7, MySQL Protocol) - confidentiality impact via crafted server
-            responses.
-        (2) CVE-2026-60623 (CVSS 7.1, MySQL Protocol) - rated "difficult to exploit" (AC:H).
-        (3) CVE-2026-60624 (CVSS 6.5, X Protocol) - NOT reachable here: this service uses the classic
-            JDBC protocol only (jdbc:mysql:// via JPA / aws-mysql-jdbc) and does not use the X DevAPI /
-            mysqlx:// connections.
-        (4) CVE-2026-61082 (CVSS 6.5, MySQL Protocol) - requires user interaction (UI:R).
-        REMOVE this suppression once a fixed Connector/J release is published and adopted (directly or
-        transitively via a Spring Boot BOM upgrade).
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/com\.mysql/mysql\-connector\-j@.*$</packageUrl>
-        <cve>CVE-2026-60586</cve>
-        <cve>CVE-2026-60623</cve>
-        <cve>CVE-2026-60624</cve>
-        <cve>CVE-2026-61082</cve>
+            Fixed in commons-lang3:3.18.0.
+
+            Package imported by `jsonschema2pojo-core@1.1.2`
+
+            jsonschema2dataclass has not had a release since Jan 2023,
+            so the suppression date has been set until Q3 2026
+
+            The attack requires a maliciously crafted yaml spec,
+            which would require write access to the source code.
+            The inputs we provide do not result in this issue.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/commons-lang/commons-lang@.*$</packageUrl>
+        <vulnerabilityName>CVE-2025-48924</vulnerabilityName>
+    </suppress>
+    <suppress until="2026-07-01Z">
+        <notes>
+            <![CDATA[file name: commons-lang-3.17.0.jar]]>
+
+            Fixed in commons-lang3:3.18.0.
+
+            Package imported by `jsonschema2pojo-core@1.1.2`
+
+            jsonschema2dataclass has not had a release since Jan 2023,
+            so the suppression date has been set until Q3 2026
+
+            The attack requires a maliciously crafted yaml spec,
+            which would require write access to the source code.
+            The inputs we provide do not result in this issue.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons-lang3@.*$</packageUrl>
+        <vulnerabilityName>CVE-2025-48924</vulnerabilityName>
+    </suppress>
+    <suppress until="2026-06-01Z">
+        <notes>
+            <![CDATA[file name: log4j-api-2.24.3.jar]]>
+
+            This vulnerability is fixed in 2.25.4.
+
+            Spring boot versions 4.0.0+ imports 2.25.4.
+
+            The project does not satisfy the narrow conditions that CVE requires, and therefore not explitable.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-api@.*$</packageUrl>
+        <cve>CVE-2026-34479</cve>
+    </suppress>
+
+    <suppress until="2026-06-01Z">
+        <notes>
+            <![CDATA[file name: log4j-api-2.24.3.jar]]>
+
+            This vulnerability is fixed in 2.25.4.
+
+            Spring boot versions 4.0.0+ imports 2.25.4.
+
+            The project does not satisfy the narrow conditions that CVE requires, and therefore not explitable.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-api@.*$</packageUrl>
+        <cve>CVE-2026-34477</cve>
+    </suppress>
+
+    <suppress until="2026-06-01Z">
+        <notes>
+            <![CDATA[file name: log4j-to-slf4j-2.24.3.jar]]>
+
+            This vulnerability is fixed in 2.25.4.
+
+            Spring boot versions 4.0.0+ imports 2.25.4.
+
+            The project does not satisfy the narrow conditions that CVE requires, and therefore not explitable.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-to-slf4j@.*$</packageUrl>
+        <cve>CVE-2026-34479</cve>
+    </suppress>
+
+    <suppress until="2026-06-01Z">
+        <notes>
+            <![CDATA[file name: log4j-to-slf4j-2.24.3.jar]]>
+
+            This vulnerability is fixed in 2.25.4.
+
+            Spring boot versions 4.0.0+ imports 2.25.4.
+
+            The project does not satisfy the narrow conditions that CVE requires, and therefore not explitable.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-to-slf4j@.*$</packageUrl>
+        <cve>CVE-2026-34477</cve>
+    </suppress>
+
+    <suppress until="2026-06-01Z">
+        <notes>
+            <![CDATA[file name: netty-transport-native-epoll-4.1.132.Final-linux-x86_64.jar]]>
+
+            This is a false positive. The vulnerability is introduced in 4.2.0 and fixed in 4.1.13,
+            and therefore this package version (at 4.1.x) is not affected.
+
+            See https://github.com/github/advisory-database/pull/7608 for the correction.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/io\.netty/netty-transport-native-epoll@.*$</packageUrl>
+        <vulnerabilityName>CVE-2026-42577</vulnerabilityName>
+    </suppress>
+
+    <suppress until="2026-06-01Z">
+        <notes>
+            <![CDATA[file name: spring-security-web-6.5.10.jar]]>
+
+            This is a false positive. The vulnerability is introduced in 7.0.0 and fixed in 7.0.5.
+
+            See https://spring.io/security/cve-2026-22747.
+        </notes>
+
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-web@.*$</packageUrl>
+        <vulnerabilityName>CVE-2026-22747</vulnerabilityName>
     </suppress>
 </suppressions>

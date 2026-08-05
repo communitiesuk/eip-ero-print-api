@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import software.amazon.awssdk.core.sync.ResponseTransformer
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
@@ -30,7 +30,7 @@ class ZipOutputStreamProducerRunnable(
                 addPhotos(out)
             } catch (ex: Exception) {
                 // close the pipe so error is propagated
-                logger.error(ex) { "Exception producing Printer Zip Output Stream" }
+                logger.error("Exception producing Printer Zip Output Stream", ex)
                 sftpInputStream.close()
             }
         }

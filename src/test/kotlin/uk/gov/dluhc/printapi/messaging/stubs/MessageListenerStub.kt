@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.messaging.stubs
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import mu.KotlinLogging
 import uk.gov.dluhc.messagingsupport.MessageListener
 
 private val logger = KotlinLogging.logger {}
