@@ -1,6 +1,6 @@
 package uk.gov.dluhc.printapi.client
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
