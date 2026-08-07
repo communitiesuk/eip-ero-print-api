@@ -275,19 +275,23 @@ tasks.withType<KtLintCheckTask> {
 
 tasks.withType<BootBuildImage> {
     builder.set("paketobuildpacks/builder-jammy-base")
-    environment = mapOf(
-        "BP_HEALTH_CHECKER_ENABLED" to "true",
-        // Netty's native epoll transport interferes with unrelated Apache MINA SSHD NIO2 SFTP sessions,
-        // causing intermittent "Broken pipe"/session reset failures when polling the print provider's SFTP server.
-        // Forcing pure-Java NIO for netty (reactor-netty + AWS SDK netty-nio-client) resolves this;
-        // the performance cost is negligible given this service's low connection volume.
-        // Netty 4.2 defaults to the adaptive allocator; pin to the pooled allocator
-        "BPE_DELIM_JAVA_TOOL_OPTIONS" to " ",
-        "BPE_APPEND_JAVA_TOOL_OPTIONS" to "-Dio.netty.transport.noNative=true -Dio.netty.allocator.type=pooled",
+    environment.set(
+        mapOf(
+            "BP_HEALTH_CHECKER_ENABLED" to "true",
+            // Netty's native epoll transport interferes with unrelated Apache MINA SSHD NIO2 SFTP sessions,
+            // causing intermittent "Broken pipe"/session reset failures when polling the print provider's SFTP server.
+            // Forcing pure-Java NIO for netty (reactor-netty + AWS SDK netty-nio-client) resolves this;
+            // the performance cost is negligible given this service's low connection volume.
+            // Netty 4.2 defaults to the adaptive allocator; pin to the pooled allocator
+            "BPE_DELIM_JAVA_TOOL_OPTIONS" to " ",
+            "BPE_APPEND_JAVA_TOOL_OPTIONS" to "-Dio.netty.transport.noNative=true -Dio.netty.allocator.type=pooled",
+        )
     )
-    buildpacks = listOf(
-        "urn:cnb:builder:paketo-buildpacks/java",
-        "docker.io/paketobuildpacks/health-checker",
+    buildpacks.set(
+        listOf(
+            "urn:cnb:builder:paketo-buildpacks/java",
+            "docker.io/paketobuildpacks/health-checker",
+        )
     )
 }
 
