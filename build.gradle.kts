@@ -15,7 +15,7 @@ plugins {
     kotlin("plugin.jpa") version "2.4.10"
     kotlin("plugin.allopen") version "2.4.10"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-    id("org.openapi.generator") version "7.9.0"
+    id("org.openapi.generator") version "7.24.0"
     id("org.owasp.dependencycheck") version "12.2.2"
     id("org.jsonschema2dataclass") version "6.1.0"
 }
@@ -58,13 +58,13 @@ repositories {
 dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("tools.jackson.module:jackson-module-kotlin:3.1.5")
-    implementation("tools.jackson.core:jackson-databind:3.1.5")
-    implementation("tools.jackson.core:jackson-core:3.1.5")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.2.1")
+    implementation("tools.jackson.core:jackson-databind:3.2.1")
+    implementation("tools.jackson.core:jackson-core:3.2.1")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("org.apache.commons:commons-lang3:3.20.0")
-    implementation("org.mapstruct:mapstruct:1.6.2")
-    kapt("org.mapstruct:mapstruct-processor:1.6.2")
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    kapt("org.mapstruct:mapstruct-processor:1.6.3")
 
     // internal libs
     implementation("uk.gov.dluhc:logging-library:4.2.0")
@@ -76,7 +76,7 @@ dependencies {
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("io.swagger.core.v3:swagger-annotations:2.2.7")
+    implementation("io.swagger.core.v3:swagger-annotations:2.2.52")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
     implementation("com.opencsv:opencsv:5.12.0")
@@ -93,7 +93,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-liquibase")
     runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.10")
+    runtimeOnly("software.aws.rds:aws-mysql-jdbc:1.1.15")
     runtimeOnly("software.amazon.awssdk:rds")
 
     // AWS dependencies
@@ -113,14 +113,14 @@ dependencies {
     implementation("software.amazon.awssdk:ses")
 
     // mongo core datatypes, so that we can generate a Mongo ObjectId (a 12 byte/24 char hex string ID)
-    implementation("org.mongodb:bson:4.7.1")
+    implementation("org.mongodb:bson:5.9.1")
 
     // Scheduling
-    implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
-    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:7.7.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.7.0")
 
     // OpenPDF
-    implementation("com.github.librepdf:openpdf:2.0.3")
+    implementation("com.github.librepdf:openpdf:3.0.5")
 
     // caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -131,22 +131,22 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-webtestclient")
     testImplementation("org.springframework.security:spring-security-test")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
-    testImplementation("org.testcontainers:testcontainers:1.21.4")
-    testImplementation("org.testcontainers:mysql:1.20.3")
+    testImplementation("org.testcontainers:junit-jupiter:2.0.5")
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
+    testImplementation("org.testcontainers:mysql:1.21.4")
 
-    testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
 
-    testImplementation("org.wiremock:wiremock-standalone:3.9.2")
-    testImplementation("net.datafaker:datafaker:2.4.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.13.2")
+    testImplementation("net.datafaker:datafaker:2.7.0")
 
     // Libraries to support creating JWTs in tests
     testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
     testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
     // EROPSPT-733: Jackson v2 packages used by jjwt, should be reviewed if upgrading jjwt-jackson
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.5")
-    testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.5")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:2.22.1")
 }
 
 kotlin {
