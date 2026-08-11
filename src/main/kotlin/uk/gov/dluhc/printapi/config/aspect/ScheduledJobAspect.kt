@@ -25,7 +25,7 @@ class ScheduledJobAspect(
         try {
             joinPoint.proceed()
         } catch (exception: Exception) {
-            val jobName = joinPoint.signature.name
+            val jobName = joinPoint.signature.declaringType.simpleName
             MDC.put(JOB_NAME_MDC_KEY, jobName)
             logger.error { "$alarmString [$jobName]" }
             throw exception
