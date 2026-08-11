@@ -4,10 +4,12 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 private const val WITH_SCHEDULED = "@annotation(org.springframework.scheduling.annotation.Scheduled)"
+private const val JOB_NAME_MDC_KEY = "jobName"
 
 private val logger = KotlinLogging.logger {}
 
@@ -24,8 +26,11 @@ class ScheduledJobAspect(
             joinPoint.proceed()
         } catch (exception: Exception) {
             val jobName = joinPoint.signature.name
+            MDC.put(JOB_NAME_MDC_KEY, jobName)
             logger.error { "$alarmString [$jobName]" }
             throw exception
+        } finally {
+            MDC.remove(JOB_NAME_MDC_KEY)
         }
     }
 }
