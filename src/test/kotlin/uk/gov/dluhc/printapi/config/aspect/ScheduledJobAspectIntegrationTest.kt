@@ -52,7 +52,7 @@ internal class ScheduledJobAspectIntegrationTest(
 
         // Then
         await.pollDelay(2, TimeUnit.SECONDS).atMost(30, TimeUnit.SECONDS).untilAsserted {
-            assertThat(TestLogAppender.hasLog("$alarmString [testFunction]", Level.ERROR)).isTrue
+            assertThat(TestLogAppender.hasLog("$alarmString [ScheduledJobAspectTestJob]", Level.ERROR)).isTrue
         }
     }
 
