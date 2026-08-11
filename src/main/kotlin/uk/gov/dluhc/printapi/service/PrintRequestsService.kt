@@ -3,6 +3,8 @@ package uk.gov.dluhc.printapi.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import uk.gov.dluhc.messagingsupport.MessageQueue
+import uk.gov.dluhc.printapi.database.entity.SourceType
+import uk.gov.dluhc.printapi.exception.CertificateNotFoundException
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintRequestBatchMessage
 
 private val logger = KotlinLogging.logger { }
@@ -15,6 +17,8 @@ class PrintRequestsService(
 
     fun processPrintRequests() {
         logger.info { "Looking for certificate Print Requests to assign to a new batch" }
+
+        throw CertificateNotFoundException("ero-test", SourceType.VOTER_CARD, "thisIsATest")
 
         // split into batches and save to database before sending messages to SQS
         // Statistics are intentionally not updated here as they will be updated when the batch is processed,
