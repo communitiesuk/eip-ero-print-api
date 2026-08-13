@@ -9,6 +9,10 @@ import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 import uk.gov.dluhc.printapi.service.TemporaryCertificateDataRetentionService
 
+/*
+ * Ensure that any changes to the name of this job class "FinalRetentionPeriodDataRemovalJob" is reflected in
+ * Infra's print_api.tf
+ */
 @Component
 class FinalRetentionPeriodDataRemovalJob(
     private val certificateDataRetentionService: CertificateDataRetentionService,

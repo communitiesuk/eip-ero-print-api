@@ -8,6 +8,10 @@ import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.service.AedDataRetentionService
 import uk.gov.dluhc.printapi.service.CertificateDataRetentionService
 
+/*
+ * Ensure that any changes to the name of this job class "InitialRetentionPeriodDataRemovalJob" is reflected in
+ * Infra's print_api.tf
+ */
 @Component
 class InitialRetentionPeriodDataRemovalJob(
     private val certificateDataRetentionService: CertificateDataRetentionService,
