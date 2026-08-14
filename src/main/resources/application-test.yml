@@ -21,3 +21,9 @@ jobs:
 
 metrics:
   environment: test
+
+logging:
+  level:
+    org.springframework.integration.file: TRACE
+    org.springframework.integration.sftp: TRACE
+    org.apache.sshd: DEBUG
