@@ -21,7 +21,7 @@ import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() {
+internal class ProsessPrintResponsesBatchJobIntegrationTest : IntegrationTest() {
     @Test
     fun `should process outbound directory for print responses`() {
         // Given
@@ -46,7 +46,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
             .containsAll(originalFileList)
 
         // When
-        processPrintResponsesBatchJob.pollAndProcessPrintResponses()
+        prosessPrintResponsesBatchJob.pollAndProcessPrintResponses()
 
         // Then
         await.atMost(3, TimeUnit.SECONDS).untilAsserted {
@@ -138,7 +138,7 @@ internal class ProcessPrintResponsesBatchJobIntegrationTest : IntegrationTest() 
         expectedCertificate2.printRequests.first().statusHistory = expectedStatuses2
 
         // When
-        processPrintResponsesBatchJob.pollAndProcessPrintResponses()
+        prosessPrintResponsesBatchJob.pollAndProcessPrintResponses()
 
         // Then
         await.atMost(3, TimeUnit.SECONDS).untilAsserted {

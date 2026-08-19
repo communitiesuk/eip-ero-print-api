@@ -45,7 +45,7 @@ import uk.gov.dluhc.printapi.database.repository.TemporaryCertificateRepository
 import uk.gov.dluhc.printapi.jobs.BatchPrintRequestsJob
 import uk.gov.dluhc.printapi.jobs.FinalRetentionPeriodDataRemovalJob
 import uk.gov.dluhc.printapi.jobs.InitialRetentionPeriodDataRemovalJob
-import uk.gov.dluhc.printapi.jobs.ProcessPrintResponsesBatchJob
+import uk.gov.dluhc.printapi.jobs.ProsessPrintResponsesBatchJob
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseMessage
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
@@ -101,7 +101,7 @@ internal abstract class IntegrationTest {
     protected lateinit var sftpOutboundTemplate: SftpRemoteFileTemplate
 
     @Autowired
-    protected lateinit var processPrintResponsesBatchJob: ProcessPrintResponsesBatchJob
+    protected lateinit var prosessPrintResponsesBatchJob: ProsessPrintResponsesBatchJob
 
     @Autowired
     protected lateinit var initialRetentionPeriodDataRemovalJob: InitialRetentionPeriodDataRemovalJob

@@ -10,7 +10,7 @@ import uk.gov.dluhc.printapi.service.PrintResponseFileReadinessService
  * Infra's print_api.tf
  */
 @Component
-class ProcessPrintResponsesBatchJob(
+class ProsessPrintResponsesBatchJob(
     private val printResponseFileReadinessService: PrintResponseFileReadinessService
 ) {
 

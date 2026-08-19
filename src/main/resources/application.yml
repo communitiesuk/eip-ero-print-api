@@ -80,13 +80,13 @@ jobs:
   lock-at-most-for: "PT10M"
   batch-print-requests:
     name: "BatchPrintRequests"
-    cron: "0 0/15 * * * *" # every 15 minutes, starting on the hour - see analysis and recommendations in EIP1-2515
+    cron: "0 20 * * * *" # every 15 minutes, starting on the hour - see analysis and recommendations in EIP1-2515
     batch-size: 50
     max-un-batched-records: 5000 # see analysis and recommendations in EIP1-2885
     daily-limit: 150_000
   process-print-responses:
-    name: "ProcessPrintResponses"
-    cron: "0 15/30 * * * *" # every 30 minutes starting at 15 minutes past the hour - see analysis and recommendations in EIP1-2515
+    name: "ProsessPrintResponses"
+    cron: "0 40 * * * *" # every 30 minutes starting at 15 minutes past the hour - see analysis and recommendations in EIP1-2515
   remove-vca-initial-retention-period-data:
     name: "RemoveVcaInitialRetentionPeriodData"
     # Runs at 21:35, 01:35 and 05:35.
