@@ -1,6 +1,7 @@
 package uk.gov.dluhc.printapi.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.apache.sshd.sftp.common.SftpException
 import org.springframework.stereotype.Service
 import uk.gov.dluhc.printapi.config.SftpProperties
 import uk.gov.dluhc.printapi.messaging.models.ProcessPrintResponseFileMessage
@@ -23,6 +24,8 @@ class PrintResponseFileReadinessService(
     fun markAndSubmitPrintResponseFileForProcessing() {
         val outboundFolderPath = sftpProperties.printResponseDownloadDirectory
         logger.info { "Finding matching print responses from directory: [$outboundFolderPath]" }
+        
+        throw SftpException(400, "bad")
 
         with(sftpService.identifyFilesToBeProcessed(outboundFolderPath)) {
             logger.info { "Found [$size] unprocessed print responses" }
