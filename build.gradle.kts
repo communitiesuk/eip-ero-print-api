@@ -7,7 +7,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "4.1.0"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.4.10"
     kotlin("kapt") version "2.4.10"
@@ -29,13 +29,10 @@ java {
     }
 }
 
-extra["awsSdkVersion"] = "2.49.4"
+extra["awsSdkVersion"] = "2.52.0"
 extra["springCloudAwsVersion"] = "4.1.0"
 // EROPSPT-733 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
-extra["logback.version"] = "1.5.37"
-extra["netty.version"] = "4.2.16.Final"
-extra["log4j2.version"] = "2.25.5"
-extra["tomcat.version"] = "11.0.24"
+extra["tomcat.version"] = "11.0.25"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
@@ -58,9 +55,9 @@ repositories {
 dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("tools.jackson.module:jackson-module-kotlin:3.1.5")
-    implementation("tools.jackson.core:jackson-databind:3.1.5")
-    implementation("tools.jackson.core:jackson-core:3.1.5")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.1.6")
+    implementation("tools.jackson.core:jackson-databind:3.1.6")
+    implementation("tools.jackson.core:jackson-core:3.1.6")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("org.apache.commons:commons-lang3:3.20.0")
     implementation("org.mapstruct:mapstruct:1.6.2")
@@ -79,6 +76,7 @@ dependencies {
     implementation("io.swagger.core.v3:swagger-annotations:2.2.7")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
+    implementation("org.apache.sshd:sshd-sftp:2.19.0")
     implementation("com.opencsv:opencsv:5.12.0")
 
     // Logging
@@ -145,8 +143,8 @@ dependencies {
     testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
     testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
     // EROPSPT-733: Jackson v2 packages used by jjwt, should be reviewed if upgrading jjwt-jackson
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.5")
-    testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.5")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.6")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.6")
 }
 
 kotlin {

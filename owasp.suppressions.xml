@@ -31,6 +31,41 @@
         <packageUrl regex="true">^pkg:maven/org\.jsonschema2pojo/jsonschema2pojo-core@.*$</packageUrl>
         <vulnerabilityName>CVE-2025-3588</vulnerabilityName>
     </suppress>
+    <suppress until="2027-01-01Z">
+        <notes><![CDATA[
+        file name: commons-lang-2.6.jar
+
+        CVE-2025-48924 (CWE-674, uncontrolled recursion) is a StackOverflowError thrown by
+        ClassUtils.getClass(...) on very long inputs. It affects commons-lang:commons-lang 2.0 to 2.6
+        and org.apache.commons:commons-lang3 3.0 before 3.18.0. Our directly declared
+        commons-lang3 is 3.20.0 and is NOT affected; this finding is the LEGACY commons-lang 2.x
+        artifact, pulled in transitively by org.jsonschema2pojo:jsonschema2pojo-core:1.2.2 via the
+        `org.jsonschema2dataclass` Gradle plugin. See the suppression above for why that plugin cannot
+        currently be upgraded.
+        There is NO fixed release to upgrade to. 2.6 is the final release of the 2.x line on Maven
+        Central, and the ASF confirmed on LANG-1781 that only the 3.x line is maintained. A
+        non-recursive rewrite was merged to the LANG_2_X branch (apache/commons-lang#1492) in November
+        2025 but has never been released, so pinning is not an option.
+        Rated LOW by the ASF (CISA-ADP CVSS 3.1 5.3, vector AV:N/AC:L/PR:N/UI:N/C:N/I:N/A:L -
+        availability only).
+        Not exploitable here:
+        (1) This is a BUILD-TIME ONLY dependency. It resolves solely in the `jsonschema2dataclass` and
+            `jsonschema2dataclassPlugins` configurations, consumed by the code generation task
+            generateJsonSchema2DataClassConfigMain. It is absent from both runtimeClasspath and
+            compileClasspath (which resolve commons-lang3 3.20.0), so it is never packaged into the
+            container image and never executed by the running service.
+        (2) Triggering it requires passing an extremely long, attacker-controlled class name to
+            ClassUtils.getClass. Our only codegen inputs are the schemas checked in under
+            src/main/resources/yamlschema, so this would require write access to the source code.
+        (3) The impact is a StackOverflowError, which on the JVM fails the build rather than corrupting
+            memory; there is no confidentiality or integrity impact.
+        REMOVE this suppression once an org.jsonschema2dataclass release adopting a jsonschema2pojo
+        version that drops the legacy commons-lang 2.x dependency is published and upgraded to. Dated
+        to coincide with the plugin's next expected (annual, January) release, as above.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-lang/commons\-lang@.*$</packageUrl>
+        <cve>CVE-2025-48924</cve>
+    </suppress>
     <suppress until="2026-10-28Z">
         <notes><![CDATA[
         org.hdrhistogram:HdrHistogram is pulled in transitively via Micrometer (used by Spring Boot
@@ -101,5 +136,75 @@
         <cve>CVE-2026-60623</cve>
         <cve>CVE-2026-60624</cve>
         <cve>CVE-2026-61082</cve>
+    </suppress>
+    <suppress until="2026-11-24Z">
+        <notes><![CDATA[
+        CVE-2026-47838 is an X.509 certificate CN parsing flaw in Spring Security's
+        SubjectDnX509PrincipalExtractor, which can cause the wrong username to be read and allow user
+        impersonation. Not applicable here for two independent reasons:
+        (1) Already fixed in our version. This service resolves Spring Security 7.1.0 via the Spring
+            Boot 4.1.0 BOM. The advisory (https://spring.io/security/cve-2026-47838) states it is "a
+            continuation of CVE-2026-22747, which addressed this same issue for Spring Security 7.0.x",
+            so the 7.x line was patched first. Affected versions stop at 6.5.10 / 6.4.17 / 6.3.17 /
+            5.8.26 / 5.7.24; 7.x is not affected.
+        (2) The vulnerable code path is unused. SubjectDnX509PrincipalExtractor only applies to X.509
+            client-certificate authentication. This service authenticates with JWT bearer tokens via
+            spring-boot-starter-oauth2-resource-server and configures no X.509/mTLS authentication.
+        Note also that VMware score this 6.8 rather than NVD's 8.1, because the extractor sits behind
+        the pre-authentication flow and exploitation "presupposes a compromise of that upstream trust".
+        REMOVE this suppression if dependency-check stops reporting it, or revisit if this service ever
+        adopts X.509 client-certificate authentication.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-.*@.*$</packageUrl>
+        <cve>CVE-2026-47838</cve>
+    </suppress>
+    <suppress until="2026-11-24Z">
+        <notes><![CDATA[
+        CVE-2026-19880 is a path traversal in logback-classic: an MDC value flows unsanitised through
+        MDCBasedDiscriminator into a nested FileAppender path, letting an attacker who controls that MDC
+        value (e.g. via an HTTP header) write log files outside the intended directory. It affects
+        logback 0.9.14 through 1.6.2, so the 1.5.38 we resolve is in range. It
+        is managed by the Spring Boot BOM (Boot 4.1.1 sets logback.version = 1.5.38).
+        There is NO fix on the 1.5.x line. The only fixed release is 1.6.3, on a different (and now the
+        only actively maintained) release line; logback's own release notes state "the 1.5.x series is
+        now considered legacy", so a backport is unlikely. Moving to 1.6.x is not a drop-in change for
+        us because Spring Boot 4.1.1 does not validate against 1.6.x, and logback has broken binary
+        compatibility within past patch releases (1.5.7 changed LoggerContext#getConfigurationLock()'s
+        return type, causing NoSuchMethodError on Boot startup).
+        Not exploitable here: the vulnerable code path requires SiftingAppender / MDCBasedDiscriminator
+        feeding a nested FileAppender. This repo declares no SiftingAppender, no discriminator and no
+        logging.file/logging.path configuration anywhere. logback-spring.xml declares only a
+        ConsoleAppender writing to stdout. logback-test.xml (test scope only) includes Spring Boot's
+        org/springframework/boot/logging/logback/base.xml, which attaches a RollingFileAppender, but it
+        writes to the static ${java.io.tmpdir}/spring.log path with no MDC or discriminator involvement.
+        MDC values (correlationId, taken from the x-correlation-id HTTP header or SQS message header,
+        and messageId) are request-influenced but only ever reach the JSON encoder or a pattern layout,
+        never a filesystem path.
+        REMOVE this suppression when we move to the logback 1.6.x line (ideally when a Spring Boot BOM
+        manages it), and revisit immediately if a SiftingAppender or an MDC-driven file appender path is
+        added.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/ch\.qos\.logback/logback\-.*@.*$</packageUrl>
+        <cve>CVE-2026-19880</cve>
+    </suppress>
+    <suppress until="2026-11-24Z">
+        <notes><![CDATA[
+        FALSE POSITIVES, not deferred fixes.
+        All three CVEs come from Oracle's July 2026 Critical Patch Update and are in the
+        "Connector/Net" component of MySQL Connectors, i.e. the .NET/C# driver. This project uses the
+        Java driver, com.mysql:mysql-connector-j (Connector/J), which is a completely separate
+        codebase and is not named in any of these advisories.
+        dependency-check matches mysql-connector-j to the generic cpe:2.3:a:oracle:mysql_connectors
+        CPE, which Oracle uses for every language binding, so any Connector/Net CVE in the affected
+        version range (9.7.0-9.7.1) is incorrectly attributed to Connector/J.
+        (1) CVE-2026-60192 (CVSS 8.1, Connector/Net) - takeover of MySQL Connectors.
+        (2) CVE-2026-60193 (CVSS 8.5, Connector/Net) - takeover of MySQL Connectors, scope change.
+        (3) CVE-2026-60317 (CVSS 7.4, Connector/Net) - unauthorised data access/modification.
+        There is no Connector/J fix to wait for; this is date-limited only so that it gets re-reviewed.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.mysql/mysql\-connector\-j@.*$</packageUrl>
+        <cve>CVE-2026-60192</cve>
+        <cve>CVE-2026-60193</cve>
+        <cve>CVE-2026-60317</cve>
     </suppress>
 </suppressions>
