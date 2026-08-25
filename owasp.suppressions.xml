@@ -142,8 +142,8 @@
         CVE-2026-47838 is an X.509 certificate CN parsing flaw in Spring Security's
         SubjectDnX509PrincipalExtractor, which can cause the wrong username to be read and allow user
         impersonation. Not applicable here for two independent reasons:
-        (1) Already fixed in our version. This service resolves Spring Security 7.1.0 via the Spring
-            Boot 4.1.0 BOM. The advisory (https://spring.io/security/cve-2026-47838) states it is "a
+        (1) Already fixed in our version. This service resolves Spring Security 7.1.1 via the Spring
+            Boot 4.1.1 BOM. The advisory (https://spring.io/security/cve-2026-47838) states it is "a
             continuation of CVE-2026-22747, which addressed this same issue for Spring Security 7.0.x",
             so the 7.x line was patched first. Affected versions stop at 6.5.10 / 6.4.17 / 6.3.17 /
             5.8.26 / 5.7.24; 7.x is not affected.
