@@ -33,6 +33,7 @@ extra["awsSdkVersion"] = "2.52.0"
 extra["springCloudAwsVersion"] = "4.1.0"
 // EROPSPT-733 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
 extra["tomcat.version"] = "11.0.25"
+extra["jackson-2-bom.version"] = "2.21.6"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")

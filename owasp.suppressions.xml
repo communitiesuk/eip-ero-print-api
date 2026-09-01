@@ -213,4 +213,17 @@
         <cve>CVE-2026-60193</cve>
         <cve>CVE-2026-60317</cve>
     </suppress>
+    <suppress until="2026-12-01Z">
+        <notes><![CDATA[
+        FALSE POSITIVE: we are already on a fixed version. CVE-2026-47842 is a deterministic AES/CBC
+        encryption flaw in Spring Security's AesBytesEncryptor (all-zero IV). The advisory
+        (https://spring.io/security/cve-2026-47842) lists 7.1.0 as the only affected release on the
+        7.1.x line, and this service resolves Spring Security 7.1.1 via the Spring Boot 4.1.1 BOM.
+        Dependency-check still reports it because the CVE is in "Awaiting Analysis" state with no CPE
+        version ranges published, so there is no machine-readable "fixed at 7.1.1" boundary to match on.
+        REMOVE this suppression once dependency-check stops reporting it.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-.*@.*$</packageUrl>
+        <cve>CVE-2026-47842</cve>
+    </suppress>
 </suppressions>
