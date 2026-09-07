@@ -89,7 +89,7 @@
         <cve>CVE-2026-14683</cve>
         <cve>CVE-2026-14686</cve>
     </suppress>
-    <suppress until="2026-09-01Z">
+    <suppress until="2026-10-01Z">
         <notes><![CDATA[
         TEMPORARY suppression. CVE-2026-53914 is an unsafe-deserialization flaw (CWE-502) in the
         JetBrains Kotlin build-cache metadata, affecting the Kotlin toolchain before 2.4.20. This
