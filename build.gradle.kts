@@ -130,9 +130,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-webtestclient")
     testImplementation("org.springframework.security:spring-security-test")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
-    testImplementation("org.testcontainers:testcontainers:1.21.4")
-    testImplementation("org.testcontainers:mysql:1.20.3")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-mysql:2.0.5")
 
     testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
@@ -166,9 +166,6 @@ tasks.withType<Test> {
     dependsOn(tasks.withType<GenerateTask>())
     useJUnitPlatform()
     jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
-
-    // TODO: EROPSPT-608 this is a temporary fix for testcontainer version
-    systemProperty("api.version", "1.44")
 }
 
 tasks.withType<GenerateTask> {
