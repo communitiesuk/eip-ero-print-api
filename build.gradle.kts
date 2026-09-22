@@ -31,10 +31,12 @@ java {
 
 extra["awsSdkVersion"] = "2.54.17"
 extra["springCloudAwsVersion"] = "4.1.0"
-// EROPSPT-733 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
+// EROPSPT-767 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
+// Note: Jackson 3.1.6 now also brings in CVEs, and should be patched to 3.1.7 once available
 extra["tomcat.version"] = "11.0.25"
 extra["jackson-2-bom.version"] = "2.21.6"
 extra["netty.version"] = "4.2.18.Final"
+extra["hibernate.version"] = "7.4.9.Final"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
