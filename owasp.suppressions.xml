@@ -226,45 +226,4 @@
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-.*@.*$</packageUrl>
         <cve>CVE-2026-47842</cve>
     </suppress>
-    <suppress until="2026-10-01Z">
-    <notes><![CDATA[
-        TEMPORARY suppression: fixed releases exist, but are less than a day old at the time of
-        writing. Both CVEs were published on 15-Sep-2026 and are fixed in jackson-databind 2.21.7 and
-        3.1.7 (both released 21/22-Sep-2026, along with 2.22.3 and 3.2.3 on the newer lines). This
-        repo pins Jackson explicitly - tools.jackson.* 3.1.6 for the runtime and
-        jackson-2-bom.version 2.21.6 for the Spring Boot BOM - so the bump is a small change, but we
-        are deliberately letting the release bake before adopting it rather than shipping a
-        same-day upgrade of the library that parses all of our external input.
-        Both are rated MEDIUM (CVSS 4.0 6.9,
-        AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N) - a bounded availability impact only,
-        with no confidentiality or integrity impact, and no known exploits.
-        Neither is reachable in this service:
-        (1) CVE-2026-91776 (databind#6203) is unbounded growth of the type id cache in
-            TypeDeserializerBase._findDeserializer, reachable only through POLYMORPHIC
-            deserialization: an attacker has to get many distinct type ids into a cache that is only
-            populated by a TypeDeserializer. This service has none. JacksonConfiguration builds a
-            plain JsonMapper with only KotlinModule registered and never calls activateDefaultTyping,
-            and there is no @JsonTypeInfo or @JsonSubTypes in hand-written or generated code - the
-            OpenAPI documents under src/main/resources/openapi and the print provider schemas under
-            src/main/resources/yamlschema declare no discriminator, oneOf or anyOf, so neither the
-            openapi-generator nor jsonschema2pojo emits polymorphic models.
-        (2) CVE-2026-91777 (databind#6204) is quadratic forward-reference resolution in the
-            Collection and Map deserializers, reachable only when deserialization produces
-            UNRESOLVED FORWARD REFERENCES - that is, Object Ids (@JsonIdentityInfo) or
-            @JsonManagedReference/@JsonBackReference pairs. None of those annotations appear anywhere
-            in this repo, so the CollectionReferringAccumulator/MapReferringAccumulator paths named in
-            the advisory are never entered.
-        (3) Scope: com.fasterxml.jackson.core:jackson-databind 2.21.6 is TEST SCOPE ONLY. It is
-            declared to pull jjwt-jackson's transitive Jackson 2 up to a patched version for the JWT
-            test helpers, and it is never packaged into the container image - the boot jar contains
-            only the tools.jackson 3.1.6 artifacts (databind, core, module-kotlin) plus
-            jackson-annotations 2.21, which is a different artifact and is not affected by either CVE.
-        REMOVE this suppression when Jackson is upgraded: tools.jackson.core:jackson-databind,
-        tools.jackson.core:jackson-core and tools.jackson.module:jackson-module-kotlin to 3.1.7, and
-        extra["jackson-2-bom.version"] plus the two testImplementation pins to 2.21.7.
-        ]]></notes>
-    <packageUrl regex="true">^pkg:maven/(tools\.jackson\.core|com\.fasterxml\.jackson\.core)/jackson\-databind@.*$</packageUrl>
-    <cve>CVE-2026-91776</cve>
-    <cve>CVE-2026-91777</cve>
-</suppress>
 </suppressions>

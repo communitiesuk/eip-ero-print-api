@@ -32,11 +32,11 @@ java {
 extra["awsSdkVersion"] = "2.54.17"
 extra["springCloudAwsVersion"] = "4.1.0"
 // EROPSPT-767 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
-// Note: Jackson 3.1.6 now also brings in CVEs, and should be patched to 3.1.7 once available
 extra["tomcat.version"] = "11.0.25"
-extra["jackson-2-bom.version"] = "2.21.6"
 extra["netty.version"] = "4.2.18.Final"
 extra["hibernate.version"] = "7.4.9.Final"
+// Patches Jackson 2 in the build-time jsonschema2pojo codegen
+extra["jackson-2-bom.version"] = "2.21.7"
 
 allOpen {
     annotations("jakarta.persistence.Entity", "jakarta.persistence.MappedSuperclass", "jakarta.persistence.Embedabble")
@@ -59,9 +59,9 @@ repositories {
 dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("tools.jackson.module:jackson-module-kotlin:3.1.6")
-    implementation("tools.jackson.core:jackson-databind:3.1.6")
-    implementation("tools.jackson.core:jackson-core:3.1.6")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.1.7")
+    implementation("tools.jackson.core:jackson-databind:3.1.7")
+    implementation("tools.jackson.core:jackson-core:3.1.7")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("org.apache.commons:commons-lang3:3.20.0")
     implementation("org.mapstruct:mapstruct:1.6.2")
@@ -147,8 +147,8 @@ dependencies {
     testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
     testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
     // EROPSPT-733: Jackson v2 packages used by jjwt, should be reviewed if upgrading jjwt-jackson
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.6")
-    testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.6")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.7")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.7")
 }
 
 kotlin {
