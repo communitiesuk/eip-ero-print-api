@@ -69,10 +69,10 @@ dependencies {
 
     // internal libs
     implementation("uk.gov.dluhc:logging-library:4.3.0")
-    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.3.0")
-    implementation("uk.gov.dluhc:messaging-support-library:3.3.0")
+    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.4.0")
+    implementation("uk.gov.dluhc:messaging-support-library:3.4.0")
     implementation("uk.gov.dluhc:email-client:1.4.1")
-    implementation("uk.gov.dluhc:internal-auth-library:2.3.0")
+    implementation("uk.gov.dluhc:internal-auth-library:2.4.0")
 
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
