@@ -80,7 +80,7 @@ dependencies {
     implementation("io.swagger.core.v3:swagger-annotations:2.2.7")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
-    implementation("org.apache.sshd:sshd-sftp:2.19.0")
+    implementation("org.apache.sshd:sshd-sftp:2.20.0")
     implementation("com.opencsv:opencsv:5.12.0")
 
     // Logging
