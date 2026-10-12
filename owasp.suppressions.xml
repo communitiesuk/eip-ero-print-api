@@ -89,25 +89,6 @@
         <cve>CVE-2026-14683</cve>
         <cve>CVE-2026-14686</cve>
     </suppress>
-    <suppress until="2026-10-01Z">
-        <notes><![CDATA[
-        TEMPORARY suppression. CVE-2026-53914 is an unsafe-deserialization flaw (CWE-502) in the
-        JetBrains Kotlin build-cache metadata, affecting the Kotlin toolchain before 2.4.20. This
-        project currently uses Kotlin 2.4.10 and cannot yet upgrade because the fixed release
-        (2.4.20) is not available in our repositories.
-        Not exploitable here:
-        (1) The Kotlin artifacts (kotlin-stdlib*, kotlin-reflect) are declared compileOnly and are
-            NOT shipped in the published library jar, so consumers of this library are unaffected.
-        (2) The flaw is build-time only and requires an attacker to plant malicious metadata in the
-            local Kotlin/Gradle build cache. The vendor (JetBrains) scores it 6.7 with
-            AV:L/AC:H/PR:H (local access, high privilege, high attack complexity); NVD's over-broad
-            9.8 AV:N enrichment does not reflect the actual attack path. Our build cache is local to
-            the CI/dev environment and is not attacker-controlled.
-        REMOVE this suppression and upgrade to Kotlin >= 2.4.20 once that release is published.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin\-.*@.*$</packageUrl>
-        <cve>CVE-2026-53914</cve>
-    </suppress>
     <suppress until="2026-10-28Z">
         <notes><![CDATA[
         com.mysql:mysql-connector-j is pinned to 9.7.0 by the Spring Boot 4.1.0 dependency BOM
