@@ -31,7 +31,7 @@ java {
 
 extra["awsSdkVersion"] = "2.54.17"
 extra["springCloudAwsVersion"] = "4.1.0"
-// EROPSPT-767 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
+// EROPSPT-784 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
 extra["tomcat.version"] = "11.0.25"
 extra["netty.version"] = "4.2.18.Final"
 extra["hibernate.version"] = "7.4.9.Final"
