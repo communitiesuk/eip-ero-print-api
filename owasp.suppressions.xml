@@ -89,25 +89,6 @@
         <cve>CVE-2026-14683</cve>
         <cve>CVE-2026-14686</cve>
     </suppress>
-    <suppress until="2026-10-01Z">
-        <notes><![CDATA[
-        TEMPORARY suppression. CVE-2026-53914 is an unsafe-deserialization flaw (CWE-502) in the
-        JetBrains Kotlin build-cache metadata, affecting the Kotlin toolchain before 2.4.20. This
-        project currently uses Kotlin 2.4.10 and cannot yet upgrade because the fixed release
-        (2.4.20) is not available in our repositories.
-        Not exploitable here:
-        (1) The Kotlin artifacts (kotlin-stdlib*, kotlin-reflect) are declared compileOnly and are
-            NOT shipped in the published library jar, so consumers of this library are unaffected.
-        (2) The flaw is build-time only and requires an attacker to plant malicious metadata in the
-            local Kotlin/Gradle build cache. The vendor (JetBrains) scores it 6.7 with
-            AV:L/AC:H/PR:H (local access, high privilege, high attack complexity); NVD's over-broad
-            9.8 AV:N enrichment does not reflect the actual attack path. Our build cache is local to
-            the CI/dev environment and is not attacker-controlled.
-        REMOVE this suppression and upgrade to Kotlin >= 2.4.20 once that release is published.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin\-.*@.*$</packageUrl>
-        <cve>CVE-2026-53914</cve>
-    </suppress>
     <suppress until="2026-10-28Z">
         <notes><![CDATA[
         com.mysql:mysql-connector-j is pinned to 9.7.0 by the Spring Boot 4.1.0 dependency BOM
@@ -157,41 +138,6 @@
         ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-.*@.*$</packageUrl>
         <cve>CVE-2026-47838</cve>
-    </suppress>
-    <suppress until="2026-11-24Z">
-        <notes><![CDATA[
-        CVE-2026-19880 is a path traversal in logback-classic: an MDC value flows unsanitised through
-        MDCBasedDiscriminator into a nested FileAppender path, letting an attacker who controls that MDC
-        value (e.g. via an HTTP header) write log files outside the intended directory. It affects
-        logback 0.9.14 through 1.6.2, so the 1.5.38 we resolve is in range. It
-        is managed by the Spring Boot BOM (Boot 4.1.1 sets logback.version = 1.5.38).
-        There is NO fix on the 1.5.x line: 1.5.38 is the latest release on it and the only fixed release
-        is 1.6.3, on a different (and now the only actively maintained) release line. Logback's own
-        release notes state "the 1.5.x series is now considered legacy", so a backport is unlikely.
-        Upstream describes 1.6.x as a drop-in replacement for 1.5.x, and its one documented caveat
-        (removal of Janino-based conditionals) does not affect us as no logback config here uses them.
-        Even so, overriding logback.version is not a change we can make blind: Spring Boot 4.1.1 is not
-        tested against 1.6.x, and logback has broken binary compatibility within a patch release before
-        (1.5.7 changed ContextBase#getConfigurationLock()'s return type from Object to ReentrantLock,
-        causing NoSuchMethodError in Boot's LogbackConfigurator on startup). The upgrade therefore needs
-        a deliberate version override plus a startup and regression test, tracked separately.
-        Not exploitable here: the vulnerable code path requires SiftingAppender / MDCBasedDiscriminator
-        feeding a nested FileAppender. This repo declares no SiftingAppender, no discriminator and no
-        logging.file/logging.path configuration anywhere.
-        Under the jsonLogging profile used in deployed environments, logback-spring.xml declares only a
-        ConsoleAppender writing JSON to stdout. Under the !jsonLogging profile (local runs), and in
-        logback-test.xml (test scope), Spring Boot's org/springframework/boot/logging/logback/base.xml is
-        included, which does attach a RollingFileAppender, but it writes to the static
-        ${java.io.tmpdir}/spring.log path with no MDC or discriminator involvement.
-        MDC values (correlationId, taken from the x-correlation-id HTTP header or SQS message header,
-        plus requestId, messageId and jobName) are request-influenced but only ever reach the JSON
-        encoder or a pattern layout, never a filesystem path.
-        REMOVE this suppression when we move to the logback 1.6.x line (ideally when a Spring Boot BOM
-        manages it), and revisit immediately if a SiftingAppender or an MDC-driven file appender path is
-        added.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/ch\.qos\.logback/logback\-.*@.*$</packageUrl>
-        <cve>CVE-2026-19880</cve>
     </suppress>
     <suppress until="2026-11-24Z">
         <notes><![CDATA[
