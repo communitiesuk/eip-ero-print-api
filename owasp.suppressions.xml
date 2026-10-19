@@ -172,4 +172,20 @@
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-.*@.*$</packageUrl>
         <cve>CVE-2026-47842</cve>
     </suppress>
+    <suppress until="2027-01-01Z">
+        <notes><![CDATA[
+        CVE-2026-53914 affects Kotlin before 2.4.20. If Kotlin reads build cache metadata that someone has
+        tampered with, it can run their code. The application we ship is not affected, because we build with
+        Kotlin 2.4.20 and runtimeClasspath resolves kotlin-stdlib, kotlin-stdlib-jdk8 and kotlin-reflect at
+        2.4.20. The warning comes from two parts of the Gradle build that still use older Kotlin jars:
+        (1) ktlint.
+        (2) kotlinAbiValidationCompatClasspath.
+        These are build time only. An attacker would need local access with high privileges to tamper with
+        the build cache.
+        REMOVE when EROPSPT-786 replaces ktlint (which removes the 2.2.21 downgrade) and the Kotlin Gradle plugin
+        stops pinning 2.4.0 build tools.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin\-.*@(2\.2\.21|2\.4\.0)$</packageUrl>
+        <cve>CVE-2026-53914</cve>
+    </suppress>
 </suppressions>
