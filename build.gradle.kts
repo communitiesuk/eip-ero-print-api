@@ -64,6 +64,9 @@ dependencies {
     implementation("tools.jackson.module:jackson-module-kotlin:3.2.3")
     implementation("tools.jackson.core:jackson-databind:3.2.3")
     implementation("tools.jackson.core:jackson-core:3.2.3")
+    // Jackson 3.2.x requires jackson-annotations 2.22, but Spring Boot 4.1 manages 2.21
+    // Can be removed once Spring Boot manages 2.22+.
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("org.apache.commons:commons-lang3:3.21.0")
     implementation("org.mapstruct:mapstruct:1.6.3")
