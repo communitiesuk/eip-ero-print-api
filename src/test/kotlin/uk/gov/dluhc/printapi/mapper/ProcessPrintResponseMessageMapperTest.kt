@@ -29,11 +29,11 @@ class ProcessPrintResponseMessageMapperTest {
     @CsvSource(
         value = [
             "PROCESSED, SUCCESS, PROCESSED, SUCCESS",
-            "IN_PRODUCTION, SUCCESS, IN_MINUS_PRODUCTION, SUCCESS",
+            "IN_PRODUCTION, SUCCESS, IN_PRODUCTION, SUCCESS",
             "PRINTED, SUCCESS, PRINTED, SUCCESS",
             "DISPATCHED, SUCCESS, DISPATCHED, SUCCESS",
             "PROCESSED, FAILED, PROCESSED, FAILED",
-            "NOT_DELIVERED, FAILED, NOT_MINUS_DELIVERED, FAILED"
+            "NOT_DELIVERED, FAILED, NOT_DELIVERED, FAILED"
         ]
     )
     fun `should map PrintResponse to ProcessPrintResponseMessage`(

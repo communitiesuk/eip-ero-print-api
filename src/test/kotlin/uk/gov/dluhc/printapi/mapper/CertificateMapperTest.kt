@@ -135,7 +135,7 @@ class CertificateMapperTest {
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
-        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_MINUS_CARD)
+        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_CARD)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)
@@ -224,7 +224,7 @@ class CertificateMapperTest {
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
-        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_MINUS_CARD)
+        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_CARD)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)
@@ -312,7 +312,7 @@ class CertificateMapperTest {
 
         // Then
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected)
-        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_MINUS_CARD)
+        verify(sourceTypeMapper).mapSqsToEntity(SourceTypeModel.VOTER_CARD)
         verify(idFactory).vacNumber()
         verify(printRequestMapper).toPrintRequest(message, ero)
         verify(instantMapper).toInstant(message.applicationReceivedDateTime)

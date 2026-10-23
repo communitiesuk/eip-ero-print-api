@@ -21,8 +21,8 @@ import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status.SENT_TO_P
 import uk.gov.dluhc.printapi.database.entity.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.messaging.models.SendApplicationToPrintMessage
-import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
-import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.LARGE_MINUS_PRINT
+import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_READ
+import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.LARGE_PRINT
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender.Companion.hasExceptionLogWithMessage
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
@@ -61,7 +61,7 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         val gssCode = localAuthority.gssCode
         val payload = buildSendApplicationToPrintMessage(
             gssCode = gssCode,
-            supportingInformationFormat = EASY_MINUS_READ,
+            supportingInformationFormat = EASY_READ,
             certificateLanguage = SqsCertificateLanguage.CY,
         )
 
@@ -119,9 +119,9 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Resend must reference the same application for original saved certificate to be updated
         val payload = buildSendApplicationToPrintMessage(
             gssCode = gssCode,
-            sourceType = SqsSourceType.VOTER_MINUS_CARD,
+            sourceType = SqsSourceType.VOTER_CARD,
             sourceReference = certificate.sourceReference!!,
-            supportingInformationFormat = LARGE_MINUS_PRINT,
+            supportingInformationFormat = LARGE_PRINT,
             requestDateTime = expected.printRequests[0].requestDateTime!!.plusSeconds(5).atOffset(UTC)
         )
         wireMockService.stubEroManagementGetEroByGssCode(ero, gssCode)
@@ -177,9 +177,9 @@ internal class SendApplicationToPrintMessageListenerIntegrationTest : Integratio
         // Resend must reference the same application for original saved certificate to be updated
         val payload = buildSendApplicationToPrintMessage(
             gssCode = gssCode,
-            sourceType = SqsSourceType.VOTER_MINUS_CARD,
+            sourceType = SqsSourceType.VOTER_CARD,
             sourceReference = certificate.sourceReference!!,
-            supportingInformationFormat = LARGE_MINUS_PRINT,
+            supportingInformationFormat = LARGE_PRINT,
             requestDateTime = expected.printRequests[0].requestDateTime!!.plusSeconds(5).atOffset(UTC),
             delivery = buildMessagingCertificateDelivery(
                 deliveryAddressType = SqsDeliveryAddressType.REGISTERED,

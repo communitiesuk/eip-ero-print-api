@@ -11,12 +11,8 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
-import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType
-import uk.gov.dluhc.printapi.dto.DeliveryAddressType.ERO_COLLECTION
-import uk.gov.dluhc.printapi.dto.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
-import uk.gov.dluhc.printapi.models.DeliveryAddressType.ERO_MINUS_COLLECTION
 import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.deepCopy
@@ -33,6 +29,9 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddressTypeEntity
+import uk.gov.dluhc.printapi.dto.DeliveryAddressType as DeliveryAddressTypeDto
+import uk.gov.dluhc.printapi.models.DeliveryAddressType as DeliveryAddressTypeModel
 
 @ExtendWith(MockitoExtension::class)
 class ReIssueAnonymousElectorDocumentMapperTest {
@@ -70,7 +69,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val userId = aValidUserId()
         val sourceReference = aValidSourceReference()
         val electoralRollNumber = aValidElectoralRollNumber()
-        val deliveryAddressType = ERO_MINUS_COLLECTION
+        val deliveryAddressType = DeliveryAddressTypeModel.ERO_COLLECTION
 
         val apiRequest = buildReIssueAnonymousElectorDocumentRequest(
             sourceReference = sourceReference,
@@ -78,13 +77,13 @@ class ReIssueAnonymousElectorDocumentMapperTest {
             deliveryAddressType = deliveryAddressType
         )
 
-        given(deliveryAddressTypeMapper.mapApiToDto(any())).willReturn(ERO_COLLECTION)
+        given(deliveryAddressTypeMapper.mapApiToDto(any())).willReturn(DeliveryAddressTypeDto.ERO_COLLECTION)
 
         val expected = ReIssueAnonymousElectorDocumentDto(
             userId = userId,
             sourceReference = sourceReference,
             electoralRollNumber = electoralRollNumber,
-            deliveryAddressType = ERO_COLLECTION
+            deliveryAddressType = DeliveryAddressTypeDto.ERO_COLLECTION
         )
 
         // When
@@ -92,7 +91,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
         // Then
         assertThat(actual).isEqualTo(expected)
-        verify(deliveryAddressTypeMapper).mapApiToDto(ERO_MINUS_COLLECTION)
+        verify(deliveryAddressTypeMapper).mapApiToDto(DeliveryAddressTypeModel.ERO_COLLECTION)
     }
 
     @Test
@@ -106,7 +105,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
             certificateNumber = aValidVacNumber(),
             electoralRollNumber = originalElectoralRollNumber,
             delivery = buildAedDelivery(
-                deliveryAddressType = DeliveryAddressType.ERO_COLLECTION,
+                deliveryAddressType = DeliveryAddressTypeEntity.ERO_COLLECTION,
                 collectionReason = "There is a postal strike"
             ),
         ).apply {
@@ -141,11 +140,11 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val dto = buildReIssueAnonymousElectorDocumentDto(
             sourceReference = sourceReference,
             electoralRollNumber = newElectoralRollNumber,
-            deliveryAddressType = REGISTERED,
+            deliveryAddressType = DeliveryAddressTypeDto.REGISTERED,
             userId = userId
         )
 
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.REGISTERED)
 
         val expected = previousAed.deepCopy().apply {
             certificateNumber = newCertificateNumber
@@ -153,7 +152,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
             issueDate = FIXED_DATE_IN_OCT
             statusHistory = expectedStatusHistory.toMutableList()
             electoralRollNumber = newElectoralRollNumber
-            delivery?.deliveryAddressType = DeliveryAddressType.REGISTERED
+            delivery?.deliveryAddressType = DeliveryAddressTypeEntity.REGISTERED
             delivery?.collectionReason = "There is a postal strike"
             this.userId = userId
         }
@@ -186,14 +185,14 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         verify(aedMappingHelper).issueDate()
         verify(aedMappingHelper).requestDateTime()
         verify(aedMappingHelper).statusHistory(AnonymousElectorDocumentStatus.Status.PRINTED)
-        verify(deliveryAddressTypeMapper).mapDtoToEntity(REGISTERED)
+        verify(deliveryAddressTypeMapper).mapDtoToEntity(DeliveryAddressTypeDto.REGISTERED)
     }
 
     @Test
     fun `should map to new Anonymous Elector Document with provided deliveryAddressType, given an AED without delivery information`() {
         // Given
         val previousAed = buildAnonymousElectorDocument(delivery = null)
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.ERO_COLLECTION)
 
         given(idFactory.vacNumber()).willReturn(aValidVacNumber())
         given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
@@ -208,7 +207,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         )
 
         // Then
-        assertThat(actual.delivery?.deliveryAddressType).usingRecursiveComparison().isEqualTo(ERO_COLLECTION)
+        assertThat(actual.delivery?.deliveryAddressType).usingRecursiveComparison().isEqualTo(DeliveryAddressTypeEntity.ERO_COLLECTION)
     }
 
     @Test
@@ -220,7 +219,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         given(aedMappingHelper.requestDateTime()).willReturn(FIXED_TIME)
         given(aedMappingHelper.issueDate()).willReturn(FIXED_DATE_IN_OCT)
         given(aedMappingHelper.statusHistory(any())).willReturn(listOf())
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.ERO_COLLECTION)
 
         // When
         val actual = mapper.toNewAnonymousElectorDocument(
@@ -249,7 +248,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
         val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
 
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.REGISTERED)
 
         // When
         val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
@@ -277,7 +276,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
         val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
 
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.REGISTERED)
 
         val newRemovalTime = FIXED_DATE_IN_OCT.plusMonths(15)
         given(electorDocumentRemovalDateResolver.getAedInitialRetentionPeriodRemovalDate(FIXED_DATE_IN_OCT)).willReturn(newRemovalTime)
@@ -306,7 +305,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
         val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
 
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.REGISTERED)
 
         // When
         val actual = mapper.toNewAnonymousElectorDocument(previousAed, dto, templateFilename)
@@ -334,7 +333,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
         val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
 
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.REGISTERED)
 
         val newRemovalTime = FIXED_DATE_IN_MAR.plusYears(9)
         given(electorDocumentRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(FIXED_DATE_IN_MAR)).willReturn(newRemovalTime)
@@ -365,7 +364,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
         val dto = buildReIssueAnonymousElectorDocumentDto(sourceReference = sourceReference)
 
-        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressType.REGISTERED)
+        given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.REGISTERED)
 
         val newRemovalTime = FIXED_DATE_IN_OCT.plusYears(10)
         given(electorDocumentRemovalDateResolver.getElectorDocumentFinalRetentionPeriodRemovalDate(FIXED_DATE_IN_OCT)).willReturn(newRemovalTime)

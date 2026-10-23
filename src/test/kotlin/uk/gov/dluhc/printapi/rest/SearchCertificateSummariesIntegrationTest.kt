@@ -183,11 +183,11 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             photoUrl = expectedPhotoUrl1,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
-                    status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+                    status = PrintRequestStatus.PRINT_PROCESSING,
                     userId = vac1Request.userId!!,
                     dateTime = vac1Request.requestDateTime!!.atOffset(ZoneOffset.UTC),
                     message = vac1Status.message,
-                    deliveryAddressType = DeliveryAddressTypeResponse.ERO_MINUS_COLLECTION
+                    deliveryAddressType = DeliveryAddressTypeResponse.ERO_COLLECTION
                 )
             )
         )
@@ -202,7 +202,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             photoUrl = expectedPhotoUrl2,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
-                    status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+                    status = PrintRequestStatus.PRINT_PROCESSING,
                     userId = vac2Request.userId!!,
                     dateTime = vac2Request.requestDateTime!!.atOffset(ZoneOffset.UTC),
                     message = vac2Status.message,
@@ -281,7 +281,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
-                    status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+                    status = PrintRequestStatus.PRINT_PROCESSING,
                     userId = vacRequest.userId!!,
                     dateTime = vacRequest.requestDateTime!!.atOffset(ZoneOffset.UTC),
                     message = vacStatus.message,
@@ -374,7 +374,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
-                    status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+                    status = PrintRequestStatus.PRINT_PROCESSING,
                     userId = vac1Request.userId!!,
                     dateTime = vac1Status.eventDateTime!!.atOffset(ZoneOffset.UTC),
                     message = vac1Status.message,
@@ -470,7 +470,7 @@ internal class SearchCertificateSummariesIntegrationTest : IntegrationTest() {
             photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
-                    status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+                    status = PrintRequestStatus.PRINT_PROCESSING,
                     userId = vac1Request.userId!!,
                     dateTime = vac1Status.eventDateTime!!.atOffset(ZoneOffset.UTC),
                     message = vac1Status.message,

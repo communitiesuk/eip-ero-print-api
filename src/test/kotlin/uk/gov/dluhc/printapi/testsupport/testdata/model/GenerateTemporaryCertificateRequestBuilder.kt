@@ -14,7 +14,7 @@ import java.time.LocalDate
 
 fun buildGenerateTemporaryCertificateRequest(
     gssCode: String = aGssCode(),
-    sourceType: SourceType = SourceType.VOTER_MINUS_CARD,
+    sourceType: SourceType = SourceType.VOTER_CARD,
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     firstName: String = aValidFirstName(),

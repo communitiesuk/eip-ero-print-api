@@ -79,8 +79,8 @@ class AnonymousElectorDocumentMapperTest {
             val requestDateTime = aValidGeneratedDateTime()
 
             given(certificateLanguageMapper.mapDtoToApi(any())).willReturn(CertificateLanguage.EN)
-            given(supportingInformationFormatMapper.mapDtoToApi(any())).willReturn(AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ)
-            given(deliveryAddressTypeMapper.mapDtoToApi(any())).willReturn(DeliveryAddressType.ERO_MINUS_COLLECTION)
+            given(supportingInformationFormatMapper.mapDtoToApi(any())).willReturn(AnonymousSupportingInformationFormatApiEnum.EASY_READ)
+            given(deliveryAddressTypeMapper.mapDtoToApi(any())).willReturn(DeliveryAddressType.ERO_COLLECTION)
             given(instantMapper.toOffsetDateTime(any())).willReturn(requestDateTime)
 
             val eroId = aValidEroId()
@@ -95,8 +95,8 @@ class AnonymousElectorDocumentMapperTest {
                     sourceReference = sourceReference,
                     applicationReference = applicationReference,
                     certificateLanguage = CertificateLanguage.EN,
-                    supportingInformationFormat = AnonymousSupportingInformationFormatApiEnum.EASY_MINUS_READ,
-                    deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
+                    supportingInformationFormat = AnonymousSupportingInformationFormatApiEnum.EASY_READ,
+                    deliveryAddressType = DeliveryAddressType.ERO_COLLECTION,
                     collectionReason = collectionReason,
                     elector = with(elector) {
                         buildAnonymousElectorApi(

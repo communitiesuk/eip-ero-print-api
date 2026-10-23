@@ -137,14 +137,14 @@ internal class DeprecatedGetCertificateSummaryByApplicationIdIntegrationTest : I
             photoUrl = expectedPhotoUrl,
             printRequestSummaries = listOf(
                 PrintRequestSummary(
-                    status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+                    status = PrintRequestStatus.PRINT_PROCESSING,
                     userId = request1.userId!!,
                     dateTime = status2.eventDateTime!!.atOffset(ZoneOffset.UTC),
                     message = status2.message,
                     deliveryAddressType = deliveryAddressTypeMapper.mapEntityToApi(request1.delivery!!.deliveryAddressType)
                 ),
                 PrintRequestSummary(
-                    status = PrintRequestStatus.PRINT_MINUS_FAILED,
+                    status = PrintRequestStatus.PRINT_FAILED,
                     userId = request2.userId!!,
                     dateTime = status4.eventDateTime!!.atOffset(ZoneOffset.UTC),
                     message = status4.message,

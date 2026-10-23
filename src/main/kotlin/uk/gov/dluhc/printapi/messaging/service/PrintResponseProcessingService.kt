@@ -127,7 +127,7 @@ class PrintResponseProcessingService(
         certificateRepository.saveAndFlush(certificate)
         metricsClient.recordPrintResponseReceived()
 
-        if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED) {
+        if (printResponse.statusStep == ProcessPrintResponseMessage.StatusStep.NOT_DELIVERED) {
             certificateNotDeliveredEmailSenderService.send(printResponse, certificate)
         } else if (printResponse.status == ProcessPrintResponseMessage.Status.FAILED) {
             certificateFailedToPrintEmailSenderService.send(printResponse, certificate)

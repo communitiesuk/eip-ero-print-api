@@ -34,7 +34,7 @@ class GenerateTemporaryCertificateMapperTest {
         // Given
         val userId = aValidUserId()
         val apiRequest = buildGenerateTemporaryCertificateRequest(
-            sourceType = SourceTypeApi.VOTER_MINUS_CARD,
+            sourceType = SourceTypeApi.VOTER_CARD,
             certificateLanguage = CertificateLanguageApi.EN
         )
 
@@ -59,7 +59,7 @@ class GenerateTemporaryCertificateMapperTest {
         val actual = mapper.toGenerateTemporaryCertificateDto(apiRequest, userId)
 
         // Then
-        verify(sourceTypeMapper).mapApiToDto(SourceTypeApi.VOTER_MINUS_CARD)
+        verify(sourceTypeMapper).mapApiToDto(SourceTypeApi.VOTER_CARD)
         verify(certificateLanguageMapper).mapApiToDto(CertificateLanguageApi.EN)
         assertThat(actual).isEqualTo(expected)
     }

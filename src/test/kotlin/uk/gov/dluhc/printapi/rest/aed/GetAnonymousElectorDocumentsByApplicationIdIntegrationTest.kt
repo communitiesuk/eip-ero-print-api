@@ -11,7 +11,7 @@ import uk.gov.dluhc.printapi.database.entity.SourceType
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.models.AnonymousElectorDocumentsResponse
-import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.LARGE_MINUS_PRINT
+import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat.LARGE_PRINT
 import uk.gov.dluhc.printapi.models.DeliveryAddressType
 import uk.gov.dluhc.printapi.testsupport.bearerToken
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidSourceReference
@@ -164,7 +164,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
                 issueDate = issueDate,
                 userId = userId,
                 dateTime = requestDateTime.atOffset(ZoneOffset.UTC),
-                supportingInformationFormat = LARGE_MINUS_PRINT
+                supportingInformationFormat = LARGE_PRINT
             )
         }
 
@@ -222,7 +222,7 @@ internal class GetAnonymousElectorDocumentsByApplicationIdIntegrationTest : Inte
         val expectedFirstRecord = with(aed2) {
             buildAnonymousElectorDocumentApi(
                 certificateNumber = certificateNumber, electoralRollNumber = electoralRollNumber,
-                gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_MINUS_COLLECTION,
+                gssCode = gssCode, deliveryAddressType = DeliveryAddressType.ERO_COLLECTION,
                 collectionReason = null,
                 sourceReference = sourceReference, applicationReference = applicationReference,
                 elector = with(contactDetails!!) {
