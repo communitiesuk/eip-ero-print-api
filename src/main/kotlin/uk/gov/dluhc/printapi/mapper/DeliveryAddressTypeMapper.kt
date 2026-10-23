@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.InheritInverseConfiguration
 import org.mapstruct.Mapper
-import org.mapstruct.ValueMapping
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddressTypeEntity
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType as DtoDeliveryAddressType
 import uk.gov.dluhc.printapi.messaging.models.DeliveryAddressType as DeliveryAddressTypeSqs

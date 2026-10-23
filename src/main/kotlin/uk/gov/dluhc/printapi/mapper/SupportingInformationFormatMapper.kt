@@ -2,7 +2,6 @@ package uk.gov.dluhc.printapi.mapper
 
 import org.mapstruct.InheritInverseConfiguration
 import org.mapstruct.Mapper
-import org.mapstruct.ValueMapping
 import uk.gov.dluhc.printapi.printprovider.models.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntityEnum
 import uk.gov.dluhc.printapi.dto.SupportingInformationFormat as SupportingInformationFormatDtoEnum

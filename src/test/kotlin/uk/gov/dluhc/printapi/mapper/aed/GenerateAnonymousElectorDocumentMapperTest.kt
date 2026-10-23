@@ -15,15 +15,12 @@ import uk.gov.dluhc.printapi.database.entity.AedContactDetails
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocument
 import uk.gov.dluhc.printapi.database.entity.AnonymousElectorDocumentStatus
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage
-import uk.gov.dluhc.printapi.database.entity.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.dto.AddressFormat
 import uk.gov.dluhc.printapi.dto.DeliveryClass
-import uk.gov.dluhc.printapi.dto.SourceType
 import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
-import uk.gov.dluhc.printapi.models.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAnonymousElectorDocumentTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
@@ -39,11 +36,14 @@ import java.time.Instant
 import java.time.LocalDate
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
 import uk.gov.dluhc.printapi.database.entity.DeliveryAddressType as DeliveryAddressTypeEntity
+import uk.gov.dluhc.printapi.database.entity.SourceType as SourceTypeEntity
 import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as SupportingInformationFormatEntity
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType as DeliveryAddressTypeDto
+import uk.gov.dluhc.printapi.dto.SourceType as SourceTypeDto
 import uk.gov.dluhc.printapi.dto.aed.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatDto
 import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat as AnonymousSupportingInformationFormatApi
 import uk.gov.dluhc.printapi.models.DeliveryAddressType as DeliveryAddressTypeApi
+import uk.gov.dluhc.printapi.models.SourceType as SourceTypeModel
 
 @ExtendWith(MockitoExtension::class)
 class GenerateAnonymousElectorDocumentMapperTest {
@@ -92,7 +92,7 @@ class GenerateAnonymousElectorDocumentMapperTest {
             val aedTemplateFilename = aValidAnonymousElectorDocumentTemplateFilename()
             val certificateNumber = aValidVacNumber()
 
-            given(sourceTypeMapper.mapDtoToEntity(any())).willReturn(ANONYMOUS_ELECTOR_DOCUMENT)
+            given(sourceTypeMapper.mapDtoToEntity(any())).willReturn(SourceTypeEntity.ANONYMOUS_ELECTOR_DOCUMENT)
             given(certificateLanguageMapper.mapDtoToEntity(any())).willReturn(CertificateLanguage.EN)
             given(supportingInformationFormatMapper.mapDtoToEntity(any())).willReturn(SupportingInformationFormatEntity.EASY_READ)
             given(deliveryAddressTypeMapper.mapDtoToEntity(any())).willReturn(DeliveryAddressTypeEntity.ERO_COLLECTION)
@@ -112,7 +112,7 @@ class GenerateAnonymousElectorDocumentMapperTest {
                 AnonymousElectorDocument(
                     id = null,
                     gssCode = gssCode,
-                    sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+                    sourceType = SourceTypeEntity.ANONYMOUS_ELECTOR_DOCUMENT,
                     sourceReference = sourceReference,
                     applicationReference = applicationReference,
                     certificateLanguage = CertificateLanguageEntity.EN,
@@ -175,7 +175,8 @@ class GenerateAnonymousElectorDocumentMapperTest {
             val actual = mapper.toAnonymousElectorDocument(dtoRequest, aedTemplateFilename)
 
             // Then
-            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
+            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX)
+                .isEqualTo(expected)
             verify(sourceTypeMapper).mapDtoToEntity(dtoRequest.sourceType)
             verify(certificateLanguageMapper).mapDtoToEntity(dtoRequest.certificateLanguage)
             verify(supportingInformationFormatMapper).mapDtoToEntity(dtoRequest.supportingInformationFormat)
@@ -184,7 +185,13 @@ class GenerateAnonymousElectorDocumentMapperTest {
             verify(aedMappingHelper).requestDateTime()
             verify(aedMappingHelper).statusHistory(AnonymousElectorDocumentStatus.Status.PRINTED)
             verify(deliveryAddressTypeMapper).mapDtoToEntity(DeliveryAddressTypeDto.ERO_COLLECTION)
-            verifyNoMoreInteractions(sourceTypeMapper, certificateLanguageMapper, supportingInformationFormatMapper, idFactory, deliveryAddressTypeMapper)
+            verifyNoMoreInteractions(
+                sourceTypeMapper,
+                certificateLanguageMapper,
+                supportingInformationFormatMapper,
+                idFactory,
+                deliveryAddressTypeMapper
+            )
         }
     }
 
@@ -220,7 +227,8 @@ class GenerateAnonymousElectorDocumentMapperTest {
             val actual = mapper.toAedContactDetailsEntity(request)
 
             // Then
-            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
+            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX)
+                .isEqualTo(expected)
         }
     }
 
@@ -261,7 +269,8 @@ class GenerateAnonymousElectorDocumentMapperTest {
             val actual = mapper.fromDeliveryDtoToAnonymousElectorDocumentDeliveryEntity(dto)
 
             // Then
-            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX).isEqualTo(expected)
+            assertThat(actual).usingRecursiveComparison().ignoringFieldsMatchingRegexes(ID_FIELDS_REGEX)
+                .isEqualTo(expected)
             verify(deliveryAddressTypeMapper).mapDtoToEntity(DeliveryAddressTypeDto.ERO_COLLECTION)
         }
     }
@@ -274,20 +283,22 @@ class GenerateAnonymousElectorDocumentMapperTest {
             // Given
             val userId = aValidUserId()
             val apiRequest = buildGenerateAnonymousElectorDocumentRequest(
-                sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
+                sourceType = SourceTypeModel.ANONYMOUS_ELECTOR_DOCUMENT,
                 certificateLanguage = uk.gov.dluhc.printapi.models.CertificateLanguage.EN,
                 supportingInformationFormat = AnonymousSupportingInformationFormatApi.LARGE_PRINT,
                 delivery = buildApiCertificateDelivery()
             )
 
-            given(sourceTypeMapper.mapApiToDto(any())).willReturn(SourceType.ANONYMOUS_ELECTOR_DOCUMENT)
+            given(sourceTypeMapper.mapApiToDto(any())).willReturn(SourceTypeDto.ANONYMOUS_ELECTOR_DOCUMENT)
             given(certificateLanguageMapper.mapApiToDto(any())).willReturn(uk.gov.dluhc.printapi.dto.CertificateLanguage.EN)
-            given(supportingInformationFormatMapper.mapApiToDto(any())).willReturn(AnonymousSupportingInformationFormatDto.LARGE_PRINT)
+            given(supportingInformationFormatMapper.mapApiToDto(any())).willReturn(
+                AnonymousSupportingInformationFormatDto.LARGE_PRINT
+            )
             given(deliveryAddressTypeMapper.mapApiToDto(any())).willReturn(DeliveryAddressTypeDto.REGISTERED)
 
             val expected = GenerateAnonymousElectorDocumentDto(
                 gssCode = apiRequest.gssCode,
-                sourceType = SourceType.ANONYMOUS_ELECTOR_DOCUMENT,
+                sourceType = SourceTypeDto.ANONYMOUS_ELECTOR_DOCUMENT,
                 sourceReference = apiRequest.sourceReference,
                 applicationReference = apiRequest.applicationReference,
                 electoralRollNumber = apiRequest.electoralRollNumber,
@@ -336,11 +347,16 @@ class GenerateAnonymousElectorDocumentMapperTest {
 
             // Then
             assertThat(actual).isEqualTo(expected)
-            verify(sourceTypeMapper).mapApiToDto(ANONYMOUS_ELECTOR_DOCUMENT)
+            verify(sourceTypeMapper).mapApiToDto(SourceTypeModel.ANONYMOUS_ELECTOR_DOCUMENT)
             verify(certificateLanguageMapper).mapApiToDto(uk.gov.dluhc.printapi.models.CertificateLanguage.EN)
             verify(supportingInformationFormatMapper).mapApiToDto(AnonymousSupportingInformationFormatApi.LARGE_PRINT)
             verify(deliveryAddressTypeMapper).mapApiToDto(DeliveryAddressTypeApi.REGISTERED)
-            verifyNoMoreInteractions(sourceTypeMapper, certificateLanguageMapper, supportingInformationFormatMapper, deliveryAddressTypeMapper)
+            verifyNoMoreInteractions(
+                sourceTypeMapper,
+                certificateLanguageMapper,
+                supportingInformationFormatMapper,
+                deliveryAddressTypeMapper
+            )
         }
     }
 }
