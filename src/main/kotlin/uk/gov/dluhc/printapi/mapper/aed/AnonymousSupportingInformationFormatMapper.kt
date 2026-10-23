@@ -10,8 +10,6 @@ import uk.gov.dluhc.printapi.models.AnonymousSupportingInformationFormat as Anon
 @Mapper
 interface AnonymousSupportingInformationFormatMapper {
 
-    @ValueMapping(target = "LARGE_PRINT", source = "LARGE_MINUS_PRINT")
-    @ValueMapping(target = "EASY_READ", source = "EASY_MINUS_READ")
     fun mapApiToDto(apiFormat: AnonymousSupportingInformationFormatApiEnum): AnonymousSupportingInformationFormatDtoEnum
 
     @InheritInverseConfiguration

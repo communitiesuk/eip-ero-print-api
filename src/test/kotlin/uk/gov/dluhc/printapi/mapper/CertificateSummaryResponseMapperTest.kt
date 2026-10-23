@@ -48,7 +48,7 @@ class CertificateSummaryResponseMapperTest {
         val request2 = buildPrintRequestSummaryDto(status = PrintRequestStatusDto.DISPATCHED, eventDateTime = Instant.now())
         val dto = buildCertificateSummaryDto(printRequests = listOf(request1, request2))
         given(printRequestStatusMapper.toPrintRequestStatus(any())).willReturn(
-            PrintRequestStatus.PRINT_MINUS_PROCESSING,
+            PrintRequestStatus.PRINT_PROCESSING,
             PrintRequestStatus.DISPATCHED
         )
         val dateTime1 = Instant.now().minusSeconds(100).atOffset(ZoneOffset.UTC)
@@ -57,7 +57,7 @@ class CertificateSummaryResponseMapperTest {
         val expectedPhotoUrl = aVacPhotoUrl(eroId = ERO_ID, sourceReference = dto.sourceReference)
         given(urlFactory.createPhotoUrl(any(), any(), any())).willReturn(expectedPhotoUrl)
         val expectedRequestSummary1 = PrintRequestSummary(
-            status = PrintRequestStatus.PRINT_MINUS_PROCESSING,
+            status = PrintRequestStatus.PRINT_PROCESSING,
             userId = request1.userId,
             dateTime = dateTime1,
             message = request1.message

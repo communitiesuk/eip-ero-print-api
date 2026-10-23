@@ -32,7 +32,7 @@ class CertificateSummarySearchResponseMapperTest {
     fun `should map CertificateSearchSummaryResults dto to a CertificateSearchSummaryResponse Api`() {
         // Given
         val expectedOffsetDateTime = OffsetDateTime.now()
-        val expectedStatus = PrintRequestStatus.PRINT_MINUS_PROCESSING
+        val expectedStatus = PrintRequestStatus.PRINT_PROCESSING
         val printRequestDto = buildPrintRequestSummaryDto()
         val certificateSummaryDto = buildCertificateSummaryDto(printRequests = listOf(printRequestDto))
         val results = buildCertificateSearchSummaryResults(

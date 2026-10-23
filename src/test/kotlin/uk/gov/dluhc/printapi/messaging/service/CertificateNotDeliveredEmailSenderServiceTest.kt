@@ -44,7 +44,7 @@ class CertificateNotDeliveredEmailSenderServiceTest {
         val printResponse = buildProcessPrintResponseMessage(
             requestId = requestId,
             status = ProcessPrintResponseMessage.Status.FAILED,
-            statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+            statusStep = ProcessPrintResponseMessage.StatusStep.NOT_DELIVERED,
         )
         val requestingUserEmailAddress = "vc-admin@camden.gov.uk"
         val localAuthorityEmailAddress = "ero.group@@camden.gov.uk"
@@ -91,7 +91,7 @@ class CertificateNotDeliveredEmailSenderServiceTest {
         val printResponse = buildProcessPrintResponseMessage(
             requestId = requestId,
             status = ProcessPrintResponseMessage.Status.FAILED,
-            statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+            statusStep = ProcessPrintResponseMessage.StatusStep.NOT_DELIVERED,
         )
         val certificate = buildCertificate()
 

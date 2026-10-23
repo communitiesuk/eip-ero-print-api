@@ -16,7 +16,7 @@ import uk.gov.dluhc.printapi.dto.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.dto.DeliveryAddressType.REGISTERED
 import uk.gov.dluhc.printapi.dto.aed.ReIssueAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
-import uk.gov.dluhc.printapi.models.DeliveryAddressType.ERO_MINUS_COLLECTION
+import uk.gov.dluhc.printapi.models.DeliveryAddressType.ERO_COLLECTION
 import uk.gov.dluhc.printapi.service.ElectorDocumentRemovalDateResolver
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.deepCopy
@@ -70,7 +70,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
         val userId = aValidUserId()
         val sourceReference = aValidSourceReference()
         val electoralRollNumber = aValidElectoralRollNumber()
-        val deliveryAddressType = ERO_MINUS_COLLECTION
+        val deliveryAddressType = ERO_COLLECTION
 
         val apiRequest = buildReIssueAnonymousElectorDocumentRequest(
             sourceReference = sourceReference,
@@ -92,7 +92,7 @@ class ReIssueAnonymousElectorDocumentMapperTest {
 
         // Then
         assertThat(actual).isEqualTo(expected)
-        verify(deliveryAddressTypeMapper).mapApiToDto(ERO_MINUS_COLLECTION)
+        verify(deliveryAddressTypeMapper).mapApiToDto(ERO_COLLECTION)
     }
 
     @Test

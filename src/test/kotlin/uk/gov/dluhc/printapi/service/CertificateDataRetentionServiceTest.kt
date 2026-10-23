@@ -25,7 +25,7 @@ import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions
 import uk.gov.dluhc.printapi.database.repository.CertificateRepositoryExtensions.findPendingRemovalOfInitialRetentionData
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
 import uk.gov.dluhc.printapi.messaging.models.RemoveCertificateMessage
-import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_MINUS_CARD
+import uk.gov.dluhc.printapi.messaging.models.SourceType.VOTER_CARD
 import uk.gov.dluhc.printapi.testsupport.TestLogAppender
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
@@ -94,7 +94,7 @@ internal class CertificateDataRetentionServiceTest {
             // Given
             val message = buildApplicationRemovedMessage(
                 sourceReference = "63774ff4bb4e7049b67182d9",
-                sourceType = VOTER_MINUS_CARD
+                sourceType = VOTER_CARD
             )
             given(sourceTypeMapper.mapSqsToEntity(any())).willReturn(VOTER_CARD)
             given(certificateRepository.findByGssCodeAndSourceTypeAndSourceReference(any(), any(), any())).willReturn(null)
@@ -121,7 +121,7 @@ internal class CertificateDataRetentionServiceTest {
             // Given
             val message = buildApplicationRemovedMessage(
                 sourceReference = "63774ff4bb4e7049b67182d9",
-                sourceType = VOTER_MINUS_CARD,
+                sourceType = VOTER_CARD,
             )
             val certificate = buildCertificate(
                 issueDate = null,

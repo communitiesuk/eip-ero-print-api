@@ -7,7 +7,7 @@ import uk.gov.dluhc.printapi.testsupport.testdata.getRandomGssCode
 
 fun buildApplicationRemovedMessage(
     sourceReference: String = aValidSourceReference(),
-    sourceType: SourceType = SourceType.VOTER_MINUS_CARD,
+    sourceType: SourceType = SourceType.VOTER_CARD,
     gssCode: String = getRandomGssCode(),
 ) = ApplicationRemovedMessage(
     sourceReference = sourceReference,

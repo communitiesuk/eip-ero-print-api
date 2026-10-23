@@ -257,7 +257,7 @@ class PrintResponseProcessingServiceTest {
             val response = buildProcessPrintResponseMessage(
                 requestId = requestId,
                 status = ProcessPrintResponseMessage.Status.FAILED,
-                statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+                statusStep = ProcessPrintResponseMessage.StatusStep.NOT_DELIVERED,
             )
 
             val expectedStatus = NOT_DELIVERED
@@ -312,7 +312,7 @@ class PrintResponseProcessingServiceTest {
             val response = buildProcessPrintResponseMessage(
                 requestId = requestId,
                 status = ProcessPrintResponseMessage.Status.FAILED,
-                statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
+                statusStep = ProcessPrintResponseMessage.StatusStep.IN_PRODUCTION,
             )
 
             val expectedStatus = NOT_DELIVERED

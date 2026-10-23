@@ -16,8 +16,8 @@ class AnonymousSupportingInformationFormatMapperTest {
         value = [
             "STANDARD, STANDARD",
             "BRAILLE, BRAILLE",
-            "LARGE_MINUS_PRINT, LARGE_PRINT",
-            "EASY_MINUS_READ, EASY_READ",
+            "LARGE_PRINT, LARGE_PRINT",
+            "EASY_READ, EASY_READ",
         ]
     )
     fun `should map AnonymousSupportingInformationFormat API enum to DTO enum`(
@@ -37,8 +37,8 @@ class AnonymousSupportingInformationFormatMapperTest {
         value = [
             "STANDARD, STANDARD",
             "BRAILLE, BRAILLE",
-            "LARGE_PRINT, LARGE_MINUS_PRINT",
-            "EASY_READ, EASY_MINUS_READ",
+            "LARGE_PRINT, LARGE_PRINT",
+            "EASY_READ, EASY_READ",
         ]
     )
     fun `should map AnonymousSupportingInformationFormat DTO enum to API enum`(

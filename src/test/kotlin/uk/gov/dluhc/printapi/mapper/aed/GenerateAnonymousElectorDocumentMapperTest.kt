@@ -23,7 +23,7 @@ import uk.gov.dluhc.printapi.dto.aed.GenerateAnonymousElectorDocumentDto
 import uk.gov.dluhc.printapi.mapper.CertificateLanguageMapper
 import uk.gov.dluhc.printapi.mapper.DeliveryAddressTypeMapper
 import uk.gov.dluhc.printapi.mapper.SourceTypeMapper
-import uk.gov.dluhc.printapi.models.SourceType.ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT
+import uk.gov.dluhc.printapi.models.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidAnonymousElectorDocumentTemplateFilename
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidUserId
@@ -274,9 +274,9 @@ class GenerateAnonymousElectorDocumentMapperTest {
             // Given
             val userId = aValidUserId()
             val apiRequest = buildGenerateAnonymousElectorDocumentRequest(
-                sourceType = ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT,
+                sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
                 certificateLanguage = uk.gov.dluhc.printapi.models.CertificateLanguage.EN,
-                supportingInformationFormat = AnonymousSupportingInformationFormatApi.LARGE_MINUS_PRINT,
+                supportingInformationFormat = AnonymousSupportingInformationFormatApi.LARGE_PRINT,
                 delivery = buildApiCertificateDelivery()
             )
 
@@ -336,9 +336,9 @@ class GenerateAnonymousElectorDocumentMapperTest {
 
             // Then
             assertThat(actual).isEqualTo(expected)
-            verify(sourceTypeMapper).mapApiToDto(ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT)
+            verify(sourceTypeMapper).mapApiToDto(ANONYMOUS_ELECTOR_DOCUMENT)
             verify(certificateLanguageMapper).mapApiToDto(uk.gov.dluhc.printapi.models.CertificateLanguage.EN)
-            verify(supportingInformationFormatMapper).mapApiToDto(AnonymousSupportingInformationFormatApi.LARGE_MINUS_PRINT)
+            verify(supportingInformationFormatMapper).mapApiToDto(AnonymousSupportingInformationFormatApi.LARGE_PRINT)
             verify(deliveryAddressTypeMapper).mapApiToDto(DeliveryAddressTypeApi.REGISTERED)
             verifyNoMoreInteractions(sourceTypeMapper, certificateLanguageMapper, supportingInformationFormatMapper, deliveryAddressTypeMapper)
         }
