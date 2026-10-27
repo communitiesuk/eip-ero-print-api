@@ -37,7 +37,7 @@ extra["netty.version"] = "4.2.18.Final"
 extra["hibernate.version"] = "7.4.9.Final"
 extra["hibernate-validator.version"] = "9.1.5.Final"
 // Patches Jackson 2 in the build-time jsonschema2pojo codegen
-extra["jackson-2-bom.version"] = "2.21.7"
+extra["jackson-2-bom.version"] = "2.21.8"
 extra["logback.version"] = "1.6.5"
 
 allOpen {
@@ -61,9 +61,9 @@ repositories {
 dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("tools.jackson.module:jackson-module-kotlin:3.1.7")
-    implementation("tools.jackson.core:jackson-databind:3.1.7")
-    implementation("tools.jackson.core:jackson-core:3.1.7")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.1.8")
+    implementation("tools.jackson.core:jackson-databind:3.1.8")
+    implementation("tools.jackson.core:jackson-core:3.1.9")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("org.apache.commons:commons-lang3:3.20.0")
     implementation("org.mapstruct:mapstruct:1.6.2")
