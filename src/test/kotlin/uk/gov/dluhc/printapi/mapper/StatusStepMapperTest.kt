@@ -13,10 +13,10 @@ class StatusStepMapperTest {
     @CsvSource(
         value = [
             "PROCESSED, PROCESSED",
-            "IN_PRODUCTION, IN_MINUS_PRODUCTION",
+            "IN_PRODUCTION, IN_PRODUCTION",
             "PRINTED, PRINTED",
             "DISPATCHED, DISPATCHED",
-            "NOT_DELIVERED, NOT_MINUS_DELIVERED"
+            "NOT_DELIVERED, NOT_DELIVERED"
         ]
     )
     fun `should map StatusStep model enum to StatusStep message enum`(statusStep: StatusStepModelEnum, expected: StatusStepMessageEnum) {

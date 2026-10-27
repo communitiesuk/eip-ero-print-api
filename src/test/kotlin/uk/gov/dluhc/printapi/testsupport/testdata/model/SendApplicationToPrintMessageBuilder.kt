@@ -19,7 +19,7 @@ import java.util.UUID
 fun buildSendApplicationToPrintMessage(
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
-    sourceType: SourceType = SourceType.VOTER_MINUS_CARD,
+    sourceType: SourceType = SourceType.VOTER_CARD,
     requestDateTime: OffsetDateTime = Instant.now().atOffset(UTC).truncatedTo(ChronoUnit.SECONDS),
     applicationReceivedDateTime: OffsetDateTime = Instant.now().atOffset(UTC),
     firstName: String = faker.name().firstName(),

@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import uk.gov.dluhc.printapi.config.IntegrationTest
-import uk.gov.dluhc.printapi.messaging.models.SourceType.ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT
+import uk.gov.dluhc.printapi.messaging.models.SourceType.ANONYMOUS_ELECTOR_DOCUMENT
 import uk.gov.dluhc.printapi.testsupport.assertj.assertions.Assertions.assertThat
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildAnonymousElectorDocument
 import uk.gov.dluhc.printapi.testsupport.testdata.entity.buildCertificate
@@ -87,7 +87,7 @@ internal class ApplicationRemovedMessageListenerTest : IntegrationTest() {
         )
         anonymousElectorDocumentRepository.save(anonymousElectorDocument)
         val payload = buildApplicationRemovedMessage(
-            sourceType = ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT,
+            sourceType = ANONYMOUS_ELECTOR_DOCUMENT,
             sourceReference = anonymousElectorDocument.sourceReference,
             gssCode = anonymousElectorDocument.gssCode
         )
