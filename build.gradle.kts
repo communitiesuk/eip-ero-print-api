@@ -61,9 +61,9 @@ repositories {
 dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("tools.jackson.module:jackson-module-kotlin:3.2.3")
-    implementation("tools.jackson.core:jackson-databind:3.2.3")
-    implementation("tools.jackson.core:jackson-core:3.2.3")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.2.4")
+    implementation("tools.jackson.core:jackson-databind:3.2.4")
+    implementation("tools.jackson.core:jackson-core:3.2.4")
     // Jackson 3.2.x requires jackson-annotations 2.22, but Spring Boot 4.1 manages 2.21
     // Can be removed once Spring Boot manages 2.22+.
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
@@ -128,7 +128,7 @@ dependencies {
 
     // OpenPDF
     // Dependabot may suggest upgrading to >v3, versions from 2.1 onwards require Java 21 which we do not use.
-    implementation("com.github.librepdf:openpdf:2.0.3")
+    implementation("com.github.librepdf:openpdf:3.0.5")
 
     // caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -153,8 +153,8 @@ dependencies {
     testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
     testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
     // EROPSPT-767: Jackson v2 packages used by jjwt, should be reviewed if upgrading jjwt-jackson
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
-    testImplementation("com.fasterxml.jackson.core:jackson-core:2.22.3")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:2.22.4")
 }
 
 kotlin {
