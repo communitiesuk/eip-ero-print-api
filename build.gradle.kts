@@ -63,7 +63,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("tools.jackson.module:jackson-module-kotlin:3.1.8")
     implementation("tools.jackson.core:jackson-databind:3.1.8")
-    implementation("tools.jackson.core:jackson-core:3.1.9")
+    implementation("tools.jackson.core:jackson-core:3.1.8")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("org.apache.commons:commons-lang3:3.20.0")
     implementation("org.mapstruct:mapstruct:1.6.2")
