@@ -21,7 +21,7 @@ import net.datafaker.providers.base.Address as DataFakerAddress
 
 fun buildGenerateAnonymousElectorDocumentRequest(
     gssCode: String = aGssCode(),
-    sourceType: SourceType = SourceType.ANONYMOUS_MINUS_ELECTOR_MINUS_DOCUMENT,
+    sourceType: SourceType = SourceType.ANONYMOUS_ELECTOR_DOCUMENT,
     sourceReference: String = aValidSourceReference(),
     applicationReference: String = aValidApplicationReference(),
     electoralRollNumber: String = aValidElectoralRollNumber(),

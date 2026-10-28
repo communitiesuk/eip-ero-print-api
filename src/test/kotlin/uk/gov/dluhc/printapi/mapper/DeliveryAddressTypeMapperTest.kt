@@ -16,7 +16,7 @@ class DeliveryAddressTypeMapperTest {
     @CsvSource(
         value = [
             "REGISTERED, REGISTERED",
-            "ERO_MINUS_COLLECTION, ERO_COLLECTION",
+            "ERO_COLLECTION, ERO_COLLECTION",
             "ALTERNATIVE, ALTERNATIVE",
         ]
     )
@@ -34,7 +34,7 @@ class DeliveryAddressTypeMapperTest {
     @CsvSource(
         value = [
             "REGISTERED, REGISTERED",
-            "ERO_MINUS_COLLECTION, ERO_COLLECTION",
+            "ERO_COLLECTION, ERO_COLLECTION",
             "ALTERNATIVE, ALTERNATIVE",
         ]
     )
@@ -52,7 +52,7 @@ class DeliveryAddressTypeMapperTest {
     @CsvSource(
         value = [
             "REGISTERED, REGISTERED",
-            "ERO_COLLECTION, ERO_MINUS_COLLECTION",
+            "ERO_COLLECTION, ERO_COLLECTION",
             "ALTERNATIVE, ALTERNATIVE",
         ]
     )

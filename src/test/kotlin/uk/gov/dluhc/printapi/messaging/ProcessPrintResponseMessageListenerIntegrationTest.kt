@@ -64,7 +64,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
             requestId = requestId,
             timestamp = printResponse.timestamp,
             status = ProcessPrintResponseMessage.Status.SUCCESS,
-            statusStep = ProcessPrintResponseMessage.StatusStep.IN_MINUS_PRODUCTION,
+            statusStep = ProcessPrintResponseMessage.StatusStep.IN_PRODUCTION,
             message = printResponse.message,
         )
 
@@ -221,7 +221,7 @@ internal class ProcessPrintResponseMessageListenerIntegrationTest : IntegrationT
         val message = buildProcessPrintResponseMessage(
             requestId = requestId,
             status = ProcessPrintResponseMessage.Status.FAILED,
-            statusStep = ProcessPrintResponseMessage.StatusStep.NOT_MINUS_DELIVERED,
+            statusStep = ProcessPrintResponseMessage.StatusStep.NOT_DELIVERED,
         )
         val expectedStatus = Status.NOT_DELIVERED
 

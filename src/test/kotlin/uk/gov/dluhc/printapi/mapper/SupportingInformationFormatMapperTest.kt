@@ -46,8 +46,8 @@ class SupportingInformationFormatMapperTest {
             value = [
                 "STANDARD, STANDARD",
                 "BRAILLE, BRAILLE",
-                "LARGE_MINUS_PRINT, LARGE_PRINT",
-                "EASY_MINUS_READ, EASY_READ",
+                "LARGE_PRINT, LARGE_PRINT",
+                "EASY_READ, EASY_READ",
             ]
         )
         fun `should map SupportingInformationFormat model enum to entity enum`(

@@ -161,11 +161,11 @@ internal class GenerateAnonymousElectorDocumentIntegrationTest : IntegrationTest
         val photoLocationArn = addPhotoToS3()
         val collectionReason = "I don't trust Royal Mail"
         val request = buildGenerateAnonymousElectorDocumentRequest(
-            supportingInformationFormat = AnonymousSupportingInformationFormat.LARGE_MINUS_PRINT,
+            supportingInformationFormat = AnonymousSupportingInformationFormat.LARGE_PRINT,
             photoLocation = photoLocationArn,
             delivery = buildApiCertificateDelivery(
                 deliveryClass = DeliveryClassApi.STANDARD,
-                deliveryAddressType = DeliveryAddressTypeApi.ERO_MINUS_COLLECTION,
+                deliveryAddressType = DeliveryAddressTypeApi.ERO_COLLECTION,
                 collectionReason = collectionReason,
                 addressFormat = uk.gov.dluhc.printapi.models.AddressFormat.UK
             )

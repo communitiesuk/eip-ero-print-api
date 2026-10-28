@@ -24,9 +24,7 @@ import uk.gov.dluhc.printapi.database.entity.DeliveryClass
 import uk.gov.dluhc.printapi.database.entity.PrintRequest
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus
 import uk.gov.dluhc.printapi.database.entity.PrintRequestStatus.Status
-import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat.EASY_READ
 import uk.gov.dluhc.printapi.messaging.models.DeliveryAddressType.REGISTERED
-import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat.EASY_MINUS_READ
 import uk.gov.dluhc.printapi.service.IdFactory
 import uk.gov.dluhc.printapi.testsupport.testdata.aValidRequestId
 import uk.gov.dluhc.printapi.testsupport.testdata.dto.buildEroDto
@@ -37,7 +35,9 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 import uk.gov.dluhc.printapi.database.entity.CertificateLanguage as CertificateLanguageEntity
+import uk.gov.dluhc.printapi.database.entity.SupportingInformationFormat as EntitySupportingInformationFormat
 import uk.gov.dluhc.printapi.messaging.models.CertificateLanguage as CertificateLanguageModel
+import uk.gov.dluhc.printapi.messaging.models.SupportingInformationFormat as ModelSupportingInformationFormat
 
 private const val ELECTORAL_REGISTRATION_OFFICER_EN = "Electoral Registration Officer"
 private const val ELECTORAL_REGISTRATION_OFFICER_CY = "Swyddog Cofrestru Etholiadol"
@@ -79,8 +79,8 @@ class PrintRequestMapperTest {
     ) {
         // Given
         val ero = buildEroDto()
-        val supportingInformationFormatModelEnum = EASY_MINUS_READ
-        val supportingInformationFormatEntityEnum = EASY_READ
+        val supportingInformationFormatModelEnum = ModelSupportingInformationFormat.EASY_READ
+        val supportingInformationFormatEntityEnum = EntitySupportingInformationFormat.EASY_READ
         val deliveryAddressTypeModelEnum = REGISTERED
         val message = buildSendApplicationToPrintMessage(
             certificateLanguage = certificateLanguageModel,
@@ -165,8 +165,8 @@ class PrintRequestMapperTest {
     fun `should map send application to print message to print request given no Welsh address details and certificate language is English`() {
         // Given
         val ero = buildEroDto(welshContactDetails = null)
-        val supportingInformationFormatModelEnum = EASY_MINUS_READ
-        val supportingInformationFormatEntityEnum = EASY_READ
+        val supportingInformationFormatModelEnum = ModelSupportingInformationFormat.EASY_READ
+        val supportingInformationFormatEntityEnum = EntitySupportingInformationFormat.EASY_READ
         val deliveryAddressTypeModelEnum = REGISTERED
         val message = buildSendApplicationToPrintMessage(
             certificateLanguage = CertificateLanguageModel.EN,
@@ -257,8 +257,8 @@ class PrintRequestMapperTest {
     fun `should map send application to print message to print request given no Welsh address details and certificate language is Welsh`() {
         // Given
         val ero = buildEroDto(welshContactDetails = null)
-        val supportingInformationFormatModelEnum = EASY_MINUS_READ
-        val supportingInformationFormatEntityEnum = EASY_READ
+        val supportingInformationFormatModelEnum = ModelSupportingInformationFormat.EASY_READ
+        val supportingInformationFormatEntityEnum = EntitySupportingInformationFormat.EASY_READ
         val deliveryAddressTypeModelEnum = REGISTERED
         val message = buildSendApplicationToPrintMessage(
             certificateLanguage = CertificateLanguageModel.CY,
