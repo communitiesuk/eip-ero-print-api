@@ -37,7 +37,7 @@ extra["netty.version"] = "4.2.18.Final"
 extra["hibernate.version"] = "7.4.9.Final"
 extra["hibernate-validator.version"] = "9.1.5.Final"
 // Patches Jackson 2 in the build-time jsonschema2pojo codegen
-extra["jackson-2-bom.version"] = "2.21.7"
+extra["jackson-2-bom.version"] = "2.21.8"
 extra["logback.version"] = "1.6.5"
 
 allOpen {
@@ -61,9 +61,9 @@ repositories {
 dependencies {
     // framework
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("tools.jackson.module:jackson-module-kotlin:3.2.3")
-    implementation("tools.jackson.core:jackson-databind:3.2.3")
-    implementation("tools.jackson.core:jackson-core:3.2.3")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.2.4")
+    implementation("tools.jackson.core:jackson-databind:3.2.4")
+    implementation("tools.jackson.core:jackson-core:3.2.4")
     // Jackson 3.2.x requires jackson-annotations 2.22, but Spring Boot 4.1 manages 2.21
     // Can be removed once Spring Boot manages 2.22+.
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
@@ -74,10 +74,10 @@ dependencies {
 
     // internal libs
     implementation("uk.gov.dluhc:logging-library:4.5.0")
-    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.6.0")
-    implementation("uk.gov.dluhc:messaging-support-library:3.6.0")
+    implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.7.0")
+    implementation("uk.gov.dluhc:messaging-support-library:3.7.0")
     implementation("uk.gov.dluhc:email-client:1.5.0")
-    implementation("uk.gov.dluhc:internal-auth-library:2.5.0")
+    implementation("uk.gov.dluhc:internal-auth-library:2.6.0")
 
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
