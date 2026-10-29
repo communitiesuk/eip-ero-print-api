@@ -85,7 +85,7 @@ dependencies {
     implementation("io.swagger.core.v3:swagger-annotations:2.2.55")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.integration:spring-integration-sftp")
-    implementation("org.apache.sshd:sshd-sftp:2.20.0")
+    implementation("org.apache.sshd:sshd-sftp:2.20.1")
     implementation("com.opencsv:opencsv:5.12.0")
 
     // Logging
@@ -128,7 +128,7 @@ dependencies {
 
     // OpenPDF
     // Dependabot may suggest upgrading to >v3, versions from 2.1 onwards require Java 21 which we do not use.
-    implementation("com.github.librepdf:openpdf:2.0.3")
+    implementation("com.github.librepdf:openpdf:3.0.5")
 
     // caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -153,8 +153,8 @@ dependencies {
     testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
     testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
     // EROPSPT-767: Jackson v2 packages used by jjwt, should be reviewed if upgrading jjwt-jackson
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
-    testImplementation("com.fasterxml.jackson.core:jackson-core:2.22.3")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:2.22.4")
 }
 
 kotlin {
