@@ -89,35 +89,6 @@
         <cve>CVE-2026-14683</cve>
         <cve>CVE-2026-14686</cve>
     </suppress>
-    <suppress until="2027-01-01Z">
-        <notes><![CDATA[
-        com.mysql:mysql-connector-j is pinned to 9.7.0 by the Spring Boot 4.1.0 dependency BOM
-        (mysql.version). All four CVEs come from Oracle's July 2026 Critical Patch Update and affect
-        Connector/J 9.7.0-9.7.1. There is currently NO fixed release on Maven Central (latest published
-        is 9.7.0), so upgrading is not yet possible; this must be revisited once Oracle ships a fixed
-        Connector/J release (> 9.7.1).
-
-        All four are client-side JDBC driver flaws that are triggered by data returned from the MySQL
-        server. Exploitation therefore requires the driver to connect to a malicious or compromised
-        MySQL server, or an attacker performing a man-in-the-middle on the client<->server connection.
-        This service connects only to its own managed (AWS RDS) MySQL database, which raises the bar
-        well above the generic "network access" wording in the advisories.
-        (1) CVE-2026-60586 (CVSS 7.7, MySQL Protocol) - confidentiality impact via crafted server
-            responses.
-        (2) CVE-2026-60623 (CVSS 7.1, MySQL Protocol) - rated "difficult to exploit" (AC:H).
-        (3) CVE-2026-60624 (CVSS 6.5, X Protocol) - NOT reachable here: this service uses the classic
-            JDBC protocol only (jdbc:mysql:// via JPA / aws-mysql-jdbc) and does not use the X DevAPI /
-            mysqlx:// connections.
-        (4) CVE-2026-61082 (CVSS 6.5, MySQL Protocol) - requires user interaction (UI:R).
-        REMOVE this suppression once a fixed Connector/J release is published and adopted (directly or
-        transitively via a Spring Boot BOM upgrade).
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/com\.mysql/mysql\-connector\-j@.*$</packageUrl>
-        <cve>CVE-2026-60586</cve>
-        <cve>CVE-2026-60623</cve>
-        <cve>CVE-2026-60624</cve>
-        <cve>CVE-2026-61082</cve>
-    </suppress>
     <suppress until="2026-11-24Z">
         <notes><![CDATA[
         CVE-2026-47838 is an X.509 certificate CN parsing flaw in Spring Security's
@@ -138,26 +109,6 @@
         ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-.*@.*$</packageUrl>
         <cve>CVE-2026-47838</cve>
-    </suppress>
-    <suppress until="2026-11-24Z">
-        <notes><![CDATA[
-        FALSE POSITIVES, not deferred fixes.
-        All three CVEs come from Oracle's July 2026 Critical Patch Update and are in the
-        "Connector/Net" component of MySQL Connectors, i.e. the .NET/C# driver. This project uses the
-        Java driver, com.mysql:mysql-connector-j (Connector/J), which is a completely separate
-        codebase and is not named in any of these advisories.
-        dependency-check matches mysql-connector-j to the generic cpe:2.3:a:oracle:mysql_connectors
-        CPE, which Oracle uses for every language binding, so any Connector/Net CVE in the affected
-        version range (9.7.0-9.7.1) is incorrectly attributed to Connector/J.
-        (1) CVE-2026-60192 (CVSS 8.1, Connector/Net) - takeover of MySQL Connectors.
-        (2) CVE-2026-60193 (CVSS 8.5, Connector/Net) - takeover of MySQL Connectors, scope change.
-        (3) CVE-2026-60317 (CVSS 7.4, Connector/Net) - unauthorised data access/modification.
-        There is no Connector/J fix to wait for; this is date-limited only so that it gets re-reviewed.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/com\.mysql/mysql\-connector\-j@.*$</packageUrl>
-        <cve>CVE-2026-60192</cve>
-        <cve>CVE-2026-60193</cve>
-        <cve>CVE-2026-60317</cve>
     </suppress>
     <suppress until="2026-12-01Z">
         <notes><![CDATA[
