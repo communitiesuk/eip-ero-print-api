@@ -36,6 +36,7 @@ extra["tomcat.version"] = "11.0.25"
 extra["netty.version"] = "4.2.18.Final"
 extra["hibernate.version"] = "7.4.9.Final"
 extra["hibernate-validator.version"] = "9.1.5.Final"
+extra["mysql.version"] = "26.10.0"
 // Patches Jackson 2 in the build-time jsonschema2pojo codegen
 extra["jackson-2-bom.version"] = "2.21.8"
 extra["logback.version"] = "1.6.5"
