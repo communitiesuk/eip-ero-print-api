@@ -129,7 +129,7 @@ dependencies {
 
     // OpenPDF
     // Dependabot may suggest upgrading to >v3, versions from 2.1 onwards require Java 21 which we do not use.
-    implementation("com.github.librepdf:openpdf:3.0.5")
+    implementation("com.github.librepdf:openpdf:2.0.3")
 
     // caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
