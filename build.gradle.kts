@@ -15,7 +15,7 @@ plugins {
     kotlin("plugin.jpa") version "2.4.21"
     kotlin("plugin.allopen") version "2.4.21"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-    id("org.openapi.generator") version "7.26.0"
+    id("org.openapi.generator") version "7.27.0"
     id("org.owasp.dependencycheck") version "13.0.0"
     id("org.jsonschema2dataclass") version "6.1.0"
 }
