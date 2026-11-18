@@ -295,6 +295,7 @@ tasks.withType<BootBuildImage> {
     )
     buildpacks.set(
         listOf(
+            "docker.io/paketobuildpacks/amazon-corretto:9.8.4",
             "urn:cnb:builder:paketo-buildpacks/java",
             "docker.io/paketobuildpacks/health-checker",
         )
