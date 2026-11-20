@@ -1,7 +1,7 @@
 # Order matters in this file with last matching row taking effect
 
 # All files owned by the standard elections development team
-* @communitiesuk/EROP-PR-Approvers
+#* @communitiesuk/EROP-PR-Approvers
 
 # However, this CODEOWNERS file should be restricted to only admins
-.github/CODEOWNERS @communitiesuk/ier-ds-admin-softwire
+#.github/CODEOWNERS @communitiesuk/ier-ds-admin-softwire
