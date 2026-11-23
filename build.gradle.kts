@@ -7,7 +7,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import java.lang.ProcessBuilder.Redirect
 
 plugins {
-    id("org.springframework.boot") version "4.1.1"
+    id("org.springframework.boot") version "4.1.3"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.4.21"
     kotlin("kapt") version "2.4.21"
@@ -31,14 +31,8 @@ java {
 
 extra["awsSdkVersion"] = "2.54.17"
 extra["springCloudAwsVersion"] = "4.1.0"
-// EROPSPT-784 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
-extra["tomcat.version"] = "11.0.25"
-extra["netty.version"] = "4.2.18.Final"
-extra["hibernate.version"] = "7.4.9.Final"
-extra["hibernate-validator.version"] = "9.1.5.Final"
-extra["mysql.version"] = "26.10.0"
-// Patches Jackson 2 in the build-time jsonschema2pojo codegen
-extra["jackson-2-bom.version"] = "2.21.8"
+// EROPSPT-801 - Pinned versions brought in by springboot - if updating springboot, check if these are still needed.
+extra["tomcat.version"] = "11.0.29"
 extra["logback.version"] = "1.6.5"
 
 allOpen {
@@ -74,11 +68,11 @@ dependencies {
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
 
     // internal libs
-    implementation("uk.gov.dluhc:logging-library:4.5.0")
+    implementation("uk.gov.dluhc:logging-library:4.6.0")
     implementation("uk.gov.dluhc:bank-holidays-data-client-library:2.7.0")
-    implementation("uk.gov.dluhc:messaging-support-library:3.7.0")
-    implementation("uk.gov.dluhc:email-client:1.5.0")
-    implementation("uk.gov.dluhc:internal-auth-library:2.6.0")
+    implementation("uk.gov.dluhc:messaging-support-library:3.8.0")
+    implementation("uk.gov.dluhc:email-client:1.5.2")
+    implementation("uk.gov.dluhc:internal-auth-library:2.7.0")
 
     // api
     implementation("org.springframework.boot:spring-boot-starter-actuator")
