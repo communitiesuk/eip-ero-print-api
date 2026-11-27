@@ -15,7 +15,7 @@ plugins {
     kotlin("plugin.jpa") version "2.4.21"
     kotlin("plugin.allopen") version "2.4.21"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-    id("org.openapi.generator") version "7.26.0"
+    id("org.openapi.generator") version "7.27.0"
     id("org.owasp.dependencycheck") version "13.0.0"
     id("org.jsonschema2dataclass") version "6.1.0"
 }
@@ -61,9 +61,9 @@ dependencies {
     implementation("tools.jackson.core:jackson-core:3.2.4")
     // Jackson 3.2.x requires jackson-annotations 2.22, but Spring Boot 4.1 manages 2.21
     // Can be removed once Spring Boot manages 2.22+.
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
-    implementation("org.apache.commons:commons-lang3:3.21.0")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.23")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.7")
+    implementation("org.apache.commons:commons-lang3:3.22.0")
     implementation("org.mapstruct:mapstruct:1.6.3")
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
 
@@ -115,15 +115,15 @@ dependencies {
     implementation("software.amazon.awssdk:ses")
 
     // mongo core datatypes, so that we can generate a Mongo ObjectId (a 12 byte/24 char hex string ID)
-    implementation("org.mongodb:bson:5.14.0")
+    implementation("org.mongodb:bson:5.15.0")
 
     // Scheduling
-    implementation("net.javacrumbs.shedlock:shedlock-spring:7.10.1")
-    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.10.1")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:7.11.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.11.0")
 
     // OpenPDF
     // Dependabot may suggest upgrading to >v3, versions from 2.1 onwards require Java 21 which we do not use.
-    implementation("com.github.librepdf:openpdf:2.0.3")
+    implementation("com.github.librepdf:openpdf:3.0.5")
 
     // caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
